@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./dist/output.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+    <title>Doctor Appointment Booking System</title>
+
+</head>
+<body class="bg-[#ECECEC] px-10 pt-2">
+    <header class="w-[100%] h-[80px] flex items-center justify-between" data-scroll-animation="animate-fade-in" data-delay="0s">
+        <div class="w-[205px] h-[100%] flex justify-between items-center" data-scroll-animation="animate-slide-up" data-delay="0.1s">
+            <img class="h-[60px]" src="./src/assets/Logo.svg" alt="">
+            <p class="font-lato font-semibold text-[24px] tracking-[1.2px]"><span class="text-[#007E85]">Health</span><span class="text-[#6EAB36]">care</span></p>
+        </div>
+
+        <nav class="flex justify-between space-x-4 w-[420px] font-lato font-semibold text-[18px] tracking-[1.1px]" data-scroll-animation="animate-fade-in" data-delay="0.2s">
+            <a href="#home" class="font-lato relative transition-colors hover:text-[#007E85] after:content-[''] after:absolute after:bottom-[-0.9px] after:left-0 after:h-[2px] after:bg-[#007E85] after:w-0 hover:after:w-full hover:after:animate-underline-grow">Home</a>
+            <a href="#about" class="font-lato relative transition-colors hover:text-[#007E85] after:content-[''] after:absolute after:bottom-[-0.9px] after:left-0 after:h-[2px] after:bg-[#007E85] after:w-0 hover:after:w-full hover:after:animate-underline-grow">About</a>
+            <a href="#service" class="font-lato relative transition-colors hover:text-[#007E85] after:content-[''] after:absolute after:bottom-[-0.9px] after:left-0 after:h-[2px] after:bg-[#007E85] after:w-0 hover:after:w-full hover:after:animate-underline-grow">Services</a>
+            <a href="#contact" class="font-lato relative transition-colors hover:text-[#007E85] after:content-[''] after:absolute after:bottom-[-0.9px] after:left-0 after:h-[2px] after:bg-[#007E85] after:w-0 hover:after:w-full hover:after:animate-underline-grow">Contact</a>
+        </nav>
+
+        <div class="flex gap-6 items-center" data-scroll-animation="animate-slide-up" data-delay="0.3s">
+            <a href="./pages/auth/signup.html" class="font-lato font-semibold text-[18px] text-[#007E85] transition-colors hover:text-[#005E65]">Sign Up</a>
+            <a href="./pages/auth/login.html" class="font-lato font-semibold text-[18px] bg-[#007E85] text-white px-8 py-3 rounded-lg transition-colors hover:bg-[#005E65]">Log In</a>
+        </div>
+    </header>
+
+   <script src="./src/js/scroll-animations.js"></script>
+</body>
+
+</html>

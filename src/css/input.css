@@ -1,0 +1,14 @@
+/* src/css/input.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .animate-underline-grow::after {
+    content: '';
+    display: block;
+    height: 2px;
+    background-color: #007E85; /* medical-teal */
+    width: 0%;
+  }
+}
