@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Healthcare | Premium Sign Up</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    ,
+    <style>
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background-color: #f8fafb;
+        margin: 0;
+        padding: 0;
+      }
+
+      .organic-bg {
+        background: linear-gradient(135deg, #007e85 0%, #005f65 100%);
+        clip-path: path(
+          "M1000 0 L1000 1000 L300 1000 C150 1000 150 800 250 700 C400 550 50 600 50 350 C50 150 400 150 450 0 Z"
+        );
+      }
+
+      .glass-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+      }
+
+      .custom-input {
+        transition: all 0.3s ease;
+        border-bottom: 2px solid #e5e7eb;
+      }
+
+      .custom-input:focus {
+        border-color: #007e85;
+        padding-left: 4px;
+      }
+
+      .dropdown-animate {
+        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      }
+
+      #doctorBioContainer {
+        transition: all 0.4s ease-in-out;
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+      }
+
+      #doctorBioContainer.show {
+        max-height: 200px;
+        opacity: 1;
+        margin-top: 1.25rem;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(0px) scale(1.1);
+        }
+        50% {
+          transform: translateY(-20px) scale(1.1);
+        }
+        100% {
+          transform: translateY(0px) scale(1.1);
+        }
+      }
+      .float-hero {
+        animation: float 6s ease-in-out infinite;
+      }
+
+      @keyframes fadeIn {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+      @keyframes slideUp {
+        0% {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes slideRight {
+        0% {
+          opacity: 0;
+          transform: translateX(-30px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .animate-fade-in {
+        animation: fadeIn 0.6s ease-out forwards;
+      }
+      .animate-slide-up {
+        animation: slideUp 0.7s ease-out forwards;
+      }
+      .animate-slide-right {
+        animation: slideRight 0.8s ease-out forwards;
+      }
+    </style>
+  </head>
+  <body class="overflow-hidden tracking-[1.1px]">
+    <div
+      class="flex h-screen w-full relative animate-fade-in"
+      data-scroll-animation="animate-fade-in"
+      data-delay="0s"
+    >
+      <div
+        class="w-full lg:w-[45%] flex flex-col justify-center px-10 xl:px-24 z-20 relative bg-[#F8FAFB]"
+        data-scroll-animation="animate-slide-up"
+        data-delay="0.1s"
+      >
+        <div
+          class="max-w-md w-full mx-auto lg:mx-0 py-1"
+          data-scroll-animation="animate-slide-up"
+          data-delay="0.2s"
+        >
+          <div
+            class="mb-8 flex flex-col items-start"
+            data-scroll-animation="animate-slide-up"
+            data-delay="0.25s"
+          >
+            <div class="flex items-center gap-3 mb-6">
+              <img
+                src="../../src/assets/logo.svg"
+                alt="Healthcare Logo"
+                class="h-12 w-12"
+              />
+              <span class="text-2xl font-extrabold">
+                <span class="text-[#007E85]">Health</span
+                ><span class="text-[#6EAB36]">care</span>
+              </span>
+            </div>
+
+            <p
+              class="text-slate-500 font-medium text-[12px] xl:text-base mt-[-10px]"
+            >
+              <span>Create Account </span
+              ><span>to join our community for world-class digital care.</span>
+            </p>
+          </div>
+
+          <form id="signupForm" class="space-y-5 xl:space-y-6">
+            <!-- 1. Full Name -->
+            <div class="group">
+              <label
+                class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                >Full Name</label
+              >
+              <input
+                type="text"
+                required
+                class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none placeholder:text-slate-300"
+              />
+            </div>
+
+            <!-- 2. Age -->
+            <div class="group">
+              <label
+                class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                >Age</label
+              >
+              <input
+                type="number"
+                required
+                min="1"
+                max="120"
+                class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none placeholder:text-slate-300"
+              />
+            </div>
+
+            <!-- 3. Email Address -->
+            <div class="group">
+              <label
+                class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                >Email Address</label
+              >
+              <input
+                type="email"
+                required
+                class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none placeholder:text-slate-300"
+                placeholder="name@company.com"
+              />
+            </div>
+
+            <!-- 4. Phone Number -->
+            <div class="group">
+              <label
+                class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                >Phone Number</label
+              >
+              <input
+                type="tel"
+                required
+                class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none placeholder:text-slate-300"
+              />
+            </div>
+
+            <!-- 5. Role (Register as) -->
+            <div class="relative group">
+              <label
+                class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                >Register as</label
+              >
+              <button
+                type="button"
+                id="customSelectBtn"
+                class="custom-input w-full flex justify-between items-center py-1.5 text-base xl:text-lg text-slate-800 outline-none"
+              >
+                <span id="selectedValue">Patient</span>
+                <div
+                  class="bg-slate-100 p-1 rounded-full group-hover:bg-[#007E85]/10 transition-colors"
+                >
+                  <svg
+                    id="chevron"
+                    class="w-4 h-4 text-[#007E85] transition-transform duration-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="3"
+                      d="M19 9l-7 7-7-7"
+                    ></path>
+                  </svg>
+                </div>
+              </button>
+
+              <div
+                id="dropdownMenu"
+                class="hidden absolute left-0 w-full mt-2 glass-card rounded-xl overflow-hidden z-50 dropdown-animate opacity-0 -translate-y-2"
+              >
+                <div class="p-1.5 space-y-1">
+                  <div
+                    class="option-item flex items-center px-4 py-2.5 hover:bg-[#007E85] hover:text-white rounded-lg cursor-pointer transition-all"
+                    data-value="patient"
+                  >
+                    <span class="font-bold text-sm">Patient</span>
+                  </div>
+                  <div
+                    class="option-item flex items-center px-4 py-2.5 hover:bg-[#007E85] hover:text-white rounded-lg cursor-pointer transition-all"
+                    data-value="doctor"
+                  >
+                    <span class="font-bold text-sm">Medical Professional</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Doctor Bio (shows only when Medical Professional is selected) -->
+            <div id="doctorBioContainer">
+              <label
+                class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                >Professional Bio</label
+              >
+              <textarea
+                rows="2"
+                class="w-full p-3 rounded-xl border-2 border-slate-100 bg-slate-50 focus:border-[#007E85] focus:bg-white outline-none text-slate-800 text-sm transition-all resize-none shadow-inner"
+                placeholder="E.g. Senior Cardiologist..."
+              ></textarea>
+            </div>
+
+            <!-- 6. Password -->
+            <div class="group">
+              <label
+                class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                >Create Password</label
+              >
+              <input
+                type="password"
+                required
+                class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none placeholder:text-slate-300"
+                placeholder="••••••••"
+              />
+            </div>
+
+            <div class="pt-2 mt-[-5px]">
+              <button
+                type="submit"
+                class="w-full bg-[#007E85] text-white font-bold py-4 xl:py-5 rounded-xl text-base xl:text-lg shadow-lg hover:bg-[#00666c] transition-all hover:-translate-y-0.5 active:scale-[0.98] mt-[-5px]"
+              >
+                Register Now
+              </button>
+              <p class="text-center mt-4 text-slate-500 text-sm font-medium">
+                Already have an account? sign in
+              </p>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div
+        class="hidden lg:block w-[55%] relative overflow-hidden bg-[#F8FAFB]"
+        data-scroll-animation="animate-slide-right"
+        data-delay="0.2s"
+      >
+        <div class="absolute inset-0 organic-bg z-0 shadow-2xl"></div>
+        <div
+          class="relative h-full w-full flex items-center justify-center z-10 p-12"
+        >
+          <img
+            src="../../src/assets/photo.png"
+            alt="Healthcare Professional"
+            class="h-[102%] object-contain transform scale-110 mt-10"
+          />
+
+          <div
+            class="absolute bottom-20 left-20 glass-card px-6 py-4 rounded-2xl flex items-center gap-4 animate-pulse"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="../../src/js/scroll-animations.js"></script>
+    <script>
+      const customSelectBtn = document.getElementById("customSelectBtn");
+      const dropdownMenu = document.getElementById("dropdownMenu");
+      const chevron = document.getElementById("chevron");
+      const selectedValueDisplay = document.getElementById("selectedValue");
+      const options = document.querySelectorAll(".option-item");
+      const bioContainer = document.getElementById("doctorBioContainer");
+
+      customSelectBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isHidden = dropdownMenu.classList.contains("hidden");
+        if (isHidden) {
+          dropdownMenu.classList.remove("hidden");
+          setTimeout(() => {
+            dropdownMenu.classList.remove("opacity-0", "-translate-y-2");
+            dropdownMenu.classList.add("opacity-100", "translate-y-0");
+          }, 10);
+          chevron.classList.add("rotate-180");
+        } else {
+          closeDropdown();
+        }
+      });
+
+      function closeDropdown() {
+        dropdownMenu.classList.add("opacity-0", "-translate-y-2");
+        dropdownMenu.classList.remove("opacity-100", "translate-y-0");
+        chevron.classList.remove("rotate-180");
+        setTimeout(() => dropdownMenu.classList.add("hidden"), 300);
+      }
+
+      options.forEach((option) => {
+        option.addEventListener("click", () => {
+          const val = option.getAttribute("data-value");
+          selectedValueDisplay.innerText = option.innerText;
+
+          if (val === "doctor") {
+            bioContainer.classList.add("show");
+          } else {
+            bioContainer.classList.remove("show");
+          }
+          closeDropdown();
+        });
+      });
+
+      window.onclick = () => closeDropdown();
+    </script>
+  </body>
+</html>
