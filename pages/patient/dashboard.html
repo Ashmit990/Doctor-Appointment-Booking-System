@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patient Dashboard - View Appointments</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="dashboard.css" />
+  </head>
+  <body class="bg-slate-100 min-h-screen font-sans">
+    <div class="flex min-h-screen">
+      <aside
+        class="w-28 md:w-32 bg-teal-700 text-white flex flex-col items-center justify-start pt-24 pb-24 gap-16 shadow-xl"
+      >
+        <button
+          onclick="goToHomePage()"
+          class="w-14 h-14 rounded-2xl bg-white/15 hover:bg-white/25 transition-all duration-200 flex items-center justify-center shadow-sm"
+          title="Home"
+        >
+          <i data-lucide="house" class="w-6 h-6 text-white"></i>
+        </button>
+
+        <button
+          class="w-14 h-14 rounded-2xl bg-white shadow-md flex items-center justify-center"
+          title="Appointments"
+        >
+          <i data-lucide="calendar-days" class="w-6 h-6 text-teal-700"></i>
+        </button>
+
+        <button
+          class="w-14 h-14 rounded-2xl bg-white/15 hover:bg-white/25 transition-all duration-200 flex items-center justify-center shadow-sm"
+          title="Patient Profile"
+        >
+          <i data-lucide="user" class="w-6 h-6 text-white"></i>
+        </button>
+
+        <button
+          class="w-14 h-14 rounded-2xl bg-white/15 hover:bg-white/25 transition-all duration-200 flex items-center justify-center shadow-sm"
+          title="Logout"
+        >
+          <i data-lucide="log-out" class="w-6 h-6 text-white"></i>
+        </button>
+      </aside>
+
+      <main class="flex-1 p-4 md:p-8">
+        <div
+          class="max-w-7xl mx-auto bg-white rounded-[32px] shadow-[0_20px_60px_rgba(15,23,42,0.08)] p-5 md:p-8"
+        >
+          <div
+            class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8"
+          >
+            <div class="pt-2">
+              <p class="text-slate-400 text-sm font-medium mb-2">
+                Patient Dashboard
+              </p>
+              <h1
+                class="text-3xl md:text-4xl font-bold text-slate-800 leading-tight"
+              >
+                My Appointments
+              </h1>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 sm:items-center">
+              <div class="relative">
+                <input
+                  id="searchInput"
+                  type="text"
+                  placeholder="Search doctor or department"
+                  class="w-full sm:w-80 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-teal-300 focus:border-transparent transition"
+                />
+              </div>
+              <button
+                onclick="openBookingModal()"
+                class="bg-teal-600 hover:bg-teal-700 text-white px-5 py-3 rounded-2xl font-medium shadow-sm transition"
+              >
+                Book Appointment
+              </button>
+            </div>
+          </div>
+
+          <section
+            class="bg-gradient-to-r from-teal-300 to-teal-400 rounded-[30px] p-7 mb-7 text-white relative overflow-hidden shadow-[0_15px_40px_rgba(20,184,166,0.25)]"
+          >
+            <div class="max-w-2xl">
+              <p class="text-sm opacity-90 mb-2">Welcome back</p>
+              <h2 class="text-3xl md:text-4xl font-bold leading-tight mb-3">
+                Here is your appointment schedule
+              </h2>
+              <p class="text-base opacity-90 mb-6">
+                View your upcoming, completed, and missed appointments in one
+                place.
+              </p>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div
+                  class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
+                >
+                  <p class="text-sm opacity-90 mb-2">Upcoming</p>
+                  <h3 id="upcomingCount" class="text-4xl font-bold">0</h3>
+                </div>
+                <div
+                  class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
+                >
+                  <p class="text-sm opacity-90 mb-2">Completed</p>
+                  <h3 id="completedCount" class="text-4xl font-bold">0</h3>
+                </div>
+                <div
+                  class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
+                >
+                  <p class="text-sm opacity-90 mb-2">Missed</p>
+                  <h3 id="missedCount" class="text-4xl font-bold">0</h3>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="hidden lg:block absolute right-10 bottom-2 text-8xl opacity-15"
+            >
+              🩺
+            </div>
+          </section>
+
+          <section class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+            <div
+              class="xl:col-span-3 bg-slate-50 rounded-[28px] p-6 border border-slate-100"
+            >
+              <div
+                class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6"
+              >
+                <div>
+                  <h2 class="text-xl font-semibold text-slate-800">
+                    Appointment List
+                  </h2>
+                  <p class="text-sm text-slate-400 mt-1">
+                    Manage your recent and upcoming visits
+                  </p>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    class="filter-btn active-filter bg-teal-600 text-white px-4 py-2.5 rounded-2xl text-sm font-medium"
+                    data-filter="all"
+                  >
+                    All
+                  </button>
+                  <button
+                    class="filter-btn bg-white border border-slate-200 text-slate-700 px-4 py-2.5 rounded-2xl text-sm font-medium"
+                    data-filter="upcoming"
+                  >
+                    Upcoming
+                  </button>
+                  <button
+                    class="filter-btn bg-white border border-slate-200 text-slate-700 px-4 py-2.5 rounded-2xl text-sm font-medium"
+                    data-filter="completed"
+                  >
+                    Completed
+                  </button>
+                  <button
+                    class="filter-btn bg-white border border-slate-200 text-slate-700 px-4 py-2.5 rounded-2xl text-sm font-medium"
+                    data-filter="missed"
+                  >
+                    Missed
+                  </button>
+                </div>
+              </div>
+
+              <div id="appointmentList" class="space-y-4 min-h-[420px]"></div>
+              <div
+                id="emptyState"
+                class="hidden text-center py-12 text-slate-400"
+              >
+                No appointments found.
+              </div>
+            </div>
+
+            <div class="space-y-6">
+              <div
+                class="bg-white rounded-[28px] p-6 border border-slate-100 shadow-sm"
+              >
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                  Today Summary
+                </h3>
+                <div class="space-y-4 text-sm text-slate-500">
+                  <div class="flex justify-between items-center">
+                    <span>Total Appointments</span>
+                    <span id="totalCount" class="font-semibold text-slate-800"
+                      >0</span
+                    >
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span>Next Appointment</span>
+                    <span
+                      id="nextAppointment"
+                      class="font-semibold text-teal-600"
+                      >-</span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="bg-white rounded-[28px] p-6 border border-slate-100 shadow-sm"
+              >
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                  Status Guide
+                </h3>
+                <div class="space-y-4 text-sm">
+                  <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                    <span class="text-slate-500">Upcoming appointments</span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+                    <span class="text-slate-500">Completed appointments</span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                    <span class="text-slate-500">Missed appointments</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <div
+      id="bookingModal"
+      class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50 p-4"
+    >
+      <div
+        class="bg-white w-full max-w-3xl h-[520px] rounded-3xl shadow-2xl relative overflow-hidden"
+      >
+        <button
+          onclick="closeBookingModal()"
+          class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white shadow flex items-center justify-center"
+        >
+          ✕
+        </button>
+
+        <iframe src="/booking.html" class="w-full h-full border-0"></iframe>
+      </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+    <script>
+      lucide.createIcons();
+    </script>
+    <div
+      id="successToast"
+      class="fixed inset-0 hidden items-center justify-center z-[70] bg-black/25 backdrop-blur-sm"
+    >
+      <div
+        class="bg-white rounded-[28px] shadow-[0_20px_60px_rgba(15,23,42,0.18)] px-8 py-7 w-[90%] max-w-md text-center border border-emerald-100"
+      >
+        <div
+          class="mx-auto mb-4 w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-8 h-8 text-emerald-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        </div>
+        <h3 class="toast-title text-2xl font-bold text-slate-800 mb-2">
+          Success
+        </h3>
+        <p class="toast-text text-slate-500 text-base">
+          Appointment booked successfully.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
