@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Healthcare Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Lato", sans-serif;
+      }
+
+      /* The Exact Organic Wave Shape from image_f2fc49.png */
+      .organic-bg {
+        background-color: #007e85;
+        /* Precise path to create the smooth curve and bulge */
+        clip-path: path(
+          "M1000 0 L1000 1000 L300 1000 C150 1000 150 800 250 700 C400 550 50 600 50 350 C50 150 400 150 450 0 Z"
+        );
+        height: 100%;
+        width: 100%;
+      }
+
+      /* Container to ensure the path scales correctly with the screen */
+      .shape-wrapper {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+      }
+
+      /* Responsive adjustment for cleaner scaling on smaller screens */
+      @media (max-width: 1280px) {
+        .organic-bg {
+          clip-path: polygon(
+            100% 0%,
+            100% 100%,
+            35% 100%,
+            15% 70%,
+            35% 55%,
+            10% 35%,
+            40% 0%
+          );
+        }
+      }
+
+      /* Scroll Animation Keyframes */
+      @keyframes fadeIn {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideUp {
+        0% {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes slideRight {
+        0% {
+          opacity: 0;
+          transform: translateX(-30px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .animate-fade-in {
+        animation: fadeIn 0.6s ease-out forwards;
+      }
+
+      .animate-slide-up {
+        animation: slideUp 0.7s ease-out forwards;
+      }
+
+      .animate-slide-right {
+        animation: slideRight 0.8s ease-out forwards;
+      }
+    </style>
+  </head>
+  <body class="bg-[#F2F2F2] m-0 p-0 overflow-hidden tracking-[1.1px]">
+    <div
+      class="flex h-screen w-full relative"
+      data-scroll-animation="animate-fade-in"
+      data-delay="0s"
+    >
+      <div
+        class="w-[45%] flex flex-col justify-between items-start pt-8 pb-8 pl-24 lg:pl-32 z-10"
+      >
+        <div
+          class="flex flex-col items-center"
+          data-scroll-animation="animate-slide-up"
+          data-delay="0.1s"
+        >
+          <img
+            src="../../src/assets/Logo.svg"
+            alt="Healthcare Logo"
+            class="h-20 w-20 mb-2"
+          />
+          <h1
+            class="text-[#007E85] font-black text-7xl tracking-[1.1px] leading-none not-italic"
+          >
+            WELCOME
+          </h1>
+          <div
+            class="w-full border-t border-dotted border-[#007E85] mt-2 opacity-40"
+          ></div>
+        </div>
+
+        <div
+          class="w-full max-w-sm"
+          data-scroll-animation="animate-slide-up"
+          data-delay="0.2s"
+        >
+          <div class="mb-10">
+            <label class="text-[#007E85] font-bold text-xl block mb-2"
+              >Email</label
+            >
+            <input
+              type="email"
+              class="w-full border-b-2 border-[#007E85] bg-transparent focus:outline-none pb-2 text-gray-800 text-lg"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="text-[#007E85] font-bold text-xl block mb-2"
+              >Password</label
+            >
+            <input
+              type="password"
+              class="w-full border-b-2 border-[#007E85] bg-transparent focus:outline-none pb-2 text-gray-800 text-lg"
+            />
+          </div>
+
+          <div class="w-full mb-10">
+            <p class="text-gray-700 text-sm">
+              Don't have an account?
+              <a
+                href="signup.html"
+                class="text-[#007E85] font-bold hover:underline"
+                >Sign up</a
+              >
+            </p>
+          </div>
+
+          <button
+            class="w-full bg-[#007E85] hover:bg-[#00666c] text-white font-black py-4 rounded-xl text-2xl shadow-lg transition-all active:scale-[0.98]"
+          >
+            LOGIN
+          </button>
+        </div>
+
+        <div
+          class="flex items-center gap-3 mt-[20px]"
+          data-scroll-animation="animate-slide-up"
+          data-delay="0.3s"
+        >
+          <img
+            src="../../src/assets/Logo.svg"
+            alt="Healthcare Logo"
+            class="h-10 w-10"
+          />
+          <span class="text-3xl font-black not-italic">
+            <span class="text-[#007E85]">Health</span
+            ><span class="text-[#6EAB36]">care</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="w-[55%] relative">
+        <div class="shape-wrapper">
+          <div class="organic-bg"></div>
+        </div>
+
+        <div
+          class="relative h-full w-full flex items-center justify-center z-10"
+          data-scroll-animation="animate-slide-right"
+          data-delay="0.2s"
+        >
+          <img
+            src="../../src/assets/photo.png"
+            alt="Healthcare Professional"
+            class="h-[85%] object-contain mt-16 ml-10 transform scale-110"
+          />
+        </div>
+      </div>
+    </div>
+
+    <script src="../../src/js/scroll-animations.js"></script>
+  </body>
+</html>
