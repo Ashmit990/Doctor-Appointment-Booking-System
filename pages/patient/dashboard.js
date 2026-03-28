@@ -59,7 +59,7 @@ const emptyState = document.getElementById("emptyState");
 const searchInput = document.getElementById("searchInput");
 const filterButtons = document.querySelectorAll(".filter-btn");
 function goToHomePage() {
-  window.location.href = "/homepage.html";
+  window.location.href = "homepage.html";
 }
 
 function getStatusClasses(status) {

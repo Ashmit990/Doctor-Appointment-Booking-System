@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patient Home Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="homepage.css" />
+  </head>
+  <body class="bg-slate-100 min-h-screen font-sans">
+    <div class="flex min-h-screen">
+      <aside
+        class="w-28 md:w-32 bg-teal-700 text-white flex flex-col items-center justify-start pt-24 pb-24 gap-16 shadow-xl"
+      >
+        <button
+          class="w-14 h-14 rounded-2xl bg-white shadow-md flex items-center justify-center"
+          title="Home"
+        >
+          <i data-lucide="house" class="w-6 h-6 text-teal-700"></i>
+        </button>
+
+        <button
+          onclick="goToDashboard()"
+          class="w-14 h-14 rounded-2xl bg-white/15 hover:bg-white/25 transition-all duration-200 flex items-center justify-center shadow-sm"
+          title="Appointments"
+        >
+          <i data-lucide="calendar-days" class="w-6 h-6 text-white"></i>
+        </button>
+
+        <button
+          class="w-14 h-14 rounded-2xl bg-white/15 hover:bg-white/25 transition-all duration-200 flex items-center justify-center shadow-sm"
+          title="Patient Profile"
+        >
+          <i data-lucide="user" class="w-6 h-6 text-white"></i>
+        </button>
+
+        <button
+          class="w-14 h-14 rounded-2xl bg-white/15 hover:bg-white/25 transition-all duration-200 flex items-center justify-center shadow-sm"
+          title="Logout"
+        >
+          <i data-lucide="log-out" class="w-6 h-6 text-white"></i>
+        </button>
+      </aside>
+
+      <main class="flex-1 p-4 md:p-8">
+        <div
+          class="max-w-7xl mx-auto bg-white rounded-[32px] shadow-[0_20px_60px_rgba(15,23,42,0.08)] p-5 md:p-8"
+        >
+          <div
+            class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8"
+          >
+            <div>
+              <p class="text-slate-400 text-sm font-medium mb-2">
+                Patient Dashboard
+              </p>
+              <h1
+                class="text-3xl md:text-4xl font-bold text-slate-800 leading-tight"
+              >
+                Good Morning
+                <span id="patientNameHeading" class="text-teal-700"
+                  >Sirjeet!</span
+                >
+              </h1>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 sm:items-center">
+              <div class="relative">
+                <input
+                  type="text"
+                  placeholder="Search"
+                  class="w-full sm:w-80 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none"
+                />
+                <i
+                  data-lucide="search"
+                  class="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2"
+                ></i>
+              </div>
+            </div>
+          </div>
+
+          <section class="grid grid-cols-1 xl:grid-cols-[1.7fr_0.9fr] gap-6">
+            <div>
+              <div
+                class="bg-gradient-to-r from-cyan-200 to-teal-500 rounded-[28px] p-6 md:p-8 text-white relative overflow-hidden min-h-[280px] hero-panel"
+              >
+                <div class="max-w-2xl">
+                  <p class="text-sm opacity-90 mb-2">Welcome back</p>
+                  <h2 class="text-3xl md:text-4xl font-bold leading-tight mb-3">
+                    Here is your patient home page
+                  </h2>
+                  <p class="text-base opacity-90 mb-6">
+                    View today’s booking status, quick info, and your upcoming
+                    appointments.
+                  </p>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div
+                      class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
+                    >
+                      <p class="text-sm opacity-90 mb-2">Today Bookings</p>
+                      <h3 id="todayBookingsCount" class="text-4xl font-bold">
+                        0
+                      </h3>
+                    </div>
+
+                    <div
+                      class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
+                    >
+                      <p class="text-sm opacity-90 mb-2">Upcoming</p>
+                      <h3 id="upcomingCount" class="text-4xl font-bold">0</h3>
+                    </div>
+
+                    <div
+                      class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
+                    >
+                      <p class="text-sm opacity-90 mb-2">Completed</p>
+                      <h3 id="completedCount" class="text-4xl font-bold">0</h3>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  class="hidden lg:block absolute right-10 bottom-2 text-8xl opacity-15"
+                >
+                  🩺
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 xl:grid-cols-[1fr_1fr] gap-6 mt-6">
+                <div
+                  class="bg-slate-50 rounded-[28px] p-6 shadow-sm min-h-[320px]"
+                >
+                  <div class="flex items-center justify-between mb-5">
+                    <h3 class="text-2xl font-semibold text-slate-800">
+                      Today Status
+                    </h3>
+                    <span
+                      class="text-sm text-slate-400"
+                      id="todayDateLabel"
+                    ></span>
+                  </div>
+
+                  <div
+                    id="todayBookingMessage"
+                    class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                  >
+                    <h4 class="text-lg font-semibold text-slate-800 mb-2">
+                      No booking for today
+                    </h4>
+                    <p class="text-slate-500 text-sm">
+                      You currently have no appointment scheduled for today.
+                    </p>
+                  </div>
+
+                  <div
+                    id="todayBookingCard"
+                    class="hidden mt-5 bg-white rounded-[24px] border border-emerald-100 p-5 shadow-sm"
+                  >
+                    <div class="flex items-center justify-between mb-3">
+                      <h4
+                        class="text-xl font-semibold text-slate-800"
+                        id="todayDoctorName"
+                      >
+                        Dr. Kim
+                      </h4>
+                      <span
+                        class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700"
+                      >
+                        Today
+                      </span>
+                    </div>
+                    <p class="text-sm text-slate-400 mb-4" id="todayDoctorMeta">
+                      Cardiologist • Heart Care
+                    </p>
+
+                    <div class="grid grid-cols-3 gap-3 text-sm text-slate-500">
+                      <div class="bg-slate-50 rounded-2xl px-4 py-3">
+                        <span class="block text-xs text-slate-400 mb-1"
+                          >Date</span
+                        >
+                        <span
+                          class="font-medium text-slate-700"
+                          id="todayBookingDate"
+                          >2026-03-25</span
+                        >
+                      </div>
+                      <div class="bg-slate-50 rounded-2xl px-4 py-3">
+                        <span class="block text-xs text-slate-400 mb-1"
+                          >Time</span
+                        >
+                        <span
+                          class="font-medium text-slate-700"
+                          id="todayBookingTime"
+                          >10:30 AM</span
+                        >
+                      </div>
+                      <div class="bg-slate-50 rounded-2xl px-4 py-3">
+                        <span class="block text-xs text-slate-400 mb-1"
+                          >Location</span
+                        >
+                        <span
+                          class="font-medium text-slate-700"
+                          id="todayBookingLocation"
+                          >Room 203</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  class="bg-slate-50 rounded-[28px] p-6 shadow-sm min-h-[320px]"
+                >
+                  <div class="flex items-center justify-between mb-5">
+                    <h3 class="text-2xl font-semibold text-slate-800">
+                      Upcoming Appointment
+                    </h3>
+                  </div>
+
+                  <div
+                    id="nextAppointmentCard"
+                    class="bg-white rounded-[24px] border border-cyan-100 p-5 shadow-sm"
+                  >
+                    <div class="flex items-center justify-between mb-3">
+                      <div>
+                        <h4
+                          class="text-xl font-semibold text-slate-800"
+                          id="nextDoctorName"
+                        >
+                          Dr. Sarah Lee
+                        </h4>
+                        <p class="text-sm text-slate-400" id="nextDoctorMeta">
+                          Dermatologist • Skin Care
+                        </p>
+                      </div>
+                      <span
+                        class="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-100 text-cyan-700"
+                      >
+                        Next
+                      </span>
+                    </div>
+
+                    <div
+                      class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-slate-500 mt-4"
+                    >
+                      <div class="bg-slate-50 rounded-2xl px-4 py-3">
+                        <span class="block text-xs text-slate-400 mb-1"
+                          >Date</span
+                        >
+                        <span
+                          class="font-medium text-slate-700"
+                          id="nextBookingDate"
+                          >2026-03-27</span
+                        >
+                      </div>
+                      <div class="bg-slate-50 rounded-2xl px-4 py-3">
+                        <span class="block text-xs text-slate-400 mb-1"
+                          >Time</span
+                        >
+                        <span
+                          class="font-medium text-slate-700"
+                          id="nextBookingTime"
+                          >02:00 PM</span
+                        >
+                      </div>
+                      <div class="bg-slate-50 rounded-2xl px-4 py-3">
+                        <span class="block text-xs text-slate-400 mb-1"
+                          >Location</span
+                        >
+                        <span
+                          class="font-medium text-slate-700"
+                          id="nextBookingLocation"
+                          >Room 105</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-6">
+              <div class="bg-slate-50 rounded-[28px] p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-2xl font-semibold text-slate-800">
+                    Calendar
+                  </h3>
+                  <i
+                    data-lucide="chevron-down"
+                    class="w-5 h-5 text-slate-400"
+                  ></i>
+                </div>
+
+                <p class="text-sm text-slate-400 mb-4">September 2022</p>
+
+                <div
+                  class="grid grid-cols-7 text-xs text-slate-400 mb-4 gap-y-3 text-center"
+                >
+                  <span>SUN</span>
+                  <span>MON</span>
+                  <span>TUE</span>
+                  <span>WED</span>
+                  <span>THU</span>
+                  <span>FRI</span>
+                  <span>SAT</span>
+
+                  <span></span><span></span><span></span><span></span
+                  ><span>1</span><span>2</span><span>3</span> <span>4</span
+                  ><span>5</span><span>6</span><span>7</span
+                  ><span class="font-semibold text-slate-700">8</span
+                  ><span>9</span><span>10</span> <span>11</span><span>12</span
+                  ><span>13</span><span>14</span><span>15</span><span>16</span
+                  ><span>17</span> <span>18</span><span>19</span
+                  ><span class="relative"
+                    >20
+                    <div class="calendar-dot"></div></span
+                  ><span>21</span><span>22</span><span>23</span><span>24</span>
+                  <span>25</span><span>26</span><span>27</span><span>28</span
+                  ><span>29</span><span>30</span><span></span>
+                </div>
+
+                <div class="flex items-center justify-between mt-6">
+                  <h4 class="text-xl font-semibold text-slate-800">Upcoming</h4>
+                  <button class="text-teal-500 text-sm font-medium">
+                    View All
+                  </button>
+                </div>
+              </div>
+
+              <div
+                class="bg-slate-50 rounded-[28px] p-6 shadow-sm min-h-[220px]"
+              >
+                <h3 class="text-xl font-semibold text-slate-800 mb-4">
+                  Quick Summary
+                </h3>
+
+                <div class="space-y-4 text-sm text-slate-500">
+                  <div class="flex justify-between items-center">
+                    <span>Total Appointments</span>
+                    <span
+                      id="totalAppointments"
+                      class="font-semibold text-slate-800"
+                      >0</span
+                    >
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span>Today’s Booking</span>
+                    <span
+                      id="todayBookingStatus"
+                      class="font-semibold text-teal-600"
+                      >No</span
+                    >
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span>Next Doctor</span>
+                    <span
+                      id="nextDoctorSummary"
+                      class="font-semibold text-slate-800"
+                      >-</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <script src="homepage.js"></script>
+    <script>
+      lucide.createIcons();
+    </script>
+  </body>
+</html>
