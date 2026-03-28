@@ -67,8 +67,16 @@
                   id="searchInput"
                   type="text"
                   placeholder="Search doctor or department"
-                  class="w-full sm:w-80 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-teal-300 focus:border-transparent transition"
+                  class="w-full sm:w-80 rounded-2xl border border-slate-200 bg-slate-50 pl-4 pr-12 py-3 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-teal-300 focus:border-transparent transition"
                 />
+
+                <button
+                  id="searchBtn"
+                  type="button"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-200/70 transition"
+                >
+                  <i data-lucide="search" class="w-4 h-4"></i>
+                </button>
               </div>
               <button
                 onclick="openBookingModal()"
@@ -80,7 +88,7 @@
           </div>
 
           <section
-            class="bg-gradient-to-r from-teal-300 to-teal-400 rounded-[30px] p-7 mb-7 text-white relative overflow-hidden shadow-[0_15px_40px_rgba(20,184,166,0.25)]"
+            class="bg-teal-600 rounded-[30px] p-7 mb-7 text-white relative overflow-hidden shadow-[0_15px_40px_rgba(20,184,166,0.25)]"
           >
             <div class="max-w-2xl">
               <p class="text-sm opacity-90 mb-2">Welcome back</p>
@@ -165,7 +173,7 @@
                 </div>
               </div>
 
-              <div id="appointmentList" class="space-y-4 min-h-[420px]"></div>
+              <div id="appointmentList" class="space-y-4 min-h-[100px]"></div>
               <div
                 id="emptyState"
                 class="hidden text-center py-12 text-slate-400"

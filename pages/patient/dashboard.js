@@ -298,6 +298,9 @@ window.addEventListener("message", function (event) {
     closeBookingModal();
   }
 });
+const searchBtn = document.getElementById("searchBtn");
+
+searchBtn.addEventListener("click", renderAppointments);
 
 searchInput.addEventListener("input", renderAppointments);
 
