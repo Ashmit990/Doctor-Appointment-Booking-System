@@ -50,7 +50,7 @@
           <div
             class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8"
           >
-            <div>
+            <div class="pt-2">
               <p class="text-slate-400 text-sm font-medium mb-2">
                 Patient Dashboard
               </p>
@@ -58,9 +58,9 @@
                 class="text-3xl md:text-4xl font-bold text-slate-800 leading-tight"
               >
                 Good Morning
-                <span id="patientNameHeading" class="text-teal-700"
-                  >Sirjeet!</span
-                >
+                <span id="patientNameHeading" class="text-teal-700">
+                  Sirjeet!
+                </span>
               </h1>
             </div>
 
@@ -69,20 +69,27 @@
                 <input
                   type="text"
                   placeholder="Search"
-                  class="w-full sm:w-80 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none"
+                  class="w-full sm:w-80 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-teal-300 focus:border-transparent transition"
                 />
                 <i
                   data-lucide="search"
                   class="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2"
                 ></i>
               </div>
+
+              <button
+                onclick="openBookingModal()"
+                class="bg-teal-600 hover:bg-teal-700 text-white px-5 py-3 rounded-2xl font-medium shadow-sm transition"
+              >
+                Book Appointment
+              </button>
             </div>
           </div>
 
           <section class="grid grid-cols-1 xl:grid-cols-[1.7fr_0.9fr] gap-6">
             <div>
               <div
-                class="bg-gradient-to-r from-cyan-200 to-teal-500 rounded-[28px] p-6 md:p-8 text-white relative overflow-hidden min-h-[280px] hero-panel"
+                class="bg-teal-700 rounded-[30px] p-7 mb-7 text-white relative overflow-hidden shadow-[0_15px_40px_rgba(20,184,166,0.25)] min-h-[280px]"
               >
                 <div class="max-w-2xl">
                   <p class="text-sm opacity-90 mb-2">Welcome back</p>
@@ -127,9 +134,9 @@
                 </div>
               </div>
 
-              <div class="grid grid-cols-1 xl:grid-cols-[1fr_1fr] gap-6 mt-6">
+              <div class="grid grid-cols-1 xl:grid-cols-[1fr_1fr] gap-6">
                 <div
-                  class="bg-slate-50 rounded-[28px] p-6 shadow-sm min-h-[320px]"
+                  class="bg-slate-50 rounded-[28px] p-6 border border-slate-100 shadow-sm min-h-[320px]"
                 >
                   <div class="flex items-center justify-between mb-5">
                     <h3 class="text-2xl font-semibold text-slate-800">
@@ -176,41 +183,44 @@
 
                     <div class="grid grid-cols-3 gap-3 text-sm text-slate-500">
                       <div class="bg-slate-50 rounded-2xl px-4 py-3">
-                        <span class="block text-xs text-slate-400 mb-1"
-                          >Date</span
-                        >
+                        <span class="block text-xs text-slate-400 mb-1">
+                          Date
+                        </span>
                         <span
                           class="font-medium text-slate-700"
                           id="todayBookingDate"
-                          >2026-03-25</span
                         >
+                          2026-03-25
+                        </span>
                       </div>
                       <div class="bg-slate-50 rounded-2xl px-4 py-3">
-                        <span class="block text-xs text-slate-400 mb-1"
-                          >Time</span
-                        >
+                        <span class="block text-xs text-slate-400 mb-1">
+                          Time
+                        </span>
                         <span
                           class="font-medium text-slate-700"
                           id="todayBookingTime"
-                          >10:30 AM</span
                         >
+                          10:30 AM
+                        </span>
                       </div>
                       <div class="bg-slate-50 rounded-2xl px-4 py-3">
-                        <span class="block text-xs text-slate-400 mb-1"
-                          >Location</span
-                        >
+                        <span class="block text-xs text-slate-400 mb-1">
+                          Location
+                        </span>
                         <span
                           class="font-medium text-slate-700"
                           id="todayBookingLocation"
-                          >Room 203</span
                         >
+                          Room 203
+                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div
-                  class="bg-slate-50 rounded-[28px] p-6 shadow-sm min-h-[320px]"
+                  class="bg-slate-50 rounded-[28px] p-6 border border-slate-100 shadow-sm min-h-[320px]"
                 >
                   <div class="flex items-center justify-between mb-5">
                     <h3 class="text-2xl font-semibold text-slate-800">
@@ -245,34 +255,37 @@
                       class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-slate-500 mt-4"
                     >
                       <div class="bg-slate-50 rounded-2xl px-4 py-3">
-                        <span class="block text-xs text-slate-400 mb-1"
-                          >Date</span
-                        >
+                        <span class="block text-xs text-slate-400 mb-1">
+                          Date
+                        </span>
                         <span
                           class="font-medium text-slate-700"
                           id="nextBookingDate"
-                          >2026-03-27</span
                         >
+                          2026-03-27
+                        </span>
                       </div>
                       <div class="bg-slate-50 rounded-2xl px-4 py-3">
-                        <span class="block text-xs text-slate-400 mb-1"
-                          >Time</span
-                        >
+                        <span class="block text-xs text-slate-400 mb-1">
+                          Time
+                        </span>
                         <span
                           class="font-medium text-slate-700"
                           id="nextBookingTime"
-                          >02:00 PM</span
                         >
+                          02:00 PM
+                        </span>
                       </div>
                       <div class="bg-slate-50 rounded-2xl px-4 py-3">
-                        <span class="block text-xs text-slate-400 mb-1"
-                          >Location</span
-                        >
+                        <span class="block text-xs text-slate-400 mb-1">
+                          Location
+                        </span>
                         <span
                           class="font-medium text-slate-700"
                           id="nextBookingLocation"
-                          >Room 105</span
                         >
+                          Room 105
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -281,7 +294,9 @@
             </div>
 
             <div class="space-y-6">
-              <div class="bg-slate-50 rounded-[28px] p-6 shadow-sm">
+              <div
+                class="bg-slate-50 rounded-[28px] p-6 border border-slate-100 shadow-sm"
+              >
                 <div class="flex items-center justify-between mb-4">
                   <h3 class="text-2xl font-semibold text-slate-800">
                     Calendar
@@ -322,14 +337,17 @@
 
                 <div class="flex items-center justify-between mt-6">
                   <h4 class="text-xl font-semibold text-slate-800">Upcoming</h4>
-                  <button class="text-teal-500 text-sm font-medium">
+                  <button
+                    onclick="goToDashboard()"
+                    class="text-teal-500 text-sm font-medium"
+                  >
                     View All
                   </button>
                 </div>
               </div>
 
               <div
-                class="bg-slate-50 rounded-[28px] p-6 shadow-sm min-h-[220px]"
+                class="bg-slate-50 rounded-[28px] p-6 border border-slate-100 shadow-sm min-h-[220px]"
               >
                 <h3 class="text-xl font-semibold text-slate-800 mb-4">
                   Quick Summary
@@ -341,24 +359,27 @@
                     <span
                       id="totalAppointments"
                       class="font-semibold text-slate-800"
-                      >0</span
                     >
+                      0
+                    </span>
                   </div>
                   <div class="flex justify-between items-center">
                     <span>Today’s Booking</span>
                     <span
                       id="todayBookingStatus"
                       class="font-semibold text-teal-600"
-                      >No</span
                     >
+                      No
+                    </span>
                   </div>
                   <div class="flex justify-between items-center">
                     <span>Next Doctor</span>
                     <span
                       id="nextDoctorSummary"
                       class="font-semibold text-slate-800"
-                      >-</span
                     >
+                      -
+                    </span>
                   </div>
                 </div>
               </div>
@@ -368,9 +389,42 @@
       </main>
     </div>
 
+    <div
+      id="bookingModal"
+      class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50 p-4"
+    >
+      <div
+        class="bg-white w-full max-w-3xl h-[520px] rounded-3xl shadow-2xl relative overflow-hidden"
+      >
+        <button
+          onclick="closeBookingModal()"
+          class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white shadow flex items-center justify-center"
+        >
+          ✕
+        </button>
+
+        <iframe
+          src="../patient/booking.html"
+          class="w-full h-full border-0"
+        ></iframe>
+      </div>
+    </div>
+
     <script src="homepage.js"></script>
     <script>
       lucide.createIcons();
+
+      function openBookingModal() {
+        const modal = document.getElementById("bookingModal");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+
+      function closeBookingModal() {
+        const modal = document.getElementById("bookingModal");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
     </script>
   </body>
 </html>
