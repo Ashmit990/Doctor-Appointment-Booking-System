@@ -14,10 +14,8 @@
         font-family: "Lato", sans-serif;
       }
 
-      /* The Exact Organic Wave Shape from image_f2fc49.png */
       .organic-bg {
         background-color: #007e85;
-        /* Precise path to create the smooth curve and bulge */
         clip-path: path(
           "M1000 0 L1000 1000 L300 1000 C150 1000 150 800 250 700 C400 550 50 600 50 350 C50 150 400 150 450 0 Z"
         );
@@ -25,14 +23,12 @@
         width: 100%;
       }
 
-      /* Container to ensure the path scales correctly with the screen */
       .shape-wrapper {
         position: absolute;
         inset: 0;
         z-index: 0;
       }
 
-      /* Responsive adjustment for cleaner scaling on smaller screens */
       @media (max-width: 1280px) {
         .organic-bg {
           clip-path: polygon(
@@ -47,7 +43,6 @@
         }
       }
 
-      /* Scroll Animation Keyframes */
       @keyframes fadeIn {
         0% {
           opacity: 0;
@@ -56,7 +51,6 @@
           opacity: 1;
         }
       }
-
       @keyframes slideUp {
         0% {
           opacity: 0;
@@ -67,7 +61,6 @@
           transform: translateY(0);
         }
       }
-
       @keyframes slideRight {
         0% {
           opacity: 0;
@@ -82,17 +75,71 @@
       .animate-fade-in {
         animation: fadeIn 0.6s ease-out forwards;
       }
-
       .animate-slide-up {
         animation: slideUp 0.7s ease-out forwards;
       }
-
       .animate-slide-right {
         animation: slideRight 0.8s ease-out forwards;
+      }
+
+      /* Modal */
+      #forgotModal {
+        display: none;
+      }
+      #forgotModal.show {
+        display: flex;
       }
     </style>
   </head>
   <body class="bg-[#F2F2F2] m-0 p-0 overflow-hidden tracking-[1.1px]">
+    <!-- ✅ Forgot Password Modal -->
+    <div
+      id="forgotModal"
+      class="fixed inset-0 z-50 items-center justify-center bg-black/40 backdrop-blur-sm"
+    >
+      <div
+        class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center"
+      >
+        <div class="flex justify-center mb-4">
+          <div class="bg-[#007E85]/10 rounded-full p-4">
+            <svg
+              class="w-10 h-10 text-[#007E85]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              />
+            </svg>
+          </div>
+        </div>
+        <h2 class="text-[#007E85] font-black text-2xl mb-3">
+          Forgot Password?
+        </h2>
+        <p class="text-gray-600 text-sm mb-4 leading-relaxed">
+          Please contact admin through email requesting for password change.
+        </p>
+        <a
+          href="mailto:admin@healthcare.com"
+          class="inline-block bg-[#007E85]/10 text-[#007E85] font-bold text-base px-4 py-2 rounded-xl hover:bg-[#007E85]/20 transition mb-6"
+        >
+          admin@healthcare.com
+        </a>
+        <button
+          onclick="
+            document.getElementById('forgotModal').classList.remove('show')
+          "
+          class="w-full bg-[#007E85] hover:bg-[#00666c] text-white font-black py-3 rounded-xl text-lg shadow transition-all active:scale-[0.98]"
+        >
+          Back to Login
+        </button>
+      </div>
+    </div>
+
     <div
       class="flex h-screen w-full relative"
       data-scroll-animation="animate-fade-in"
@@ -155,6 +202,15 @@
                 >Sign up</a
               >
             </p>
+            <!-- ✅ ADDED: Forgot Password -->
+            <button
+              onclick="
+                document.getElementById('forgotModal').classList.add('show')
+              "
+              class="text-[#007E85] text-sm font-bold hover:underline mt-1"
+            >
+              Forgot Password?
+            </button>
           </div>
 
           <button
@@ -185,7 +241,6 @@
         <div class="shape-wrapper">
           <div class="organic-bg"></div>
         </div>
-
         <div
           class="relative h-full w-full flex items-center justify-center z-10"
           data-scroll-animation="animate-slide-right"
