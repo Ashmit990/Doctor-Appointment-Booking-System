@@ -86,68 +86,71 @@
             </div>
           </div>
 
-          <section class="grid grid-cols-1 xl:grid-cols-[1.7fr_0.9fr] gap-6">
-            <div>
-              <div
-                class="bg-teal-700 rounded-[30px] p-7 mb-7 text-white relative overflow-hidden shadow-[0_15px_40px_rgba(20,184,166,0.25)] min-h-[280px]"
-              >
-                <div class="max-w-2xl">
-                  <p class="text-sm opacity-90 mb-2">Welcome back</p>
-                  <h2 class="text-3xl md:text-4xl font-bold leading-tight mb-3">
-                    Here is your patient home page
-                  </h2>
-                  <p class="text-base opacity-90 mb-6">
-                    View today’s booking status, quick info, and your upcoming
-                    appointments.
-                  </p>
+          <section
+            class="bg-teal-700 rounded-[30px] p-7 mb-7 text-white relative overflow-hidden shadow-[0_15px_40px_rgba(20,184,166,0.25)]"
+          >
+            <div class="max-w-2xl">
+              <p class="text-sm opacity-90 mb-2">Welcome back</p>
+              <h2 class="text-3xl md:text-4xl font-bold leading-tight mb-3">
+                Here is your patient home page
+              </h2>
+              <p class="text-base opacity-90 mb-6">
+                View today’s booking status, quick info, and your upcoming
+                appointments.
+              </p>
 
-                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div
-                      class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
-                    >
-                      <p class="text-sm opacity-90 mb-2">Today Bookings</p>
-                      <h3 id="todayBookingsCount" class="text-4xl font-bold">
-                        0
-                      </h3>
-                    </div>
-
-                    <div
-                      class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
-                    >
-                      <p class="text-sm opacity-90 mb-2">Upcoming</p>
-                      <h3 id="upcomingCount" class="text-4xl font-bold">0</h3>
-                    </div>
-
-                    <div
-                      class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
-                    >
-                      <p class="text-sm opacity-90 mb-2">Completed</p>
-                      <h3 id="completedCount" class="text-4xl font-bold">0</h3>
-                    </div>
-                  </div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div
+                  class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
+                >
+                  <p class="text-sm opacity-90 mb-2">Today Bookings</p>
+                  <h3 id="todayBookingsCount" class="text-4xl font-bold">0</h3>
                 </div>
 
                 <div
-                  class="hidden lg:block absolute right-10 bottom-2 text-8xl opacity-15"
+                  class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
                 >
-                  🩺
+                  <p class="text-sm opacity-90 mb-2">Upcoming</p>
+                  <h3 id="upcomingCount" class="text-4xl font-bold">0</h3>
                 </div>
+
+                <div
+                  class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
+                >
+                  <p class="text-sm opacity-90 mb-2">Completed</p>
+                  <h3 id="completedCount" class="text-4xl font-bold">0</h3>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="hidden lg:block absolute right-10 bottom-2 text-8xl opacity-15"
+            >
+              🩺
+            </div>
+          </section>
+
+          <section class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+            <div
+              class="xl:col-span-3 bg-slate-50 rounded-[28px] p-6 border border-slate-100"
+            >
+              <div
+                class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6"
+              >
+                <div>
+                  <h2 class="text-xl font-semibold text-slate-800">
+                    Today Status
+                  </h2>
+                  <p class="text-sm text-slate-400 mt-1">
+                    Your booking status and next visit details
+                  </p>
+                </div>
+
+                <div class="text-sm text-slate-400" id="todayDateLabel"></div>
               </div>
 
               <div class="grid grid-cols-1 xl:grid-cols-[1fr_1fr] gap-6">
-                <div
-                  class="bg-slate-50 rounded-[28px] p-6 border border-slate-100 shadow-sm min-h-[320px]"
-                >
-                  <div class="flex items-center justify-between mb-5">
-                    <h3 class="text-2xl font-semibold text-slate-800">
-                      Today Status
-                    </h3>
-                    <span
-                      class="text-sm text-slate-400"
-                      id="todayDateLabel"
-                    ></span>
-                  </div>
-
+                <div>
                   <div
                     id="todayBookingMessage"
                     class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
@@ -177,15 +180,16 @@
                         Today
                       </span>
                     </div>
+
                     <p class="text-sm text-slate-400 mb-4" id="todayDoctorMeta">
                       Cardiologist • Heart Care
                     </p>
 
                     <div class="grid grid-cols-3 gap-3 text-sm text-slate-500">
                       <div class="bg-slate-50 rounded-2xl px-4 py-3">
-                        <span class="block text-xs text-slate-400 mb-1">
-                          Date
-                        </span>
+                        <span class="block text-xs text-slate-400 mb-1"
+                          >Date</span
+                        >
                         <span
                           class="font-medium text-slate-700"
                           id="todayBookingDate"
@@ -194,9 +198,9 @@
                         </span>
                       </div>
                       <div class="bg-slate-50 rounded-2xl px-4 py-3">
-                        <span class="block text-xs text-slate-400 mb-1">
-                          Time
-                        </span>
+                        <span class="block text-xs text-slate-400 mb-1"
+                          >Time</span
+                        >
                         <span
                           class="font-medium text-slate-700"
                           id="todayBookingTime"
@@ -220,73 +224,63 @@
                 </div>
 
                 <div
-                  class="bg-slate-50 rounded-[28px] p-6 border border-slate-100 shadow-sm min-h-[320px]"
+                  id="nextAppointmentCard"
+                  class="bg-white rounded-[24px] border border-cyan-100 p-5 shadow-sm"
                 >
-                  <div class="flex items-center justify-between mb-5">
-                    <h3 class="text-2xl font-semibold text-slate-800">
-                      Upcoming Appointment
-                    </h3>
+                  <div class="flex items-center justify-between mb-3">
+                    <div>
+                      <h4
+                        class="text-xl font-semibold text-slate-800"
+                        id="nextDoctorName"
+                      >
+                        Dr. Sarah Lee
+                      </h4>
+                      <p class="text-sm text-slate-400" id="nextDoctorMeta">
+                        Dermatologist • Skin Care
+                      </p>
+                    </div>
+                    <span
+                      class="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-100 text-cyan-700"
+                    >
+                      Next
+                    </span>
                   </div>
 
                   <div
-                    id="nextAppointmentCard"
-                    class="bg-white rounded-[24px] border border-cyan-100 p-5 shadow-sm"
+                    class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-slate-500 mt-4"
                   >
-                    <div class="flex items-center justify-between mb-3">
-                      <div>
-                        <h4
-                          class="text-xl font-semibold text-slate-800"
-                          id="nextDoctorName"
-                        >
-                          Dr. Sarah Lee
-                        </h4>
-                        <p class="text-sm text-slate-400" id="nextDoctorMeta">
-                          Dermatologist • Skin Care
-                        </p>
-                      </div>
-                      <span
-                        class="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-100 text-cyan-700"
+                    <div class="bg-slate-50 rounded-2xl px-4 py-3">
+                      <span class="block text-xs text-slate-400 mb-1"
+                        >Date</span
                       >
-                        Next
+                      <span
+                        class="font-medium text-slate-700"
+                        id="nextBookingDate"
+                      >
+                        2026-03-27
                       </span>
                     </div>
-
-                    <div
-                      class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-slate-500 mt-4"
-                    >
-                      <div class="bg-slate-50 rounded-2xl px-4 py-3">
-                        <span class="block text-xs text-slate-400 mb-1">
-                          Date
-                        </span>
-                        <span
-                          class="font-medium text-slate-700"
-                          id="nextBookingDate"
-                        >
-                          2026-03-27
-                        </span>
-                      </div>
-                      <div class="bg-slate-50 rounded-2xl px-4 py-3">
-                        <span class="block text-xs text-slate-400 mb-1">
-                          Time
-                        </span>
-                        <span
-                          class="font-medium text-slate-700"
-                          id="nextBookingTime"
-                        >
-                          02:00 PM
-                        </span>
-                      </div>
-                      <div class="bg-slate-50 rounded-2xl px-4 py-3">
-                        <span class="block text-xs text-slate-400 mb-1">
-                          Location
-                        </span>
-                        <span
-                          class="font-medium text-slate-700"
-                          id="nextBookingLocation"
-                        >
-                          Room 105
-                        </span>
-                      </div>
+                    <div class="bg-slate-50 rounded-2xl px-4 py-3">
+                      <span class="block text-xs text-slate-400 mb-1"
+                        >Time</span
+                      >
+                      <span
+                        class="font-medium text-slate-700"
+                        id="nextBookingTime"
+                      >
+                        02:00 PM
+                      </span>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl px-4 py-3">
+                      <span class="block text-xs text-slate-400 mb-1">
+                        Location
+                      </span>
+                      <span
+                        class="font-medium text-slate-700"
+                        id="nextBookingLocation"
+                      >
+                        Room 105
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -295,12 +289,10 @@
 
             <div class="space-y-6">
               <div
-                class="bg-slate-50 rounded-[28px] p-6 border border-slate-100 shadow-sm"
+                class="bg-white rounded-[28px] p-6 border border-slate-100 shadow-sm"
               >
                 <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-2xl font-semibold text-slate-800">
-                    Calendar
-                  </h3>
+                  <h3 class="text-lg font-semibold text-slate-800">Calendar</h3>
                   <i
                     data-lucide="chevron-down"
                     class="w-5 h-5 text-slate-400"
@@ -336,7 +328,7 @@
                 </div>
 
                 <div class="flex items-center justify-between mt-6">
-                  <h4 class="text-xl font-semibold text-slate-800">Upcoming</h4>
+                  <h4 class="text-lg font-semibold text-slate-800">Upcoming</h4>
                   <button
                     onclick="goToDashboard()"
                     class="text-teal-500 text-sm font-medium"
@@ -347,9 +339,9 @@
               </div>
 
               <div
-                class="bg-slate-50 rounded-[28px] p-6 border border-slate-100 shadow-sm min-h-[220px]"
+                class="bg-white rounded-[28px] p-6 border border-slate-100 shadow-sm"
               >
-                <h3 class="text-xl font-semibold text-slate-800 mb-4">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
                   Quick Summary
                 </h3>
 
