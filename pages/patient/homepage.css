@@ -3,9 +3,49 @@
 }
 
 .calendar-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   background: #ef4444;
   border-radius: 9999px;
   margin: 4px auto 0;
+}
+
+.notification-card {
+  transition: all 0.25s ease;
+}
+
+.notification-card:hover {
+  background-color: #f8fafc;
+}
+
+.calendar-day {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.calendar-day:hover {
+  background: #f8fafc;
+}
+
+.active-day {
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.appointment-day {
+  font-weight: 700;
+  color: #0f172a;
+  background: #fff5f5;
+}
+
+.calendar-popup-grid {
+  user-select: none;
 }
