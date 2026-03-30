@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patient Profile Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="profile.css" />
+  </head>
+  <body class="bg-slate-100 min-h-screen font-sans">
+    <div class="flex min-h-screen">
+      <aside
+        class="w-28 md:w-32 bg-teal-700 text-white flex flex-col items-center justify-start pt-24 pb-24 gap-16 shadow-xl"
+      >
+        <button
+          onclick="goToHomePage()"
+          class="w-14 h-14 rounded-2xl bg-white/15 hover:bg-white/25 transition-all duration-200 flex items-center justify-center shadow-sm"
+          title="Home"
+        >
+          <i data-lucide="house" class="w-6 h-6 text-white"></i>
+        </button>
+
+        <button
+          onclick="goToDashboard()"
+          class="w-14 h-14 rounded-2xl bg-white/15 hover:bg-white/25 transition-all duration-200 flex items-center justify-center shadow-sm"
+          title="Appointments"
+        >
+          <i data-lucide="calendar-days" class="w-6 h-6 text-white"></i>
+        </button>
+
+        <button
+          class="w-14 h-14 rounded-2xl bg-white shadow-md flex items-center justify-center"
+          title="Patient Profile"
+        >
+          <i data-lucide="user" class="w-6 h-6 text-teal-700"></i>
+        </button>
+
+        <button
+          class="w-14 h-14 rounded-2xl bg-white/15 hover:bg-white/25 transition-all duration-200 flex items-center justify-center shadow-sm"
+          title="Logout"
+        >
+          <i data-lucide="log-out" class="w-6 h-6 text-white"></i>
+        </button>
+      </aside>
+
+      <main class="flex-1 p-4 md:p-8">
+        <div
+          class="max-w-7xl mx-auto bg-white rounded-[32px] shadow-[0_20px_60px_rgba(15,23,42,0.08)] p-5 md:p-8"
+        >
+          <div
+            class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8"
+          >
+            <div class="pt-2">
+              <p class="text-slate-400 text-sm font-medium mb-2">
+                Patient Dashboard
+              </p>
+              <h1
+                class="text-3xl md:text-4xl font-bold text-slate-800 leading-tight"
+              >
+                Profile Management
+              </h1>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 sm:items-center">
+              <div class="relative">
+                <input
+                  id="profileSearch"
+                  type="text"
+                  placeholder="Search profile settings"
+                  class="w-full sm:w-80 rounded-2xl border border-slate-200 bg-slate-50 pl-4 pr-12 py-3 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-teal-300 focus:border-transparent transition"
+                />
+                <i
+                  data-lucide="search"
+                  class="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2"
+                ></i>
+              </div>
+
+              <button
+                type="button"
+                onclick="saveProfile()"
+                class="bg-teal-600 hover:bg-teal-700 text-white px-5 py-3 rounded-2xl font-medium shadow-sm transition"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+
+          <section
+            class="bg-teal-700 rounded-[30px] p-7 mb-7 text-white relative overflow-hidden shadow-[0_15px_40px_rgba(20,184,166,0.25)] hero-panel"
+          >
+            <div class="max-w-2xl">
+              <p class="text-sm opacity-90 mb-2">Manage your details</p>
+              <h2 class="text-3xl md:text-4xl font-bold leading-tight mb-3">
+                Keep your profile information updated
+              </h2>
+              <p class="text-base opacity-90 mb-6">
+                Edit your personal details so your information stays accurate
+                and easy to manage.
+              </p>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div
+                  class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
+                >
+                  <p class="text-sm opacity-90 mb-2">Profile Completion</p>
+                  <h3 id="profileCompletion" class="text-4xl font-bold">0%</h3>
+                </div>
+
+                <div
+                  class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
+                >
+                  <p class="text-sm opacity-90 mb-2">Verified Fields</p>
+                  <h3 id="verifiedFields" class="text-4xl font-bold">0</h3>
+                </div>
+
+                <div
+                  class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
+                >
+                  <p class="text-sm opacity-90 mb-2">Last Updated</p>
+                  <h3 id="lastUpdatedHero" class="text-2xl font-bold">Today</h3>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="hidden lg:block absolute right-10 bottom-2 text-8xl opacity-15"
+            >
+              👤
+            </div>
+          </section>
+
+          <section class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+            <div
+              class="xl:col-span-3 bg-slate-50 rounded-[28px] p-6 border border-slate-100"
+            >
+              <div
+                class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6"
+              >
+                <div>
+                  <h2 class="text-xl font-semibold text-slate-800">
+                    Personal Information
+                  </h2>
+                  <p class="text-sm text-slate-400 mt-1">
+                    Update your profile details below
+                  </p>
+                </div>
+
+                <div id="profileDateLabel" class="text-sm text-slate-400"></div>
+              </div>
+
+              <form id="profileForm" class="space-y-6">
+                <div
+                  class="profile-card bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm"
+                >
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                      <label
+                        id="labelFullName"
+                        class="block text-sm font-medium text-slate-700 mb-2"
+                      >
+                        Full Name
+                      </label>
+                      <input
+                        id="fullName"
+                        type="text"
+                        placeholder="Enter full name"
+                        class="w-full border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-teal-300 bg-slate-50"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        id="labelEmail"
+                        class="block text-sm font-medium text-slate-700 mb-2"
+                      >
+                        Email Address
+                      </label>
+                      <input
+                        id="email"
+                        type="email"
+                        placeholder="Enter email address"
+                        class="w-full border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-teal-300 bg-slate-50"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        id="labelPhone"
+                        class="block text-sm font-medium text-slate-700 mb-2"
+                      >
+                        Phone Number
+                      </label>
+                      <input
+                        id="phone"
+                        type="text"
+                        placeholder="Enter phone number"
+                        class="w-full border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-teal-300 bg-slate-50"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        id="labelDob"
+                        class="block text-sm font-medium text-slate-700 mb-2"
+                      >
+                        Date of Birth
+                      </label>
+                      <input
+                        id="dob"
+                        type="date"
+                        class="w-full border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-teal-300 bg-slate-50"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        id="labelGender"
+                        class="block text-sm font-medium text-slate-700 mb-2"
+                      >
+                        Gender
+                      </label>
+                      <select
+                        id="gender"
+                        class="w-full border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-teal-300 bg-slate-50"
+                      >
+                        <option value="">Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label
+                        id="labelBlood"
+                        class="block text-sm font-medium text-slate-700 mb-2"
+                      >
+                        Blood Group
+                      </label>
+                      <select
+                        id="bloodGroup"
+                        class="w-full border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-teal-300 bg-slate-50"
+                      >
+                        <option value="">Select blood group</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  class="profile-card bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm"
+                >
+                  <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    Address & Emergency Contact
+                  </h3>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="md:col-span-2">
+                      <label
+                        id="labelAddress"
+                        class="block text-sm font-medium text-slate-700 mb-2"
+                      >
+                        Address
+                      </label>
+                      <textarea
+                        id="address"
+                        rows="3"
+                        placeholder="Enter your address"
+                        class="w-full border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-teal-300 resize-none bg-slate-50"
+                      ></textarea>
+                    </div>
+
+                    <div>
+                      <label
+                        id="labelEmergencyName"
+                        class="block text-sm font-medium text-slate-700 mb-2"
+                      >
+                        Emergency Contact Name
+                      </label>
+                      <input
+                        id="emergencyName"
+                        type="text"
+                        placeholder="Enter emergency contact name"
+                        class="w-full border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-teal-300 bg-slate-50"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        id="labelEmergencyPhone"
+                        class="block text-sm font-medium text-slate-700 mb-2"
+                      >
+                        Emergency Contact Phone
+                      </label>
+                      <input
+                        id="emergencyPhone"
+                        type="text"
+                        placeholder="Enter emergency contact phone"
+                        class="w-full border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-teal-300 bg-slate-50"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap gap-3 pt-1">
+                  <button
+                    type="submit"
+                    class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-2xl font-medium transition"
+                  >
+                    Save Profile
+                  </button>
+
+                  <button
+                    type="button"
+                    id="resetProfile"
+                    class="border border-slate-200 hover:bg-slate-50 text-slate-700 px-6 py-3 rounded-2xl font-medium transition"
+                  >
+                    Reset
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div class="space-y-6">
+              <div
+                class="bg-white rounded-[28px] p-6 border border-slate-100 shadow-sm"
+              >
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                  Profile Summary
+                </h3>
+
+                <div class="space-y-4">
+                  <div class="flex items-center gap-4">
+                    <div
+                      class="w-14 h-14 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center text-xl font-bold"
+                      id="profileInitial"
+                    >
+                      S
+                    </div>
+                    <div>
+                      <p
+                        id="summaryName"
+                        class="font-semibold text-slate-800 text-base"
+                      >
+                        Sirjeet Dahal
+                      </p>
+                      <p id="summaryEmail" class="text-sm text-slate-400">
+                        sirjeet@example.com
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="space-y-4 text-sm text-slate-500 pt-2">
+                    <div class="flex justify-between items-center">
+                      <span>Phone</span>
+                      <span
+                        id="summaryPhone"
+                        class="font-semibold text-slate-800"
+                      >
+                        -
+                      </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span>Gender</span>
+                      <span
+                        id="summaryGender"
+                        class="font-semibold text-slate-800"
+                      >
+                        -
+                      </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span>Blood Group</span>
+                      <span
+                        id="summaryBlood"
+                        class="font-semibold text-slate-800"
+                      >
+                        -
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="bg-white rounded-[28px] p-6 border border-slate-100 shadow-sm"
+              >
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                  Account Status
+                </h3>
+
+                <div class="space-y-4 text-sm">
+                  <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                    <span class="text-slate-500">Profile editable</span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+                    <span class="text-slate-500">Changes saved locally</span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full bg-teal-500"></span>
+                    <span class="text-slate-500"
+                      >Information can be updated anytime</span
+                    >
+                  </div>
+                </div>
+
+                <div
+                  class="mt-6 pt-4 border-t border-slate-100 space-y-3 text-sm text-slate-500"
+                >
+                  <div class="flex justify-between items-center">
+                    <span>Last Updated</span>
+                    <span
+                      id="lastUpdatedSide"
+                      class="font-semibold text-teal-600"
+                    >
+                      Today
+                    </span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span>Filled Fields</span>
+                    <span
+                      id="filledFields"
+                      class="font-semibold text-slate-800"
+                    >
+                      0/9
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <div
+      id="successToast"
+      class="fixed inset-0 hidden items-center justify-center z-[70] bg-black/25 backdrop-blur-sm"
+    >
+      <div
+        class="bg-white rounded-[28px] shadow-[0_20px_60px_rgba(15,23,42,0.18)] px-8 py-7 w-[90%] max-w-md text-center border border-emerald-100"
+      >
+        <div
+          class="mx-auto mb-4 w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-8 h-8 text-emerald-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        </div>
+        <h3 class="toast-title text-2xl font-bold text-slate-800 mb-2">
+          Success
+        </h3>
+        <p class="toast-text text-slate-500 text-base">
+          Profile updated successfully.
+        </p>
+      </div>
+    </div>
+
+    <script src="profile.js"></script>
+    <script>
+      lucide.createIcons();
+    </script>
+  </body>
+</html>
