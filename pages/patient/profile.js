@@ -178,3 +178,4 @@ searchInput.addEventListener("input", () => {
 });
 
 loadProfile();
+//completed
