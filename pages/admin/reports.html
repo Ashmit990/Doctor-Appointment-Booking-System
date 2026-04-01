@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reports & Analytics – Healthcare</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              teal: {
+                DEFAULT: "#0d7377",
+                dark: "#0a5a5d",
+                light: "#14a3a8",
+                bg: "#e8f5f5",
+              },
+            },
+            fontFamily: { poppins: ["Poppins", "sans-serif"] },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 text-gray-800 flex min-h-screen">
+    <!-- Mobile overlay -->
+    <div
+      id="overlay"
+      class="fixed inset-0 bg-black/40 z-40 hidden lg:hidden"
+      onclick="closeSidebar()"
+    ></div>
+
+    <!-- Sidebar -->
+    <aside
+      id="sidebar"
+      class="fixed top-0 left-0 bottom-0 w-60 bg-teal-dark flex flex-col z-50 -translate-x-full lg:translate-x-0 transition-transform duration-300"
+    >
+      <div class="px-6 py-7 flex items-center gap-3 border-b border-white/10">
+        <svg class="w-8 h-8 shrink-0" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="16" fill="rgba(255,255,255,.15)" />
+          <path
+            d="M16 8v16M8 16h16"
+            stroke="#fff"
+            stroke-width="2.5"
+            stroke-linecap="round"
+          />
+        </svg>
+        <span class="text-white font-bold text-lg">Healthcare</span>
+      </div>
+      <nav class="p-3 flex-1">
+        <a
+          href="dashboard.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"
+            />
+          </svg>
+          Dashboard
+        </a>
+        <a
+          href="users.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
+            />
+          </svg>
+          Users
+        </a>
+        <a
+          href="#"
+          onclick="showToast('Appointments page coming soon!')"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
+            />
+          </svg>
+          Appointments
+        </a>
+        <a
+          href="reports.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white bg-white/20 text-sm font-medium mb-1"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"
+            />
+          </svg>
+          Reports
+        </a>
+        <a
+          href="#"
+          onclick="showToast('Doctors page coming soon!')"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+            />
+          </svg>
+          Doctors
+        </a>
+      </nav>
+      <div class="p-3 border-t border-white/10">
+        <a
+          href="#"
+          onclick="showToast('Admin profile coming soon!')"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/65 hover:bg-white/10 hover:text-white text-sm font-medium transition-all"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+            />
+          </svg>
+          Admin Profile
+        </a>
+        <a
+          href="#"
+          onclick="confirmLogout()"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/65 hover:bg-white/10 hover:text-white text-sm font-medium transition-all"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
+            />
+          </svg>
+          Logout
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 flex flex-col lg:ml-60">
+      <header
+        class="bg-white px-4 md:px-8 py-4 flex items-center justify-between shadow-sm sticky top-0 z-30"
+      >
+        <div class="flex items-center gap-3">
+          <button
+            onclick="toggleSidebar()"
+            class="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <svg
+              class="w-5 h-5 text-teal-dark"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+            </svg>
+          </button>
+          <h1 class="text-base font-semibold text-teal-dark">
+            Reports & Analytics
+          </h1>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="text-xs text-gray-500 hidden sm:block"
+            >March 31, 2026</span
+          >
+          <div
+            class="w-9 h-9 bg-teal rounded-full flex items-center justify-center text-white font-bold text-sm cursor-pointer hover:bg-teal-dark transition-colors"
+            onclick="showToast('Admin profile clicked!')"
+          >
+            A
+          </div>
+        </div>
+      </header>
+
+      <div class="p-4 md:p-8">
+        <!-- Toolbar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <h2 class="text-2xl font-bold text-teal-dark">Analytics Overview</h2>
+          <div class="flex gap-2">
+            <select
+              id="periodSelect"
+              onchange="updatePeriod()"
+              class="bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-poppins text-gray-800 shadow-sm outline-none cursor-pointer focus:border-teal transition-colors"
+            >
+              <option>Last 6 Months</option>
+              <option>Last 30 Days</option>
+              <option>This Year</option>
+            </select>
+            <button
+              onclick="exportData()"
+              class="flex items-center gap-2 bg-teal text-white rounded-xl px-5 py-2.5 text-sm font-semibold hover:bg-teal-dark transition-colors shadow-sm"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+              </svg>
+              Export
+            </button>
+          </div>
+        </div>
+
+        <!-- KPI Grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div
+            class="bg-white rounded-2xl p-5 shadow-md border-l-4 border-teal cursor-pointer hover:-translate-y-1 transition-transform"
+            onclick="showToast('Total Revenue: $48,320 — ↑ 18%')"
+          >
+            <div class="text-2xl font-bold text-teal-dark" id="kpiRevenue">
+              $48,320
+            </div>
+            <div class="text-xs text-gray-400 font-medium mt-1">
+              Total Revenue
+            </div>
+            <div
+              class="text-xs font-semibold text-green-600 mt-2"
+              id="kpiRevDelta"
+            >
+              ↑ 18% vs last period
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-2xl p-5 shadow-md border-l-4 border-teal cursor-pointer hover:-translate-y-1 transition-transform"
+            onclick="showToast('Total Appointments: 1,206 — ↑ 8%')"
+          >
+            <div class="text-2xl font-bold text-teal-dark">1,206</div>
+            <div class="text-xs text-gray-400 font-medium mt-1">
+              Total Appointments
+            </div>
+            <div class="text-xs font-semibold text-green-600 mt-2">
+              ↑ 8% vs last period
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-2xl p-5 shadow-md border-l-4 border-teal cursor-pointer hover:-translate-y-1 transition-transform"
+            onclick="showToast('Completion Rate: 92%')"
+          >
+            <div class="text-2xl font-bold text-teal-dark">92%</div>
+            <div class="text-xs text-gray-400 font-medium mt-1">
+              Completion Rate
+            </div>
+            <div class="text-xs font-semibold text-green-600 mt-2">
+              ↑ 3% vs last period
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-2xl p-5 shadow-md border-l-4 border-teal cursor-pointer hover:-translate-y-1 transition-transform"
+            onclick="showToast('Avg. Doctor Rating: 4.8 stars')"
+          >
+            <div class="text-2xl font-bold text-teal-dark">4.8★</div>
+            <div class="text-xs text-gray-400 font-medium mt-1">
+              Avg. Doctor Rating
+            </div>
+            <div class="text-xs font-semibold text-green-600 mt-2">
+              ↑ 0.2 vs last period
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+          <div class="bg-white rounded-2xl p-6 shadow-md">
+            <div class="flex items-center justify-between mb-5">
+              <span class="font-semibold text-gray-800">Revenue Trend</span>
+              <span
+                class="bg-teal-bg text-teal text-xs font-semibold px-3 py-1 rounded-full"
+                >Monthly</span
+              >
+            </div>
+            <canvas id="revenueChart"></canvas>
+          </div>
+          <div class="bg-white rounded-2xl p-6 shadow-md">
+            <div class="flex items-center justify-between mb-5">
+              <span class="font-semibold text-gray-800"
+                >Appointments by Status</span
+              >
+              <span
+                class="bg-teal-bg text-teal text-xs font-semibold px-3 py-1 rounded-full"
+                >This Month</span
+              >
+            </div>
+            <canvas id="statusChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div class="bg-white rounded-2xl p-6 shadow-md">
+            <div class="flex items-center justify-between mb-5">
+              <span class="font-semibold text-gray-800"
+                >New User Registrations</span
+              >
+              <span
+                class="bg-teal-bg text-teal text-xs font-semibold px-3 py-1 rounded-full"
+                >Weekly</span
+              >
+            </div>
+            <canvas id="usersChart"></canvas>
+          </div>
+          <div class="bg-white rounded-2xl p-6 shadow-md">
+            <div class="flex items-center justify-between mb-5">
+              <span class="font-semibold text-gray-800"
+                >Top Specialties by Bookings</span
+              >
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[300px]">
+                <thead>
+                  <tr>
+                    <th
+                      class="text-left text-xs text-gray-400 font-semibold pb-3 uppercase tracking-wider"
+                    >
+                      Specialty
+                    </th>
+                    <th
+                      class="text-left text-xs text-gray-400 font-semibold pb-3 uppercase tracking-wider"
+                    >
+                      Bookings
+                    </th>
+                    <th
+                      class="text-left text-xs text-gray-400 font-semibold pb-3 uppercase tracking-wider"
+                    >
+                      Share
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                    onclick="showToast('General Medicine: 342 bookings (28%)')"
+                  >
+                    <td class="py-3 text-sm">General Medicine</td>
+                    <td class="py-3 text-sm">
+                      <strong>342</strong>
+                      <div
+                        class="h-1.5 rounded-full bg-teal mt-1"
+                        style="width: 90%"
+                      ></div>
+                    </td>
+                    <td class="py-3 text-sm text-gray-500">28%</td>
+                  </tr>
+                  <tr
+                    class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                    onclick="showToast('Cardiology: 218 bookings (18%)')"
+                  >
+                    <td class="py-3 text-sm">Cardiology</td>
+                    <td class="py-3 text-sm">
+                      <strong>218</strong>
+                      <div
+                        class="h-1.5 rounded-full bg-teal mt-1"
+                        style="width: 57%"
+                      ></div>
+                    </td>
+                    <td class="py-3 text-sm text-gray-500">18%</td>
+                  </tr>
+                  <tr
+                    class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                    onclick="showToast('Dermatology: 185 bookings (15%)')"
+                  >
+                    <td class="py-3 text-sm">Dermatology</td>
+                    <td class="py-3 text-sm">
+                      <strong>185</strong>
+                      <div
+                        class="h-1.5 rounded-full bg-teal mt-1"
+                        style="width: 48%"
+                      ></div>
+                    </td>
+                    <td class="py-3 text-sm text-gray-500">15%</td>
+                  </tr>
+                  <tr
+                    class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                    onclick="showToast('Orthopedics: 140 bookings (12%)')"
+                  >
+                    <td class="py-3 text-sm">Orthopedics</td>
+                    <td class="py-3 text-sm">
+                      <strong>140</strong>
+                      <div
+                        class="h-1.5 rounded-full bg-teal mt-1"
+                        style="width: 37%"
+                      ></div>
+                    </td>
+                    <td class="py-3 text-sm text-gray-500">12%</td>
+                  </tr>
+                  <tr
+                    class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                    onclick="showToast('Neurology: 120 bookings (10%)')"
+                  >
+                    <td class="py-3 text-sm">Neurology</td>
+                    <td class="py-3 text-sm">
+                      <strong>120</strong>
+                      <div
+                        class="h-1.5 rounded-full bg-teal mt-1"
+                        style="width: 31%"
+                      ></div>
+                    </td>
+                    <td class="py-3 text-sm text-gray-500">10%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Toast -->
+    <div
+      id="toast"
+      class="fixed bottom-6 right-6 bg-teal-dark text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium translate-y-20 opacity-0 transition-all duration-300 z-50 max-w-xs"
+    ></div>
+
+    <!-- Logout Modal -->
+    <div
+      id="logoutModal"
+      class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4"
+    >
+      <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+        <h3 class="font-bold text-lg text-gray-800 mb-2">Confirm Logout</h3>
+        <p class="text-sm text-gray-500 mb-6">
+          Are you sure you want to log out?
+        </p>
+        <div class="flex gap-3">
+          <button
+            onclick="closeLogout()"
+            class="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onclick="
+              showToast('Logged out successfully!');
+              closeLogout();
+            "
+            class="flex-1 px-4 py-2.5 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal-dark transition-colors"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const teal = "#0d7377",
+        tealLight = "#14a3a8",
+        tealBg = "#e8f5f5";
+
+      const revenueData = {
+        "Last 6 Months": [28000, 32000, 27000, 38000, 42000, 48320],
+        "Last 30 Days": [5000, 7200, 6800, 9000, 8400, 10120],
+        "This Year": [28000, 32000, 27000, 38000, 42000, 48320],
+      };
+      const revenueLabels = {
+        "Last 6 Months": ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar"],
+        "Last 30 Days": ["Wk1", "Wk2", "Wk3", "Wk4", "Wk5", "Wk6"],
+        "This Year": ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar"],
+      };
+
+      let revChart, statChart, usrChart;
+
+      function buildCharts(period = "Last 6 Months") {
+        if (revChart) revChart.destroy();
+        if (statChart) statChart.destroy();
+        if (usrChart) usrChart.destroy();
+
+        revChart = new Chart(document.getElementById("revenueChart"), {
+          type: "line",
+          data: {
+            labels: revenueLabels[period],
+            datasets: [
+              {
+                label: "Revenue ($)",
+                data: revenueData[period],
+                borderColor: teal,
+                backgroundColor: "rgba(13,115,119,.08)",
+                borderWidth: 2.5,
+                pointBackgroundColor: teal,
+                pointRadius: 4,
+                fill: true,
+                tension: 0.4,
+              },
+            ],
+          },
+          options: {
+            plugins: { legend: { display: false } },
+            scales: {
+              y: {
+                grid: { color: "#f0f0f0" },
+                ticks: {
+                  color: "#6b8080",
+                  font: { family: "Poppins", size: 11 },
+                },
+              },
+              x: {
+                grid: { display: false },
+                ticks: {
+                  color: "#6b8080",
+                  font: { family: "Poppins", size: 11 },
+                },
+              },
+            },
+          },
+        });
+
+        statChart = new Chart(document.getElementById("statusChart"), {
+          type: "doughnut",
+          data: {
+            labels: ["Confirmed", "Pending", "Cancelled"],
+            datasets: [
+              {
+                data: [780, 280, 146],
+                backgroundColor: [teal, "#d96c0a", "#c0392b"],
+                borderWidth: 0,
+              },
+            ],
+          },
+          options: {
+            cutout: "70%",
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: {
+                  font: { family: "Poppins", size: 11 },
+                  color: "#1e2d2d",
+                  padding: 16,
+                },
+              },
+            },
+          },
+        });
+
+        usrChart = new Chart(document.getElementById("usersChart"), {
+          type: "bar",
+          data: {
+            labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+            datasets: [
+              {
+                label: "Patients",
+                data: [120, 95, 140, 108],
+                backgroundColor: teal,
+                borderRadius: 6,
+              },
+              {
+                label: "Doctors",
+                data: [12, 8, 15, 10],
+                backgroundColor: tealBg,
+                borderRadius: 6,
+              },
+            ],
+          },
+          options: {
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: {
+                  font: { family: "Poppins", size: 11 },
+                  color: "#1e2d2d",
+                  padding: 16,
+                },
+              },
+            },
+            scales: {
+              y: {
+                grid: { color: "#f0f0f0" },
+                ticks: {
+                  color: "#6b8080",
+                  font: { family: "Poppins", size: 11 },
+                },
+              },
+              x: {
+                grid: { display: false },
+                ticks: {
+                  color: "#6b8080",
+                  font: { family: "Poppins", size: 11 },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      function updatePeriod() {
+        const period = document.getElementById("periodSelect").value;
+        showToast(`Showing data for: ${period}`);
+        buildCharts(period);
+      }
+
+      function exportData() {
+        showToast("Exporting report as CSV...");
+        setTimeout(() => showToast("Report exported successfully!"), 1500);
+      }
+
+      function toggleSidebar() {
+        document
+          .getElementById("sidebar")
+          .classList.toggle("-translate-x-full");
+        document.getElementById("overlay").classList.toggle("hidden");
+      }
+      function closeSidebar() {
+        document.getElementById("sidebar").classList.add("-translate-x-full");
+        document.getElementById("overlay").classList.add("hidden");
+      }
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.remove("translate-y-20", "opacity-0");
+        t.classList.add("translate-y-0", "opacity-100");
+        setTimeout(() => {
+          t.classList.add("translate-y-20", "opacity-0");
+          t.classList.remove("translate-y-0", "opacity-100");
+        }, 3000);
+      }
+      function confirmLogout() {
+        document.getElementById("logoutModal").classList.remove("hidden");
+      }
+      function closeLogout() {
+        document.getElementById("logoutModal").classList.add("hidden");
+      }
+
+      buildCharts();
+    </script>
+  </body>
+</html>
