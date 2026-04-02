@@ -113,9 +113,11 @@
       }
     </style>
   </head>
-  <body class="overflow-hidden tracking-[1.1px]">
+  <!-- FIX 1: Changed overflow-hidden to overflow-x-hidden to allow vertical scrolling -->
+  <body class="overflow-x-hidden tracking-[1.1px]">
+    <!-- FIX 2: Changed h-screen to min-h-screen so container can grow beyond viewport height -->
     <div
-      class="flex h-screen w-full relative animate-fade-in"
+      class="flex min-h-screen w-full relative animate-fade-in"
       data-scroll-animation="animate-fade-in"
       data-delay="0s"
     >
