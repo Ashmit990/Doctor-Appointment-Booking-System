@@ -52,6 +52,10 @@ function goToDashboard() {
   window.location.href = "dashboard.html";
 }
 
+function goToProfile() {
+  window.location.href = "profile.html";
+}
+
 document.getElementById("todayBookingsCount").textContent = todayCount;
 document.getElementById("upcomingCount").textContent = upcomingCount;
 document.getElementById("completedCount").textContent = completedCount;
