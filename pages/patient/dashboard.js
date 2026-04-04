@@ -62,6 +62,10 @@ function goToHomePage() {
   window.location.href = "homepage.html";
 }
 
+function goToProfile() {
+  window.location.href = "profile.html";
+}
+
 function getStatusClasses(status) {
   if (status === "upcoming") return "bg-emerald-100 text-emerald-700";
   if (status === "completed") return "bg-blue-100 text-blue-700";
