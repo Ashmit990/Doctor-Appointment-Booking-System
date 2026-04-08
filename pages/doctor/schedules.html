@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard - Schedules</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        body { background: #ffffff; }
+        .primary-color { color: #007E85; }
+        .bg-primary { background-color: #007E85; }
+        .bg-primary-light { background-color: rgba(0, 126, 133, 0.1); }
+        .card-shadow { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); }
+        .sidebar { background: #007E85; }
+        .nav-link { transition: all 0.3s ease; color: white; }
+        .nav-link:hover { background-color: rgba(255, 255, 255, 0.2); }
+        .nav-link.active { background-color: rgba(255, 255, 255, 0.3); }
+        .calendar-day { 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            min-height: 45px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .calendar-day:hover { background-color: rgba(0, 126, 133, 0.1); }
+        .calendar-day.has-appointment { position: relative; font-weight: bold; }
+        .calendar-day.has-appointment::after { 
+            content: ''; 
+            position: absolute; 
+            bottom: 2px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: 6px; 
+            height: 6px; 
+            background: #ef4444; 
+            border-radius: 50%; 
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- SIDEBAR -->
+        <aside class="sidebar w-64 text-white shadow-lg fixed h-full overflow-y-auto z-40">
+            <div class="p-8 border-b border-gray-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <i data-lucide="stethoscope" class="w-6 h-6"></i>
+                    </div>
+                    <h1 class="text-xl font-bold">MedHub</h1>
+                </div>
+                <p id="sidebar-doctor-name" class="text-sm text-gray-300 mt-2">Loading...</p>
+            </div>
+
+            <nav class="p-6 space-y-2">
+                <a href="home.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg hover:opacity-80 transition">
+                    <i data-lucide="home" class="w-5 h-5"></i>
+                    <span>Home</span>
+                </a>
+                <a href="schedules.html" class="nav-link active flex items-center gap-3 px-4 py-3 rounded-lg hover:opacity-80 transition">
+                    <i data-lucide="calendar" class="w-5 h-5"></i>
+                    <span>Schedules</span>
+                </a>
+                <a href="earnings.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg hover:opacity-80 transition">
+                    <i data-lucide="dollar-sign" class="w-5 h-5"></i>
+                    <span>Earnings</span>
+                </a>
+                <a href="profile.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg hover:opacity-80 transition">
+                    <i data-lucide="user" class="w-5 h-5"></i>
+                    <span>Profile</span>
+                </a>
+                <a href="../../api/auth/logout.php" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-600 transition text-red-300 hover:text-white mt-8">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="ml-64 flex-1 overflow-y-auto">
+            <!-- TOP BAR -->
+            <div class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
+                <div class="px-8 py-4 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Manage Schedules</h2>
+                        <p id="current-date" class="text-sm text-gray-500"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE CONTENT -->
+            <div class="p-8">
+                <div class="space-y-8">
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-6">Manage Your Availability</h3>
+
+                        <div class="grid grid-cols-2 gap-8">
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-4">Select Date</h4>
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h4 id="schedule-calendar-month" class="font-bold text-gray-900">April 2026</h4>
+                                        <div class="flex gap-2">
+                                            <button onclick="prevMonthSchedule()" class="p-2 hover:bg-gray-100 rounded-lg">
+                                                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                                            </button>
+                                            <button onclick="nextMonthSchedule()" class="p-2 hover:bg-gray-100 rounded-lg">
+                                                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-7 gap-2 mb-4 text-center text-xs font-bold text-gray-500">
+                                        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                                    </div>
+
+                                    <div id="schedule-calendar-days" class="grid grid-cols-7 gap-2"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-4">Set Availability</h4>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                                        <input type="date" id="schedule-selected-date" class="w-full px-4 py-2 border border-gray-300 rounded-lg" disabled>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
+                                        <input type="time" id="start-time" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">End Time</label>
+                                        <input type="time" id="end-time" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                    </div>
+                                    <button onclick="saveAvailability()" class="w-full bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90">
+                                        Save Availability
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 pt-8 border-t">
+                            <h4 class="font-semibold text-gray-900 mb-4">Your Schedules for <span id="schedule-date-display">Today</span></h4>
+                            <div id="existing-availability" class="space-y-3">
+                                <div class="text-center py-8 text-gray-400">
+                                    <p>Select a date to view schedules</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- EDIT SCHEDULE MODAL -->
+    <div id="edit-schedule-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-lg p-8 w-96">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-900">Edit Schedule</h3>
+                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                    <input type="date" id="edit-schedule-date" class="w-full px-4 py-2 border border-gray-300 rounded-lg" disabled>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
+                    <input type="time" id="edit-start-time" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">End Time</label>
+                    <input type="time" id="edit-end-time" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+
+                <div class="flex gap-3 mt-6">
+                    <button onclick="updateSchedule()" class="flex-1 bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90">
+                        Save Changes
+                    </button>
+                    <button onclick="closeEditModal()" class="flex-1 bg-gray-200 text-gray-900 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="schedules.js"></script>
+</body>
+</html>
