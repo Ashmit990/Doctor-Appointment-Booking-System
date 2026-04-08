@@ -178,6 +178,7 @@
               >Email</label
             >
             <input
+              id="loginEmail"
               type="email"
               class="w-full border-b-2 border-[#007E85] bg-transparent focus:outline-none pb-2 text-gray-800 text-lg"
             />
@@ -188,6 +189,7 @@
               >Password</label
             >
             <input
+              id="loginPassword"
               type="password"
               class="w-full border-b-2 border-[#007E85] bg-transparent focus:outline-none pb-2 text-gray-800 text-lg"
             />
@@ -214,6 +216,7 @@
           </div>
 
           <button
+            onclick="handleLogin()"
             class="w-full bg-[#007E85] hover:bg-[#00666c] text-white font-black py-4 rounded-xl text-2xl shadow-lg transition-all active:scale-[0.98]"
           >
             LOGIN
@@ -255,6 +258,49 @@
       </div>
     </div>
 
+    <script>
+      function handleLogin() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
+
+        if (!email || !password) {
+          alert('Please fill in all fields.');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('email', email);
+        formData.append('password', password);
+
+        fetch('../../api/auth/login_process.php', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            window.location.href = data.redirect;
+          } else {
+            alert(data.message || 'Login failed');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred during login');
+        });
+      }
+
+      // Allow Enter key to trigger login
+      document.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+          const email = document.getElementById('loginEmail');
+          const password = document.getElementById('loginPassword');
+          if (document.activeElement === email || document.activeElement === password) {
+            handleLogin();
+          }
+        }
+      });
+    </script>
     <script src="../../src/js/scroll-animations.js"></script>
   </body>
 </html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard - Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        body { background: #ffffff; }
+        .primary-color { color: #007E85; }
+        .bg-primary { background-color: #007E85; }
+        .bg-primary-light { background-color: rgba(0, 126, 133, 0.1); }
+        .card-shadow { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); }
+        .sidebar { background: #007E85; }
+        .nav-link { transition: all 0.3s ease; color: white; }
+        .nav-link:hover { background-color: rgba(255, 255, 255, 0.2); }
+        .nav-link.active { background-color: rgba(255, 255, 255, 0.3); }
+        .calendar-day { 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            min-height: 40px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .calendar-day:hover { background-color: rgba(0, 126, 133, 0.1); }
+        .calendar-day.has-appointment { position: relative; font-weight: bold; }
+        .calendar-day.has-appointment::after { 
+            content: ''; 
+            position: absolute; 
+            bottom: 2px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: 6px; 
+            height: 6px; 
+            background: #ef4444; 
+            border-radius: 50%; 
+        }
+        .calendar-day.has-completed { position: relative; font-weight: bold; color: #10b981; }
+        .calendar-day.has-completed::after { 
+            content: '✓'; 
+            position: absolute; 
+            bottom: -4px; 
+            right: 2px; 
+            width: 18px; 
+            height: 18px; 
+            background: #10b981; 
+            color: white; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 12px; 
+            font-weight: bold; 
+            line-height: 1;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .badge { border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 600; }
+        .badge-info { background: #007E85; color: white; }
+        .badge-success { background: #007E85; color: white; }
+        .badge-warning { background: #007E85; color: white; }
+        .badge-danger { background: #007E85; color: white; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- SIDEBAR -->
+        <aside class="sidebar w-64 text-white shadow-lg fixed h-full overflow-y-auto z-40">
+            <div class="p-8 border-b border-gray-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <i data-lucide="stethoscope" class="w-6 h-6"></i>
+                    </div>
+                    <h1 class="text-xl font-bold">MedHub</h1>
+                </div>
+                <p id="sidebar-doctor-name" class="text-sm text-gray-300 mt-2">Loading...</p>
+            </div>
+
+            <nav class="p-6 space-y-2">
+                <a href="home.html" class="nav-link active flex items-center gap-3 px-4 py-3 rounded-lg hover:opacity-80 transition">
+                    <i data-lucide="home" class="w-5 h-5"></i>
+                    <span>Home</span>
+                </a>
+                <a href="schedules.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg hover:opacity-80 transition">
+                    <i data-lucide="calendar" class="w-5 h-5"></i>
+                    <span>Schedules</span>
+                </a>
+                <a href="earnings.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg hover:opacity-80 transition">
+                    <i data-lucide="dollar-sign" class="w-5 h-5"></i>
+                    <span>Earnings</span>
+                </a>
+                <a href="profile.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg hover:opacity-80 transition">
+                    <i data-lucide="user" class="w-5 h-5"></i>
+                    <span>Profile</span>
+                </a>
+                <a href="../../api/auth/logout.php" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-600 transition text-red-300 hover:text-white mt-8">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="ml-64 flex-1 overflow-y-auto">
+            <!-- TOP BAR -->
+            <div class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
+                <div class="px-8 py-4 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
+                        <p id="current-date" class="text-sm text-gray-500"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE CONTENT -->
+            <div class="p-8">
+                <div class="space-y-8">
+                    <!-- STATS -->
+                    <div class="grid grid-cols-3 gap-6">
+                        <div class="bg-white rounded-xl card-shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm font-medium">Today's Visits</p>
+                                    <p id="stat-today-visits" class="text-4xl font-bold text-gray-900 mt-2">0</p>
+                                </div>
+                                <div class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center">
+                                    <i data-lucide="calendar" class="w-7 h-7 primary-color"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl card-shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm font-medium">Total Patients</p>
+                                    <p id="stat-total-patients" class="text-4xl font-bold text-gray-900 mt-2">0</p>
+                                </div>
+                                <div class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center">
+                                    <i data-lucide="users" class="w-7 h-7 primary-color"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl card-shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm font-medium">Completed</p>
+                                    <p id="stat-completed" class="text-4xl font-bold text-gray-900 mt-2">0</p>
+                                </div>
+                                <div class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center">
+                                    <i data-lucide="check-circle" class="w-7 h-7 primary-color"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CALENDAR AND APPOINTMENTS -->
+                    <div class="grid grid-cols-3 gap-6">
+                        <div class="col-span-1 bg-white rounded-xl card-shadow p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 id="calendar-month" class="font-bold text-gray-900">April 2026</h3>
+                                <div class="flex gap-2">
+                                    <button onclick="prevMonth()" class="p-2 hover:bg-gray-100 rounded-lg">
+                                        <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                                    </button>
+                                    <button onclick="nextMonth()" class="p-2 hover:bg-gray-100 rounded-lg">
+                                        <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-7 gap-2 mb-4 text-center text-xs font-bold text-gray-500">
+                                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                            </div>
+
+                            <div id="calendar-days" class="grid grid-cols-7 gap-2"></div>
+                        </div>
+
+                        <div class="col-span-2 bg-white rounded-xl card-shadow p-6">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">Appointments for <span id="selected-date-display">Today</span></h3>
+                            <div id="appointments-container" class="space-y-4">
+                                <div class="text-center py-8 text-gray-400">
+                                    <p>Loading appointments...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COMPLETED APPOINTMENTS PANEL -->
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                Completed Appointments
+                            </h3>
+                            <span id="completed-count" class="text-sm font-semibold text-gray-600 bg-gray-200 px-3 py-1 rounded-full">0</span>
+                        </div>
+                        <div id="completed-appointments-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="text-center py-8 text-gray-400">
+                                <p>No completed appointments to display</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- APPOINTMENT DETAIL MODAL -->
+    <div id="appointment-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl card-shadow max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-primary text-white px-6 py-4 flex justify-between items-center">
+                <h3 class="text-xl font-bold" id="modal-patient-name">Patient Name</h3>
+                <button onclick="closeAppointmentModal()" class="text-white hover:text-gray-200">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-6">
+                <div class="grid grid-cols-2 gap-6 text-sm">
+                    <div>
+                        <p class="text-gray-600">Patient ID</p>
+                        <p id="modal-patient-id" class="font-semibold text-gray-900">-</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Date</p>
+                        <p id="modal-apt-date" class="font-semibold text-gray-900">-</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Time</p>
+                        <p id="modal-apt-time" class="font-semibold text-gray-900">-</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Room</p>
+                        <p id="modal-room-num" class="font-semibold text-gray-900">-</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Blood Group</p>
+                        <p id="modal-blood-group" class="font-semibold text-gray-900">-</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Contact</p>
+                        <p id="modal-contact" class="font-semibold text-gray-900">-</p>
+                    </div>
+                </div>
+
+                <div class="border-t pt-6">
+                    <p class="text-gray-600 text-sm mb-2">Reason for Visit</p>
+                    <p id="modal-reason" class="font-semibold text-gray-900">-</p>
+                </div>
+
+                <div id="edit-section" class="hidden border-t pt-6 space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Appointment Status</label>
+                        <select id="modal-status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                            <option value="Upcoming">Upcoming</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Missed">Missed</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Doctor's Comments</label>
+                        <textarea id="modal-comments" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Prescribed Medicines</label>
+                        <textarea id="modal-medicines" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"></textarea>
+                    </div>
+
+                    <button onclick="updateAppointment()" class="w-full bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90">
+                        Save Appointment Details
+                    </button>
+                </div>
+
+                <div id="view-section" class="hidden border-t pt-6 space-y-4">
+                    <div>
+                        <p class="text-sm text-gray-600">Status</p>
+                        <p id="view-status" class="font-semibold text-gray-900 mt-1">-</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Doctor's Comments</p>
+                        <p id="view-comments" class="font-semibold text-gray-900 mt-1">-</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Prescribed Medicines</p>
+                        <p id="view-medicines" class="font-semibold text-gray-900 mt-1">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="home.js"></script>
+</body>
+</html>
