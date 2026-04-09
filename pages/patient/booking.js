@@ -1,37 +1,128 @@
-const doctorDetails = {
-  "Dr. Kim": {
-    specialty: "Cardiologist",
-    department: "Heart Care",
-    location: "Room 203",
-  },
-  "Dr. Sarah Lee": {
-    specialty: "Dermatologist",
-    department: "Skin Care",
-    location: "Room 105",
-  },
-  "Dr. James Miller": {
-    specialty: "Dentist",
-    department: "Dental Unit",
-    location: "Room 301",
-  },
-  "Dr. Emily Carter": {
-    specialty: "Neurologist",
-    department: "Neuro Care",
-    location: "Room 410",
-  },
-  "Dr. John Smith": {
-    specialty: "General Physician",
-    department: "General OPD",
-    location: "Room 115",
-  },
-};
+let doctorsList = [];
+let selectedDoctor = null;
+let rescheduleAppointmentId = null;
 
-function formatTimeTo12Hour(time24) {
-  const [hours, minutes] = time24.split(":");
-  let h = parseInt(hours, 10);
-  const ampm = h >= 12 ? "PM" : "AM";
-  h = h % 12 || 12;
-  return `${h}:${minutes} ${ampm}`;
+function formatMoney(n) {
+  if (n == null || n === "") return "—";
+  const x = Number(n);
+  if (Number.isNaN(x)) return "—";
+  return `Rs. ${x.toFixed(2)}`;
+}
+
+function updatePrice() {
+  const sel = document.getElementById("doctor").value;
+  const doc = doctorsList.find((d) => d.doctor_id === sel);
+  selectedDoctor = doc || null;
+  document.getElementById("totalPrice").textContent = doc
+    ? formatMoney(doc.consultation_fee)
+    : "—";
+}
+
+async function loadDoctors() {
+  const r = await fetch(`${API_BASE}/patient/doctors.php`, {
+    credentials: "include",
+  });
+  const j = await r.json();
+  if (j.status !== "success") throw new Error(j.message || "Doctors failed");
+  doctorsList = j.data || [];
+  const sel = document.getElementById("doctor");
+  sel.innerHTML = '<option value="">Select doctor</option>';
+  doctorsList.forEach((d) => {
+    const opt = document.createElement("option");
+    opt.value = d.doctor_id;
+    opt.textContent = `${d.full_name} (${d.specialization})`;
+    sel.appendChild(opt);
+  });
+}
+
+async function loadDates(doctorId) {
+  const dateSel = document.getElementById("date");
+  const timeSel = document.getElementById("time");
+  dateSel.innerHTML = '<option value="">Loading…</option>';
+  timeSel.innerHTML = '<option value="">Select date first</option>';
+  document.getElementById("availId").value = "";
+
+  if (!doctorId) {
+    dateSel.innerHTML = '<option value="">Select doctor first</option>';
+    return;
+  }
+
+  const r = await fetch(
+    `${API_BASE}/patient/availability.php?action=dates&doctor_id=${encodeURIComponent(doctorId)}`,
+    { credentials: "include" },
+  );
+  const j = await r.json();
+  dateSel.innerHTML = '<option value="">Select date</option>';
+  if (j.status !== "success" || !j.data || !j.data.length) {
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.textContent = "No open dates for this doctor";
+    opt.disabled = true;
+    dateSel.appendChild(opt);
+    return;
+  }
+  j.data.forEach((d) => {
+    const opt = document.createElement("option");
+    opt.value = d;
+    opt.textContent = d;
+    dateSel.appendChild(opt);
+  });
+}
+
+async function loadSlots(doctorId, dateStr) {
+  const timeSel = document.getElementById("time");
+  timeSel.innerHTML = '<option value="">Loading…</option>';
+  document.getElementById("availId").value = "";
+
+  if (!doctorId || !dateStr) {
+    timeSel.innerHTML = '<option value="">Select date first</option>';
+    return;
+  }
+
+  const r = await fetch(
+    `${API_BASE}/patient/availability.php?action=slots&doctor_id=${encodeURIComponent(doctorId)}&date=${encodeURIComponent(dateStr)}`,
+    { credentials: "include" },
+  );
+  const j = await r.json();
+  timeSel.innerHTML = '<option value="">Select time</option>';
+  if (j.status !== "success" || !j.data || !j.data.length) {
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.textContent = "No slots left";
+    opt.disabled = true;
+    timeSel.appendChild(opt);
+    return;
+  }
+  j.data.forEach((slot) => {
+    const opt = document.createElement("option");
+    opt.value = String(slot.avail_id);
+    opt.textContent = `${formatTime12h(slot.start_time)} – ${formatTime12h(slot.end_time)}`;
+    timeSel.appendChild(opt);
+  });
+}
+
+async function loadRescheduleContext(appointmentId) {
+  rescheduleAppointmentId = appointmentId;
+  const r = await fetch(
+    `${API_BASE}/patient/appointment_detail.php?id=${appointmentId}`,
+    { credentials: "include" },
+  );
+  const j = await r.json();
+  if (j.status !== "success" || !j.data) {
+    alert(j.message || "Could not load appointment");
+    return;
+  }
+  const a = j.data;
+  document.getElementById("doctor").value = a.doctor_id;
+  updatePrice();
+  await loadDates(a.doctor_id);
+  document.getElementById("date").value = "";
+  document.getElementById("time").innerHTML =
+    '<option value="">Select date first</option>';
+  document.getElementById("availId").value = "";
+  document.getElementById("description").value = a.reason_for_visit || "";
+  const btn = document.getElementById("confirmBtn");
+  btn.textContent = "Confirm reschedule";
 }
 
 const bookingForm = document.getElementById("bookingForm");
@@ -39,45 +130,113 @@ const cancelBooking = document.getElementById("cancelBooking");
 
 window.addEventListener("message", (event) => {
   if (!event.data) return;
-
-  if (event.data.type === "LOAD_APPOINTMENT") {
-    document.getElementById("patientName").value =
-      event.data.data.patient || "";
-    document.getElementById("doctor").value = event.data.data.doctor || "";
-    document.getElementById("date").value = event.data.data.date || "";
-    document.getElementById("time").value = event.data.data.time || "";
+  if (event.data.type === "START_RESCHEDULE" && event.data.appointment_id) {
+    loadRescheduleContext(event.data.appointment_id);
   }
 });
 
 cancelBooking.addEventListener("click", () => {
   bookingForm.reset();
+  rescheduleAppointmentId = null;
+  document.getElementById("confirmBtn").textContent = "Confirm Booking";
   window.parent.postMessage({ type: "booking:close" }, "*");
 });
 
-bookingForm.addEventListener("submit", (e) => {
+document.getElementById("doctor").addEventListener("change", async () => {
+  updatePrice();
+  const doctorId = document.getElementById("doctor").value;
+  await loadDates(doctorId);
+});
+
+document.getElementById("date").addEventListener("change", async () => {
+  const doctorId = document.getElementById("doctor").value;
+  const dateStr = document.getElementById("date").value;
+  await loadSlots(doctorId, dateStr);
+});
+
+document.getElementById("time").addEventListener("change", () => {
+  const v = document.getElementById("time").value;
+  document.getElementById("availId").value = v || "";
+});
+
+bookingForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const doctor = document.getElementById("doctor").value;
-  const details = doctorDetails[doctor];
+  const doctorId = document.getElementById("doctor").value;
+  const availId = parseInt(document.getElementById("availId").value, 10);
+  const description = document.getElementById("description").value.trim();
 
-  const appointment = {
-    patient: document.getElementById("patientName").value.trim(),
-    doctor: doctor,
-    specialty: details.specialty,
-    department: details.department,
-    date: document.getElementById("date").value,
-    time: formatTimeTo12Hour(document.getElementById("time").value),
-    status: "upcoming",
-    location: details.location,
-  };
+  if (!doctorId || !availId) {
+    alert("Please choose doctor, date, and an available time slot.");
+    return;
+  }
 
-  window.parent.postMessage(
-    {
-      type: "NEW_APPOINTMENT",
-      data: appointment,
-    },
-    "*",
-  );
+  try {
+    if (rescheduleAppointmentId) {
+      const r = await fetch(`${API_BASE}/patient/reschedule.php`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          appointment_id: rescheduleAppointmentId,
+          avail_id: availId,
+        }),
+      });
+      const j = await r.json();
+      if (j.status !== "success") {
+        alert(j.message || "Reschedule failed");
+        return;
+      }
+    } else {
+      const r = await fetch(`${API_BASE}/patient/book.php`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          doctor_id: doctorId,
+          avail_id: availId,
+          reason_for_visit: description,
+        }),
+      });
+      const j = await r.json();
+      if (j.status !== "success") {
+        alert(j.message || "Booking failed");
+        return;
+      }
+      if (!j.appointment_id || j.appointment_id < 1) {
+        alert(
+          "Booking did not save correctly (no appointment id). Check the server log or try again.",
+        );
+        return;
+      }
+    }
 
-  bookingForm.reset();
+    bookingForm.reset();
+    rescheduleAppointmentId = null;
+    document.getElementById("confirmBtn").textContent = "Confirm Booking";
+    window.parent.postMessage({ type: "patient-booking-done" }, "*");
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong.");
+  }
 });
+
+(async function initBooking() {
+  const ok = await requirePatientSession();
+  if (!ok) return;
+
+  try {
+    const me = await fetch(`${API_BASE}/patient/me.php`, {
+      credentials: "include",
+    }).then((r) => r.json());
+    if (me.status === "success" && me.data) {
+      document.getElementById("patientName").value = me.data.full_name || "";
+    }
+    await loadDoctors();
+    updatePrice();
+  } catch (e) {
+    console.error(e);
+    document.getElementById("doctor").innerHTML =
+      '<option value="">Could not load doctors</option>';
+  }
+})();

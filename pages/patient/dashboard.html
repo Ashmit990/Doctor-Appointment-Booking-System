@@ -37,6 +37,8 @@
         </button>
 
         <button
+          type="button"
+          onclick="logoutPatient()"
           class="w-14 h-14 rounded-2xl bg-white/15 hover:bg-white/25 transition-all duration-200 flex items-center justify-center shadow-sm"
           title="Logout"
         >
@@ -253,6 +255,35 @@
       </div>
     </div>
 
+    <div
+      id="detailModal"
+      class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/40 p-4"
+    >
+      <div
+        class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 relative max-h-[90vh] overflow-y-auto"
+      >
+        <button
+          type="button"
+          id="closeDetailModal"
+          class="absolute top-4 right-4 w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200"
+        >
+          ✕
+        </button>
+        <h3 class="text-xl font-bold text-slate-800 mb-4 pr-10">
+          Appointment details
+        </h3>
+        <div id="detailModalBody"></div>
+        <button
+          type="button"
+          id="detailRescheduleBtn"
+          class="hidden mt-4 w-full py-3 rounded-2xl bg-teal-600 text-white font-medium hover:bg-teal-700"
+        >
+          Reschedule visit
+        </button>
+      </div>
+    </div>
+
+    <script src="patient-common.js"></script>
     <script src="dashboard.js"></script>
     <script>
       lucide.createIcons();

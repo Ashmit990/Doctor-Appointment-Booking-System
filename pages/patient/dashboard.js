@@ -1,63 +1,12 @@
-let appointments = [
-  {
-    patient: "You",
-    doctor: "Dr. Kim",
-    specialty: "Cardiologist",
-    department: "Heart Care",
-    date: "2026-03-25",
-    time: "10:30 AM",
-    status: "upcoming",
-    location: "Room 203",
-  },
-  {
-    patient: "You",
-    doctor: "Dr. Sarah Lee",
-    specialty: "Dermatologist",
-    department: "Skin Care",
-    date: "2026-03-27",
-    time: "02:00 PM",
-    status: "upcoming",
-    location: "Room 105",
-  },
-  {
-    patient: "You",
-    doctor: "Dr. James Miller",
-    specialty: "Dentist",
-    department: "Dental Unit",
-    date: "2026-03-18",
-    time: "11:00 AM",
-    status: "completed",
-    location: "Room 301",
-  },
-  {
-    patient: "You",
-    doctor: "Dr. Emily Carter",
-    specialty: "Neurologist",
-    department: "Neuro Care",
-    date: "2026-03-14",
-    time: "09:00 AM",
-    status: "missed",
-    location: "Room 410",
-  },
-  {
-    patient: "You",
-    doctor: "Dr. John Smith",
-    specialty: "General Physician",
-    department: "General OPD",
-    date: "2026-03-20",
-    time: "04:15 PM",
-    status: "completed",
-    location: "Room 115",
-  },
-];
-
 let activeFilter = "all";
-let editingIndex = null;
+let searchQuery = "";
+let cachedAppointments = [];
 
 const appointmentList = document.getElementById("appointmentList");
 const emptyState = document.getElementById("emptyState");
 const searchInput = document.getElementById("searchInput");
 const filterButtons = document.querySelectorAll(".filter-btn");
+
 function goToHomePage() {
   window.location.href = "homepage.html";
 }
@@ -67,73 +16,66 @@ function goToProfile() {
 }
 
 function getStatusClasses(status) {
-  if (status === "upcoming") return "bg-emerald-100 text-emerald-700";
-  if (status === "completed") return "bg-blue-100 text-blue-700";
+  const s = String(status).toLowerCase();
+  if (s === "upcoming") return "bg-emerald-100 text-emerald-700";
+  if (s === "completed") return "bg-blue-100 text-blue-700";
+  if (s === "cancelled") return "bg-slate-100 text-slate-600";
   return "bg-red-100 text-red-700";
 }
 
 function formatStatus(status) {
-  return status.charAt(0).toUpperCase() + status.slice(1);
+  return String(status).charAt(0).toUpperCase() + String(status).slice(1);
 }
 
-function to24Hour(time12) {
-  const [time, modifier] = time12.split(" ");
-  let [hours, minutes] = time.split(":");
-  hours = parseInt(hours, 10);
-
-  if (modifier === "PM" && hours !== 12) hours += 12;
-  if (modifier === "AM" && hours === 12) hours = 0;
-
-  return `${String(hours).padStart(2, "0")}:${minutes}`;
+async function fetchAppointments() {
+  const params = new URLSearchParams();
+  if (activeFilter !== "all") params.set("status", activeFilter);
+  if (searchQuery) params.set("q", searchQuery);
+  const r = await fetch(
+    `${API_BASE}/patient/appointments.php?${params.toString()}`,
+    { credentials: "include" },
+  );
+  const j = await r.json();
+  if (j.status !== "success") throw new Error(j.message || "Load failed");
+  return j.data || [];
 }
 
-function renderCounts() {
-  const upcoming = appointments.filter((a) => a.status === "upcoming").length;
-  const completed = appointments.filter((a) => a.status === "completed").length;
-  const missed = appointments.filter((a) => a.status === "missed").length;
+function renderCounts(rows) {
+  const upcoming = rows.filter((a) => a.status_key === "upcoming").length;
+  const completed = rows.filter((a) => a.status_key === "completed").length;
+  const missed = rows.filter((a) => a.status_key === "missed").length;
 
   document.getElementById("upcomingCount").textContent = upcoming;
   document.getElementById("completedCount").textContent = completed;
   document.getElementById("missedCount").textContent = missed;
-  document.getElementById("totalCount").textContent = appointments.length;
+  document.getElementById("totalCount").textContent = rows.length;
 
-  const next = appointments.find((a) => a.status === "upcoming");
+  const next = rows.find((a) => a.status_key === "upcoming");
   document.getElementById("nextAppointment").textContent = next
-    ? `${next.date} • ${next.time}`
+    ? `${next.app_date} • ${formatTime12h(next.app_time)}`
     : "-";
 }
 
-function renderAppointments() {
-  const searchValue = searchInput.value.toLowerCase().trim();
-
-  const filtered = appointments
-    .map((item, originalIndex) => ({ item, originalIndex }))
-    .filter(({ item }) => {
-      const matchFilter =
-        activeFilter === "all" || item.status === activeFilter;
-      const matchSearch =
-        item.doctor.toLowerCase().includes(searchValue) ||
-        item.department.toLowerCase().includes(searchValue) ||
-        item.specialty.toLowerCase().includes(searchValue);
-      return matchFilter && matchSearch;
-    });
-
+function renderAppointments(rows) {
   appointmentList.innerHTML = "";
 
-  if (!filtered.length) {
+  if (!rows.length) {
     emptyState.classList.remove("hidden");
     return;
   }
 
   emptyState.classList.add("hidden");
 
-  filtered.forEach(({ item, originalIndex }) => {
+  rows.forEach((item) => {
     const lineColor =
-      item.status === "upcoming"
+      item.status_key === "upcoming"
         ? "bg-emerald-500"
-        : item.status === "completed"
+        : item.status_key === "completed"
           ? "bg-blue-500"
           : "bg-red-500";
+
+    const showReschedule =
+      item.status_key === "missed" || item.status_key === "upcoming";
 
     const card = document.createElement("div");
     card.className =
@@ -145,37 +87,41 @@ function renderAppointments() {
       <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div class="flex-1">
           <div class="flex flex-wrap items-center gap-3 mb-2">
-            <h3 class="text-lg font-semibold text-slate-800">${item.doctor}</h3>
+            <h3 class="text-lg font-semibold text-slate-800">${item.doctor_name}</h3>
             <span class="px-3 py-1 rounded-full text-xs font-semibold ${getStatusClasses(item.status)}">
               ${formatStatus(item.status)}
             </span>
           </div>
 
-          <p class="text-sm text-slate-400 mb-4">${item.specialty} • ${item.department}</p>
+          <p class="text-sm text-slate-400 mb-4">${item.specialization || ""} • Consultation</p>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-slate-500">
             <div class="bg-slate-50 rounded-2xl px-4 py-3">
               <span class="block text-xs text-slate-400 mb-1">Date</span>
-              <span class="font-medium text-slate-700">${item.date}</span>
+              <span class="font-medium text-slate-700">${item.app_date}</span>
             </div>
             <div class="bg-slate-50 rounded-2xl px-4 py-3">
               <span class="block text-xs text-slate-400 mb-1">Time</span>
-              <span class="font-medium text-slate-700">${item.time}</span>
+              <span class="font-medium text-slate-700">${formatTime12h(item.app_time)}</span>
             </div>
             <div class="bg-slate-50 rounded-2xl px-4 py-3">
               <span class="block text-xs text-slate-400 mb-1">Location</span>
-              <span class="font-medium text-slate-700">${item.location}</span>
+              <span class="font-medium text-slate-700">${item.room_num || "—"}</span>
             </div>
           </div>
         </div>
 
-        <div class="flex gap-2">
-          <button class="px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-sm font-medium transition">
-            View
+        <div class="flex flex-wrap gap-2">
+          <button type="button" data-view="${item.appointment_id}" class="view-btn px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-sm font-medium transition">
+            View details
           </button>
-          <button data-index="${originalIndex}" class="reschedule-btn px-4 py-2.5 rounded-2xl bg-teal-600 text-white hover:bg-teal-700 text-sm font-medium shadow-sm transition">
+          ${
+            showReschedule
+              ? `<button type="button" data-reschedule="${item.appointment_id}" class="reschedule-btn px-4 py-2.5 rounded-2xl bg-teal-600 text-white hover:bg-teal-700 text-sm font-medium shadow-sm transition">
             Reschedule
-          </button>
+          </button>`
+              : ""
+          }
         </div>
       </div>
     `;
@@ -183,42 +129,52 @@ function renderAppointments() {
     appointmentList.appendChild(card);
   });
 
+  document.querySelectorAll(".view-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      openDetailModal(Number(button.dataset.view));
+    });
+  });
+
   document.querySelectorAll(".reschedule-btn").forEach((button) => {
     button.addEventListener("click", () => {
-      const index = Number(button.dataset.index);
-      openRescheduleModal(index);
+      openRescheduleModal(Number(button.dataset.reschedule));
     });
   });
 }
 
+async function reload() {
+  try {
+    const rows = await fetchAppointments();
+    cachedAppointments = rows;
+    renderCounts(rows);
+    renderAppointments(rows);
+  } catch (e) {
+    console.error(e);
+    appointmentList.innerHTML =
+      '<p class="text-red-500 text-sm">Could not load appointments. Are you logged in?</p>';
+  }
+}
+
 function openBookingModal() {
-  editingIndex = null;
   const modal = document.getElementById("bookingModal");
   const iframe = document.querySelector("#bookingModal iframe");
-  iframe.src = "booking.html";
+  iframe.src = `booking.html?t=${Date.now()}`;
   modal.classList.remove("hidden");
   modal.classList.add("flex");
 }
 
-function openRescheduleModal(index) {
-  editingIndex = index;
+function openRescheduleModal(appointmentId) {
   const modal = document.getElementById("bookingModal");
   const iframe = document.querySelector("#bookingModal iframe");
-  iframe.src = "booking.html";
+  iframe.src = `booking.html?t=${Date.now()}`;
   modal.classList.remove("hidden");
   modal.classList.add("flex");
 
   iframe.onload = () => {
-    const appointment = appointments[index];
     iframe.contentWindow.postMessage(
       {
-        type: "LOAD_APPOINTMENT",
-        data: {
-          patient: appointment.patient,
-          doctor: appointment.doctor,
-          date: appointment.date,
-          time: to24Hour(appointment.time),
-        },
+        type: "START_RESCHEDULE",
+        appointment_id: appointmentId,
       },
       "*",
     );
@@ -231,6 +187,61 @@ function closeBookingModal() {
   modal.classList.remove("flex");
 }
 
+function showSuccessToast(title, text) {
+  const toast = document.getElementById("successToast");
+  const t = toast.querySelector(".toast-title");
+  const x = toast.querySelector(".toast-text");
+  if (t) t.textContent = title;
+  if (x) x.textContent = text;
+  toast.classList.remove("hidden");
+  toast.classList.add("flex");
+  setTimeout(() => {
+    toast.classList.add("hidden");
+    toast.classList.remove("flex");
+  }, 2000);
+}
+
+async function openDetailModal(id) {
+  const r = await fetch(`${API_BASE}/patient/appointment_detail.php?id=${id}`, {
+    credentials: "include",
+  });
+  const j = await r.json();
+  if (j.status !== "success" || !j.data) {
+    alert(j.message || "Not found");
+    return;
+  }
+  const a = j.data;
+  const body = document.getElementById("detailModalBody");
+  body.innerHTML = `
+    <div class="space-y-3 text-sm text-slate-600">
+      <p><span class="text-slate-400">Doctor</span><br/><strong class="text-slate-800">${a.doctor_name}</strong> — ${a.specialization || ""}</p>
+      <p><span class="text-slate-400">When</span><br/>${a.app_date} at ${formatTime12h(a.app_time)} · ${a.room_num || ""}</p>
+      <p><span class="text-slate-400">Status</span><br/>${formatStatus(a.status)}</p>
+      <p><span class="text-slate-400">Reason</span><br/>${a.reason_for_visit || "—"}</p>
+      <p><span class="text-slate-400">Doctor comments</span><br/>${a.doctor_comments || "—"}</p>
+      <p><span class="text-slate-400">Prescribed medicines</span><br/>${a.prescribed_medicines || "—"}</p>
+      <p class="text-xs text-slate-400">Reschedule date shown above is your current scheduled visit. Use Reschedule on the card to pick a new slot if allowed.</p>
+    </div>
+  `;
+  document.getElementById("detailModal").classList.remove("hidden");
+  document.getElementById("detailModal").classList.add("flex");
+
+  const missBtn = document.getElementById("detailRescheduleBtn");
+  if (missBtn) {
+    missBtn.classList.toggle("hidden", a.status_key !== "missed");
+    missBtn.onclick = () => {
+      document.getElementById("detailModal").classList.add("hidden");
+      document.getElementById("detailModal").classList.remove("flex");
+      openRescheduleModal(id);
+    };
+  }
+}
+
+function closeDetailModal() {
+  document.getElementById("detailModal").classList.add("hidden");
+  document.getElementById("detailModal").classList.remove("flex");
+}
+
 filterButtons.forEach((button) => {
   button.addEventListener("click", () => {
     activeFilter = button.dataset.filter;
@@ -240,73 +251,54 @@ filterButtons.forEach((button) => {
       btn.classList.add(
         "bg-white",
         "border",
-        "border-gray-200",
-        "text-gray-700",
+        "border-slate-200",
+        "text-slate-700",
       );
     });
 
     button.classList.remove(
       "bg-white",
       "border",
-      "border-gray-200",
+      "border-slate-200",
       "text-gray-700",
     );
     button.classList.add("active-filter", "bg-teal-600", "text-white");
 
-    renderAppointments();
+    reload();
   });
 });
 
 window.addEventListener("message", function (event) {
   if (!event.data) return;
-
-  if (event.data.type === "NEW_APPOINTMENT") {
-    if (editingIndex !== null) {
-      appointments[editingIndex] = {
-        ...appointments[editingIndex],
-        ...event.data.data,
-        status: "upcoming",
-      };
-      editingIndex = null;
-    } else {
-      appointments.unshift(event.data.data);
-    }
-
-    renderAppointments();
-    renderCounts();
+  if (event.data.type === "patient-booking-done") {
     closeBookingModal();
-
-    setTimeout(() => {
-      const toast = document.getElementById("successToast");
-      toast.classList.remove("hidden");
-      toast.classList.add("flex");
-
-      const title = toast.querySelector(".toast-title");
-      const text = toast.querySelector(".toast-text");
-
-      if (title) title.textContent = "Success";
-      if (text)
-        text.textContent =
-          editingIndex === null
-            ? "Appointment booked successfully."
-            : "Appointment rescheduled successfully.";
-
-      setTimeout(() => {
-        toast.classList.add("hidden");
-        toast.classList.remove("flex");
-      }, 2000);
-    }, 350);
+    reload();
+    showSuccessToast("Success", "Your appointment was saved.");
   }
-
   if (event.data.type === "booking:close") {
     closeBookingModal();
   }
 });
+
 const searchBtn = document.getElementById("searchBtn");
+searchBtn.addEventListener("click", () => {
+  searchQuery = searchInput.value.trim();
+  reload();
+});
+searchInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    searchQuery = searchInput.value.trim();
+    reload();
+  }
+});
 
-searchBtn.addEventListener("click", renderAppointments);
+document.getElementById("closeDetailModal")?.addEventListener("click", closeDetailModal);
+document.getElementById("detailModal")?.addEventListener("click", (e) => {
+  if (e.target.id === "detailModal") closeDetailModal();
+});
 
-searchInput.addEventListener("input", renderAppointments);
-
-renderCounts();
-renderAppointments();
+(async function initDashboard() {
+  const ok = await requirePatientSession();
+  if (!ok) return;
+  await reload();
+})();

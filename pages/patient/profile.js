@@ -1,16 +1,3 @@
-const defaultProfile = {
-  fullName: "Sirjeet Dahal",
-  email: "sirjeet@example.com",
-  phone: "9800000000",
-  dob: "2004-01-01",
-  gender: "Male",
-  bloodGroup: "O+",
-  address: "Kathmandu, Nepal",
-  emergencyName: "Family Contact",
-  emergencyPhone: "9811111111",
-  lastUpdated: "Today",
-};
-
 const profileForm = document.getElementById("profileForm");
 const resetProfileButton = document.getElementById("resetProfile");
 const searchInput = document.getElementById("profileSearch");
@@ -23,14 +10,9 @@ function goToDashboard() {
   window.location.href = "dashboard.html";
 }
 
-function getStoredProfile() {
-  const savedProfile = localStorage.getItem("patientProfileData");
-  return savedProfile ? JSON.parse(savedProfile) : defaultProfile;
-}
-
 function setFieldValue(id, value) {
   const field = document.getElementById(id);
-  if (field) field.value = value || "";
+  if (field) field.value = value ?? "";
 }
 
 function getFieldValue(id) {
@@ -38,67 +20,75 @@ function getFieldValue(id) {
   return field ? field.value.trim() : "";
 }
 
-function loadProfile() {
-  const profile = getStoredProfile();
-
-  setFieldValue("fullName", profile.fullName);
-  setFieldValue("email", profile.email);
-  setFieldValue("phone", profile.phone);
-  setFieldValue("dob", profile.dob);
-  setFieldValue("gender", profile.gender);
-  setFieldValue("bloodGroup", profile.bloodGroup);
-  setFieldValue("address", profile.address);
-  setFieldValue("emergencyName", profile.emergencyName);
-  setFieldValue("emergencyPhone", profile.emergencyPhone);
-
-  updateSummary(profile);
-}
-
-function updateSummary(profile) {
+function updateSummaryFromData(profile) {
   const fields = [
-    profile.fullName,
+    profile.full_name,
     profile.email,
-    profile.phone,
+    profile.contact_number,
     profile.dob,
     profile.gender,
-    profile.bloodGroup,
+    profile.blood_group,
     profile.address,
-    profile.emergencyName,
-    profile.emergencyPhone,
+    profile.emergency_contact_name,
+    profile.emergency_contact_phone,
   ];
 
   const filledCount = fields.filter(
-    (item) => item && item.trim() !== "",
+    (item) => item && String(item).trim() !== "",
   ).length;
   const completion = Math.round((filledCount / fields.length) * 100);
-  const verified = [
-    profile.email,
-    profile.phone,
-    profile.emergencyPhone,
-  ].filter((item) => item && item.trim() !== "").length;
+  const verified = [profile.email, profile.contact_number, profile.emergency_contact_phone].filter(
+    (item) => item && String(item).trim() !== "",
+  ).length;
 
   document.getElementById("summaryName").textContent =
-    profile.fullName || "Patient Name";
+    profile.full_name || "Patient Name";
   document.getElementById("summaryEmail").textContent =
     profile.email || "No email added";
-  document.getElementById("summaryPhone").textContent = profile.phone || "-";
+  document.getElementById("summaryPhone").textContent =
+    profile.contact_number || "-";
   document.getElementById("summaryGender").textContent = profile.gender || "-";
   document.getElementById("summaryBlood").textContent =
-    profile.bloodGroup || "-";
+    profile.blood_group || "-";
 
   document.getElementById("profileCompletion").textContent = `${completion}%`;
   document.getElementById("verifiedFields").textContent = verified;
   document.getElementById("filledFields").textContent = `${filledCount}/9`;
 
-  document.getElementById("lastUpdatedHero").textContent =
-    profile.lastUpdated || "Today";
-  document.getElementById("lastUpdatedSide").textContent =
-    profile.lastUpdated || "Today";
+  const lu = profile.last_updated || new Date().toLocaleDateString();
+  document.getElementById("lastUpdatedHero").textContent = lu;
+  document.getElementById("lastUpdatedSide").textContent = lu;
 
-  const initial = profile.fullName
-    ? profile.fullName.charAt(0).toUpperCase()
+  const initial = profile.full_name
+    ? profile.full_name.charAt(0).toUpperCase()
     : "P";
   document.getElementById("profileInitial").textContent = initial;
+}
+
+async function loadProfile() {
+  const r = await fetch(`${API_BASE}/patient/profile.php`, {
+    credentials: "include",
+  });
+  const j = await r.json();
+  if (j.status !== "success" || !j.data) {
+    console.error(j.message);
+    return;
+  }
+  const p = j.data;
+  setFieldValue("fullName", p.full_name);
+  setFieldValue("email", p.email);
+  setFieldValue("phone", p.contact_number);
+  setFieldValue("dob", p.dob ? String(p.dob).slice(0, 10) : "");
+  setFieldValue("gender", p.gender);
+  setFieldValue("bloodGroup", p.blood_group);
+  setFieldValue("address", p.address);
+  setFieldValue("emergencyName", p.emergency_contact_name);
+  setFieldValue("emergencyPhone", p.emergency_contact_phone);
+
+  updateSummaryFromData({
+    ...p,
+    last_updated: new Date().toLocaleDateString(),
+  });
 }
 
 function showSuccessToast() {
@@ -118,22 +108,37 @@ function showSuccessToast() {
   }, 2000);
 }
 
-function saveProfile() {
-  const profile = {
-    fullName: getFieldValue("fullName"),
+async function saveProfile() {
+  const payload = {
+    full_name: getFieldValue("fullName"),
     email: getFieldValue("email"),
-    phone: getFieldValue("phone"),
-    dob: getFieldValue("dob"),
-    gender: getFieldValue("gender"),
-    bloodGroup: getFieldValue("bloodGroup"),
-    address: getFieldValue("address"),
-    emergencyName: getFieldValue("emergencyName"),
-    emergencyPhone: getFieldValue("emergencyPhone"),
-    lastUpdated: "Today",
+    contact_number: getFieldValue("phone"),
+    dob: getFieldValue("dob") || null,
+    gender: getFieldValue("gender") || null,
+    blood_group: getFieldValue("bloodGroup") || null,
+    address: getFieldValue("address") || null,
+    emergency_contact_name: getFieldValue("emergencyName") || null,
+    emergency_contact_phone: getFieldValue("emergencyPhone") || null,
   };
 
-  localStorage.setItem("patientProfileData", JSON.stringify(profile));
-  updateSummary(profile);
+  if (!payload.full_name || !payload.email) {
+    alert("Full name and email are required.");
+    return;
+  }
+
+  const r = await fetch(`${API_BASE}/patient/profile.php`, {
+    method: "PUT",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const j = await r.json();
+  if (j.status !== "success") {
+    alert(j.message || "Save failed");
+    return;
+  }
+
+  await loadProfile();
   showSuccessToast();
 }
 
@@ -177,5 +182,8 @@ searchInput.addEventListener("input", () => {
   });
 });
 
-loadProfile();
-//completed
+(async function initProfile() {
+  const ok = await requirePatientSession();
+  if (!ok) return;
+  await loadProfile();
+})();
