@@ -1,620 +1,221 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard – Healthcare</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              teal: {
-                DEFAULT: "#0d7377",
-                dark: "#0a5a5d",
-                light: "#14a3a8",
-                bg: "#e8f5f5",
-              },
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        teal: {
+                            DEFAULT: "#0d7377",
+                            dark: "#0a5a5d",
+                            light: "#14a3a8",
+                            bg: "#e8f5f5",
+                        },
+                    },
+                    fontFamily: { poppins: ["Poppins", "sans-serif"] },
+                },
             },
-            fontFamily: { poppins: ["Poppins", "sans-serif"] },
-          },
-        },
-      };
+        };
     </script>
     <style>
-      body {
-        font-family: "Poppins", sans-serif;
-      }
-      .bar {
-        transition: background 0.2s;
-      }
-      .bar:hover {
-        background: #14a3a8 !important;
-      }
+        body { font-family: "Poppins", sans-serif; }
+        .bar { transition: background 0.2s; }
+        .bar:hover { background: #14a3a8 !important; }
+        .calendar-day { cursor: pointer; transition: all 0.2s; min-height: 38px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; }
+        .calendar-day:hover { background-color: rgba(0, 126, 133, 0.1); }
+        .calendar-day.has-appointment { position: relative; font-weight: bold; }
+        .calendar-day.has-appointment::after { content: '●'; position: absolute; bottom: 2px; color: #ef4444; font-size: 12px; }
+        .calendar-day.has-completed { position: relative; font-weight: bold; }
+        .calendar-day.has-completed::after { content: '✓'; position: absolute; bottom: 2px; color: #10b981; font-size: 12px; }
+        .modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 50; }
+        .modal-backdrop.active { display: flex; align-items: center; justify-content: center; }
+        .toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; background: #0d7377; color: white; border-radius: 8px; z-index: 1000; opacity: 0; animation: slideIn 0.3s forwards; }
+        @keyframes slideIn { to { opacity: 1; transform: translateY(-10px); } }
     </style>
-  </head>
-  <body class="bg-gray-100 text-gray-800 flex min-h-screen">
-    <!-- Mobile overlay -->
-    <div
-      id="overlay"
-      class="fixed inset-0 bg-black/40 z-40 hidden lg:hidden"
-      onclick="closeSidebar()"
-    ></div>
+</head>
+<body class="bg-gray-100 text-gray-800 flex min-h-screen">
+    <div id="overlay" class="fixed inset-0 bg-black/40 z-40 hidden lg:hidden" onclick="closeSidebar()"></div>
 
     <!-- Sidebar -->
-    <aside
-      id="sidebar"
-      class="fixed top-0 left-0 bottom-0 w-60 bg-teal-dark flex flex-col z-50 -translate-x-full lg:translate-x-0 transition-transform duration-300"
-    >
-      <div class="px-6 py-7 flex items-center gap-3 border-b border-white/10">
-        <svg class="w-8 h-8 shrink-0" viewBox="0 0 32 32" fill="none">
-          <circle cx="16" cy="16" r="16" fill="rgba(255,255,255,.15)" />
-          <path
-            d="M16 8v16M8 16h16"
-            stroke="#fff"
-            stroke-width="2.5"
-            stroke-linecap="round"
-          />
-        </svg>
-        <span class="text-white font-bold text-lg">Healthcare</span>
-      </div>
-      <nav class="p-3 flex-1">
-        <a
-          href="dashboard.html"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white bg-white/20 text-sm font-medium mb-1"
-        >
-          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-            <path
-              d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"
-            />
-          </svg>
-          Dashboard
-        </a>
-        <a
-          href="users.html"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all"
-        >
-          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-            <path
-              d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
-            />
-          </svg>
-          Users
-        </a>
-        <a
-          href="#"
-          onclick="showToast('Appointments page coming soon!')"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all"
-        >
-          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-            <path
-              d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
-            />
-          </svg>
-          Appointments
-        </a>
-        <a
-          href="reports.html"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all"
-        >
-          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-            <path
-              d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"
-            />
-          </svg>
-          Reports
-        </a>
-        <a
-          href="#"
-          onclick="showToast('Doctors page coming soon!')"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all"
-        >
-          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-            <path
-              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
-            />
-          </svg>
-          Doctors
-        </a>
-      </nav>
-      <div class="p-3 border-t border-white/10">
-        <a
-          href="#"
-          onclick="showToast('Admin profile coming soon!')"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/65 hover:bg-white/10 hover:text-white text-sm font-medium transition-all"
-        >
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-            <path
-              d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-            />
-          </svg>
-          Admin Profile
-        </a>
-        <a
-          href="#"
-          onclick="confirmLogout()"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/65 hover:bg-white/10 hover:text-white text-sm font-medium transition-all"
-        >
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-            <path
-              d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
-            />
-          </svg>
-          Logout
-        </a>
-      </div>
+    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-60 bg-teal-dark flex flex-col z-50 -translate-x-full lg:translate-x-0 transition-transform duration-300">
+        <div class="px-6 py-7 flex items-center gap-3 border-b border-white/10">
+            <svg class="w-8 h-8 shrink-0" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="16" fill="rgba(255,255,255,.15)" />
+                <path d="M16 8v16M8 16h16" stroke="#fff" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
+            <span class="text-white font-bold text-lg">Healthcare</span>
+        </div>
+        <nav class="p-3 flex-1">
+            <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white bg-white/20 text-sm font-medium mb-1">
+                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
+                </svg>
+                Dashboard
+            </a>
+            <a href="users.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all">
+                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+                </svg>
+                Patients
+            </a>
+            <a href="appointments.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all">
+                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z" />
+                </svg>
+                Appointments
+            </a>
+            <a href="doctor.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all">
+                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                </svg>
+                Doctors
+            </a>
+            <a href="reports.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all">
+                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+                </svg>
+                Reports
+            </a>
+        </nav>
+        <div class="p-3 border-t border-white/10">
+            <a href="adminprofile.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/65 hover:bg-white/10 hover:text-white text-sm font-medium transition-all">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                </svg>
+                Admin Profile
+            </a>
+            <a href="../../api/auth/logout.php" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/65 hover:bg-white/10 hover:text-white text-sm font-medium transition-all">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
+                </svg>
+                Logout
+            </a>
+        </div>
     </aside>
 
     <!-- Main Content -->
     <main class="flex-1 flex flex-col lg:ml-60">
-      <!-- Header -->
-      <header
-        class="bg-white px-4 md:px-8 py-4 flex items-center justify-between shadow-sm sticky top-0 z-30"
-      >
-        <div class="flex items-center gap-3">
-          <button
-            onclick="toggleSidebar()"
-            class="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <svg
-              class="w-5 h-5 text-teal-dark"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
-            </svg>
-          </button>
-          <h1 class="text-base font-semibold text-teal-dark">
-            System Overview
-          </h1>
-        </div>
-        <div class="flex items-center gap-4">
-          <span class="text-xs text-gray-500 hidden sm:block"
-            >March 31, 2026</span
-          >
-          <div
-            class="w-9 h-9 bg-teal rounded-full flex items-center justify-center text-white font-bold text-sm cursor-pointer hover:bg-teal-dark transition-colors"
-            onclick="showToast('Admin profile clicked!')"
-          >
-            A
-          </div>
-        </div>
-      </header>
+        <!-- Header -->
+        <header class="bg-white px-4 md:px-8 py-4 flex items-center justify-between shadow-sm sticky top-0 z-30">
+            <div class="flex items-center gap-3">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    <svg class="w-5 h-5 text-teal-dark" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+                    </svg>
+                </button>
+                <h1 class="text-base font-semibold text-teal-dark">System Overview</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <span id="current-date" class="text-xs text-gray-500 hidden sm:block"></span>
+                <div class="w-9 h-9 bg-teal rounded-full flex items-center justify-center text-white font-bold text-sm cursor-pointer hover:bg-teal-dark transition-colors" id="admin-avatar">A</div>
+            </div>
+        </header>
 
-      <!-- Content -->
-      <div class="p-4 md:p-8 flex-1">
-        <p class="text-2xl font-bold text-teal-dark mb-6">Dashboard</p>
+        <!-- Content -->
+        <div class="p-4 md:p-8 flex-1 overflow-y-auto">
+            <p class="text-2xl font-bold text-teal-dark mb-6">Dashboard</p>
 
-        <!-- Stats Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
-          <div
-            class="bg-white rounded-2xl p-6 shadow-md hover:-translate-y-1 transition-transform cursor-pointer"
-            onclick="showToast('Total Users: 2,841')"
-          >
-            <div
-              class="w-12 h-12 rounded-xl bg-teal-bg text-teal flex items-center justify-center mb-3"
-            >
-              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                <path
-                  d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
-                />
-              </svg>
-            </div>
-            <div class="text-3xl font-bold text-gray-800 leading-none mb-1">
-              2,841
-            </div>
-            <div class="text-xs text-gray-500 font-medium mb-2">
-              Total Users
-            </div>
-            <span
-              class="text-xs font-semibold px-2 py-1 rounded-full bg-green-100 text-green-700"
-              >↑ 12% this month</span
-            >
-          </div>
-          <div
-            class="bg-white rounded-2xl p-6 shadow-md hover:-translate-y-1 transition-transform cursor-pointer"
-            onclick="showToast('Total Doctors: 184')"
-          >
-            <div
-              class="w-12 h-12 rounded-xl bg-green-100 text-green-700 flex items-center justify-center mb-3"
-            >
-              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                <path
-                  d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
-                />
-              </svg>
-            </div>
-            <div class="text-3xl font-bold text-gray-800 leading-none mb-1">
-              184
-            </div>
-            <div class="text-xs text-gray-500 font-medium mb-2">
-              Total Doctors
-            </div>
-            <span
-              class="text-xs font-semibold px-2 py-1 rounded-full bg-green-100 text-green-700"
-              >↑ 5% this month</span
-            >
-          </div>
-          <div
-            class="bg-white rounded-2xl p-6 shadow-md hover:-translate-y-1 transition-transform cursor-pointer"
-            onclick="showToast('Total Appointments: 1,206')"
-          >
-            <div
-              class="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center mb-3"
-            >
-              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                <path
-                  d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
-                />
-              </svg>
-            </div>
-            <div class="text-3xl font-bold text-gray-800 leading-none mb-1">
-              1,206
-            </div>
-            <div class="text-xs text-gray-500 font-medium mb-2">
-              Appointments
-            </div>
-            <span
-              class="text-xs font-semibold px-2 py-1 rounded-full bg-green-100 text-green-700"
-              >↑ 8% this month</span
-            >
-          </div>
-          <div
-            class="bg-white rounded-2xl p-6 shadow-md hover:-translate-y-1 transition-transform cursor-pointer"
-            onclick="showToast('Total Revenue: $48,320')"
-          >
-            <div
-              class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-3"
-            >
-              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                <path
-                  d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"
-                />
-              </svg>
-            </div>
-            <div class="text-3xl font-bold text-gray-800 leading-none mb-1">
-              $48,320
-            </div>
-            <div class="text-xs text-gray-500 font-medium mb-2">Revenue</div>
-            <span
-              class="text-xs font-semibold px-2 py-1 rounded-full bg-green-100 text-green-700"
-              >↑ 18% this month</span
-            >
-          </div>
-        </div>
-
-        <!-- Charts Row -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
-          <!-- Bar Chart -->
-          <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-md">
-            <div class="flex items-center justify-between mb-5">
-              <span class="font-semibold text-gray-800"
-                >Monthly Appointments</span
-              >
-              <span
-                class="bg-teal-bg text-teal text-xs font-semibold px-3 py-1 rounded-full"
-                >2026</span
-              >
-            </div>
-            <div class="flex items-end gap-2 h-40" id="barChart">
-              <div
-                class="flex flex-col items-center gap-1 flex-1 cursor-pointer"
-                onclick="showToast('October: ~660 appointments')"
-              >
-                <div
-                  class="bar w-full rounded-t-md bg-teal-bg"
-                  style="height: 55%"
-                ></div>
-                <span class="text-xs text-gray-500 font-medium">Oct</span>
-              </div>
-              <div
-                class="flex flex-col items-center gap-1 flex-1 cursor-pointer"
-                onclick="showToast('November: ~840 appointments')"
-              >
-                <div
-                  class="bar w-full rounded-t-md bg-teal-bg"
-                  style="height: 70%"
-                ></div>
-                <span class="text-xs text-gray-500 font-medium">Nov</span>
-              </div>
-              <div
-                class="flex flex-col items-center gap-1 flex-1 cursor-pointer"
-                onclick="showToast('December: ~720 appointments')"
-              >
-                <div
-                  class="bar w-full rounded-t-md bg-teal-bg"
-                  style="height: 60%"
-                ></div>
-                <span class="text-xs text-gray-500 font-medium">Dec</span>
-              </div>
-              <div
-                class="flex flex-col items-center gap-1 flex-1 cursor-pointer"
-                onclick="showToast('January: ~960 appointments')"
-              >
-                <div
-                  class="bar w-full rounded-t-md bg-teal-bg"
-                  style="height: 80%"
-                ></div>
-                <span class="text-xs text-gray-500 font-medium">Jan</span>
-              </div>
-              <div
-                class="flex flex-col items-center gap-1 flex-1 cursor-pointer"
-                onclick="showToast('February: ~780 appointments')"
-              >
-                <div
-                  class="bar w-full rounded-t-md bg-teal-bg"
-                  style="height: 65%"
-                ></div>
-                <span class="text-xs text-gray-500 font-medium">Feb</span>
-              </div>
-              <div
-                class="flex flex-col items-center gap-1 flex-1 cursor-pointer"
-                onclick="
-                  showToast('March: 1,206 appointments — highest this year!')
-                "
-              >
-                <div
-                  class="bar w-full rounded-t-md bg-teal"
-                  style="height: 90%"
-                ></div>
-                <span class="text-xs text-gray-500 font-medium">Mar</span>
-              </div>
-            </div>
-          </div>
-          <!-- Revenue Summary -->
-          <div class="bg-white rounded-2xl p-6 shadow-md">
-            <div class="flex items-center justify-between mb-5">
-              <span class="font-semibold text-gray-800">Revenue Summary</span>
-            </div>
-            <div class="flex flex-col gap-4">
-              <div
-                class="flex items-center justify-between py-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 rounded-lg px-2 -mx-2 transition-colors"
-                onclick="showToast('Consultations: $22,400 (46%)')"
-              >
-                <span class="flex items-center text-sm font-medium"
-                  ><span
-                    class="w-2.5 h-2.5 rounded-full bg-teal mr-2.5 shrink-0"
-                  ></span
-                  >Consultations</span
-                >
-                <div class="text-right">
-                  <div class="font-bold text-teal-dark text-sm">$22,400</div>
-                  <div class="text-xs text-gray-400">46%</div>
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
+                <div class="bg-white rounded-2xl p-6 shadow-md hover:-translate-y-1 transition-transform cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-teal-bg text-teal flex items-center justify-center mb-3">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-800 leading-none mb-1" id="stat-patients">0</div>
+                    <div class="text-xs text-gray-500 font-medium">Total Patients</div>
                 </div>
-              </div>
-              <div
-                class="flex items-center justify-between py-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 rounded-lg px-2 -mx-2 transition-colors"
-                onclick="showToast('Procedures: $15,800 (33%)')"
-              >
-                <span class="flex items-center text-sm font-medium"
-                  ><span
-                    class="w-2.5 h-2.5 rounded-full bg-teal-light mr-2.5 shrink-0"
-                  ></span
-                  >Procedures</span
-                >
-                <div class="text-right">
-                  <div class="font-bold text-teal-dark text-sm">$15,800</div>
-                  <div class="text-xs text-gray-400">33%</div>
-                </div>
-              </div>
-              <div
-                class="flex items-center justify-between py-3 cursor-pointer hover:bg-gray-50 rounded-lg px-2 -mx-2 transition-colors"
-                onclick="showToast('Other: $10,120 (21%)')"
-              >
-                <span class="flex items-center text-sm font-medium"
-                  ><span
-                    class="w-2.5 h-2.5 rounded-full bg-teal-bg mr-2.5 shrink-0"
-                    style="background: #c8e8e8"
-                  ></span
-                  >Other</span
-                >
-                <div class="text-right">
-                  <div class="font-bold text-teal-dark text-sm">$10,120</div>
-                  <div class="text-xs text-gray-400">21%</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- Appointments Table -->
-        <div class="bg-white rounded-2xl p-6 shadow-md">
-          <div class="flex items-center justify-between mb-5">
-            <span class="font-semibold text-gray-800">Recent Appointments</span>
-            <button
-              onclick="showToast('Viewing all appointments...')"
-              class="bg-teal-bg text-teal text-xs font-semibold px-3 py-1 rounded-full hover:bg-teal hover:text-white transition-colors"
-            >
-              View All
-            </button>
-          </div>
-          <div class="overflow-x-auto -mx-6 px-6">
-            <table class="w-full min-w-[500px]">
-              <thead>
-                <tr>
-                  <th
-                    class="text-left text-xs text-gray-400 font-semibold pb-3 uppercase tracking-wider px-4"
-                  >
-                    Patient
-                  </th>
-                  <th
-                    class="text-left text-xs text-gray-400 font-semibold pb-3 uppercase tracking-wider px-4"
-                  >
-                    Doctor
-                  </th>
-                  <th
-                    class="text-left text-xs text-gray-400 font-semibold pb-3 uppercase tracking-wider px-4 hidden sm:table-cell"
-                  >
-                    Date
-                  </th>
-                  <th
-                    class="text-left text-xs text-gray-400 font-semibold pb-3 uppercase tracking-wider px-4"
-                  >
-                    Status
-                  </th>
-                  <th
-                    class="text-left text-xs text-gray-400 font-semibold pb-3 uppercase tracking-wider px-4 hidden md:table-cell"
-                  >
-                    Amount
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
-                  onclick="
-                    showToast(
-                      'Appointment: Aarav Sharma with Dr. Priya Koirala — $60',
-                    )
-                  "
-                >
-                  <td class="px-4 py-3.5 text-sm">Aarav Sharma</td>
-                  <td class="px-4 py-3.5 text-sm">Dr. Priya Koirala</td>
-                  <td class="px-4 py-3.5 text-sm hidden sm:table-cell">
-                    Mar 29, 2026
-                  </td>
-                  <td class="px-4 py-3.5">
-                    <span
-                      class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700"
-                      >Confirmed</span
-                    >
-                  </td>
-                  <td class="px-4 py-3.5 text-sm hidden md:table-cell">$60</td>
-                </tr>
-                <tr
-                  class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
-                  onclick="
-                    showToast(
-                      'Appointment: Sita Thapa with Dr. Rajan Mehta — $80 (Pending)',
-                    )
-                  "
-                >
-                  <td class="px-4 py-3.5 text-sm">Sita Thapa</td>
-                  <td class="px-4 py-3.5 text-sm">Dr. Rajan Mehta</td>
-                  <td class="px-4 py-3.5 text-sm hidden sm:table-cell">
-                    Mar 28, 2026
-                  </td>
-                  <td class="px-4 py-3.5">
-                    <span
-                      class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-600"
-                      >Pending</span
-                    >
-                  </td>
-                  <td class="px-4 py-3.5 text-sm hidden md:table-cell">$80</td>
-                </tr>
-                <tr
-                  class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
-                  onclick="
-                    showToast(
-                      'Appointment: Bibek Rai with Dr. Anita Gurung — $55',
-                    )
-                  "
-                >
-                  <td class="px-4 py-3.5 text-sm">Bibek Rai</td>
-                  <td class="px-4 py-3.5 text-sm">Dr. Anita Gurung</td>
-                  <td class="px-4 py-3.5 text-sm hidden sm:table-cell">
-                    Mar 27, 2026
-                  </td>
-                  <td class="px-4 py-3.5">
-                    <span
-                      class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700"
-                      >Confirmed</span
-                    >
-                  </td>
-                  <td class="px-4 py-3.5 text-sm hidden md:table-cell">$55</td>
-                </tr>
-                <tr
-                  class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
-                  onclick="showToast('Appointment: Nisha Lama — Cancelled')"
-                >
-                  <td class="px-4 py-3.5 text-sm">Nisha Lama</td>
-                  <td class="px-4 py-3.5 text-sm">Dr. Suresh Patel</td>
-                  <td class="px-4 py-3.5 text-sm hidden sm:table-cell">
-                    Mar 26, 2026
-                  </td>
-                  <td class="px-4 py-3.5">
-                    <span
-                      class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-600"
-                      >Cancelled</span
-                    >
-                  </td>
-                  <td class="px-4 py-3.5 text-sm hidden md:table-cell">–</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                <div class="bg-white rounded-2xl p-6 shadow-md hover:-translate-y-1 transition-transform cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-green-100 text-green-700 flex items-center justify-center mb-3">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-800 leading-none mb-1" id="stat-doctors">0</div>
+                    <div class="text-xs text-gray-500 font-medium">Total Doctors</div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-md hover:-translate-y-1 transition-transform cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center mb-3">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z" />
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-800 leading-none mb-1" id="stat-upcoming">0</div>
+                    <div class="text-xs text-gray-500 font-medium">Upcoming Appointments</div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-md hover:-translate-y-1 transition-transform cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-3">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z" />
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-800 leading-none mb-1" id="stat-completed">0</div>
+                    <div class="text-xs text-gray-500 font-medium">Completed Appointments</div>
+                </div>
+            </div>
+
+            <!-- Calendar and Recent Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+                <!-- Calendar -->
+                <div class="bg-white rounded-2xl p-6 shadow-md">
+                    <div class="mb-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <button onclick="previousMonth()" class="p-1 hover:bg-gray-100 rounded">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" /></svg>
+                            </button>
+                            <h3 id="calendar-month" class="font-semibold text-center flex-1"></h3>
+                            <button onclick="nextMonth()" class="p-1 hover:bg-gray-100 rounded">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" /></svg>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 text-center mb-2">
+                            <div class="text-xs font-semibold text-gray-500">Sun</div>
+                            <div class="text-xs font-semibold text-gray-500">Mon</div>
+                            <div class="text-xs font-semibold text-gray-500">Tue</div>
+                            <div class="text-xs font-semibold text-gray-500">Wed</div>
+                            <div class="text-xs font-semibold text-gray-500">Thu</div>
+                            <div class="text-xs font-semibold text-gray-500">Fri</div>
+                            <div class="text-xs font-semibold text-gray-500">Sat</div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1" id="calendar-days"></div>
+                    </div>
+                </div>
+
+                <!-- Recent Appointments Modal Trigger -->
+                <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-md">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-gray-800">Recent Appointments (5)</h3>
+                        <button onclick="window.location.href='appointments.html'" class="bg-teal-bg text-teal text-xs font-semibold px-3 py-1 rounded-full hover:bg-teal hover:text-white transition-colors">View All</button>
+                    </div>
+                    <div id="recent-appointments-list" class="space-y-2">
+                        <p class="text-gray-500 text-sm">Loading...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointment Details Modal -->
+            <div id="appointment-modal" class="modal-backdrop">
+                <div class="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-lg relative">
+                    <button onclick="closeAppointmentModal()" class="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" /></svg>
+                    </button>
+                    <div id="appointment-modal-content"></div>
+                </div>
+            </div>
         </div>
-      </div>
     </main>
 
-    <!-- Toast Notification -->
-    <div
-      id="toast"
-      class="fixed bottom-6 right-6 bg-teal-dark text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium translate-y-20 opacity-0 transition-all duration-300 z-50 max-w-xs"
-    ></div>
-
-    <!-- Logout Modal -->
-    <div
-      id="logoutModal"
-      class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4"
-    >
-      <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-        <h3 class="font-bold text-lg text-gray-800 mb-2">Confirm Logout</h3>
-        <p class="text-sm text-gray-500 mb-6">
-          Are you sure you want to log out?
-        </p>
-        <div class="flex gap-3">
-          <button
-            onclick="closeLogout()"
-            class="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold hover:bg-gray-50 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onclick="
-              showToast('Logged out successfully!');
-              closeLogout();
-            "
-            class="flex-1 px-4 py-2.5 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal-dark transition-colors"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <script>
-      function toggleSidebar() {
-        const sidebar = document.getElementById("sidebar");
-        const overlay = document.getElementById("overlay");
-        sidebar.classList.toggle("-translate-x-full");
-        overlay.classList.toggle("hidden");
-      }
-      function closeSidebar() {
-        document.getElementById("sidebar").classList.add("-translate-x-full");
-        document.getElementById("overlay").classList.add("hidden");
-      }
-      function showToast(msg) {
-        const t = document.getElementById("toast");
-        t.textContent = msg;
-        t.classList.remove("translate-y-20", "opacity-0");
-        t.classList.add("translate-y-0", "opacity-100");
-        setTimeout(() => {
-          t.classList.add("translate-y-20", "opacity-0");
-          t.classList.remove("translate-y-0", "opacity-100");
-        }, 3000);
-      }
-      function confirmLogout() {
-        document.getElementById("logoutModal").classList.remove("hidden");
-      }
-      function closeLogout() {
-        document.getElementById("logoutModal").classList.add("hidden");
-      }
-    </script>
-  </body>
+    <script src="dashboard.js"></script>
+</body>
 </html>
