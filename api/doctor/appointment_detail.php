@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         ");
 
         $stmt->bind_param(
-            "sssii",
+            "sssis",
             $status,
             $doctor_comments,
             $prescribed_medicines,
