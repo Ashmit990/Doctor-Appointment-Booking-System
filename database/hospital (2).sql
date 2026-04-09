@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 09, 2026 at 06:09 AM
+-- Generation Time: Apr 09, 2026 at 03:51 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -47,8 +47,28 @@ CREATE TABLE `appointments` (
 
 INSERT INTO `appointments` (`appointment_id`, `patient_id`, `doctor_id`, `app_date`, `app_time`, `room_num`, `reason_for_visit`, `doctor_comments`, `prescribed_medicines`, `status`, `created_at`) VALUES
 (7, 'PAT_USER', 'DOC_SARAH', '2026-04-05', '09:00:00', 'Room A1', 'Routine heart checkup', NULL, NULL, 'Completed', '2026-04-05 13:43:03'),
-(8, 'PAT_002', 'DOC_EMILY', '2026-04-05', '11:30:00', 'Room B3', 'Child vaccination', NULL, NULL, 'Upcoming', '2026-04-05 13:43:03'),
-(9, 'PAT_003', 'DOC_MIKE', '2026-04-02', '10:00:00', 'Room C2', 'Recurring headaches', NULL, NULL, 'Completed', '2026-04-05 13:43:03');
+(8, 'PAT_002', 'DOC_EMILY', '2026-04-05', '11:30:00', 'Room B3', 'Child vaccination', 'Checking Done, Patient is now completely fine.', NULL, 'Completed', '2026-04-05 13:43:03'),
+(9, 'PAT_003', 'DOC_MIKE', '2026-04-02', '10:00:00', 'Room C2', 'Recurring headaches', NULL, NULL, 'Completed', '2026-04-05 13:43:03'),
+(13, 'PAT_002', 'DOC_SARAH', '2026-04-12', '14:30:00', 'Room A1', 'Experiencing occasional chest palpitations and mild shortness of breath during morning walks; seeking a specialist consultation.', 'Patient presents with heart palpitations and dyspnea during physical exertion. Initial physical examination shows a regular rhythm but elevated blood pressure. Recommended an immediate ECG and a stress test to rule out arrhythmia or stable angina. Patient is advised to avoid heavy exercise until test results are reviewed. Next Follow up on 12th April', 'Amlodipine 5mg (once daily in the morning for BP control)\n\nPropranolol 10mg (as needed for palpitations)\n\nMultivitamin supplement (daily)', 'Upcoming', '2026-04-09 05:17:42');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `doctor_approvals`
+--
+
+CREATE TABLE `doctor_approvals` (
+  `approval_id` int(11) NOT NULL,
+  `full_name` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `specialization` varchar(100) NOT NULL,
+  `consultation_fee` decimal(10,2) NOT NULL,
+  `bio` text DEFAULT NULL,
+  `status` enum('Pending','Accepted','Rejected') DEFAULT 'Pending',
+  `submitted_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `reviewed_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -70,13 +90,14 @@ CREATE TABLE `doctor_availability` (
 --
 
 INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `start_time`, `end_time`, `status`) VALUES
-(7, 'DOC_SARAH', '2026-04-05', '09:00:00', '10:00:00', 'Booked'),
-(8, 'DOC_SARAH', '2026-04-05', '10:00:00', '11:00:00', 'Available'),
+(7, 'DOC_SARAH', '2026-04-05', '10:00:00', '11:00:00', 'Booked'),
 (9, 'DOC_MIKE', '2026-04-05', '09:00:00', '10:00:00', 'Available'),
 (10, 'DOC_EMILY', '2026-04-05', '11:30:00', '12:30:00', 'Booked'),
 (11, 'DOC_SARAH', '2026-03-30', '23:45:00', '12:45:00', 'Available'),
-(12, 'DOC_SARAH', '2026-04-22', '22:49:00', '23:50:00', 'Available'),
-(13, 'DOC_SARAH', '2026-04-10', '09:50:00', '10:50:00', 'Available');
+(12, 'DOC_SARAH', '2026-04-22', '22:49:00', '23:50:00', 'Booked'),
+(13, 'DOC_SARAH', '2026-04-10', '09:50:00', '10:50:00', 'Booked'),
+(14, 'DOC_SARAH', '2026-04-09', '11:00:00', '12:00:00', 'Available'),
+(15, 'DOC_SARAH', '2026-04-12', '14:30:00', '15:30:00', 'Booked');
 
 -- --------------------------------------------------------
 
@@ -148,19 +169,22 @@ CREATE TABLE `patient_profiles` (
   `user_id` varchar(20) NOT NULL,
   `dob` date DEFAULT NULL,
   `blood_group` varchar(5) DEFAULT NULL,
+  `gender` varchar(20) DEFAULT NULL,
   `contact_number` varchar(15) DEFAULT NULL,
-  `address` text DEFAULT NULL
+  `address` text DEFAULT NULL,
+  `emergency_contact_name` varchar(100) DEFAULT NULL,
+  `emergency_contact_phone` varchar(15) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `patient_profiles`
 --
 
-INSERT INTO `patient_profiles` (`user_id`, `dob`, `blood_group`, `contact_number`, `address`) VALUES
-('PAT_002', '1995-04-12', 'O+', '9801112223', 'Lalitpur, Nepal'),
-('PAT_003', '1988-11-20', 'A-', '9803334445', 'Bhaktapur, Nepal'),
-('PAT_004', '1992-06-15', 'B+', '9805556667', 'Pokhara, Nepal'),
-('PAT_USER', '1990-05-15', 'O+', '9801112220', 'Kathmandu, Nepal');
+INSERT INTO `patient_profiles` (`user_id`, `dob`, `blood_group`, `gender`, `contact_number`, `address`, `emergency_contact_name`, `emergency_contact_phone`) VALUES
+('PAT_002', '1995-04-12', 'O+', NULL, '9801112223', 'Lalitpur, Nepal', NULL, NULL),
+('PAT_003', '1988-11-20', 'A-', NULL, '9803334445', 'Bhaktapur, Nepal', NULL, NULL),
+('PAT_004', '1992-06-15', 'B+', NULL, '9805556667', 'Pokhara, Nepal', NULL, NULL),
+('PAT_USER', '1990-05-15', 'O+', NULL, '9801112220', 'Kathmandu, Nepal', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -183,13 +207,13 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`user_id`, `full_name`, `email`, `password_hash`, `role`, `created_at`) VALUES
 ('ADM_001', 'System Administrator', 'admin@spentra.com', 'admin_hash_123', 'Admin', '2026-04-08 17:53:07'),
-('DOC_ARJUN', 'Dr. Arjun Mehta', 'arjun@spentra.com', 'hash123', 'Doctor', '2026-04-05 13:43:02'),
+('DOC_ARJUN', 'Dr. Arjun Mehta', 'arjun123@spentra.com', 'hash123', 'Doctor', '2026-04-05 13:43:02'),
 ('DOC_EMILY', 'Dr. Emily Blunt', 'emily@spentra.com', 'hash123', 'Doctor', '2026-04-05 13:43:02'),
 ('DOC_MIKE', 'Dr. Mike Ross', 'mike@spentra.com', 'hash123', 'Doctor', '2026-04-05 13:43:02'),
 ('DOC_SARAH', 'Dr. Sarah Lee', 'sarah@spentra.com', 'hash123', 'Doctor', '2026-04-05 13:43:02'),
 ('PAT_002', 'Stacy Mitchell', 'stacy@email.com', 'hash123', 'Patient', '2026-04-05 13:43:02'),
 ('PAT_003', 'James Wilson', 'james@email.com', 'hash123', 'Patient', '2026-04-05 13:43:02'),
-('PAT_004', 'Elena Rodriguez', 'elena@email.com', 'hash123', 'Patient', '2026-04-05 13:43:02'),
+('PAT_004', 'Alina Rodriguez', 'alina@email.com', 'hash123', 'Patient', '2026-04-05 13:43:02'),
 ('PAT_USER', 'John Doe', 'john@email.com', 'hash123', 'Patient', '2026-04-05 13:43:02');
 
 --
@@ -203,6 +227,13 @@ ALTER TABLE `appointments`
   ADD PRIMARY KEY (`appointment_id`),
   ADD KEY `patient_id` (`patient_id`),
   ADD KEY `doctor_id` (`doctor_id`);
+
+--
+-- Indexes for table `doctor_approvals`
+--
+ALTER TABLE `doctor_approvals`
+  ADD PRIMARY KEY (`approval_id`),
+  ADD UNIQUE KEY `email` (`email`);
 
 --
 -- Indexes for table `doctor_availability`
@@ -253,13 +284,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
+-- AUTO_INCREMENT for table `doctor_approvals`
+--
+ALTER TABLE `doctor_approvals`
+  MODIFY `approval_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `doctor_availability`
 --
 ALTER TABLE `doctor_availability`
-  MODIFY `avail_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `avail_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `earnings`

@@ -164,6 +164,7 @@
                 >Full Name</label
               >
               <input
+                id="signupFullName"
                 type="text"
                 required
                 class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none placeholder:text-slate-300"
@@ -177,6 +178,7 @@
                 >Age</label
               >
               <input
+                id="signupAge"
                 type="number"
                 required
                 min="1"
@@ -192,6 +194,7 @@
                 >Email Address</label
               >
               <input
+                id="signupEmail"
                 type="email"
                 required
                 class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none placeholder:text-slate-300"
@@ -206,6 +209,7 @@
                 >Phone Number</label
               >
               <input
+                id="signupPhone"
                 type="tel"
                 required
                 class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none placeholder:text-slate-300"
@@ -272,6 +276,7 @@
                 >Professional Bio</label
               >
               <textarea
+                id="signupBio"
                 rows="2"
                 class="w-full p-3 rounded-xl border-2 border-slate-100 bg-slate-50 focus:border-[#007E85] focus:bg-white outline-none text-slate-800 text-sm transition-all resize-none shadow-inner"
                 placeholder="E.g. Senior Cardiologist..."
@@ -285,6 +290,7 @@
                 >Create Password</label
               >
               <input
+                id="signupPassword"
                 type="password"
                 required
                 class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none placeholder:text-slate-300"
@@ -365,10 +371,13 @@
         setTimeout(() => dropdownMenu.classList.add("hidden"), 300);
       }
 
+      let selectedRole = "Patient";
+
       options.forEach((option) => {
         option.addEventListener("click", () => {
           const val = option.getAttribute("data-value");
           selectedValueDisplay.innerText = option.innerText;
+          selectedRole = option.innerText;
 
           if (val === "doctor") {
             bioContainer.classList.add("show");
@@ -380,6 +389,59 @@
       });
 
       window.onclick = () => closeDropdown();
+
+      document.getElementById('signupForm').addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const fullName = document.getElementById('signupFullName').value.trim();
+          const email = document.getElementById('signupEmail').value.trim();
+          const phone = document.getElementById('signupPhone').value.trim();
+          const age = document.getElementById('signupAge').value.trim();
+          const password = document.getElementById('signupPassword').value.trim();
+          const bio = document.getElementById('signupBio').value.trim();
+
+          const formData = new FormData();
+          formData.append('full_name', fullName);
+          formData.append('email', email);
+          formData.append('phone', phone);
+          formData.append('age', age);
+          formData.append('role', selectedRole);
+          formData.append('password', password);
+          if (selectedRole === "Medical Professional") {
+              formData.append('bio', bio);
+          }
+
+          // Button visually showing loading mode
+          const btn = this.querySelector('button[type="submit"]');
+          const origText = btn.innerText;
+          btn.innerText = "Registering...";
+          btn.disabled = true;
+
+          fetch('../../api/auth/signup_process.php', {
+              method: 'POST',
+              body: formData
+          })
+          .then(r => r.json())
+          .then(data => {
+              btn.innerText = origText;
+              btn.disabled = false;
+              if (data.status === 'success') {
+                  alert(data.message);
+                  if (data.redirect) {
+                      window.location.href = data.redirect;
+                  } else {
+                      window.location.href = 'login.html';
+                  }
+              } else {
+                  alert(data.message || 'Error occurred during registration');
+              }
+          })
+          .catch(err => {
+              btn.innerText = origText;
+              btn.disabled = false;
+              alert("Error connecting to server.");
+          });
+      });
     </script>
   </body>
 </html>
