@@ -30,16 +30,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $redirect = '';
             switch ($user['role']) {
                 case 'Doctor':
-                    $redirect = '/Dummy/pages/doctor/home.html';
+                    $redirect = '/Doctor-Appointment-Booking-System/pages/doctor/home.html';
                     break;
                 case 'Patient':
-                    $redirect = '/Dummy/pages/patient/homepage.html';
+                    $redirect = '/Doctor-Appointment-Booking-System/pages/patient/homepage.html';
                     break;
                 case 'Admin':
-                    $redirect = '/Dummy/pages/admin/dashboard.html';
+                    $redirect = '/Doctor-Appointment-Booking-System/pages/admin/dashboard.html';
                     break;
                 default:
-                    $redirect = '/Dummy/index.html';
+                    $redirect = '/Doctor-Appointment-Booking-System/index.html';
             }
 
             echo json_encode([
