@@ -91,7 +91,7 @@
       }
     </style>
   </head>
-  <body class="bg-[#F2F2F2] m-0 p-0 overflow-hidden tracking-[1.1px]">
+  <body class="bg-[#F2F2F2] m-0 p-0 overflow-x-hidden min-h-screen tracking-[1.1px]">
     <!-- ✅ Forgot Password Modal -->
     <div
       id="forgotModal"
@@ -141,12 +141,12 @@
     </div>
 
     <div
-      class="flex h-screen w-full relative"
+      class="flex min-h-screen w-full relative"
       data-scroll-animation="animate-fade-in"
       data-delay="0s"
     >
       <div
-        class="w-[45%] flex flex-col justify-between items-start pt-8 pb-8 pl-24 lg:pl-32 z-10"
+        class="w-full lg:w-[45%] flex flex-col justify-center lg:justify-between items-center lg:items-start py-12 px-6 sm:px-12 lg:pl-24 xl:pl-32 z-10 gap-10 lg:gap-0"
       >
         <div
           class="flex flex-col items-center"
@@ -169,7 +169,7 @@
         </div>
 
         <div
-          class="w-full max-w-sm"
+          class="w-full max-w-sm px-4 lg:px-0"
           data-scroll-animation="animate-slide-up"
           data-delay="0.2s"
         >
@@ -240,7 +240,7 @@
         </div>
       </div>
 
-      <div class="w-[55%] relative">
+      <div class="hidden lg:block w-[55%] relative">
         <div class="shape-wrapper">
           <div class="organic-bg"></div>
         </div>

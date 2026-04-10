@@ -44,10 +44,10 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <div class="flex h-screen overflow-hidden">
+    <div class="flex flex-col md:flex-row h-screen overflow-hidden">
         <!-- SIDEBAR -->
-        <aside class="sidebar w-64 text-white shadow-lg fixed h-full overflow-y-auto z-40">
-            <div class="p-8 border-b border-gray-700">
+        <aside class="sidebar w-full md:w-64 text-white shadow-lg fixed bottom-0 md:top-0 h-auto md:h-full overflow-x-auto md:overflow-y-auto z-40">
+            <div class="hidden md:block p-8 border-b border-gray-700">
                 <div class="flex items-center gap-3">
                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
                        <img src="../../src/assets/Logo.svg" alt="">
@@ -57,24 +57,24 @@
                 <p id="sidebar-doctor-name" class="text-sm text-gray-300 mt-2">Loading...</p>
             </div>
 
-            <nav class="p-6 space-y-2">
-                <a href="home.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg hover:opacity-80 transition">
+            <nav class="p-2 md:p-6 flex flex-row md:flex-col gap-2 md:gap-0 space-y-0 md:space-y-2 justify-around md:justify-start">
+                <a href="home.html" class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
                     <i data-lucide="home" class="w-5 h-5"></i>
                     <span>Home</span>
                 </a>
-                <a href="schedules.html" class="nav-link active flex items-center gap-3 px-4 py-3 rounded-lg hover:opacity-80 transition">
+                <a href="schedules.html" class="nav-link active flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
                     <i data-lucide="calendar" class="w-5 h-5"></i>
                     <span>Schedules</span>
                 </a>
-                <a href="earnings.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg hover:opacity-80 transition">
+                <a href="earnings.html" class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
                     <i data-lucide="dollar-sign" class="w-5 h-5"></i>
                     <span>Earnings</span>
                 </a>
-                <a href="profile.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg hover:opacity-80 transition">
+                <a href="profile.html" class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
                     <i data-lucide="user" class="w-5 h-5"></i>
                     <span>Profile</span>
                 </a>
-                <a href="../../api/auth/logout.php" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-600 transition text-red-300 hover:text-white mt-8">
+                <a href="../../api/auth/logout.php" class="flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:bg-red-600 transition text-red-300 hover:text-white md:mt-8 text-[10px] md:text-base">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
                     <span>Logout</span>
                 </a>
@@ -82,7 +82,7 @@
         </aside>
 
         <!-- MAIN CONTENT -->
-        <main class="ml-64 flex-1 overflow-y-auto">
+        <main class="ml-0 md:ml-64 flex-1 overflow-y-auto pb-20 md:pb-0">
             <!-- TOP BAR -->
             <div class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
                 <div class="px-8 py-4 flex justify-between items-center">
@@ -99,7 +99,7 @@
                     <div class="bg-white rounded-xl card-shadow p-6">
                         <h3 class="text-xl font-bold text-gray-900 mb-6">Manage Your Availability</h3>
 
-                        <div class="grid grid-cols-2 gap-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div>
                                 <h4 class="font-semibold text-gray-900 mb-4">Select Date</h4>
                                 <div class="bg-gray-50 rounded-lg p-4">
@@ -160,8 +160,8 @@
     </div>
 
     <!-- EDIT SCHEDULE MODAL -->
-    <div id="edit-schedule-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-lg p-8 w-96">
+    <div id="edit-schedule-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm sm:w-96">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-bold text-gray-900">Edit Schedule</h3>
                 <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
