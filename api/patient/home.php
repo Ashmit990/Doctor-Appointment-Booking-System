@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/../includes/appointment_reminder_sync.php';
 
 $today = date('Y-m-d');
 
@@ -77,6 +78,8 @@ $stmt->bind_param("s", $patient_id);
 $stmt->execute();
 $next_appt = $stmt->get_result()->fetch_assoc();
 $stmt->close();
+
+sync_patient_appointment_reminders($conn, $patient_id);
 
 $unread = 0;
 $stmt = $conn->prepare("SELECT COUNT(*) AS c FROM notifications WHERE user_id = ? AND is_read = 0");

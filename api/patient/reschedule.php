@@ -99,6 +99,23 @@ try {
     $up->execute();
     $up->close();
 
+    $pn = $conn->prepare("SELECT full_name FROM users WHERE user_id = ?");
+    $pn->bind_param("s", $patient_id);
+    $pn->execute();
+    $pn_res = $pn->get_result()->fetch_assoc();
+    $pat_name = $pn_res ? $pn_res['full_name'] : 'A patient';
+    $pn->close();
+
+    $notif_title = "Appointment Rescheduled";
+    $notif_msg = "{$pat_name} has rescheduled their appointment to {$newDate} at " . substr($newTime, 0, 5) . ".";
+    
+    $ns = $conn->prepare("INSERT INTO notifications (user_id, title, message, is_read, created_at) VALUES (?, ?, ?, 0, NOW())");
+    $ns->bind_param("sss", $doctor_id, $notif_title, $notif_msg);
+    if (!$ns->execute()) {
+        error_log("Failed to insert notification: " . $ns->error);
+    }
+    $ns->close();
+
     $conn->commit();
     echo json_encode(['status' => 'success', 'message' => 'Appointment rescheduled']);
 } catch (Exception $e) {

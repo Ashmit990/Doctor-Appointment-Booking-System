@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 09, 2026 at 03:51 PM
+-- Generation Time: Apr 12, 2026 at 08:02 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -38,18 +38,27 @@ CREATE TABLE `appointments` (
   `doctor_comments` text DEFAULT NULL,
   `prescribed_medicines` text DEFAULT NULL,
   `status` enum('Upcoming','Completed','Missed','Cancelled') DEFAULT 'Upcoming',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `doctor_notes` text DEFAULT NULL,
+  `prescriptions` text DEFAULT NULL,
+  `next_followup_id` int(11) DEFAULT NULL,
+  `rating` int(11) DEFAULT 0,
+  `feedback` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `appointments`
 --
 
-INSERT INTO `appointments` (`appointment_id`, `patient_id`, `doctor_id`, `app_date`, `app_time`, `room_num`, `reason_for_visit`, `doctor_comments`, `prescribed_medicines`, `status`, `created_at`) VALUES
-(7, 'PAT_USER', 'DOC_SARAH', '2026-04-05', '09:00:00', 'Room A1', 'Routine heart checkup', NULL, NULL, 'Completed', '2026-04-05 13:43:03'),
-(8, 'PAT_002', 'DOC_EMILY', '2026-04-05', '11:30:00', 'Room B3', 'Child vaccination', 'Checking Done, Patient is now completely fine.', NULL, 'Completed', '2026-04-05 13:43:03'),
-(9, 'PAT_003', 'DOC_MIKE', '2026-04-02', '10:00:00', 'Room C2', 'Recurring headaches', NULL, NULL, 'Completed', '2026-04-05 13:43:03'),
-(13, 'PAT_002', 'DOC_SARAH', '2026-04-12', '14:30:00', 'Room A1', 'Experiencing occasional chest palpitations and mild shortness of breath during morning walks; seeking a specialist consultation.', 'Patient presents with heart palpitations and dyspnea during physical exertion. Initial physical examination shows a regular rhythm but elevated blood pressure. Recommended an immediate ECG and a stress test to rule out arrhythmia or stable angina. Patient is advised to avoid heavy exercise until test results are reviewed. Next Follow up on 12th April', 'Amlodipine 5mg (once daily in the morning for BP control)\n\nPropranolol 10mg (as needed for palpitations)\n\nMultivitamin supplement (daily)', 'Upcoming', '2026-04-09 05:17:42');
+INSERT INTO `appointments` (`appointment_id`, `patient_id`, `doctor_id`, `app_date`, `app_time`, `room_num`, `reason_for_visit`, `doctor_comments`, `prescribed_medicines`, `status`, `created_at`, `doctor_notes`, `prescriptions`, `next_followup_id`, `rating`, `feedback`) VALUES
+(7, 'PAT_USER', 'DOC_SARAH', '2026-04-05', '09:00:00', 'Room A1', 'Routine heart checkup', NULL, NULL, 'Completed', '2026-04-05 13:43:03', NULL, NULL, NULL, 0, NULL),
+(8, 'PAT_002', 'DOC_EMILY', '2026-04-05', '11:30:00', 'Room B3', 'Child vaccination', 'Checking Done, Patient is now completely fine.', NULL, 'Completed', '2026-04-05 13:43:03', NULL, NULL, NULL, 0, NULL),
+(9, 'PAT_003', 'DOC_MIKE', '2026-04-02', '10:00:00', 'Room C2', 'Recurring headaches', NULL, NULL, 'Completed', '2026-04-05 13:43:03', NULL, NULL, NULL, 0, NULL),
+(13, 'PAT_002', 'DOC_SARAH', '2026-04-12', '14:30:00', 'Room A1', 'Experiencing occasional chest palpitations and mild shortness of breath during morning walks; seeking a specialist consultation.', 'Patient presents with heart palpitations and dyspnea during physical exertion. Initial physical examination shows a regular rhythm but elevated blood pressure. Recommended an immediate ECG and a stress test to rule out arrhythmia or stable angina. Patient is advised to avoid heavy exercise until test results are reviewed. Next Follow up on 12th April', 'Amlodipine 5mg (once daily in the morning for BP control)\n\nPropranolol 10mg (as needed for palpitations)\n\nMultivitamin supplement (daily)', 'Upcoming', '2026-04-09 05:17:42', NULL, NULL, NULL, 0, NULL),
+(14, 'PAT_9628', 'DOC_EA8D58', '2026-04-10', '21:01:00', 'Room A1', 'Pain in Teeth', NULL, NULL, 'Upcoming', '2026-04-09 14:24:49', NULL, NULL, NULL, 0, NULL),
+(16, 'PAT_003', 'DOC_ARJUN', '2026-04-12', '18:12:00', 'Room A1', 'Common Cold', NULL, NULL, 'Upcoming', '2026-04-11 13:28:52', NULL, NULL, NULL, 0, NULL),
+(17, 'PAT_002', 'DOC_ARJUN', '2026-04-12', '16:00:00', 'Room A1', 'Headache', NULL, NULL, 'Upcoming', '2026-04-12 05:24:43', NULL, NULL, NULL, 0, NULL),
+(18, 'PAT_003', 'DOC_ARJUN', '2026-04-12', '12:00:00', 'Room A1', 'Cold', NULL, NULL, 'Upcoming', '2026-04-12 05:27:39', NULL, NULL, NULL, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -69,6 +78,15 @@ CREATE TABLE `doctor_approvals` (
   `submitted_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `reviewed_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `doctor_approvals`
+--
+
+INSERT INTO `doctor_approvals` (`approval_id`, `full_name`, `email`, `password_hash`, `specialization`, `consultation_fee`, `bio`, `status`, `submitted_at`, `reviewed_at`) VALUES
+(1, 'Dr. Subodh Regmi', 'subodh@email.com', 'hash123', 'General', 500.00, 'Senior Dentist', 'Accepted', '2026-04-09 14:15:40', '2026-04-09 14:16:30'),
+(2, 'Dr. Shiwen Mahaju', 'shiwen@email.com', 'hash123', 'General', 500.00, 'Senior Surgeon', 'Pending', '2026-04-10 05:56:46', NULL),
+(3, 'Dr. Abhinash Dawadi', 'abhinash@email.com', 'hash123', 'General', 500.00, 'Cardiologist', 'Pending', '2026-04-10 06:00:04', NULL);
 
 -- --------------------------------------------------------
 
@@ -97,7 +115,18 @@ INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `s
 (12, 'DOC_SARAH', '2026-04-22', '22:49:00', '23:50:00', 'Booked'),
 (13, 'DOC_SARAH', '2026-04-10', '09:50:00', '10:50:00', 'Booked'),
 (14, 'DOC_SARAH', '2026-04-09', '11:00:00', '12:00:00', 'Available'),
-(15, 'DOC_SARAH', '2026-04-12', '14:30:00', '15:30:00', 'Booked');
+(15, 'DOC_SARAH', '2026-04-12', '14:30:00', '15:30:00', 'Booked'),
+(16, 'DOC_EA8D58', '2026-04-10', '21:01:00', '22:01:00', 'Booked'),
+(18, 'DOC_ARJUN', '2026-04-10', '08:20:00', '21:21:00', 'Available'),
+(19, 'DOC_SARAH', '2026-04-12', '09:10:00', '10:10:00', 'Booked'),
+(20, 'DOC_ARJUN', '2026-04-12', '18:12:00', '19:13:00', 'Booked'),
+(22, 'DOC_ARJUN', '2026-04-12', '09:00:00', '10:00:00', 'Available'),
+(23, 'DOC_ARJUN', '2026-04-12', '16:00:00', '17:00:00', 'Booked'),
+(24, 'DOC_ARJUN', '2026-04-12', '15:00:00', '16:00:00', 'Available'),
+(25, 'DOC_ARJUN', '2026-04-12', '14:00:00', '15:00:00', 'Available'),
+(26, 'DOC_ARJUN', '2026-04-12', '12:00:00', '13:00:00', 'Booked'),
+(27, 'DOC_ARJUN', '2026-04-12', '11:00:00', '12:00:00', 'Available'),
+(28, 'DOC_ARJUN', '2026-04-12', '10:00:00', '11:00:00', 'Available');
 
 -- --------------------------------------------------------
 
@@ -118,6 +147,7 @@ CREATE TABLE `doctor_profiles` (
 
 INSERT INTO `doctor_profiles` (`user_id`, `specialization`, `consultation_fee`, `bio`) VALUES
 ('DOC_ARJUN', 'Dermatologist', 800.00, 'Skin care and cosmetic treatment specialist.'),
+('DOC_EA8D58', 'General', 500.00, 'Senior Dentist'),
 ('DOC_EMILY', 'Pediatrician', 600.00, 'Caring for children from birth to young adulthood.'),
 ('DOC_MIKE', 'Neurologist', 900.00, 'Specializes in brain and nervous system disorders.'),
 ('DOC_SARAH', 'Cardiologist', 740.00, 'Expert in heart health with 10+ years experience.');
@@ -157,7 +187,15 @@ CREATE TABLE `notifications` (
 
 INSERT INTO `notifications` (`notification_id`, `user_id`, `title`, `message`, `is_read`, `created_at`) VALUES
 (1, 'PAT_USER', 'Health Notice', 'Keep your prescriptions and reports ready before the visit.', 0, '2026-04-05 13:43:03'),
-(2, 'PAT_USER', 'Upcoming Visit', 'You have an appointment with Dr. Sarah Lee at 09:00 AM today.', 0, '2026-04-05 13:43:03');
+(2, 'PAT_USER', 'Upcoming Visit', 'You have an appointment with Dr. Sarah Lee at 09:00 AM today.', 0, '2026-04-05 13:43:03'),
+(3, 'PAT_002', 'Appointment Reminder', 'Reminder: You have an appointment with Dr. Dr. Sarah Lee tomorrow at 02:30 PM.', 1, '2026-04-11 13:13:05'),
+(4, 'PAT_003', 'Appointment Reminder', 'You have an appointment with Dr. Dr. Arjun Mehta tomorrow at 06:12 PM.', 1, '2026-04-11 13:28:55'),
+(5, 'DOC_SARAH', 'Appointment Reminder', 'You have an appointment with Stacy Mitchell tomorrow (Apr 12, 2026) at 02:30 PM. Appointment ref. #13.', 0, '2026-04-11 14:05:48'),
+(6, 'PAT_003', 'Appointment Reminder', 'You have an appointment with Dr. Dr. Arjun Mehta tomorrow (Apr 12, 2026) at 06:12 PM. Appointment ref. #16.', 1, '2026-04-11 14:08:06'),
+(7, 'DOC_ARJUN', 'Appointment Reminder', 'You have an appointment with James Wilson tomorrow (Apr 12, 2026) at 06:12 PM. Appointment ref. #16.', 1, '2026-04-11 14:08:33'),
+(8, 'DOC_ARJUN', 'Account updated by admin', 'An administrator updated your account. Your display name is now: Dr. Amit Mehta. Your email is now: arjun123@spentra.com.', 1, '2026-04-11 14:15:16'),
+(9, 'PAT_002', 'Appointment Reminder', 'You have an appointment with Dr. Dr. Sarah Lee tomorrow (Apr 12, 2026) at 02:30 PM. Appointment ref. #13.', 1, '2026-04-11 14:15:36'),
+(10, 'DOC_ARJUN', 'New Appointment', 'James Wilson has booked an appointment with you for 2026-04-12 at 12:00.', 1, '2026-04-12 05:27:39');
 
 -- --------------------------------------------------------
 
@@ -184,6 +222,7 @@ INSERT INTO `patient_profiles` (`user_id`, `dob`, `blood_group`, `gender`, `cont
 ('PAT_002', '1995-04-12', 'O+', NULL, '9801112223', 'Lalitpur, Nepal', NULL, NULL),
 ('PAT_003', '1988-11-20', 'A-', NULL, '9803334445', 'Bhaktapur, Nepal', NULL, NULL),
 ('PAT_004', '1992-06-15', 'B+', NULL, '9805556667', 'Pokhara, Nepal', NULL, NULL),
+('PAT_9628', '2006-01-01', NULL, NULL, '9876109876', NULL, NULL, NULL),
 ('PAT_USER', '1990-05-15', 'O+', NULL, '9801112220', 'Kathmandu, Nepal', NULL, NULL);
 
 -- --------------------------------------------------------
@@ -207,13 +246,15 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`user_id`, `full_name`, `email`, `password_hash`, `role`, `created_at`) VALUES
 ('ADM_001', 'System Administrator', 'admin@spentra.com', 'admin_hash_123', 'Admin', '2026-04-08 17:53:07'),
-('DOC_ARJUN', 'Dr. Arjun Mehta', 'arjun123@spentra.com', 'hash123', 'Doctor', '2026-04-05 13:43:02'),
+('DOC_ARJUN', 'Dr. Amit Mehta', 'arjun123@spentra.com', 'hash123', 'Doctor', '2026-04-05 13:43:02'),
+('DOC_EA8D58', 'Dr. Subodh Regmi', 'subodh@email.com', 'hash123', 'Doctor', '2026-04-09 14:16:30'),
 ('DOC_EMILY', 'Dr. Emily Blunt', 'emily@spentra.com', 'hash123', 'Doctor', '2026-04-05 13:43:02'),
 ('DOC_MIKE', 'Dr. Mike Ross', 'mike@spentra.com', 'hash123', 'Doctor', '2026-04-05 13:43:02'),
 ('DOC_SARAH', 'Dr. Sarah Lee', 'sarah@spentra.com', 'hash123', 'Doctor', '2026-04-05 13:43:02'),
 ('PAT_002', 'Stacy Mitchell', 'stacy@email.com', 'hash123', 'Patient', '2026-04-05 13:43:02'),
 ('PAT_003', 'James Wilson', 'james@email.com', 'hash123', 'Patient', '2026-04-05 13:43:02'),
-('PAT_004', 'Alina Rodriguez', 'alina@email.com', 'hash123', 'Patient', '2026-04-05 13:43:02'),
+('PAT_004', 'Elina Rodriguez', 'elina@email.com', 'hash123', 'Patient', '2026-04-05 13:43:02'),
+('PAT_9628', 'Bijay Budhathoki', 'bijay@email.com', 'hash123', 'Patient', '2026-04-09 14:24:04'),
 ('PAT_USER', 'John Doe', 'john@email.com', 'hash123', 'Patient', '2026-04-05 13:43:02');
 
 --
@@ -284,19 +325,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `doctor_approvals`
 --
 ALTER TABLE `doctor_approvals`
-  MODIFY `approval_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `approval_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `doctor_availability`
 --
 ALTER TABLE `doctor_availability`
-  MODIFY `avail_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `avail_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `earnings`
@@ -308,7 +349,7 @@ ALTER TABLE `earnings`
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- Constraints for dumped tables

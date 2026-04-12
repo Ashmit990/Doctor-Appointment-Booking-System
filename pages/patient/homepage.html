@@ -8,49 +8,65 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="homepage.css" />
+  <style>
+    /* Match doctor dashboard “Mark all as read” accent (#007E85) */
+    .patient-notify-primary {
+      color: #007e85;
+    }
+
+    /* Fixed panel must not intercept clicks while closed (hidden + fixed edge cases) */
+    #notificationPanel.hidden {
+      pointer-events: none !important;
+    }
+  </style>
 </head>
 
 <body class="bg-slate-100 min-h-screen font-sans">
   <div class="flex flex-col md:flex-row min-h-screen relative">
     <aside
-      class="w-full md:w-44 bg-teal-700 text-white flex flex-row md:flex-col items-center justify-around md:justify-start py-2 md:py-8 px-2 md:px-0 gap-1 md:gap-4 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] md:shadow-xl fixed bottom-0 md:sticky md:top-0 left-0 h-auto md:h-screen z-[100] overflow-x-auto md:overflow-y-auto">
-      <div class="hidden md:flex items-center justify-center gap-2 mb-4">
+      class="w-full md:w-60 bg-[#0a5a5d] text-white flex flex-row md:flex-col items-center justify-around md:justify-start py-2 md:py-0 px-2 md:px-0 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] md:shadow-xl fixed bottom-0 md:sticky md:top-0 left-0 h-auto md:h-screen z-[100] overflow-x-auto md:overflow-y-auto">
+      
+      <div class="hidden md:flex w-full px-6 py-7 items-center gap-3 border-b border-white/10 shrink-0 mb-2">
         <img src="../../src/assets/Logo.svg" alt="Logo" class="w-8 h-8">
-        <span class="text-white font-bold text-sm">Healthcare</span>
+        <span class="text-white font-bold text-lg">Healthcare</span>
       </div>
-      <button
-        class="w-16 h-14 sm:w-20 sm:h-16 md:w-36 md:h-24 rounded-xl md:rounded-2xl bg-white shadow-md flex flex-col items-center justify-center gap-1 md:gap-1.5"
-        title="Home">
-        <i data-lucide="house" class="w-6 h-6 md:w-7 md:h-7 text-teal-700"></i>
-        <span class="text-teal-700 font-bold text-[10px] md:text-sm text-center leading-tight">Home</span>
-      </button>
 
-      <button onclick="goToDashboard()"
-        class="w-16 h-14 sm:w-20 sm:h-16 md:w-36 md:h-24 rounded-xl md:rounded-2xl bg-white/15 hover:bg-white/25 transition-all duration-200 flex flex-col items-center justify-center gap-1 md:gap-1.5 shadow-sm"
-        title="My Appointments">
-        <i data-lucide="calendar-days" class="w-6 h-6 md:w-7 md:h-7 text-white"></i>
-        <span class="text-white font-medium text-[10px] md:text-sm text-center leading-tight">Appointments</span>
-      </button>
-
-      <button onclick="goToProfile()"
-        class="w-16 h-14 sm:w-20 sm:h-16 md:w-36 md:h-24 rounded-xl md:rounded-2xl bg-white/15 hover:bg-white/25 transition-all duration-200 flex flex-col items-center justify-center gap-1 md:gap-1.5 shadow-sm"
-        title="Profile">
-        <i data-lucide="user" class="w-6 h-6 md:w-7 md:h-7 text-white"></i>
-        <span class="text-white font-medium text-[10px] md:text-sm text-center leading-tight">Profile</span>
-      </button>
-
-      <div class="md:mt-auto mb-0 md:mb-4 flex justify-center">
-        <button type="button" onclick="logoutPatient()"
-          class="w-16 h-14 sm:w-20 sm:h-16 md:w-36 md:h-24 rounded-xl md:rounded-2xl bg-white/15 hover:bg-white/25 transition-all duration-200 flex flex-col items-center justify-center gap-1 md:gap-1.5 shadow-sm"
-          title="Logout">
-          <i data-lucide="log-out" class="w-6 h-6 md:w-7 md:h-7 text-white"></i>
-          <span class="text-white font-medium text-[10px] md:text-sm text-center">Logout</span>
+      <nav class="flex flex-row md:flex-col justify-around md:justify-start w-full md:flex-1 md:px-3 md:gap-1 md:pb-3">
+        <button
+          class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl bg-white/20 text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left"
+          title="Home">
+          <i data-lucide="house" class="w-6 h-6 md:w-5 md:h-5 text-white shrink-0"></i>
+          <span class="mt-1 md:mt-0 font-medium whitespace-nowrap">Home</span>
         </button>
-      </div>
+
+        <button onclick="goToDashboard()"
+          class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left"
+          title="My Appointments">
+          <i data-lucide="calendar-days" class="w-6 h-6 md:w-5 md:h-5 shrink-0"></i>
+          <span class="mt-1 md:mt-0 font-medium whitespace-nowrap">Appointments</span>
+        </button>
+
+        <button onclick="goToProfile()"
+          class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left"
+          title="Profile">
+          <i data-lucide="user" class="w-6 h-6 md:w-5 md:h-5 shrink-0"></i>
+          <span class="mt-1 md:mt-0 font-medium whitespace-nowrap">Profile</span>
+        </button>
+
+        <div class="hidden md:block mt-auto border-t border-white/10 pt-3"></div>
+        
+        <button type="button" onclick="logoutPatient()"
+          class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl text-white/65 hover:bg-white/10 hover:text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left md:justify-start"
+          title="Logout">
+          <i data-lucide="log-out" class="w-6 h-6 md:w-5 md:h-5 shrink-0"></i>
+          <span class="mt-1 md:mt-0 font-medium whitespace-nowrap">Logout</span>
+        </button>
+      </nav>
     </aside>
 
-    <main class="flex-1 p-4 md:p-8 pb-24 md:pb-8 w-full overflow-x-hidden">
-      <div class="max-w-7xl mx-auto bg-white rounded-[32px] shadow-[0_20px_60px_rgba(15,23,42,0.08)] p-5 md:p-8">
+    <main class="flex-1 overflow-x-hidden overflow-y-visible p-4 md:p-8 pb-24 md:pb-8 w-full">
+      <div
+        class="relative max-w-7xl mx-auto bg-white rounded-[32px] shadow-[0_20px_60px_rgba(15,23,42,0.08)] p-5 md:p-8">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
           <div class="pt-2">
 
@@ -60,14 +76,17 @@
             </h1>
           </div>
 
-          <div class="flex flex-col sm:flex-row gap-3 sm:items-center relative w-full lg:w-auto mt-4 lg:mt-0">
+          <div id="doctorNotificationPanel"
+            class="hidden fixed top-20 right-8 w-[min(calc(100vw-2rem),390px)] bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden z-[300]">
             <button id="notificationBtn" type="button"
-              class="relative w-12 h-12 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-2xl font-medium transition flex items-center justify-center"
-              title="Alerts">
-              <i data-lucide="bell" class="w-5 h-5"></i>
+              class="relative isolate w-12 h-12 shrink-0 cursor-pointer border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl font-medium transition flex items-center justify-center"
+              title="Notifications">
+              <span class="pointer-events-none flex items-center justify-center" aria-hidden="true">
+                <i data-lucide="bell" class="w-5 h-5"></i>
+              </span>
               <span id="notificationCount"
-                class="absolute -top-2 -right-2 min-w-[22px] h-[22px] px-1 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center">
-                4
+                class="hidden absolute -top-1 -right-1 min-w-[22px] h-[22px] px-1 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center pointer-events-none">
+                0
               </span>
             </button>
 
@@ -75,23 +94,6 @@
               class="bg-teal-600 hover:bg-teal-700 flex-1 sm:flex-none text-center text-white px-5 py-3 rounded-2xl font-medium shadow-sm transition">
               Book Appointment
             </button>
-
-            <!-- ====================== NOTIFICATION PANEL START ====================== -->
-            <div id="notificationPanel"
-              class="hidden absolute right-0 sm:right-auto md:right-0 top-16 w-[300px] sm:w-[360px] md:w-[390px] bg-white rounded-[24px] border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.18)] overflow-hidden z-50">
-              <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-                <h3 class="text-xl font-bold text-slate-800">
-                  Notifications
-                </h3>
-                <button id="markAllReadBtn" type="button"
-                  class="text-sm font-medium text-blue-600 hover:text-blue-700 transition">
-                  Mark all as read
-                </button>
-              </div>
-
-              <div id="notificationList" class="max-h-[430px] overflow-y-auto"></div>
-            </div>
-            <!-- ======================= NOTIFICATION PANEL END ======================= -->
           </div>
         </div>
 
@@ -291,12 +293,24 @@
             </div>
           </div>
         </section>
+
+        <!-- Inside .relative card: toolbar z-[80] stacks above this panel (z-[60]) so the bell stays clickable -->
+        <div id="notificationPanel"
+          class="hidden fixed w-[min(calc(100vw-2rem),390px)] max-w-[calc(100vw-2rem)] bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden z-[60] pointer-events-auto">
+          <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <h3 class="text-lg font-bold text-gray-800">Notifications</h3>
+            <button id="markAllReadBtn" type="button"
+              class="text-sm font-medium patient-notify-primary hover:opacity-80 transition">Mark all as read</button>
+          </div>
+          <div id="notificationList" class="notification-panel-list max-h-[430px] overflow-y-auto"></div>
+        </div>
       </div>
     </main>
   </div>
 
-  <div id="bookingModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white w-full max-w-3xl h-[600px] md:h-[520px] max-h-[90vh] rounded-3xl shadow-2xl relative overflow-hidden">
+  <div id="bookingModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[100] p-4">
+    <div
+      class="bg-white w-full max-w-3xl h-[600px] md:h-[520px] max-h-[90vh] rounded-3xl shadow-2xl relative overflow-hidden">
       <button onclick="closeBookingModal()"
         class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white shadow flex items-center justify-center">
         ✕

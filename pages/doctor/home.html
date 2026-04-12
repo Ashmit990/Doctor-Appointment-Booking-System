@@ -108,11 +108,21 @@
         <!-- MAIN CONTENT -->
         <main class="ml-0 md:ml-64 flex-1 overflow-y-auto pb-20 md:pb-0">
             <!-- TOP BAR -->
-            <div class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
-                <div class="px-8 py-4 flex justify-between items-center">
-                    <div>
+            <div class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm overflow-visible">
+                <div class="px-8 py-4 flex justify-between items-center gap-4 overflow-visible">
+                    <div class="min-w-0 flex-1">
                         <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
                         <p id="current-date" class="text-sm text-gray-500"></p>
+                    </div>
+                    <div class="relative z-[200] flex shrink-0 items-center">
+                        <button id="doctorNotificationBtn" type="button"
+                            onclick="window.__doctorNotificationBarToggle && window.__doctorNotificationBarToggle(event)"
+                            class="relative isolate cursor-pointer w-12 h-12 border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl flex items-center justify-center transition"
+                            title="Notifications">
+                            <span class="pointer-events-none flex items-center justify-center" aria-hidden="true"><i data-lucide="bell" class="w-5 h-5"></i></span>
+                            <span id="doctorNotificationCount"
+                                class="hidden absolute -top-1 -right-1 min-w-[22px] h-[22px] px-1 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center pointer-events-none">0</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -211,8 +221,19 @@
         </main>
     </div>
 
+    <!-- Panel outside main/sidebar so nothing stacks over the hit target -->
+    <div id="doctorNotificationPanel"
+        class="hidden fixed w-[min(calc(100vw-2rem),390px)] max-w-[calc(100vw-2rem)] bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden z-[300] pointer-events-auto">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <h3 class="text-lg font-bold text-gray-800">Notifications</h3>
+            <button id="doctorMarkAllReadBtn" type="button"
+                class="text-sm font-medium primary-color hover:opacity-80 transition">Mark all as read</button>
+        </div>
+        <div id="doctorNotificationList" class="max-h-[430px] overflow-y-auto"></div>
+    </div>
+
     <!-- APPOINTMENT DETAIL MODAL -->
-    <div id="appointment-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50">
+    <div id="appointment-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[400]">
         <div class="bg-white rounded-2xl card-shadow max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div class="sticky top-0 bg-primary text-white px-6 py-4 flex justify-between items-center">
                 <h3 class="text-xl font-bold" id="modal-patient-name">Patient Name</h3>

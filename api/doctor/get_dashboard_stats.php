@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../config/db.php';
+require_once __DIR__ . '/../includes/appointment_reminder_sync.php';
 
 header('Content-Type: application/json');
 
@@ -53,6 +54,8 @@ try {
     $earnings_data = $stmt->get_result()->fetch_assoc();
     $total_earnings = $earnings_data['total'] ?? 0;
     $stmt->close();
+
+    sync_doctor_appointment_reminders($conn, $doctor_id);
 
     // 6. Unread Notifications
     $stmt = $conn->prepare("SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND is_read = 0");

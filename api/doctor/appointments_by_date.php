@@ -28,10 +28,15 @@ try {
     $stmt = $conn->prepare("
         SELECT 
             a.appointment_id as apt_id,
+            a.patient_id,
             a.app_date,
             a.app_time as appointment_time,
             a.room_num as room_number,
             a.reason_for_visit,
+            a.doctor_notes,
+            a.prescriptions,
+            a.rating,
+            a.feedback,
             a.status,
             u.full_name as patient_name,
             pp.contact_number,

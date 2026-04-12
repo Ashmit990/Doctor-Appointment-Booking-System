@@ -1,3 +1,8 @@
+/* Keep notification bell above the fixed dropdown (same card stacking context) */
+.patient-notify-toolbar {
+  isolation: isolate;
+}
+
 .hero-panel {
   box-shadow: 0 18px 40px rgba(20, 184, 166, 0.18);
 }
@@ -8,6 +13,40 @@
   background: #ef4444;
   border-radius: 9999px;
   margin: 4px auto 0;
+}
+
+/* Match doctor dashboard notification row highlight */
+.bg-primary-light {
+  background-color: rgba(0, 126, 133, 0.1);
+}
+
+/* Normal sentence wrapping */
+.notification-panel-copy {
+  word-break: normal;
+  overflow-wrap: break-word;
+  hyphens: none;
+  white-space: normal;
+}
+
+.notification-panel-list {
+  scrollbar-gutter: stable;
+}
+
+.notification-panel-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notification-panel-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notification-panel-list::-webkit-scrollbar-thumb {
+  background: rgba(13, 148, 136, 0.35);
+  border-radius: 9999px;
+}
+
+.notification-panel-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(13, 148, 136, 0.55);
 }
 
 .notification-card {

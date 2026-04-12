@@ -12,36 +12,35 @@ function goToProfile() {
   window.location.href = "profile.html";
 }
 
+function escapeHtml(str) {
+  if (str == null) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/** Collapse odd whitespace/newlines from DB so text wraps as normal sentences (not one word per line) */
+function normalizeNotificationText(str) {
+  if (str == null) return "";
+  return String(str)
+    .replace(/\r\n/g, "\n")
+    .replace(/\n+/g, " ")
+    .replace(/[ \t]+/g, " ")
+    .trim();
+}
+
 function notificationIcon(title) {
-  if (!title) return { icon: "bell", iconBg: "bg-slate-100", iconColor: "text-slate-600", dot: "bg-teal-500" };
+  if (!title) return { icon: "bell", iconBg: "bg-gray-100", iconColor: "text-gray-600" };
   const t = title.toLowerCase();
   if (t.includes("health") || t.includes("notice"))
-    return {
-      icon: "shield-alert",
-      iconBg: "bg-yellow-100",
-      iconColor: "text-yellow-600",
-      dot: "bg-yellow-500",
-    };
-  if (t.includes("reminder") || t.includes("appointment"))
-    return {
-      icon: "calendar-clock",
-      iconBg: "bg-orange-100",
-      iconColor: "text-orange-600",
-      dot: "bg-teal-500",
-    };
-  if (t.includes("upcoming") || t.includes("visit"))
-    return {
-      icon: "calendar-clock",
-      iconBg: "bg-slate-100",
-      iconColor: "text-slate-600",
-      dot: "bg-teal-500",
-    };
-  return {
-    icon: "circle-alert",
-    iconBg: "bg-red-100",
-    iconColor: "text-red-600",
-    dot: "bg-red-500",
-  };
+    return { icon: "shield-alert", iconBg: "bg-yellow-100", iconColor: "text-yellow-600" };
+  if (t.includes("account") || t.includes("admin"))
+    return { icon: "user-round-cog", iconBg: "bg-violet-100", iconColor: "text-violet-600" };
+  if (t.includes("reminder") || t.includes("appointment") || t.includes("upcoming") || t.includes("visit"))
+    return { icon: "calendar-clock", iconBg: "bg-orange-100", iconColor: "text-orange-600" };
+  return { icon: "circle-alert", iconBg: "bg-red-100", iconColor: "text-red-600" };
 }
 
 async function loadHomeData() {
@@ -127,43 +126,30 @@ function applyHomeToUI(data) {
   }
 }
 
+// ... existing variables ...
+
 function renderNotificationList(rows) {
-  const notificationList = document.getElementById("notificationList");
+  // CHANGE THIS: doctorNotificationList instead of notificationList
+  const notificationList = document.getElementById("doctorNotificationList");
+  if (!notificationList) return;
   notificationList.innerHTML = "";
 
-  rows.forEach((item) => {
-    const meta = notificationIcon(item.title);
-    const when = item.created_at
-      ? new Date(item.created_at.replace(" ", "T")).toLocaleString()
-      : "";
-    const wrap = document.createElement("div");
-    wrap.className =
-      "notification-card px-5 py-4 border-b border-slate-100 last:border-b-0";
-    wrap.innerHTML = `
-      <div class="flex gap-4">
-        <div class="pt-1">
-          <div class="w-10 h-10 rounded-full ${meta.iconBg} ${meta.iconColor} flex items-center justify-center">
-            <i data-lucide="${meta.icon}" class="w-5 h-5"></i>
-          </div>
-          <div class="w-2.5 h-2.5 rounded-full ${meta.dot} mt-3 mx-auto"></div>
-        </div>
-        <div class="flex-1">
-          <div class="flex items-start justify-between gap-4">
-            <p class="text-[16px] leading-8 text-slate-600">
-              <span class="font-bold text-slate-800">${item.title || "Notice"}</span>
-              <span> ${item.message || ""}</span>
-            </p>
-            <span class="text-sm text-slate-400 whitespace-nowrap">${when}</span>
-          </div>
-        </div>
-      </div>
-    `;
-    notificationList.appendChild(wrap);
-  });
+  // CHANGE THIS: doctorNotificationCount instead of notificationCount
+  const unreadCount = rows.filter((item) => parseInt(item.is_read, 10) === 0).length;
+  const badge = document.getElementById("doctorNotificationCount");
+  if (badge) {
+    badge.textContent = unreadCount;
+    badge.classList.toggle("hidden", unreadCount < 1);
+  }
 
-  if (typeof lucide !== "undefined") lucide.createIcons();
+  if (rows.length === 0) {
+    notificationList.innerHTML = '<div class="p-6 text-center text-gray-400">No notifications</div>';
+    return;
+  }
+
+  // ... (rest of your rows.forEach logic remains the same)
 }
-
+// ... rest of the file stays the same ...
 async function refreshCalendarDots(year, month) {
   const r = await fetch(
     `${API_BASE}/patient/calendar.php?year=${year}&month=${month}`,
@@ -331,35 +317,142 @@ document.getElementById("fullCalNavNext")?.addEventListener("click", async () =>
   if (grid) buildCalendarGrid(grid, calViewYear, calViewMonth, false);
 });
 
-const notificationBtn = document.getElementById("notificationBtn");
-const notificationPanel = document.getElementById("notificationPanel");
-const markAllReadBtn = document.getElementById("markAllReadBtn");
+// --- NOTIFICATION PANEL LOGIC (DOCTOR) ---
+const doctorNotificationBtn = document.getElementById("doctorNotificationBtn");
+const doctorNotificationPanel = document.getElementById("doctorNotificationPanel");
+const doctorMarkAllReadBtn = document.getElementById("doctorMarkAllReadBtn");
 
-notificationBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
-  notificationPanel.classList.toggle("hidden");
-});
+function updateDoctorNotificationPanelPosition() {
+  const btn = document.getElementById("doctorNotificationBtn");
+  const panel = document.getElementById("doctorNotificationPanel");
+  if (!btn || !panel || panel.classList.contains("hidden")) return;
 
-document.addEventListener("click", (e) => {
-  if (
-    !notificationPanel.contains(e.target) &&
-    !notificationBtn.contains(e.target)
-  ) {
-    notificationPanel.classList.add("hidden");
+  const rect = btn.getBoundingClientRect();
+  const panelWidth = Math.min(window.innerWidth - 32, 390);
+  let left = rect.right - panelWidth;
+  if (left < 16) left = 16;
+
+  panel.style.width = `${panelWidth}px`;
+  panel.style.top = `${Math.round(rect.bottom + 8)}px`;
+  panel.style.left = `${Math.round(left)}px`;
+}
+
+// This matches the onclick="window.__doctorNotificationBarToggle(event)" in your HTML
+window.__doctorNotificationBarToggle = function (e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
   }
+  const panel = document.getElementById("doctorNotificationPanel");
+  const btn = document.getElementById("doctorNotificationBtn");
+  if (!panel || !btn) return;
+
+  if (panel.classList.contains("hidden")) {
+    panel.classList.remove("hidden");
+    updateDoctorNotificationPanelPosition();
+
+    // Load notifications from the database
+    loadNotifications()
+      .then((rows) => renderNotificationList(rows))
+      .catch((err) => console.error(err));
+  } else {
+    panel.classList.add("hidden");
+  }
+};
+
+// Close panel when clicking outside
+document.addEventListener("click", (e) => {
+  const panel = document.getElementById("doctorNotificationPanel");
+  const btn = document.getElementById("doctorNotificationBtn");
+  if (!panel || panel.classList.contains("hidden") || btn.contains(e.target) || panel.contains(e.target)) {
+    return;
+  }
+  panel.classList.add("hidden");
 });
 
-markAllReadBtn.addEventListener("click", async () => {
+// Sync position on resize
+window.addEventListener("resize", updateDoctorNotificationPanelPosition);
+
+function patientNotificationBarToggle(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  const panel = document.getElementById("notificationPanel");
+  const btn = document.getElementById("notificationBtn");
+  if (!panel || !btn) return;
+
+  if (panel.classList.contains("hidden")) {
+    // Position while still display:none so a stray fixed layer never covers the bell
+    const rect = btn.getBoundingClientRect();
+    const panelWidth = Math.min(window.innerWidth - 32, 390);
+    let left = rect.right - panelWidth;
+    if (left < 16) left = 16;
+    panel.style.width = `${panelWidth}px`;
+    panel.style.top = `${Math.round(rect.bottom + 8)}px`;
+    panel.style.left = `${Math.round(left)}px`;
+    panel.classList.remove("hidden");
+    loadNotifications()
+      .then((rows) => renderNotificationList(rows))
+      .catch((err) => console.error(err));
+  } else {
+    panel.classList.add("hidden");
+  }
+}
+
+window.__patientNotificationBarToggle = patientNotificationBarToggle;
+
+notificationBtn?.addEventListener(
+  "click",
+  (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    patientNotificationBarToggle(ev);
+  },
+  true,
+);
+
+window.addEventListener("resize", () => updatePatientNotificationPanelPosition());
+window.addEventListener("orientationchange", () => {
+  requestAnimationFrame(() => updatePatientNotificationPanelPosition());
+});
+
+document.addEventListener(
+  "click",
+  (e) => {
+    setTimeout(() => {
+      if (
+        !notificationPanel ||
+        !notificationBtn ||
+        notificationPanel.classList.contains("hidden") ||
+        notificationBtn.contains(e.target) ||
+        notificationPanel.contains(e.target)
+      ) {
+        return;
+      }
+      notificationPanel.classList.add("hidden");
+    }, 0);
+  },
+  false,
+);
+
+markAllReadBtn?.addEventListener("click", async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
   await fetch(`${API_BASE}/patient/notifications.php`, {
     method: "PATCH",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action: "mark_all_read" }),
   });
-  document.getElementById("notificationCount").classList.add("hidden");
+
+  updateBadge(0);
+
+  const updatedNotes = await loadNotifications();
+  renderNotificationList(updatedNotes);
 });
 
-document.getElementById("calendarCardBtn").addEventListener("click", openFullCalendar);
+document.getElementById("calendarCardBtn")?.addEventListener("click", openFullCalendar);
 document.getElementById("closeCalendarModal").addEventListener("click", closeCalendarPopup);
 document.getElementById("calendarModal").addEventListener("click", (e) => {
   if (e.target === document.getElementById("calendarModal")) closeCalendarPopup();
@@ -392,3 +485,16 @@ document.getElementById("calendarModal").addEventListener("click", (e) => {
     console.error(e);
   }
 })();
+
+function updateBadge(unreadCount) {
+  const badge = document.getElementById("notificationCount");
+  if (!badge) return;
+
+  if (unreadCount > 0) {
+    badge.textContent = unreadCount;
+    badge.classList.remove("hidden"); // Show the red popup if there are unread items
+  } else {
+    badge.textContent = "0";
+    badge.classList.add("hidden"); // Hide the red popup when count is 0
+  }
+}

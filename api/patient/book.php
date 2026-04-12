@@ -101,6 +101,23 @@ try {
         exit;
     }
 
+    $pn = $conn->prepare("SELECT full_name FROM users WHERE user_id = ?");
+    $pn->bind_param("s", $patient_id);
+    $pn->execute();
+    $pn_res = $pn->get_result()->fetch_assoc();
+    $pat_name = $pn_res ? $pn_res['full_name'] : 'A patient';
+    $pn->close();
+
+    $notif_title = "New Appointment";
+    $notif_msg = "{$pat_name} has booked an appointment with you for {$app_date} at " . substr($app_time, 0, 5) . ".";
+    
+    $ns = $conn->prepare("INSERT INTO notifications (user_id, title, message, is_read, created_at) VALUES (?, ?, ?, 0, NOW())");
+    $ns->bind_param("sss", $doctor_id, $notif_title, $notif_msg);
+    if (!$ns->execute()) {
+        error_log("Failed to insert notification: " . $ns->error);
+    }
+    $ns->close();
+
     if (!$conn->commit()) {
         echo json_encode(['status' => 'error', 'message' => 'Could not finalize booking: ' . $conn->error]);
         $conn->close();

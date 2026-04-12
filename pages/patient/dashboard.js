@@ -15,6 +15,86 @@ function goToProfile() {
   window.location.href = "profile.html";
 }
 
+function dashboardNotificationIcon(title) {
+  if (!title) return { icon: "bell", iconBg: "bg-slate-100", iconColor: "text-slate-600" };
+  const t = title.toLowerCase();
+  if (t.includes("account") || t.includes("admin"))
+    return { icon: "user-round-cog", iconBg: "bg-violet-100", iconColor: "text-violet-600" };
+  if (t.includes("reminder") || t.includes("appointment"))
+    return { icon: "calendar-clock", iconBg: "bg-orange-100", iconColor: "text-orange-600" };
+  return { icon: "circle-alert", iconBg: "bg-red-100", iconColor: "text-red-600" };
+}
+
+async function loadDashboardNotifications() {
+  const r = await fetch(`${API_BASE}/patient/notifications.php`, { credentials: "include" });
+  const j = await r.json();
+  if (j.status !== "success") return [];
+  return j.data || [];
+}
+
+function updateDashboardNotificationBadge(unreadCount) {
+  const badge = document.getElementById("dashboardNotificationCount");
+  if (!badge) return;
+  if (unreadCount > 0) {
+    badge.textContent = unreadCount;
+    badge.classList.remove("hidden");
+  } else {
+    badge.textContent = "0";
+    badge.classList.add("hidden");
+  }
+}
+
+function renderDashboardNotificationList(rows) {
+  const notificationList = document.getElementById("dashboardNotificationList");
+  if (!notificationList) return;
+
+  notificationList.innerHTML = "";
+  const unreadCount = rows.filter((item) => parseInt(item.is_read, 10) === 0).length;
+  updateDashboardNotificationBadge(unreadCount);
+
+  if (rows.length === 0) {
+    notificationList.innerHTML =
+      '<div class="p-6 text-center text-slate-400">No notifications</div>';
+    return;
+  }
+
+  rows.forEach((item) => {
+    const meta = dashboardNotificationIcon(item.title);
+    const isUnread = parseInt(item.is_read, 10) === 0;
+    const wrap = document.createElement("div");
+    wrap.className = `px-5 py-4 border-b border-slate-50 cursor-pointer transition hover:bg-slate-50 ${isUnread ? "bg-teal-50/30" : ""}`;
+    wrap.innerHTML = `
+      <div class="flex gap-4">
+        <div class="relative">
+          <div class="w-10 h-10 rounded-full ${meta.iconBg} ${meta.iconColor} flex items-center justify-center">
+            <i data-lucide="${meta.icon}" class="w-5 h-5"></i>
+          </div>
+          ${isUnread ? `<div class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></div>` : ""}
+        </div>
+        <div class="flex-1">
+          <p class="text-sm font-bold text-slate-800">${item.title}</p>
+          <p class="text-xs text-slate-600">${item.message}</p>
+          <p class="text-[10px] text-slate-400 mt-1">${new Date(item.created_at).toLocaleString()}</p>
+        </div>
+      </div>`;
+
+    wrap.onclick = async () => {
+      if (isUnread) {
+        await fetch(`${API_BASE}/patient/notifications.php`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ notification_id: item.notification_id }),
+          credentials: "include",
+        });
+        const updated = await loadDashboardNotifications();
+        renderDashboardNotificationList(updated);
+      }
+    };
+    notificationList.appendChild(wrap);
+  });
+  if (typeof lucide !== "undefined") lucide.createIcons();
+}
+
 function getStatusClasses(status) {
   const s = String(status).toLowerCase();
   if (s === "upcoming") return "bg-emerald-100 text-emerald-700";
@@ -122,6 +202,13 @@ function renderAppointments(rows) {
           </button>`
               : ""
           }
+          ${
+            item.status_key === "completed" && parseInt(item.rating || 0) === 0
+              ? `<button type="button" data-feedback="${item.appointment_id}" class="feedback-btn px-4 py-2.5 rounded-2xl bg-yellow-500 text-white hover:bg-yellow-600 text-sm font-medium shadow-sm transition flex items-center gap-1">
+            <i data-lucide="star" class="w-4 h-4"></i> Rate Visit
+          </button>`
+              : ""
+          }
         </div>
       </div>
     `;
@@ -138,6 +225,13 @@ function renderAppointments(rows) {
   document.querySelectorAll(".reschedule-btn").forEach((button) => {
     button.addEventListener("click", () => {
       openRescheduleModal(Number(button.dataset.reschedule));
+    });
+  });
+
+  document.querySelectorAll(".feedback-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      const apt = cachedAppointments.find(a => a.appointment_id == button.dataset.feedback);
+      if (apt) openFeedbackModal(apt);
     });
   });
 }
@@ -297,8 +391,135 @@ document.getElementById("detailModal")?.addEventListener("click", (e) => {
   if (e.target.id === "detailModal") closeDetailModal();
 });
 
+const dashboardNotificationBtn = document.getElementById("dashboardNotificationBtn");
+const dashboardNotificationPanel = document.getElementById("dashboardNotificationPanel");
+const dashboardMarkAllReadBtn = document.getElementById("dashboardMarkAllReadBtn");
+
+dashboardNotificationBtn?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  dashboardNotificationPanel?.classList.toggle("hidden");
+});
+
+document.addEventListener("click", (e) => {
+  if (
+    dashboardNotificationPanel &&
+    dashboardNotificationBtn &&
+    !dashboardNotificationPanel.contains(e.target) &&
+    !dashboardNotificationBtn.contains(e.target)
+  ) {
+    dashboardNotificationPanel.classList.add("hidden");
+  }
+});
+
+dashboardMarkAllReadBtn?.addEventListener("click", async () => {
+  await fetch(`${API_BASE}/patient/notifications.php`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "mark_all_read" }),
+  });
+  updateDashboardNotificationBadge(0);
+  const updated = await loadDashboardNotifications();
+  renderDashboardNotificationList(updated);
+});
+
+// --- FEEDBACK MODAL LOGIC ---
+function openFeedbackModal(apt) {
+    document.getElementById('feedback-doc-name').textContent = apt.doctor_name || 'Dr.';
+    document.getElementById('feedback-apt-id').value = apt.appointment_id;
+    document.getElementById('feedback-rating-val').value = 0;
+    document.getElementById('feedback-text').value = '';
+    
+    renderStars(0);
+    
+    document.getElementById('feedbackModal').classList.remove('hidden');
+    document.getElementById('feedbackModal').classList.add('flex');
+}
+
+function closeFeedbackModal() {
+    document.getElementById('feedbackModal').classList.add('hidden');
+    document.getElementById('feedbackModal').classList.remove('flex');
+}
+
+function renderStars(rating) {
+    const container = document.getElementById('star-rating-container');
+    container.innerHTML = '';
+    document.getElementById('feedback-rating-val').value = rating;
+    
+    for (let i = 1; i <= 5; i++) {
+        const star = document.createElement('i');
+        star.setAttribute('data-lucide', 'star');
+        star.className = `w-10 h-10 cursor-pointer transition transform hover:scale-110 ${i <= rating ? 'text-yellow-400 fill-current' : 'text-slate-200'}`;
+        star.onclick = () => renderStars(i);
+        container.appendChild(star);
+    }
+    lucide.createIcons();
+}
+
+async function submitFeedback() {
+    const aptId = document.getElementById('feedback-apt-id').value;
+    const rating = parseInt(document.getElementById('feedback-rating-val').value);
+    const feedback = document.getElementById('feedback-text').value;
+    
+    if (rating === 0) {
+        alert("Please select a star rating!");
+        return;
+    }
+    
+    const btn = document.getElementById('submitFeedbackBtn');
+    btn.innerHTML = 'Submitting...';
+    btn.disabled = true;
+    
+    try {
+        const res = await fetch('../../api/patient/submit_feedback.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                appointment_id: aptId,
+                rating: rating,
+                feedback: feedback
+            })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            closeFeedbackModal();
+            showSuccessToast("Feedback Sent", "Thank you for your rating.");
+            reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch(e) {
+        alert('Exception: ' + e.message);
+    } finally {
+        btn.innerHTML = 'Submit Review';
+        btn.disabled = false;
+    }
+}
+
+function checkForPendingFeedback(rows) {
+    const unrated = rows.find(a => a.status_key === "completed" && parseInt(a.rating || 0) === 0);
+    if (unrated) {
+        // Show prompt automatically for the most recent unrated one
+        const key = `prompted_feedback_${unrated.appointment_id}`;
+        if (!sessionStorage.getItem(key)) {
+            sessionStorage.setItem(key, 'true');
+            setTimeout(() => openFeedbackModal(unrated), 1000);
+        }
+    }
+}
+
 (async function initDashboard() {
   const ok = await requirePatientSession();
   if (!ok) return;
   await reload();
+  // Check feedback on load
+  if (cachedAppointments && cachedAppointments.length) {
+      checkForPendingFeedback(cachedAppointments);
+  }
+  try {
+    const notes = await loadDashboardNotifications();
+    renderDashboardNotificationList(notes);
+  } catch (err) {
+    console.error(err);
+  }
 })();

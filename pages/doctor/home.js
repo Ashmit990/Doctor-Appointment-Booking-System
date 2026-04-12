@@ -1,6 +1,103 @@
 let currentMonth = new Date(2026, 3); // April 2026
 let currentAppointmentID = null;
 
+const DOCTOR_API_BASE = '../../api';
+
+function doctorNotificationIcon(title) {
+    if (!title) return { icon: 'bell', iconBg: 'bg-gray-100', iconColor: 'text-gray-600' };
+    const t = title.toLowerCase();
+    if (t.includes('account') || t.includes('admin'))
+        return { icon: 'user-round-cog', iconBg: 'bg-violet-100', iconColor: 'text-violet-600' };
+    if (t.includes('reminder') || t.includes('appointment'))
+        return { icon: 'calendar-clock', iconBg: 'bg-orange-100', iconColor: 'text-orange-600' };
+    return { icon: 'circle-alert', iconBg: 'bg-red-100', iconColor: 'text-red-600' };
+}
+
+function updateDoctorNotificationBadge(count) {
+    const badge = document.getElementById('doctorNotificationCount');
+    if (!badge) return;
+    if (count > 0) {
+        badge.textContent = count;
+        badge.classList.remove('hidden');
+    } else {
+        badge.textContent = '0';
+        badge.classList.add('hidden');
+    }
+}
+
+function updateDoctorNotificationPanelPosition() {
+    const btn = document.getElementById('doctorNotificationBtn');
+    const panel = document.getElementById('doctorNotificationPanel');
+    if (!btn || !panel || panel.classList.contains('hidden')) return;
+    const rect = btn.getBoundingClientRect();
+    const panelWidth = Math.min(window.innerWidth - 32, 390);
+    let left = rect.right - panelWidth;
+    if (left < 16) left = 16;
+    panel.style.width = `${panelWidth}px`;
+    panel.style.top = `${Math.round(rect.bottom + 8)}px`;
+    panel.style.left = `${Math.round(left)}px`;
+}
+
+async function loadDoctorNotifications() {
+    const r = await fetch(`${DOCTOR_API_BASE}/doctor/notifications.php`, { credentials: 'include' });
+    const j = await r.json();
+    if (j.status !== 'success') return [];
+    return j.data || [];
+}
+
+function renderDoctorNotificationList(rows) {
+    const listEl = document.getElementById('doctorNotificationList');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    const unread = rows.filter((item) => parseInt(item.is_read, 10) === 0).length;
+    updateDoctorNotificationBadge(unread);
+
+    if (!rows.length) {
+        listEl.innerHTML = '<div class="p-6 text-center text-gray-400">No notifications</div>';
+        return;
+    }
+
+    rows.forEach((item) => {
+        const meta = doctorNotificationIcon(item.title);
+        const isUnread = parseInt(item.is_read, 10) === 0;
+        const wrap = document.createElement('div');
+        wrap.className = `px-5 py-4 border-b border-gray-50 cursor-pointer transition hover:bg-gray-50 ${isUnread ? 'bg-primary-light' : ''}`;
+        wrap.innerHTML = `
+            <div class="flex gap-4">
+                <div class="relative">
+                    <div class="w-10 h-10 rounded-full ${meta.iconBg} ${meta.iconColor} flex items-center justify-center">
+                        <i data-lucide="${meta.icon}" class="w-5 h-5"></i>
+                    </div>
+                    ${isUnread ? `<div class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></div>` : ''}
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-gray-800">${item.title}</p>
+                    <p class="text-xs text-gray-600">${item.message}</p>
+                    <p class="text-[10px] text-gray-400 mt-1">${new Date(item.created_at).toLocaleString()}</p>
+                </div>
+            </div>`;
+        wrap.onclick = async () => {
+            if (isUnread) {
+                await fetch(`${DOCTOR_API_BASE}/doctor/notifications.php`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ notification_id: item.notification_id }),
+                    credentials: 'include',
+                });
+                const updated = await loadDoctorNotifications();
+                renderDoctorNotificationList(updated);
+                const statsR = await fetch(`${DOCTOR_API_BASE}/doctor/get_dashboard_stats.php`, { credentials: 'include' });
+                const statsJ = await statsR.json();
+                if (statsJ.status === 'success' && statsJ.data?.stats) {
+                    updateDoctorNotificationBadge(statsJ.data.stats.unread_notifications || 0);
+                }
+            }
+        };
+        listEl.appendChild(wrap);
+    });
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
 function getStatusBadgeClass(status) {
     switch(status) {
         case 'Completed': return 'bg-green-100 text-green-800';
@@ -36,6 +133,7 @@ async function loadHomePageData() {
         document.getElementById('stat-today-visits').textContent = stats.today_appointments || 0;
         document.getElementById('stat-total-patients').textContent = data.today_appointments?.length || 0;
         document.getElementById('stat-completed').textContent = stats.completed_total || 0;
+        updateDoctorNotificationBadge(stats.unread_notifications || 0);
     }
     
     renderCalendar();
@@ -313,8 +411,70 @@ async function loadCompletedAppointmentsPanel() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('doctorNotificationBtn');
+    const panel = document.getElementById('doctorNotificationPanel');
+
+    function doctorNotificationBarToggle(e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        if (!panel) return;
+        panel.classList.toggle('hidden');
+        if (!panel.classList.contains('hidden')) {
+            requestAnimationFrame(() => {
+                updateDoctorNotificationPanelPosition();
+                loadDoctorNotifications().then((rows) => renderDoctorNotificationList(rows));
+            });
+        }
+    }
+
+    if (btn && panel) {
+        window.__doctorNotificationBarToggle = doctorNotificationBarToggle;
+    }
+
     updateCurrentDate();
     loadDoctorProfile();
     loadHomePageData();
+    loadDoctorNotifications().then((rows) => renderDoctorNotificationList(rows));
+
+    window.addEventListener('resize', () => updateDoctorNotificationPanelPosition());
+    window.addEventListener('orientationchange', () => {
+        requestAnimationFrame(() => updateDoctorNotificationPanelPosition());
+    });
+
+    document.addEventListener(
+        'click',
+        (e) => {
+            setTimeout(() => {
+                if (
+                    !panel ||
+                    !btn ||
+                    panel.classList.contains('hidden') ||
+                    btn.contains(e.target) ||
+                    panel.contains(e.target)
+                ) {
+                    return;
+                }
+                panel.classList.add('hidden');
+            }, 0);
+        },
+        false,
+    );
+
+    document.getElementById('doctorMarkAllReadBtn')?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        await fetch(`${DOCTOR_API_BASE}/doctor/notifications.php`, {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'mark_all_read' }),
+        });
+        updateDoctorNotificationBadge(0);
+        const updated = await loadDoctorNotifications();
+        renderDoctorNotificationList(updated);
+    });
+
     lucide.createIcons();
 });

@@ -109,14 +109,37 @@ try {
             throw new Exception('Doctor ID required');
         }
 
+        $stmt = $conn->prepare("SELECT full_name, email FROM users WHERE user_id = ? AND role = 'Doctor'");
+        $stmt->bind_param("s", $doctor_id);
+        $stmt->execute();
+        $before = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$before) {
+            throw new Exception('Doctor not found');
+        }
+
         // Update user info
-        $stmt = $conn->prepare("UPDATE users SET full_name = ?, email = ? WHERE user_id = ?");
+        $stmt = $conn->prepare("UPDATE users SET full_name = ?, email = ? WHERE user_id = ? AND role = 'Doctor'");
         $stmt->bind_param("sss", $full_name, $email, $doctor_id);
         
         if (!$stmt->execute()) {
             throw new Exception($stmt->error);
         }
         $stmt->close();
+
+        $nameChanged = trim((string) $before['full_name']) !== trim((string) $full_name);
+        $emailChanged = strcasecmp(trim((string) $before['email']), trim((string) $email)) !== 0;
+        if ($nameChanged || $emailChanged) {
+            $msg = 'An administrator updated your account. Your display name is now: '
+                . $full_name . '. Your email is now: ' . $email . '.';
+            $n = $conn->prepare(
+                "INSERT INTO notifications (user_id, title, message, is_read, created_at) VALUES (?, 'Account updated by admin', ?, 0, NOW())"
+            );
+            $n->bind_param("ss", $doctor_id, $msg);
+            $n->execute();
+            $n->close();
+        }
 
         // Update doctor profile
         if ($specialization !== null || $consultation_fee !== null || $bio !== null) {
