@@ -41,6 +41,10 @@
         padding-left: 4px;
       }
 
+      .custom-input.input-error {
+        border-bottom-color: #dc2626;
+      }
+
       .dropdown-animate {
         transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
       }
@@ -113,29 +117,16 @@
       }
     </style>
   </head>
-  <!-- FIX 1: Changed overflow-hidden to overflow-x-hidden to allow vertical scrolling -->
+
   <body class="overflow-x-hidden tracking-[1.1px]">
-    <!-- FIX 2: Changed h-screen to min-h-screen so container can grow beyond viewport height -->
-    <div
-      class="flex min-h-screen w-full relative animate-fade-in"
-      data-scroll-animation="animate-fade-in"
-      data-delay="0s"
-    >
+    <div class="flex min-h-screen w-full relative animate-fade-in">
+      <!-- ── Left Panel ─────────────────────────────────────────────────── -->
       <div
-        class="w-full lg:w-[45%] flex flex-col justify-center px-6 sm:px-10 xl:px-24 py-12 lg:py-0 z-20 relative bg-[#F8FAFB]"
-        data-scroll-animation="animate-slide-up"
-        data-delay="0.1s"
+        class="w-full lg:w-[45%] flex flex-col justify-center px-10 xl:px-24 z-20 relative bg-[#F8FAFB]"
       >
-        <div
-          class="max-w-md w-full mx-auto lg:mx-0 py-1"
-          data-scroll-animation="animate-slide-up"
-          data-delay="0.2s"
-        >
-          <div
-            class="mb-8 flex flex-col items-start"
-            data-scroll-animation="animate-slide-up"
-            data-delay="0.25s"
-          >
+        <div class="max-w-md w-full mx-auto lg:mx-0 py-1">
+          <!-- Logo -->
+          <div class="mb-8 flex flex-col items-start">
             <div class="flex items-center gap-3 mb-6">
               <img
                 src="../../src/assets/logo.svg"
@@ -147,81 +138,98 @@
                 ><span class="text-[#6EAB36]">care</span>
               </span>
             </div>
-
             <p
               class="text-slate-500 font-medium text-[12px] xl:text-base mt-[-10px]"
             >
-              <span>Create Account </span
-              ><span>to join our community for world-class digital care.</span>
+              <span>Create Account </span>
+              <span>to join our community for world-class digital care.</span>
             </p>
           </div>
 
-          <form id="signupForm" class="space-y-5 xl:space-y-6">
+          <form id="signupForm" class="space-y-5 xl:space-y-6" novalidate>
             <!-- 1. Full Name -->
             <div class="group">
               <label
                 class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                >Full Name</label
               >
+                Full Name
+              </label>
               <input
                 id="signupFullName"
                 type="text"
-                required
-                class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none placeholder:text-slate-300"
+                class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
+                oninput="clearErr('signupFullName')"
               />
+              <p
+                id="signupFullName_err"
+                class="hidden text-red-600 text-xs font-semibold mt-1"
+              ></p>
             </div>
 
             <!-- 2. Age -->
             <div class="group">
               <label
                 class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                >Age</label
               >
+                Age
+              </label>
               <input
                 id="signupAge"
                 type="number"
-                required
-                min="1"
-                max="120"
-                class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none placeholder:text-slate-300"
+                class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
+                oninput="clearErr('signupAge')"
               />
+              <p
+                id="signupAge_err"
+                class="hidden text-red-600 text-xs font-semibold mt-1"
+              ></p>
             </div>
 
-            <!-- 3. Email Address -->
+            <!-- 3. Email -->
             <div class="group">
               <label
                 class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                >Email Address</label
               >
+                Email Address
+              </label>
               <input
                 id="signupEmail"
                 type="email"
-                required
-                class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none placeholder:text-slate-300"
-                placeholder="name@company.com"
+                class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
+                oninput="clearErr('signupEmail')"
               />
+              <p
+                id="signupEmail_err"
+                class="hidden text-red-600 text-xs font-semibold mt-1"
+              ></p>
             </div>
 
-            <!-- 4. Phone Number -->
+            <!-- 4. Phone -->
             <div class="group">
               <label
                 class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                >Phone Number</label
               >
+                Phone Number
+              </label>
               <input
                 id="signupPhone"
                 type="tel"
-                required
-                class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none placeholder:text-slate-300"
+                class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
+                oninput="clearErr('signupPhone')"
               />
+              <p
+                id="signupPhone_err"
+                class="hidden text-red-600 text-xs font-semibold mt-1"
+              ></p>
             </div>
 
-            <!-- 5. Role (Register as) -->
+            <!-- 5. Role -->
             <div class="relative group">
               <label
                 class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                >Register as</label
               >
+                Register as
+              </label>
               <button
                 type="button"
                 id="customSelectBtn"
@@ -243,7 +251,7 @@
                       stroke-linejoin="round"
                       stroke-width="3"
                       d="M19 9l-7 7-7-7"
-                    ></path>
+                    />
                   </svg>
                 </div>
               </button>
@@ -269,38 +277,93 @@
               </div>
             </div>
 
-            <!-- Doctor Bio (shows only when Medical Professional is selected) -->
+            <!-- Doctor Bio -->
             <div id="doctorBioContainer">
               <label
                 class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                >Professional Bio</label
               >
+                Professional Bio
+              </label>
               <textarea
                 id="signupBio"
                 rows="2"
                 class="w-full p-3 rounded-xl border-2 border-slate-100 bg-slate-50 focus:border-[#007E85] focus:bg-white outline-none text-slate-800 text-sm transition-all resize-none shadow-inner"
-                placeholder="E.g. Senior Cardiologist..."
+                oninput="clearErr('signupBio')"
               ></textarea>
+              <p
+                id="signupBio_err"
+                class="hidden text-red-600 text-xs font-semibold mt-1"
+              ></p>
             </div>
 
             <!-- 6. Password -->
             <div class="group">
               <label
                 class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                >Create Password</label
               >
-              <input
-                id="signupPassword"
-                type="password"
-                required
-                class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none placeholder:text-slate-300"
-                placeholder="••••••••"
-              />
+                Create Password
+              </label>
+              <div class="relative">
+                <input
+                  id="signupPassword"
+                  type="password"
+                  class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none pr-10"
+                  oninput="clearErr('signupPassword')"
+                />
+                <!-- Eye toggle -->
+                <button
+                  type="button"
+                  onclick="togglePass()"
+                  class="absolute right-0 bottom-2 text-[#007E85] hover:text-[#005f65]"
+                  tabindex="-1"
+                >
+                  <svg
+                    id="eyeIcon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <!-- Password strength bar -->
+              <div
+                class="mt-2 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden"
+              >
+                <div
+                  id="strengthBar"
+                  class="h-full rounded-full transition-all duration-500 w-0"
+                ></div>
+              </div>
+              <p
+                id="strengthLabel"
+                class="text-xs mt-1 font-semibold text-slate-400"
+              ></p>
+              <p
+                id="signupPassword_err"
+                class="hidden text-red-600 text-xs font-semibold mt-1"
+              ></p>
             </div>
 
+            <!-- Submit -->
             <div class="pt-2 mt-[-5px]">
               <button
                 type="submit"
+                id="submitBtn"
                 class="w-full bg-[#007E85] text-white font-bold py-4 xl:py-5 rounded-xl text-base xl:text-lg shadow-lg hover:bg-[#00666c] transition-all hover:-translate-y-0.5 active:scale-[0.98] mt-[-5px]"
               >
                 Register Now
@@ -318,10 +381,9 @@
         </div>
       </div>
 
+      <!-- ── Right Panel ────────────────────────────────────────────────── -->
       <div
         class="hidden lg:block w-[55%] relative overflow-hidden bg-[#F8FAFB]"
-        data-scroll-animation="animate-slide-right"
-        data-delay="0.2s"
       >
         <div class="absolute inset-0 organic-bg z-0 shadow-2xl"></div>
         <div
@@ -332,7 +394,6 @@
             alt="Healthcare Professional"
             class="h-[102%] object-contain transform scale-110 mt-10"
           />
-
           <div
             class="absolute bottom-20 left-20 glass-card px-6 py-4 rounded-2xl flex items-center gap-4 animate-pulse"
           ></div>
@@ -342,6 +403,7 @@
 
     <script src="../../src/js/scroll-animations.js"></script>
     <script>
+      // ── Dropdown logic (unchanged) ────────────────────────────────────────
       const customSelectBtn = document.getElementById("customSelectBtn");
       const dropdownMenu = document.getElementById("dropdownMenu");
       const chevron = document.getElementById("chevron");
@@ -378,7 +440,6 @@
           const val = option.getAttribute("data-value");
           selectedValueDisplay.innerText = option.innerText;
           selectedRole = option.innerText;
-
           if (val === "doctor") {
             bioContainer.classList.add("show");
           } else {
@@ -390,58 +451,254 @@
 
       window.onclick = () => closeDropdown();
 
-      document.getElementById('signupForm').addEventListener('submit', function(e) {
-          e.preventDefault();
-          
-          const fullName = document.getElementById('signupFullName').value.trim();
-          const email = document.getElementById('signupEmail').value.trim();
-          const phone = document.getElementById('signupPhone').value.trim();
-          const age = document.getElementById('signupAge').value.trim();
-          const password = document.getElementById('signupPassword').value.trim();
-          const bio = document.getElementById('signupBio').value.trim();
+      // ── Password visibility toggle ────────────────────────────────────────
+      function togglePass() {
+        const input = document.getElementById("signupPassword");
+        const icon = document.getElementById("eyeIcon");
+        const show = input.type === "password";
+        input.type = show ? "text" : "password";
+        icon.style.opacity = show ? "0.45" : "1";
+      }
 
-          const formData = new FormData();
-          formData.append('full_name', fullName);
-          formData.append('email', email);
-          formData.append('phone', phone);
-          formData.append('age', age);
-          formData.append('role', selectedRole);
-          formData.append('password', password);
-          if (selectedRole === "Medical Professional") {
-              formData.append('bio', bio);
+      // ── Password strength meter ───────────────────────────────────────────
+      document
+        .getElementById("signupPassword")
+        .addEventListener("input", function () {
+          const v = this.value;
+          const bar = document.getElementById("strengthBar");
+          const lbl = document.getElementById("strengthLabel");
+
+          let score = 0;
+          if (v.length >= 8) score++;
+          if (/[A-Z]/.test(v)) score++;
+          if (/[0-9]/.test(v)) score++;
+          if (/[!@#$%^&*()\-_=+\[\]{};':"\\|,.<>\/?]/.test(v)) score++;
+
+          const levels = [
+            { w: "0", bg: "", label: "" },
+            { w: "25%", bg: "bg-red-500", label: "Weak" },
+            { w: "50%", bg: "bg-orange-400", label: "Fair" },
+            { w: "75%", bg: "bg-yellow-400", label: "Good" },
+            { w: "100%", bg: "bg-green-500", label: "Strong" },
+          ];
+
+          bar.className = "h-full rounded-full transition-all duration-500";
+          bar.classList.add(levels[score].bg);
+          bar.style.width = levels[score].w;
+
+          const colors = [
+            "text-slate-400",
+            "text-red-500",
+            "text-orange-400",
+            "text-yellow-500",
+            "text-green-600",
+          ];
+          lbl.className = `text-xs mt-1 font-semibold ${colors[score]}`;
+          lbl.textContent = levels[score].label;
+        });
+
+      // ── Error helpers ─────────────────────────────────────────────────────
+      function showErr(id, msg) {
+        const input = document.getElementById(id);
+        const err = document.getElementById(id + "_err");
+        if (input) input.classList.add("input-error");
+        if (err) {
+          err.textContent = msg;
+          err.classList.remove("hidden");
+        }
+      }
+
+      function clearErr(id) {
+        const input = document.getElementById(id);
+        const err = document.getElementById(id + "_err");
+        if (input) input.classList.remove("input-error");
+        if (err) {
+          err.textContent = "";
+          err.classList.add("hidden");
+        }
+      }
+
+      // ── Validators ────────────────────────────────────────────────────────
+      const Validators = {
+        fullName(v) {
+          if (!v) return "Full name is required.";
+          if (v.length < 2) return "Name must be at least 2 characters.";
+          if (!/^[a-zA-Z\s\-']+$/.test(v))
+            return "Name must contain letters only — no numbers or special characters.";
+          return null;
+        },
+
+        age(v) {
+          if (!v) return "Age is required.";
+          if (!/^\d+$/.test(v))
+            return "Age must be a whole number — no letters or decimals.";
+          const n = parseInt(v, 10);
+          if (n < 1) return "Please enter a valid age.";
+          if (n < 18) return "You must be at least 18 years old to register.";
+          if (n > 120) return "Please enter a valid age.";
+          return null;
+        },
+
+        email(v) {
+          if (!v) return "Email address is required.";
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v))
+            return "Enter a valid email address — it must include @ and a domain.";
+          return null;
+        },
+
+        phone(v) {
+          if (!v) return "Phone number is required.";
+          const digits = v.replace(/[\s\-()]/g, "");
+          if (!/^\+?\d{10,15}$/.test(digits))
+            return "Phone must be 10 digits. A leading + is allowed for country codes.";
+          return null;
+        },
+
+        password(v) {
+          if (!v) return "Password is required.";
+          if (v.length < 8)
+            return "Password must be at least 8 characters long.";
+          if (!/[A-Z]/.test(v))
+            return "Password must include at least one uppercase letter.";
+          if (!/[0-9]/.test(v))
+            return "Password must include at least one number.";
+          if (!/[!@#$%^&*()\-_=+\[\]{};':"\\|,.<>\/?]/.test(v))
+            return "Password must include at least one special character (e.g. ! @ # $ %).";
+          return null;
+        },
+
+        bio(v) {
+          if (!v)
+            return "Professional bio is required for Medical Professionals.";
+          if (v.length < 10) return "Bio must be at least 10 characters.";
+          return null;
+        },
+      };
+
+      // ── Form submit ───────────────────────────────────────────────────────
+      document
+        .getElementById("signupForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const fullName = document
+            .getElementById("signupFullName")
+            .value.trim();
+          const age = document.getElementById("signupAge").value.trim();
+          const email = document.getElementById("signupEmail").value.trim();
+          const phone = document.getElementById("signupPhone").value.trim();
+          const password = document.getElementById("signupPassword").value;
+          const bio = document.getElementById("signupBio").value.trim();
+          const isDoctor = selectedRole === "Medical Professional";
+
+          // Clear all errors first
+          [
+            "signupFullName",
+            "signupAge",
+            "signupEmail",
+            "signupPhone",
+            "signupPassword",
+            "signupBio",
+          ].forEach(clearErr);
+
+          let hasError = false;
+
+          const nameErr = Validators.fullName(fullName);
+          if (nameErr) {
+            showErr("signupFullName", nameErr);
+            hasError = true;
           }
 
-          // Button visually showing loading mode
-          const btn = this.querySelector('button[type="submit"]');
+          const ageErr = Validators.age(age);
+          if (ageErr) {
+            showErr("signupAge", ageErr);
+            hasError = true;
+          }
+
+          const emailErr = Validators.email(email);
+          if (emailErr) {
+            showErr("signupEmail", emailErr);
+            hasError = true;
+          }
+
+          const phoneErr = Validators.phone(phone);
+          if (phoneErr) {
+            showErr("signupPhone", phoneErr);
+            hasError = true;
+          }
+
+          const passErr = Validators.password(password);
+          if (passErr) {
+            showErr("signupPassword", passErr);
+            hasError = true;
+          }
+
+          if (isDoctor) {
+            const bioErr = Validators.bio(bio);
+            if (bioErr) {
+              showErr("signupBio", bioErr);
+              hasError = true;
+            }
+          }
+
+          // Stop here — do NOT submit if anything is invalid
+          if (hasError) return;
+
+          // All valid — send to backend
+          const btn = document.getElementById("submitBtn");
           const origText = btn.innerText;
           btn.innerText = "Registering...";
           btn.disabled = true;
 
-          fetch('../../api/auth/signup_process.php', {
-              method: 'POST',
-              body: formData
+          const formData = new FormData();
+          formData.append("full_name", fullName);
+          formData.append("email", email);
+          formData.append("phone", phone);
+          formData.append("age", age);
+          formData.append("role", selectedRole);
+          formData.append("password", password);
+          if (isDoctor) formData.append("bio", bio);
+
+          fetch("../../api/auth/signup_process.php", {
+            method: "POST",
+            body: formData,
           })
-          .then(r => r.json())
-          .then(data => {
+            .then((r) => r.json())
+            .then((data) => {
               btn.innerText = origText;
               btn.disabled = false;
-              if (data.status === 'success') {
-                  alert(data.message);
-                  if (data.redirect) {
-                      window.location.href = data.redirect;
-                  } else {
-                      window.location.href = 'login.html';
-                  }
+              if (data.status === "success") {
+                if (data.redirect) {
+                  window.location.href = data.redirect;
+                } else {
+                  window.location.href = "login.html";
+                }
               } else {
-                  alert(data.message || 'Error occurred during registration');
+                // Show server error on the relevant field if possible
+                if (data.field) {
+                  showErr(
+                    "signup" +
+                      data.field.charAt(0).toUpperCase() +
+                      data.field.slice(1),
+                    data.message,
+                  );
+                } else {
+                  showErr(
+                    "signupEmail",
+                    data.message || "Registration failed. Please try again.",
+                  );
+                }
               }
-          })
-          .catch(err => {
+            })
+            .catch(() => {
               btn.innerText = origText;
               btn.disabled = false;
-              alert("Error connecting to server.");
-          });
-      });
+              showErr(
+                "signupEmail",
+                "Could not connect to the server. Please try again.",
+              );
+            });
+        });
     </script>
   </body>
 </html>
