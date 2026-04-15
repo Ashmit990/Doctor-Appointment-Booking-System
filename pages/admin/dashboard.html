@@ -1,220 +1,433 @@
 <!doctype html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard – Healthcare</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        teal: {
-                            DEFAULT: "#0d7377",
-                            dark: "#0a5a5d",
-                            light: "#14a3a8",
-                            bg: "#e8f5f5",
-                        },
-                    },
-                    fontFamily: { poppins: ["Poppins", "sans-serif"] },
-                },
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              teal: {
+                DEFAULT: "#0d7377",
+                dark: "#0a5a5d",
+                light: "#14a3a8",
+                bg: "#e8f5f5",
+              },
             },
-        };
+            fontFamily: { poppins: ["Poppins", "sans-serif"] },
+          },
+        },
+      };
     </script>
     <style>
-        body { font-family: "Poppins", sans-serif; }
-        .bar { transition: background 0.2s; }
-        .bar:hover { background: #14a3a8 !important; }
-        .calendar-day { cursor: pointer; transition: all 0.2s; min-height: 38px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; }
-        .calendar-day:hover { background-color: rgba(0, 126, 133, 0.1); }
-        .calendar-day.has-appointment { position: relative; font-weight: bold; }
-        .calendar-day.has-appointment::after { content: '●'; position: absolute; bottom: 2px; color: #ef4444; font-size: 12px; }
-        .calendar-day.has-completed { position: relative; font-weight: bold; }
-        .calendar-day.has-completed::after { content: '✓'; position: absolute; bottom: 2px; color: #10b981; font-size: 12px; }
-        .modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 50; }
-        .modal-backdrop.active { display: flex; align-items: center; justify-content: center; }
-        .toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; background: #0d7377; color: white; border-radius: 8px; z-index: 1000; opacity: 0; animation: slideIn 0.3s forwards; }
-        @keyframes slideIn { to { opacity: 1; transform: translateY(-10px); } }
+      body {
+        font-family: "Poppins", sans-serif;
+      }
+      .bar {
+        transition: background 0.2s;
+      }
+      .bar:hover {
+        background: #14a3a8 !important;
+      }
+      .calendar-day {
+        cursor: pointer;
+        transition: all 0.2s;
+        min-height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .calendar-day:hover {
+        background-color: rgba(0, 126, 133, 0.1);
+      }
+      .calendar-day.has-appointment {
+        position: relative;
+        font-weight: bold;
+      }
+      .calendar-day.has-appointment::after {
+        content: "●";
+        position: absolute;
+        bottom: 2px;
+        color: #ef4444;
+        font-size: 12px;
+      }
+      .calendar-day.has-completed {
+        position: relative;
+        font-weight: bold;
+      }
+      .calendar-day.has-completed::after {
+        content: "✓";
+        position: absolute;
+        bottom: 2px;
+        color: #10b981;
+        font-size: 12px;
+      }
+      .modal-backdrop {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 50;
+      }
+      .modal-backdrop.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        background: #0d7377;
+        color: white;
+        border-radius: 8px;
+        z-index: 1000;
+        opacity: 0;
+        animation: slideIn 0.3s forwards;
+      }
+      @keyframes slideIn {
+        to {
+          opacity: 1;
+          transform: translateY(-10px);
+        }
+      }
     </style>
-</head>
-<body class="bg-gray-100 text-gray-800 flex min-h-screen">
-    <div id="overlay" class="fixed inset-0 bg-black/40 z-40 hidden lg:hidden" onclick="closeSidebar()"></div>
+  </head>
+  <body class="bg-gray-100 text-gray-800 flex min-h-screen">
+    <div
+      id="overlay"
+      class="fixed inset-0 bg-black/40 z-40 hidden lg:hidden"
+      onclick="closeSidebar()"
+    ></div>
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-60 bg-teal-dark flex flex-col z-50 -translate-x-full lg:translate-x-0 transition-transform duration-300">
-        <div class="px-6 py-7 flex items-center gap-3 border-b border-white/10">
-            <img src="../../src/assets/Logo.svg" alt="">
-            <span class="text-white font-bold text-lg">Healthcare</span>
-        </div>
-        <nav class="p-3 flex-1">
-            <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white bg-white/20 text-sm font-medium mb-1">
-                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
-                </svg>
-                Dashboard
-            </a>
-            <a href="users.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all">
-                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-                </svg>
-                Patients
-            </a>
-            <a href="appointments.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all">
-                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z" />
-                </svg>
-                Appointments
-            </a>
-            <a href="doctor.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all">
-                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                </svg>
-                Doctors
-            </a>
-            <a href="doctor_approvals.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 text-sm font-medium mb-1 transition-all">
-                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-2 14l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>Doctor Approvals</a>
-            <a href="reports.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all">
-                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
-                </svg>
-                Reports
-            </a>
-        </nav>
-        <div class="p-3 border-t border-white/10">
-            <a href="adminprofile.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/65 hover:bg-white/10 hover:text-white text-sm font-medium transition-all">
-                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                </svg>
-                Admin Profile
-            </a>
-            <a href="../../api/auth/logout.php" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/65 hover:bg-white/10 hover:text-white text-sm font-medium transition-all">
-                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
-                </svg>
-                Logout
-            </a>
-        </div>
+    <aside
+      id="sidebar"
+      class="fixed top-0 left-0 bottom-0 w-60 bg-teal-dark flex flex-col z-50 -translate-x-full lg:translate-x-0 transition-transform duration-300"
+    >
+      <div class="px-6 py-7 flex items-center gap-3 border-b border-white/10">
+        <img src="../../src/assets/Logo.svg" alt="" />
+        <span class="text-white font-bold text-lg">Healthcare</span>
+      </div>
+      <nav class="p-3 flex-1">
+        <a
+          href="dashboard.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white bg-white/20 text-sm font-medium mb-1"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"
+            />
+          </svg>
+          Dashboard
+        </a>
+        <a
+          href="users.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
+            />
+          </svg>
+          Patients
+        </a>
+        <a
+          href="appointments.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
+            />
+          </svg>
+          Appointments
+        </a>
+        <a
+          href="doctor.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+            />
+          </svg>
+          Doctors
+        </a>
+        <a
+          href="doctor_approvals.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-2 14l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"
+            /></svg
+          >Doctor Approvals</a
+        >
+        <a
+          href="reports.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"
+            />
+          </svg>
+          Reports
+        </a>
+      </nav>
+      <div class="p-3 border-t border-white/10">
+        <a
+          href="adminprofile.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/65 hover:bg-white/10 hover:text-white text-sm font-medium transition-all"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+            />
+          </svg>
+          Admin Profile
+        </a>
+        <a
+          href="../../api/auth/logout.php"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/65 hover:bg-white/10 hover:text-white text-sm font-medium transition-all"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
+            />
+          </svg>
+          Logout
+        </a>
+      </div>
     </aside>
 
     <!-- Main Content -->
     <main class="flex-1 flex flex-col lg:ml-60">
-        <!-- Header -->
-        <header class="bg-white px-4 md:px-8 py-4 flex items-center justify-between shadow-sm sticky top-0 z-30">
-            <div class="flex items-center gap-3">
-                <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <svg class="w-5 h-5 text-teal-dark" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
-                    </svg>
-                </button>
-                <h1 class="text-base font-semibold text-teal-dark">System Overview</h1>
-            </div>
-            <div class="flex items-center gap-4">
-                <span id="current-date" class="text-xs text-gray-500 hidden sm:block"></span>
-                <div class="w-9 h-9 bg-teal rounded-full flex items-center justify-center text-white font-bold text-sm cursor-pointer hover:bg-teal-dark transition-colors" id="admin-avatar">A</div>
-            </div>
-        </header>
-
-        <!-- Content -->
-        <div class="p-4 md:p-8 flex-1 overflow-y-auto">
-            <p class="text-2xl font-bold text-teal-dark mb-6">Dashboard</p>
-
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
-                <div class="bg-white rounded-2xl p-6 shadow-md hover:-translate-y-1 transition-transform cursor-pointer">
-                    <div class="w-12 h-12 rounded-xl bg-teal-bg text-teal flex items-center justify-center mb-3">
-                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-                        </svg>
-                    </div>
-                    <div class="text-3xl font-bold text-gray-800 leading-none mb-1" id="stat-patients">0</div>
-                    <div class="text-xs text-gray-500 font-medium">Total Patients</div>
-                </div>
-
-                <div class="bg-white rounded-2xl p-6 shadow-md hover:-translate-y-1 transition-transform cursor-pointer">
-                    <div class="w-12 h-12 rounded-xl bg-green-100 text-green-700 flex items-center justify-center mb-3">
-                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                        </svg>
-                    </div>
-                    <div class="text-3xl font-bold text-gray-800 leading-none mb-1" id="stat-doctors">0</div>
-                    <div class="text-xs text-gray-500 font-medium">Total Doctors</div>
-                </div>
-
-                <div class="bg-white rounded-2xl p-6 shadow-md hover:-translate-y-1 transition-transform cursor-pointer">
-                    <div class="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center mb-3">
-                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z" />
-                        </svg>
-                    </div>
-                    <div class="text-3xl font-bold text-gray-800 leading-none mb-1" id="stat-upcoming">0</div>
-                    <div class="text-xs text-gray-500 font-medium">Upcoming Appointments</div>
-                </div>
-
-                <div class="bg-white rounded-2xl p-6 shadow-md hover:-translate-y-1 transition-transform cursor-pointer">
-                    <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-3">
-                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z" />
-                        </svg>
-                    </div>
-                    <div class="text-3xl font-bold text-gray-800 leading-none mb-1" id="stat-completed">0</div>
-                    <div class="text-xs text-gray-500 font-medium">Completed Appointments</div>
-                </div>
-            </div>
-
-            <!-- Calendar and Recent Row -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
-                <!-- Calendar -->
-                <div class="bg-white rounded-2xl p-6 shadow-md">
-                    <div class="mb-4">
-                        <div class="flex items-center justify-between mb-4">
-                            <button onclick="previousMonth()" class="p-1 hover:bg-gray-100 rounded">
-                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" /></svg>
-                            </button>
-                            <h3 id="calendar-month" class="font-semibold text-center flex-1"></h3>
-                            <button onclick="nextMonth()" class="p-1 hover:bg-gray-100 rounded">
-                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" /></svg>
-                            </button>
-                        </div>
-                        <div class="grid grid-cols-7 gap-1 text-center mb-2">
-                            <div class="text-xs font-semibold text-gray-500">Sun</div>
-                            <div class="text-xs font-semibold text-gray-500">Mon</div>
-                            <div class="text-xs font-semibold text-gray-500">Tue</div>
-                            <div class="text-xs font-semibold text-gray-500">Wed</div>
-                            <div class="text-xs font-semibold text-gray-500">Thu</div>
-                            <div class="text-xs font-semibold text-gray-500">Fri</div>
-                            <div class="text-xs font-semibold text-gray-500">Sat</div>
-                        </div>
-                        <div class="grid grid-cols-7 gap-1" id="calendar-days"></div>
-                    </div>
-                </div>
-
-                <!-- Recent Appointments Modal Trigger -->
-                <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-md">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-semibold text-gray-800">Recent Appointments (5)</h3>
-                        <button onclick="window.location.href='appointments.html'" class="bg-teal-bg text-teal text-xs font-semibold px-3 py-1 rounded-full hover:bg-teal hover:text-white transition-colors">View All</button>
-                    </div>
-                    <div id="recent-appointments-list" class="space-y-2">
-                        <p class="text-gray-500 text-sm">Loading...</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Appointment Details Modal -->
-            <div id="appointment-modal" class="modal-backdrop">
-                <div class="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-lg relative">
-                    <button onclick="closeAppointmentModal()" class="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded">
-                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" /></svg>
-                    </button>
-                    <div id="appointment-modal-content"></div>
-                </div>
-            </div>
+      <!-- Header -->
+      <header
+        class="bg-white px-4 md:px-8 py-4 flex items-center justify-between shadow-sm sticky top-0 z-30"
+      >
+        <div class="flex items-center gap-3">
+          <button
+            onclick="toggleSidebar()"
+            class="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <svg
+              class="w-5 h-5 text-teal-dark"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+            </svg>
+          </button>
+          <h1 class="text-base font-semibold text-teal-dark">
+            System Overview
+          </h1>
         </div>
+        <div class="flex items-center gap-4">
+          <span
+            id="current-date"
+            class="text-xs text-gray-500 hidden sm:block"
+          ></span>
+          <div
+            class="w-9 h-9 bg-teal rounded-full flex items-center justify-center text-white font-bold text-sm cursor-pointer hover:bg-teal-dark transition-colors"
+            id="admin-avatar"
+          >
+            A
+          </div>
+        </div>
+      </header>
+
+      <!-- Content -->
+      <div class="p-4 md:p-8 flex-1 overflow-y-auto">
+        <p class="text-2xl font-bold text-teal-dark mb-6">Dashboard</p>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
+          <div
+            class="bg-white rounded-2xl p-6 shadow-md hover:-translate-y-1 transition-transform cursor-pointer"
+          >
+            <div
+              class="w-12 h-12 rounded-xl bg-teal-bg text-teal flex items-center justify-center mb-3"
+            >
+              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
+                />
+              </svg>
+            </div>
+            <div
+              class="text-3xl font-bold text-gray-800 leading-none mb-1"
+              id="stat-patients"
+            >
+              0
+            </div>
+            <div class="text-xs text-gray-500 font-medium">Total Patients</div>
+          </div>
+
+          <div
+            class="bg-white rounded-2xl p-6 shadow-md hover:-translate-y-1 transition-transform cursor-pointer"
+          >
+            <div
+              class="w-12 h-12 rounded-xl bg-green-100 text-green-700 flex items-center justify-center mb-3"
+            >
+              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+                />
+              </svg>
+            </div>
+            <div
+              class="text-3xl font-bold text-gray-800 leading-none mb-1"
+              id="stat-doctors"
+            >
+              0
+            </div>
+            <div class="text-xs text-gray-500 font-medium">Total Doctors</div>
+          </div>
+
+          <div
+            class="bg-white rounded-2xl p-6 shadow-md hover:-translate-y-1 transition-transform cursor-pointer"
+          >
+            <div
+              class="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center mb-3"
+            >
+              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
+                />
+              </svg>
+            </div>
+            <div
+              class="text-3xl font-bold text-gray-800 leading-none mb-1"
+              id="stat-upcoming"
+            >
+              0
+            </div>
+            <div class="text-xs text-gray-500 font-medium">
+              Upcoming Appointments
+            </div>
+          </div>
+
+          <div
+            class="bg-white rounded-2xl p-6 shadow-md hover:-translate-y-1 transition-transform cursor-pointer"
+          >
+            <div
+              class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-3"
+            >
+              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"
+                />
+              </svg>
+            </div>
+            <div
+              class="text-3xl font-bold text-gray-800 leading-none mb-1"
+              id="stat-completed"
+            >
+              0
+            </div>
+            <div class="text-xs text-gray-500 font-medium">
+              Completed Appointments
+            </div>
+          </div>
+        </div>
+
+        <!-- Calendar and Recent Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+          <!-- Calendar -->
+          <div class="bg-white rounded-2xl p-6 shadow-md">
+            <div class="mb-4">
+              <div class="flex items-center justify-between mb-4">
+                <button
+                  onclick="previousMonth()"
+                  class="p-1 hover:bg-gray-100 rounded"
+                >
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                  </svg>
+                </button>
+                <h3
+                  id="calendar-month"
+                  class="font-semibold text-center flex-1"
+                ></h3>
+                <button
+                  onclick="nextMonth()"
+                  class="p-1 hover:bg-gray-100 rounded"
+                >
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                  </svg>
+                </button>
+              </div>
+              <div class="grid grid-cols-7 gap-1 text-center mb-2">
+                <div class="text-xs font-semibold text-gray-500">Sun</div>
+                <div class="text-xs font-semibold text-gray-500">Mon</div>
+                <div class="text-xs font-semibold text-gray-500">Tue</div>
+                <div class="text-xs font-semibold text-gray-500">Wed</div>
+                <div class="text-xs font-semibold text-gray-500">Thu</div>
+                <div class="text-xs font-semibold text-gray-500">Fri</div>
+                <div class="text-xs font-semibold text-gray-500">Sat</div>
+              </div>
+              <div class="grid grid-cols-7 gap-1" id="calendar-days"></div>
+            </div>
+          </div>
+
+          <!-- Recent Appointments Modal Trigger -->
+          <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-md">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-semibold text-gray-800">
+                Recent Appointments (5)
+              </h3>
+              <button
+                onclick="window.location.href = 'appointments.html'"
+                class="bg-teal-bg text-teal text-xs font-semibold px-3 py-1 rounded-full hover:bg-teal hover:text-white transition-colors"
+              >
+                View All
+              </button>
+            </div>
+            <div id="recent-appointments-list" class="space-y-2">
+              <p class="text-gray-500 text-sm">Loading...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Appointment Details Modal -->
+        <div id="appointment-modal" class="modal-backdrop">
+          <div
+            class="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-lg relative"
+          >
+            <button
+              onclick="closeAppointmentModal()"
+              class="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded"
+            >
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+                />
+              </svg>
+            </button>
+            <div id="appointment-modal-content"></div>
+          </div>
+        </div>
+      </div>
     </main>
 
     <script src="dashboard.js"></script>
-</body>
+  </body>
 </html>
