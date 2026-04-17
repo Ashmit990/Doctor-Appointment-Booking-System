@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Profile API</title>
+</head>
+<body>
+    <h1>Testing Patient Profile API</h1>
+    <button onclick="testAPI()">Test API Call</button>
+    <pre id="output"></pre>
+    
+    <script>
+        const API_SEG = window.location.pathname.split("/").filter(Boolean)[0];
+        const API_BASE = API_SEG ? `/${API_SEG}/api` : "/api";
+        
+        async function testAPI() {
+            const output = document.getElementById('output');
+            try {
+                output.textContent = 'Loading...';
+                
+                console.log('API_BASE:', API_BASE);
+                console.log('Fetching from:', `${API_BASE}/patient/profile.php`);
+                
+                const response = await fetch(`${API_BASE}/patient/profile.php`, {
+                    credentials: "include"
+                });
+                
+                output.textContent = `Status: ${response.status}\n`;
+                output.textContent += `OK: ${response.ok}\n\n`;
+                
+                const result = await response.json();
+                output.textContent += JSON.stringify(result, null, 2);
+                
+                console.log('Response:', result);
+            } catch (error) {
+                output.textContent = 'Error: ' + error.message;
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

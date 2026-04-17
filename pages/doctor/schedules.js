@@ -14,17 +14,23 @@ function updateCurrentDate() {
 }
 
 async function loadDoctorProfile() {
-  const response = await fetch("../../api/doctor/get_doctor_info.php");
+  const response = await fetch("../../api/doctor/get_doctor_info.php", {
+    credentials: 'include'
+  });
   const result = await response.json();
 
   if (result.status === "success" && result.data) {
-    document.getElementById("sidebar-doctor-name").textContent =
-      result.data.full_name || "Doctor";
+    const nameElement = document.getElementById("sidebar-doctor-name");
+    if (nameElement) {
+      nameElement.textContent = result.data.full_name || "Doctor";
+    }
   }
 }
 
 async function fetchAppointmentDates() {
-  const response = await fetch("../../api/doctor/appointment_dates.php");
+  const response = await fetch("../../api/doctor/appointment_dates.php", {
+    credentials: 'include'
+  });
   const result = await response.json();
 
   if (result.status === "success" && Array.isArray(result.data)) {
@@ -34,7 +40,9 @@ async function fetchAppointmentDates() {
 }
 
 async function fetchAvailabilityDates() {
-  const response = await fetch("../../api/doctor/availability.php");
+  const response = await fetch("../../api/doctor/availability.php", {
+    credentials: 'include'
+  });
   const result = await response.json();
 
   if (result.status === "success" && Array.isArray(result.data)) {
@@ -228,8 +236,8 @@ async function loadScheduleForDate(date) {
   try {
     // Fetch Parallel
     const [availRes, aptRes] = await Promise.all([
-      fetch(`../../api/doctor/availability.php?date=${date}`),
-      fetch(`../../api/doctor/appointments_by_date.php?date=${date}`),
+      fetch(`../../api/doctor/availability.php?date=${date}`, { credentials: 'include' }),
+      fetch(`../../api/doctor/appointments_by_date.php?date=${date}`, { credentials: 'include' }),
     ]);
 
     const availData = await availRes.json();
@@ -357,7 +365,10 @@ async function toggleSlot(startTime, endTime, availId, isPast) {
     // DELETE
     const response = await fetch(
       `../../api/doctor/availability.php?avail_id=${availId}`,
-      { method: "DELETE" },
+      { 
+        method: "DELETE",
+        credentials: "include"
+      },
     );
     const result = await response.json();
     if (result.status === "success") {
@@ -369,6 +380,7 @@ async function toggleSlot(startTime, endTime, availId, isPast) {
     // POST
     const response = await fetch("../../api/doctor/availability.php", {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         avail_date: date,
@@ -505,6 +517,7 @@ async function submitConsultation() {
   try {
     const res = await fetch("../../api/doctor/complete_consultation.php", {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         appointment_id: aptId,

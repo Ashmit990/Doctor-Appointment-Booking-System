@@ -78,10 +78,9 @@
                     </div>
                     <h1 class="text-xl font-bold">Healthcare</h1>
                 </div>
-                <p id="sidebar-doctor-name" class="text-sm text-gray-300 mt-2">Loading...</p>
             </div>
 
-            <nav class="p-2 md:p-6 flex flex-row md:flex-col gap-2 md:gap-0 space-y-0 md:space-y-2 justify-around md:justify-start">
+            <nav class="p-2 md:p-6 flex flex-row md:flex-col gap-2 md:gap-0 space-y-0 md:space-y-2 justify-around md:justify-start md:flex-1">
                 <a href="home.html" class="nav-link active flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
                     <i data-lucide="home" class="w-5 h-5"></i>
                     <span>Home</span>
@@ -98,7 +97,8 @@
                     <i data-lucide="user" class="w-5 h-5"></i>
                     <span>Profile</span>
                 </a>
-                <a href="../../api/auth/logout.php" class="flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:bg-red-600 transition text-red-300 hover:text-white md:mt-8 text-[10px] md:text-base">
+                <div class="hidden md:block mt-auto border-t border-gray-600 pt-3"></div>
+                <a href="../../api/auth/logout.php" class="flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:bg-red-600 transition text-red-300 hover:text-white text-[10px] md:text-base">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
                     <span>Logout</span>
                 </a>
@@ -109,10 +109,18 @@
         <main class="ml-0 md:ml-64 flex-1 overflow-y-auto pb-20 md:pb-0">
             <!-- TOP BAR -->
             <div class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm overflow-visible">
-                <div class="px-8 py-4 flex justify-between items-center gap-4 overflow-visible">
+                <div class="px-8 py-4 flex justify-between items-center gap-4 overflow-visible flex-wrap">
                     <div class="min-w-0 flex-1">
                         <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
                         <p id="current-date" class="text-sm text-gray-500"></p>
+                    </div>
+                    <div class="relative flex-1 sm:flex-none min-w-0 sm:min-w-[300px]">
+                        <input id="doctorSearchInput" type="text" placeholder="Search patient by name or contact"
+                            class="w-full sm:w-80 rounded-lg border border-gray-300 bg-gray-50 pl-4 pr-12 py-2.5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent transition" />
+                        <button id="doctorSearchBtn" type="button"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-200 transition">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                        </button>
                     </div>
                     <div class="relative z-[200] flex shrink-0 items-center">
                         <button id="doctorNotificationBtn" type="button"
@@ -130,6 +138,12 @@
             <!-- PAGE CONTENT -->
             <div class="p-8">
                 <div class="space-y-8">
+                    <!-- GREETING -->
+                    <div>
+                        <h1 id="greeting-message" class="text-4xl font-bold text-gray-900">Hello, Doctor</h1>
+                        <p class="text-gray-600 mt-2">Welcome to your dashboard</p>
+                    </div>
+
                     <!-- STATS -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="bg-white rounded-xl card-shadow p-6">

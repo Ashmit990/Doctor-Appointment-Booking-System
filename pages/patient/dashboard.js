@@ -449,10 +449,20 @@ function renderStars(rating) {
     for (let i = 1; i <= 5; i++) {
         const star = document.createElement('i');
         star.setAttribute('data-lucide', 'star');
+        star.setAttribute('data-star-index', i);
         star.className = `w-10 h-10 cursor-pointer transition transform hover:scale-110 ${i <= rating ? 'text-yellow-400 fill-current' : 'text-slate-200'}`;
-        star.onclick = () => renderStars(i);
         container.appendChild(star);
     }
+    
+    // Use event delegation for click handling (persists after lucide renders)
+    container.onclick = (e) => {
+        const star = e.target.closest('[data-star-index]');
+        if (star) {
+            const index = parseInt(star.getAttribute('data-star-index'));
+            renderStars(index);
+        }
+    };
+    
     lucide.createIcons();
 }
 
@@ -473,6 +483,7 @@ async function submitFeedback() {
     try {
         const res = await fetch('../../api/patient/submit_feedback.php', {
             method: 'POST',
+            credentials: 'include',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 appointment_id: aptId,

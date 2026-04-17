@@ -13,7 +13,7 @@
 <body class="bg-slate-100 min-h-screen font-sans">
   <div class="flex flex-col md:flex-row min-h-screen relative">
     <aside
-      class="w-full md:w-60 bg-[#0a5a5d] text-white flex flex-row md:flex-col items-center justify-around md:justify-start py-2 md:py-0 px-2 md:px-0 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] md:shadow-xl fixed bottom-0 md:sticky md:top-0 left-0 h-auto md:h-screen z-[100] overflow-x-auto md:overflow-y-auto">
+      class="w-full md:w-60 bg-[#007E85] text-white flex flex-row md:flex-col items-center justify-around md:justify-start py-2 md:py-0 px-2 md:px-0 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] md:shadow-xl fixed bottom-0 md:sticky md:top-0 left-0 h-auto md:h-screen z-[100] overflow-x-auto md:overflow-y-auto">
       
       <div class="hidden md:flex w-full px-6 py-7 items-center gap-3 border-b border-white/10 shrink-0 mb-2">
         <img src="../../src/assets/Logo.svg" alt="Logo" class="w-8 h-8">
@@ -82,7 +82,7 @@
             </div>
             <div class="relative flex-1 sm:flex-none min-w-0">
               <input id="searchInput" type="text" placeholder="Search doctor or department"
-                class="w-full sm:w-80 rounded-2xl border border-slate-200 bg-slate-50 pl-4 pr-12 py-3 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-teal-300 focus:border-transparent transition" />
+                class="w-full sm:w-80 rounded-2xl border border-slate-200 bg-slate-50 pl-4 pr-12 py-3 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent transition" />
 
               <button id="searchBtn" type="button"
                 class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-200/70 transition">
@@ -90,14 +90,14 @@
               </button>
             </div>
             <button onclick="openBookingModal()"
-              class="bg-teal-600 hover:bg-teal-700 flex-1 sm:flex-none text-center text-white px-5 py-3 rounded-2xl font-medium shadow-sm transition">
+              class="bg-[#007E85] hover:bg-[#006570] flex-1 sm:flex-none text-center text-white px-5 py-3 rounded-2xl font-medium shadow-sm transition">
               Book Appointment
             </button>
           </div>
         </div>
 
         <section
-          class="bg-teal-600 rounded-[30px] p-7 mb-7 text-white relative overflow-hidden shadow-[0_15px_40px_rgba(20,184,166,0.25)]">
+          class="bg-[#007E85] rounded-[30px] p-7 mb-7 text-white relative overflow-hidden shadow-[0_15px_40px_rgba(0,126,133,0.25)]">
           <div class="max-w-2xl">
             <p class="text-3xl font-bold mb-2">Welcome back</p>
 
@@ -141,7 +141,7 @@
 
               <div class="flex flex-wrap gap-2">
                 <button
-                  class="filter-btn active-filter bg-teal-600 text-white px-4 py-2.5 rounded-2xl text-sm font-medium"
+                  class="filter-btn active-filter bg-[#007E85] text-white px-4 py-2.5 rounded-2xl text-sm font-medium"
                   data-filter="all">
                   All
                 </button>
@@ -181,7 +181,7 @@
                 </div>
                 <div class="flex justify-between items-center">
                   <span>Next Appointment</span>
-                  <span id="nextAppointment" class="font-semibold text-teal-600">...</span>
+                  <span id="nextAppointment" class="font-semibold text-[#007E85]">...</span>
                 </div>
               </div>
             </div>
@@ -233,7 +233,7 @@
       </h3>
       <div id="detailModalBody"></div>
       <button type="button" id="detailRescheduleBtn"
-        class="hidden mt-4 w-full py-3 rounded-2xl bg-teal-600 text-white font-medium hover:bg-teal-700">
+        class="hidden mt-4 w-full py-3 rounded-2xl bg-[#007E85] text-white font-medium hover:bg-[#006570]">
         Reschedule visit
     </div>
   </div>

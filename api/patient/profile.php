@@ -2,11 +2,14 @@
 require_once __DIR__ . '/bootstrap.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    error_log("Patient profile GET request for patient_id: " . $patient_id);
+    
     $stmt = $conn->prepare("
         SELECT
             u.full_name,
             u.email,
             pp.dob,
+            pp.age,
             pp.blood_group,
             pp.contact_number,
             pp.address,
@@ -17,17 +20,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         LEFT JOIN patient_profiles pp ON u.user_id = pp.user_id
         WHERE u.user_id = ?
     ");
+    
+    if (!$stmt) {
+        echo json_encode(['status' => 'error', 'message' => 'Prepare failed: ' . $conn->error]);
+        $conn->close();
+        exit;
+    }
+    
     $stmt->bind_param("s", $patient_id);
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
     $stmt->close();
 
     if (!$row) {
+        error_log("Patient not found with ID: " . $patient_id);
         echo json_encode(['status' => 'error', 'message' => 'User not found']);
         $conn->close();
         exit;
     }
 
+    error_log("Patient profile data: " . json_encode($row));
     echo json_encode(['status' => 'success', 'data' => $row]);
     $conn->close();
     exit;
@@ -45,6 +57,7 @@ $input = json_decode(file_get_contents('php://input'), true) ?: [];
 $full_name = trim($input['full_name'] ?? '');
 $email = trim($input['email'] ?? '');
 $dob = trim($input['dob'] ?? '') ?: null;
+$age = isset($input['age']) ? (int)$input['age'] : null;
 $blood_group = trim($input['blood_group'] ?? '') ?: null;
 $contact_number = trim($input['contact_number'] ?? '') ?: null;
 $address = trim($input['address'] ?? '') ?: null;
@@ -78,11 +91,12 @@ try {
 
     $pp = $conn->prepare("
         INSERT INTO patient_profiles (
-            user_id, dob, blood_group, contact_number, address,
+            user_id, dob, age, blood_group, contact_number, address,
             gender, emergency_contact_name, emergency_contact_phone
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
             dob = VALUES(dob),
+            age = VALUES(age),
             blood_group = VALUES(blood_group),
             contact_number = VALUES(contact_number),
             address = VALUES(address),
@@ -91,9 +105,10 @@ try {
             emergency_contact_phone = VALUES(emergency_contact_phone)
     ");
     $pp->bind_param(
-        "ssssssss",
+        "ssissssss",
         $patient_id,
         $dob,
+        $age,
         $blood_group,
         $contact_number,
         $address,

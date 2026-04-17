@@ -114,11 +114,19 @@ function updateCurrentDate() {
 }
 
 async function loadDoctorProfile() {
-    const response = await fetch('../../api/doctor/get_doctor_info.php');
-    const result = await response.json();
-    
-    if (result.status === 'success' && result.data) {
-        document.getElementById('sidebar-doctor-name').textContent = result.data.full_name || 'Doctor';
+    try {
+        const response = await fetch('../../api/doctor/get_doctor_info.php');
+        const result = await response.json();
+        
+        if (result.status === 'success' && result.data) {
+            const doctorName = result.data.full_name || 'Doctor';
+            const greetingElement = document.getElementById('greeting-message');
+            if (greetingElement) {
+                greetingElement.textContent = `Hello, ${doctorName}`;
+            }
+        }
+    } catch (error) {
+        console.error('Error loading doctor profile:', error);
     }
 }
 
@@ -345,6 +353,7 @@ async function updateAppointment() {
     
     const response = await fetch(`../../api/doctor/appointment_detail.php`, {
         method: 'PUT',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
             appointment_id: currentAppointmentID,
@@ -410,9 +419,65 @@ async function loadCompletedAppointmentsPanel() {
     lucide.createIcons();
 }
 
+let allAppointments = [];
+
+async function performDoctorSearch() {
+    const searchTerm = document.getElementById('doctorSearchInput').value.toLowerCase().trim();
+    const container = document.getElementById('appointments-container');
+    
+    if (searchTerm === '') {
+        // Reset to today's appointments if search is cleared
+        await loadAppointmentsForToday();
+        return;
+    }
+    
+    // Filter all appointments based on search term
+    const filtered = allAppointments.filter(apt => 
+        apt.patient_name.toLowerCase().includes(searchTerm) ||
+        apt.contact_number?.toLowerCase().includes(searchTerm) ||
+        apt.patient_id?.toString().includes(searchTerm)
+    );
+    
+    if (filtered.length > 0) {
+        container.innerHTML = filtered.map(apt => `
+            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition cursor-pointer" onclick="openAppointmentModal(${apt.apt_id})">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <p class="font-semibold text-gray-900">${apt.patient_name}</p>
+                        <p class="text-sm text-gray-600">${apt.appointment_time}</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${apt.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">
+                        ${apt.status}
+                    </span>
+                </div>
+                <p class="text-sm text-gray-600">Reason: ${apt.reason_for_visit}</p>
+                <p class="text-sm text-gray-600">Room: ${apt.room_number}</p>
+            </div>
+        `).join('');
+        document.getElementById('selected-date-display').textContent = `Search Results (${filtered.length})`;
+    } else {
+        container.innerHTML = '<div class="text-center py-8 text-gray-400"><p>No appointments match your search</p></div>';
+        document.getElementById('selected-date-display').textContent = 'No Results';
+    }
+}
+
+async function loadAllAppointmentsForSearch() {
+    try {
+        const response = await fetch('../../api/doctor/appointments.php');
+        const result = await response.json();
+        if (result.status === 'success' && Array.isArray(result.data)) {
+            allAppointments = result.data;
+        }
+    } catch (error) {
+        console.error('Error loading appointments for search:', error);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById('doctorNotificationBtn');
     const panel = document.getElementById('doctorNotificationPanel');
+    const searchInput = document.getElementById('doctorSearchInput');
+    const searchBtn = document.getElementById('doctorSearchBtn');
 
     function doctorNotificationBarToggle(e) {
         if (e) {
@@ -433,8 +498,21 @@ document.addEventListener('DOMContentLoaded', () => {
         window.__doctorNotificationBarToggle = doctorNotificationBarToggle;
     }
 
+    // Search functionality
+    if (searchBtn) {
+        searchBtn.addEventListener('click', performDoctorSearch);
+    }
+    if (searchInput) {
+        searchInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                performDoctorSearch();
+            }
+        });
+    }
+
     updateCurrentDate();
     loadDoctorProfile();
+    loadAllAppointmentsForSearch();
     loadHomePageData();
     loadDoctorNotifications().then((rows) => renderDoctorNotificationList(rows));
 

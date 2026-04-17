@@ -13,7 +13,7 @@ $doctor_id = $_SESSION['user_id'];
 
 try {
     $stmt = $conn->prepare("
-        SELECT u.full_name, u.email, dp.specialization, dp.consultation_fee, dp.bio 
+        SELECT u.full_name, u.email, dp.specialization, dp.consultation_fee, dp.age, dp.bio 
         FROM users u 
         LEFT JOIN doctor_profiles dp ON u.user_id = dp.user_id 
         WHERE u.user_id = ? AND u.role = 'Doctor'
@@ -31,6 +31,14 @@ try {
     $stmt->close();
     
     if ($profile) {
+        // Parse bio JSON if it exists
+        if (!empty($profile['bio'])) {
+            $bio_data = json_decode($profile['bio'], true);
+            if (is_array($bio_data)) {
+                // Merge bio data into profile
+                $profile = array_merge($profile, $bio_data);
+            }
+        }
         echo json_encode(['status' => 'success', 'data' => $profile]);
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Doctor profile not found', 'debug' => 'Query returned no rows']);

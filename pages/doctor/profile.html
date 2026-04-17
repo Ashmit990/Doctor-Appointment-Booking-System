@@ -81,20 +81,15 @@
         <div class="hidden md:block p-8 border-b border-gray-700">
           <div class="flex items-center gap-3">
             <div
-              class="w-10 h-10 bg-white rounded-lg flex items-center justify-center"
+              class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center"
             >
-              <span class="text-primary text-xl font-bold">H</span>
+              <img src="../../src/assets/Logo.svg" alt="">
             </div>
             <h1 class="text-xl font-bold">Healthcare</h1>
           </div>
-          <p id="sidebar-doctor-name" class="text-sm text-gray-300 mt-2">
-            Loading...
-          </p>
         </div>
 
-        <nav
-          class="p-2 md:p-6 flex flex-row md:flex-col gap-2 md:gap-0 space-y-0 md:space-y-2 justify-around md:justify-start"
-        >
+        <nav class="p-2 md:p-6 flex flex-row md:flex-col gap-2 md:gap-0 space-y-0 md:space-y-2 justify-around md:justify-start md:flex-1">
           <a
             href="home.html"
             class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base"
@@ -123,9 +118,10 @@
             <i data-lucide="user" class="w-5 h-5"></i>
             <span>Profile</span>
           </a>
+          <div class="hidden md:block mt-auto border-t border-gray-600 pt-3"></div>
           <a
             href="../../api/auth/logout.php"
-            class="flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:bg-red-600 transition text-red-300 hover:text-white md:mt-8 text-[10px] md:text-base"
+            class="flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:bg-red-600 transition text-red-300 hover:text-white text-[10px] md:text-base"
           >
             <i data-lucide="log-out" class="w-5 h-5"></i>
             <span>Logout</span>
@@ -267,6 +263,18 @@
                         -
                       </p>
                     </div>
+                    <div>
+                      <label
+                        class="block text-xs uppercase font-semibold text-gray-400 tracking-wider"
+                        >Age</label
+                      >
+                      <p
+                        class="text-gray-800 font-medium mt-1"
+                        id="viewAge"
+                      >
+                        -
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -401,7 +409,19 @@
                           class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
                           placeholder="e.g., 12+ years"
                         />
-                        <p
+                      </div>
+                      <div>
+                        <label
+                          class="block text-sm font-medium text-gray-700 mb-1"
+                          >Age</label
+                        >
+                        <input
+                          type="number"
+                          id="editAge"
+                          min="18"
+                          max="100"
+                          class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
+                        />
                           class="text-xs text-red-500 hidden mt-1"
                           id="expError"
                         >
@@ -572,6 +592,7 @@
               specialization: "Cardiology",
               phone: "+1 (555) 234-7890",
               experience: "12+ years",
+              age: 45,
               qualification:
                 "MD, FACC - Cardiology & Internal Medicine, Board Certified",
               description:
@@ -589,6 +610,7 @@
             specialization: "Cardiology",
             phone: "+1 (555) 234-7890",
             experience: "12+ years",
+            age: 45,
             qualification:
               "MD, FACC - Cardiology & Internal Medicine, Board Certified",
             description:
@@ -612,6 +634,8 @@
           doctorProfile.phone || "-";
         document.getElementById("viewExperience").textContent =
           doctorProfile.experience || "-";
+        document.getElementById("viewAge").textContent =
+          doctorProfile.age || "-";
         document.getElementById("viewQualification").textContent =
           doctorProfile.qualification || "-";
         document.getElementById("viewDescription").textContent =
@@ -627,12 +651,6 @@
           doctorProfile.specialization || "-";
         document.getElementById("experienceDisplay").textContent =
           doctorProfile.experience || "-";
-
-        // Update sidebar doctor name
-        const sidebarName = document.getElementById("sidebar-doctor-name");
-        if (sidebarName)
-          sidebarName.textContent =
-            doctorProfile.full_name || doctorProfile.name || "Doctor";
       }
 
       // Helper: Fill edit form with current profile data
@@ -644,6 +662,7 @@
         document.getElementById("editPhone").value = doctorProfile.phone || "";
         document.getElementById("editExperience").value =
           doctorProfile.experience || "";
+        document.getElementById("editAge").value = doctorProfile.age || "";
         document.getElementById("editQualification").value =
           doctorProfile.qualification || "";
         document.getElementById("editDescription").value =
@@ -765,12 +784,14 @@
         try {
           const response = await fetch("../../api/doctor/update_profile.php", {
             method: "PUT",
+            credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               full_name: updatedData.full_name,
               specialization: updatedData.specialization,
               phone: updatedData.phone,
               experience: updatedData.experience,
+              age: updatedData.age,
               qualification: updatedData.qualification,
               description: updatedData.description,
               availability_info: updatedData.availability_info,
@@ -818,6 +839,7 @@
             .value.trim(),
           phone: document.getElementById("editPhone").value.trim(),
           experience: document.getElementById("editExperience").value.trim(),
+          age: document.getElementById("editAge").value ? parseInt(document.getElementById("editAge").value) : null,
           qualification: document
             .getElementById("editQualification")
             .value.trim(),
@@ -879,21 +901,11 @@
         );
       }
 
-      // Load sidebar doctor name from profile
-      async function loadSidebarDoctorName() {
-        const profile = await fetchDoctorProfile();
-        if (profile && profile.full_name) {
-          const sidebarName = document.getElementById("sidebar-doctor-name");
-          if (sidebarName) sidebarName.textContent = profile.full_name;
-        }
-      }
-
       // Initialize page
       async function init() {
         updateCurrentDate();
         await fetchDoctorProfile();
         updateViewModeDisplay();
-        await loadSidebarDoctorName();
 
         // Set up event listeners
         document

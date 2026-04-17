@@ -9,7 +9,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="homepage.css" />
   <style>
-    /* Match doctor dashboard “Mark all as read” accent (#007E85) */
+    /* Match doctor dashboard "Mark all as read" accent (#007E85) */
     .patient-notify-primary {
       color: #007e85;
     }
@@ -24,7 +24,7 @@
 <body class="bg-slate-100 min-h-screen font-sans">
   <div class="flex flex-col md:flex-row min-h-screen relative">
     <aside
-      class="w-full md:w-60 bg-[#0a5a5d] text-white flex flex-row md:flex-col items-center justify-around md:justify-start py-2 md:py-0 px-2 md:px-0 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] md:shadow-xl fixed bottom-0 md:sticky md:top-0 left-0 h-auto md:h-screen z-[100] overflow-x-auto md:overflow-y-auto">
+      class="w-full md:w-60 bg-[#007E85] text-white flex flex-row md:flex-col items-center justify-around md:justify-start py-2 md:py-0 px-2 md:px-0 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] md:shadow-xl fixed bottom-0 md:sticky md:top-0 left-0 h-auto md:h-screen z-[100] overflow-x-auto md:overflow-y-auto">
       
       <div class="hidden md:flex w-full px-6 py-7 items-center gap-3 border-b border-white/10 shrink-0 mb-2">
         <img src="../../src/assets/Logo.svg" alt="Logo" class="w-8 h-8">
@@ -72,7 +72,7 @@
 
             <h1 class="text-3xl md:text-4xl font-bold text-slate-800 leading-tight">
               Good Morning
-              <span id="patientNameHeading" class="text-teal-700"> </span>
+              <span id="patientNameHeading" class="text-[#007E85]"> </span>
             </h1>
           </div>
 
@@ -91,14 +91,14 @@
             </button>
 
             <button onclick="openBookingModal()"
-              class="bg-teal-600 hover:bg-teal-700 flex-1 sm:flex-none text-center text-white px-5 py-3 rounded-2xl font-medium shadow-sm transition">
+              class="bg-[#007E85] hover:bg-[#006570] flex-1 sm:flex-none text-center text-white px-5 py-3 rounded-2xl font-medium shadow-sm transition">
               Book Appointment
             </button>
           </div>
         </div>
 
         <section
-          class="bg-teal-700 rounded-[30px] p-7 mb-7 text-white relative overflow-hidden shadow-[0_15px_40px_rgba(20,184,166,0.25)] hero-panel">
+          class="bg-[#007E85] rounded-[30px] p-7 mb-7 text-white relative overflow-hidden shadow-[0_15px_40px_rgba(0,126,133,0.25)] hero-panel">
           <div class="max-w-2xl">
             <p class="text-3xl font-bold mb-2">Welcome back</p>
 
@@ -259,7 +259,7 @@
 
               <div class="flex items-center justify-between mt-6">
                 <h4 class="text-lg font-semibold text-slate-800">Upcoming</h4>
-                <button type="button" onclick="goToDashboard(event)" class="text-teal-500 text-sm font-medium">
+                <button type="button" onclick="goToDashboard(event)" class="text-[#007E85] text-sm font-medium">
                   View All
                 </button>
               </div>
@@ -279,7 +279,7 @@
                 </div>
                 <div class="flex justify-between items-center">
                   <span>Today’s Booking</span>
-                  <span id="todayBookingStatus" class="font-semibold text-teal-600">
+                  <span id="todayBookingStatus" class="font-semibold text-[#007E85]">
                     No
                   </span>
                 </div>
