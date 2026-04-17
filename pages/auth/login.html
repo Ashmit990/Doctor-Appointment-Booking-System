@@ -92,7 +92,7 @@
     </style>
   </head>
   <body
-    class="bg-[#F2F2F2] m-0 p-0 overflow-x-hidden min-h-screen tracking-[1.1px]"
+    class="bg-[#F2F2F2] m-0 p-0 overflow-hidden h-screen tracking-[1.1px]"
   >
     <!-- ✅ Forgot Password Modal -->
     <div
@@ -143,7 +143,7 @@
     </div>
 
     <div
-      class="flex min-h-screen w-full relative"
+      class="flex h-screen w-full relative"
       data-scroll-animation="animate-fade-in"
       data-delay="0s"
     >
@@ -190,11 +190,41 @@
             <label class="text-[#007E85] font-bold text-xl block mb-2"
               >Password</label
             >
-            <input
-              id="loginPassword"
-              type="password"
-              class="w-full border-b-2 border-[#007E85] bg-transparent focus:outline-none pb-2 text-gray-800 text-lg"
-            />
+            <div class="relative">
+              <input
+                id="loginPassword"
+                type="password"
+                class="w-full border-b-2 border-[#007E85] bg-transparent focus:outline-none pb-2 text-gray-800 text-lg pr-10"
+              />
+              <button
+                type="button"
+                onclick="togglePass()"
+                class="absolute right-0 bottom-2 text-[#007E85] hover:text-[#005f65]"
+                tabindex="-1"
+              >
+                <svg
+                  id="eyeIcon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
 
           <div class="w-full mb-10">
@@ -216,6 +246,8 @@
               Forgot Password?
             </button>
           </div>
+
+          <p id="loginError" class="hidden text-red-600 text-sm font-semibold mb-4 text-center"></p>
 
           <button
             onclick="handleLogin()"
@@ -264,9 +296,14 @@
       function handleLogin() {
         const email = document.getElementById("loginEmail").value.trim();
         const password = document.getElementById("loginPassword").value.trim();
+        const errorEl = document.getElementById("loginError");
+
+        errorEl.classList.add("hidden");
+        errorEl.textContent = "";
 
         if (!email || !password) {
-          alert("Please fill in all fields.");
+          errorEl.textContent = "Please fill in all fields.";
+          errorEl.classList.remove("hidden");
           return;
         }
 
@@ -283,13 +320,23 @@
             if (data.status === "success") {
               window.location.href = data.redirect;
             } else {
-              alert(data.message || "Login failed");
+              errorEl.textContent = data.message || "Email or password didn't match.";
+              errorEl.classList.remove("hidden");
             }
           })
           .catch((error) => {
             console.error("Error:", error);
-            alert("An error occurred during login");
+            errorEl.textContent = "An error occurred during login.";
+            errorEl.classList.remove("hidden");
           });
+      }
+
+      function togglePass() {
+        const input = document.getElementById("loginPassword");
+        const icon = document.getElementById("eyeIcon");
+        const show = input.type === "password";
+        input.type = show ? "text" : "password";
+        icon.style.opacity = show ? "0.45" : "1";
       }
 
       // Allow Enter key to trigger login

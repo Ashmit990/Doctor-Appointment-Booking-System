@@ -45,9 +45,6 @@ async function fetchAvailabilityDates() {
 }
 
 function renderScheduleCalendar() {
-  const daysContainer = document.getElementById("schedule-calendar-days");
-  daysContainer.innerHTML = "";
-
   const year = scheduleMonth.getFullYear();
   const month = scheduleMonth.getMonth();
 
@@ -62,6 +59,8 @@ function renderScheduleCalendar() {
 
   // Fetch availability dates for this month
   fetchAvailabilityDates().then((availabilityDates) => {
+    const daysContainer = document.getElementById("schedule-calendar-days");
+    daysContainer.innerHTML = "";
     // Create a Set of dates for this month/year only
     const targetYear = year;
     const targetMonth = month + 1; // Convert from 0-11 to 1-12
@@ -90,6 +89,9 @@ function renderScheduleCalendar() {
       daysContainer.appendChild(dayDiv);
     }
 
+    const todayObj = new Date();
+    const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, "0")}-${String(todayObj.getDate()).padStart(2, "0")}`;
+
     // Current month dates
     for (let i = 1; i <= daysInMonth; i++) {
       const dayDiv = document.createElement("div");
@@ -103,6 +105,14 @@ function renderScheduleCalendar() {
       }
 
       const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
+      
+      if (dateStr < todayStr) {
+        dayDiv.style.color = "#d1d5db";
+      } else if (dateStr === todayStr) {
+        dayDiv.style.backgroundColor = "#007E85";
+        dayDiv.style.color = "white";
+      }
+
       dayDiv.onclick = () => selectScheduleDate(dateStr);
 
       daysContainer.appendChild(dayDiv);
@@ -212,8 +222,8 @@ let storedAppointmentsForModal = [];
 
 async function loadScheduleForDate(date) {
   const gridContainer = document.getElementById("daily-schedule-grid");
-  gridContainer.innerHTML =
-    '<div class="text-center py-12 text-gray-400"><p>Loading slots...</p></div>';
+  gridContainer.style.opacity = "0.5";
+  gridContainer.style.transition = "opacity 0.2s ease-in-out";
 
   try {
     // Fetch Parallel
@@ -237,6 +247,7 @@ async function loadScheduleForDate(date) {
     const currentHour = today.getHours();
     const currentMinute = today.getMinutes();
 
+    gridContainer.style.opacity = "1";
     gridContainer.innerHTML = "";
 
     FIX_SLOTS.forEach((slot) => {
@@ -329,6 +340,7 @@ async function loadScheduleForDate(date) {
     });
     lucide.createIcons();
   } catch (e) {
+    gridContainer.style.opacity = "1";
     gridContainer.innerHTML =
       '<div class="text-center py-12 text-red-500"><p>Failed to load slots. Please try again.</p></div>';
   }

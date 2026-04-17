@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
@@ -14,9 +14,9 @@
 
 </head>
 
-<body class="bg-[#ECECEC] px-10 pt-2">
-    <header class="w-[100%] h-[80px] flex items-center justify-between" data-scroll-animation="animate-fade-in"
-        data-delay="0s">
+<body id="home" class="bg-[#ECECEC] px-10 pt-2">
+    <header class="sticky top-0 z-50 bg-[#ECECEC] w-[100%] h-[80px] flex items-center justify-between"
+        data-scroll-animation="animate-fade-in" data-delay="0s">
         <div class="w-[205px] h-[100%] flex justify-between items-center" data-scroll-animation="animate-slide-up"
             data-delay="0.1s">
             <img class="h-[60px]" src="./src/assets/Logo.svg" alt="">
@@ -29,10 +29,10 @@
             <a href="#home"
                 class="font-lato relative transition-colors hover:text-[#007E85] after:content-[''] after:absolute after:bottom-[-0.9px] after:left-0 after:h-[2px] after:bg-[#007E85] after:w-0 hover:after:w-full hover:after:animate-underline-grow">Home</a>
 
-            <a href="#service"
-                class="font-lato relative transition-colors hover:text-[#007E85] after:content-[''] after:absolute after:bottom-[-0.9px] after:left-0 after:h-[2px] after:bg-[#007E85] after:w-0 hover:after:w-full hover:after:animate-underline-grow">Services</a>
             <a href="#about"
                 class="font-lato relative transition-colors hover:text-[#007E85] after:content-[''] after:absolute after:bottom-[-0.9px] after:left-0 after:h-[2px] after:bg-[#007E85] after:w-0 hover:after:w-full hover:after:animate-underline-grow">About</a>
+            <a href="#service"
+                class="font-lato relative transition-colors hover:text-[#007E85] after:content-[''] after:absolute after:bottom-[-0.9px] after:left-0 after:h-[2px] after:bg-[#007E85] after:w-0 hover:after:w-full hover:after:animate-underline-grow">Services</a>
             <a href="#contact"
                 class="font-lato relative transition-colors hover:text-[#007E85] after:content-[''] after:absolute after:bottom-[-0.9px] after:left-0 after:h-[2px] after:bg-[#007E85] after:w-0 hover:after:w-full hover:after:animate-underline-grow">Contact</a>
 
@@ -48,7 +48,8 @@
         </div>
     </header>
 
-    <section id="home" class="flex items-center justify-between gap-12 mt-20 mb-20 tracking-[1px]">
+    <section
+        class="bg-white rounded-[40px] shadow-sm p-10 lg:p-16 flex items-center justify-between gap-12 mt-10 mb-10 tracking-[1px]">
         <!-- Left Content -->
         <div class="flex-1" data-scroll-animation="animate-slide-up" data-delay="0.4s">
             <h1 class="font-lato font-bold text-[56px] leading-tight mb-6" data-scroll-animation="animate-slide-up"
@@ -99,8 +100,153 @@
         </div>
     </section>
 
-    <section id="service" class="py-24 animate-slide-up" data-scroll-animation="animate-slide-up"
-        style="animation-delay: 0.4s; animation-fill-mode: both;">
+    <section id="about" class="bg-white rounded-[40px] shadow-sm p-10 lg:p-16 mb-10">
+        <div class="max-w-6xl mx-auto">
+            <!-- Section Title -->
+            <div class="text-center mb-20" data-scroll-animation="animate-slide-up" data-delay="0s">
+                <h2 class="font-lato font-bold text-[48px] text-[#007E85] tracking-wide mb-6">About Healthcare</h2>
+                <p class="font-lato text-[18px] text-[#333333] opacity-80 max-w-3xl mx-auto">
+                    We are a leading healthcare provider committed to delivering exceptional medical services with
+                    compassion and excellence. Our mission is to make quality healthcare accessible and affordable for
+                    everyone.
+                </p>
+            </div>
+
+            <!-- Why Choose Us Grid -->
+            <div class="grid grid-cols-2 gap-12 mb-20">
+                <!-- Reason 1 -->
+                <div class="flex gap-6" data-scroll-animation="animate-slide-up" data-delay="0.1s">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center h-14 w-14 rounded-full bg-[#007E85]">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-lato font-bold text-[22px] text-[#333333] mb-3">Board-Certified Doctors</h3>
+                        <p class="font-lato text-[16px] text-[#333333] opacity-75">Our team consists of highly qualified
+                            and certified medical professionals with years of experience in their respective fields.</p>
+                    </div>
+                </div>
+
+                <!-- Reason 2 -->
+                <div class="flex gap-6" data-scroll-animation="animate-slide-up" data-delay="0.2s">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center h-14 w-14 rounded-full bg-[#6EAB36]">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-lato font-bold text-[22px] text-[#333333] mb-3">State-of-the-Art Technology</h3>
+                        <p class="font-lato text-[16px] text-[#333333] opacity-75">We invest in the latest medical
+                            equipment and technology to ensure accurate diagnoses and effective treatments.</p>
+                    </div>
+                </div>
+
+                <!-- Reason 3 -->
+                <div class="flex gap-6" data-scroll-animation="animate-slide-up" data-delay="0.3s">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center h-14 w-14 rounded-full bg-[#007E85]">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-lato font-bold text-[22px] text-[#333333] mb-3">Affordable Healthcare</h3>
+                        <p class="font-lato text-[16px] text-[#333333] opacity-75">We believe healthcare should be
+                            accessible. Our transparent pricing and flexible payment options ensure quality care for
+                            all.</p>
+                    </div>
+                </div>
+
+                <!-- Reason 4 -->
+                <div class="flex gap-6" data-scroll-animation="animate-slide-up" data-delay="0.4s">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center h-14 w-14 rounded-full bg-[#6EAB36]">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z">
+                                </path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-lato font-bold text-[22px] text-[#333333] mb-3">Patient-Centered Care</h3>
+                        <p class="font-lato text-[16px] text-[#333333] opacity-75">Your comfort and satisfaction are our
+                            priorities. We provide personalized care plans tailored to your individual health needs.</p>
+                    </div>
+                </div>
+
+                <!-- Reason 5 -->
+                <div class="flex gap-6" data-scroll-animation="animate-slide-up" data-delay="0.5s">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center h-14 w-14 rounded-full bg-[#007E85]">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-lato font-bold text-[22px] text-[#333333] mb-3">24/7 Availability</h3>
+                        <p class="font-lato text-[16px] text-[#333333] opacity-75">Our healthcare services are available
+                            round the clock. Whether it's day or night, we're here to serve your medical needs.</p>
+                    </div>
+                </div>
+
+                <!-- Reason 6 -->
+                <div class="flex gap-6" data-scroll-animation="animate-slide-up" data-delay="0.6s">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center h-14 w-14 rounded-full bg-[#6EAB36]">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-lato font-bold text-[22px] text-[#333333] mb-3">Privacy & Confidentiality</h3>
+                        <p class="font-lato text-[16px] text-[#333333] opacity-75">We prioritize your privacy with
+                            HIPAA-compliant systems and secure medical records management for complete peace of mind.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Company Info Section -->
+            <div class="bg-gradient-to-r from-[#007E85]/10 to-[#6EAB36]/10 rounded-3xl p-12 border border-[#007E85]/20"
+                data-scroll-animation="animate-slide-up" data-delay="0.7s">
+                <div class="grid grid-cols-3 gap-10 text-center">
+                    <div>
+                        <h4 class="font-lato font-bold text-[28px] text-[#007E85] mb-3">15+ Years</h4>
+                        <p class="font-lato text-[16px] text-[#333333] opacity-75">Of trusted healthcare service and
+                            excellence in the industry</p>
+                    </div>
+                    <div>
+                        <h4 class="font-lato font-bold text-[28px] text-[#6EAB36] mb-3">500+ Staff</h4>
+                        <p class="font-lato text-[16px] text-[#333333] opacity-75">Dedicated healthcare professionals
+                            committed to your wellness</p>
+                    </div>
+                    <div>
+                        <h4 class="font-lato font-bold text-[28px] text-[#007E85] mb-3">Multi-Location</h4>
+                        <p class="font-lato text-[16px] text-[#333333] opacity-75">Conveniently located clinics across
+                            the region for easy access</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="service" class="bg-white rounded-[40px] shadow-sm p-10 lg:p-16 mb-10 animate-slide-up"
+        data-scroll-animation="animate-slide-up" style="animation-delay: 0.4s; animation-fill-mode: both;">
         <div data-scroll-animation="animate-slide-up" class="text-center mb-16">
             <h2 class="text-[#333333] font-lato font-black text-[40px] leading-tight">
                 Services we <span class="text-[#007E85]">provide</span>
@@ -250,152 +396,7 @@
         </div>
     </section>
 
-    <section id="about" class="py-24">
-        <div class="max-w-6xl mx-auto">
-            <!-- Section Title -->
-            <div class="text-center mb-20" data-scroll-animation="animate-slide-up" data-delay="0s">
-                <h2 class="font-lato font-bold text-[48px] text-[#007E85] tracking-wide mb-6">About Healthcare</h2>
-                <p class="font-lato text-[18px] text-[#333333] opacity-80 max-w-3xl mx-auto">
-                    We are a leading healthcare provider committed to delivering exceptional medical services with
-                    compassion and excellence. Our mission is to make quality healthcare accessible and affordable for
-                    everyone.
-                </p>
-            </div>
-
-            <!-- Why Choose Us Grid -->
-            <div class="grid grid-cols-2 gap-12 mb-20">
-                <!-- Reason 1 -->
-                <div class="flex gap-6" data-scroll-animation="animate-slide-up" data-delay="0.1s">
-                    <div class="flex-shrink-0">
-                        <div class="flex items-center justify-center h-14 w-14 rounded-full bg-[#007E85]">
-                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="font-lato font-bold text-[22px] text-[#333333] mb-3">Board-Certified Doctors</h3>
-                        <p class="font-lato text-[16px] text-[#333333] opacity-75">Our team consists of highly qualified
-                            and certified medical professionals with years of experience in their respective fields.</p>
-                    </div>
-                </div>
-
-                <!-- Reason 2 -->
-                <div class="flex gap-6" data-scroll-animation="animate-slide-up" data-delay="0.2s">
-                    <div class="flex-shrink-0">
-                        <div class="flex items-center justify-center h-14 w-14 rounded-full bg-[#6EAB36]">
-                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="font-lato font-bold text-[22px] text-[#333333] mb-3">State-of-the-Art Technology</h3>
-                        <p class="font-lato text-[16px] text-[#333333] opacity-75">We invest in the latest medical
-                            equipment and technology to ensure accurate diagnoses and effective treatments.</p>
-                    </div>
-                </div>
-
-                <!-- Reason 3 -->
-                <div class="flex gap-6" data-scroll-animation="animate-slide-up" data-delay="0.3s">
-                    <div class="flex-shrink-0">
-                        <div class="flex items-center justify-center h-14 w-14 rounded-full bg-[#007E85]">
-                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                </path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="font-lato font-bold text-[22px] text-[#333333] mb-3">Affordable Healthcare</h3>
-                        <p class="font-lato text-[16px] text-[#333333] opacity-75">We believe healthcare should be
-                            accessible. Our transparent pricing and flexible payment options ensure quality care for
-                            all.</p>
-                    </div>
-                </div>
-
-                <!-- Reason 4 -->
-                <div class="flex gap-6" data-scroll-animation="animate-slide-up" data-delay="0.4s">
-                    <div class="flex-shrink-0">
-                        <div class="flex items-center justify-center h-14 w-14 rounded-full bg-[#6EAB36]">
-                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z">
-                                </path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="font-lato font-bold text-[22px] text-[#333333] mb-3">Patient-Centered Care</h3>
-                        <p class="font-lato text-[16px] text-[#333333] opacity-75">Your comfort and satisfaction are our
-                            priorities. We provide personalized care plans tailored to your individual health needs.</p>
-                    </div>
-                </div>
-
-                <!-- Reason 5 -->
-                <div class="flex gap-6" data-scroll-animation="animate-slide-up" data-delay="0.5s">
-                    <div class="flex-shrink-0">
-                        <div class="flex items-center justify-center h-14 w-14 rounded-full bg-[#007E85]">
-                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="font-lato font-bold text-[22px] text-[#333333] mb-3">24/7 Availability</h3>
-                        <p class="font-lato text-[16px] text-[#333333] opacity-75">Our healthcare services are available
-                            round the clock. Whether it's day or night, we're here to serve your medical needs.</p>
-                    </div>
-                </div>
-
-                <!-- Reason 6 -->
-                <div class="flex gap-6" data-scroll-animation="animate-slide-up" data-delay="0.6s">
-                    <div class="flex-shrink-0">
-                        <div class="flex items-center justify-center h-14 w-14 rounded-full bg-[#6EAB36]">
-                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="font-lato font-bold text-[22px] text-[#333333] mb-3">Privacy & Confidentiality</h3>
-                        <p class="font-lato text-[16px] text-[#333333] opacity-75">We prioritize your privacy with
-                            HIPAA-compliant systems and secure medical records management for complete peace of mind.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Company Info Section -->
-            <div class="bg-gradient-to-r from-[#007E85]/10 to-[#6EAB36]/10 rounded-3xl p-12 border border-[#007E85]/20"
-                data-scroll-animation="animate-slide-up" data-delay="0.7s">
-                <div class="grid grid-cols-3 gap-10 text-center">
-                    <div>
-                        <h4 class="font-lato font-bold text-[28px] text-[#007E85] mb-3">15+ Years</h4>
-                        <p class="font-lato text-[16px] text-[#333333] opacity-75">Of trusted healthcare service and
-                            excellence in the industry</p>
-                    </div>
-                    <div>
-                        <h4 class="font-lato font-bold text-[28px] text-[#6EAB36] mb-3">500+ Staff</h4>
-                        <p class="font-lato text-[16px] text-[#333333] opacity-75">Dedicated healthcare professionals
-                            committed to your wellness</p>
-                    </div>
-                    <div>
-                        <h4 class="font-lato font-bold text-[28px] text-[#007E85] mb-3">Multi-Location</h4>
-                        <p class="font-lato text-[16px] text-[#333333] opacity-75">Conveniently located clinics across
-                            the region for easy access</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="contact" class="py-20">
+    <section id="contact" class="bg-white rounded-[40px] shadow-sm p-10 lg:p-16 mb-10">
         <div class="max-w-6xl mx-auto">
             <!-- Section Title -->
             <div class="text-center mb-16" data-scroll-animation="animate-slide-up" data-delay="0s">
@@ -557,4 +558,4 @@
     <script src="./src/js/scroll-animations.js"></script>
 </body>
 
-</html
+</html>

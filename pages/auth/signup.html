@@ -359,6 +359,55 @@
               ></p>
             </div>
 
+            <!-- 7. Confirm Password -->
+            <div class="group">
+              <label
+                class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+              >
+                Confirm Password
+              </label>
+              <div class="relative">
+                <input
+                  id="signupConfirmPassword"
+                  type="password"
+                  class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none pr-10"
+                  oninput="clearErr('signupConfirmPassword')"
+                />
+                <button
+                  type="button"
+                  onclick="toggleConfirmPass()"
+                  class="absolute right-0 bottom-2 text-[#007E85] hover:text-[#005f65]"
+                  tabindex="-1"
+                >
+                  <svg
+                    id="confirmEyeIcon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <p
+                id="signupConfirmPassword_err"
+                class="hidden text-red-600 text-xs font-semibold mt-1"
+              ></p>
+            </div>
+
             <!-- Submit -->
             <div class="pt-2 mt-[-5px]">
               <button
@@ -460,6 +509,14 @@
         icon.style.opacity = show ? "0.45" : "1";
       }
 
+      function toggleConfirmPass() {
+        const input = document.getElementById("signupConfirmPassword");
+        const icon = document.getElementById("confirmEyeIcon");
+        const show = input.type === "password";
+        input.type = show ? "text" : "password";
+        icon.style.opacity = show ? "0.45" : "1";
+      }
+
       // ── Password strength meter ───────────────────────────────────────────
       document
         .getElementById("signupPassword")
@@ -549,8 +606,8 @@
         phone(v) {
           if (!v) return "Phone number is required.";
           const digits = v.replace(/[\s\-()]/g, "");
-          if (!/^\+?\d{10,15}$/.test(digits))
-            return "Phone must be 10 digits. A leading + is allowed for country codes.";
+          if (!/^\d{10}$/.test(digits))
+            return "Phone number must be exactly 10 digits.";
           return null;
         },
 
@@ -588,6 +645,7 @@
           const email = document.getElementById("signupEmail").value.trim();
           const phone = document.getElementById("signupPhone").value.trim();
           const password = document.getElementById("signupPassword").value;
+          const confirmPassword = document.getElementById("signupConfirmPassword").value;
           const bio = document.getElementById("signupBio").value.trim();
           const isDoctor = selectedRole === "Medical Professional";
 
@@ -598,6 +656,7 @@
             "signupEmail",
             "signupPhone",
             "signupPassword",
+            "signupConfirmPassword",
             "signupBio",
           ].forEach(clearErr);
 
@@ -630,6 +689,14 @@
           const passErr = Validators.password(password);
           if (passErr) {
             showErr("signupPassword", passErr);
+            hasError = true;
+          }
+
+          if (!confirmPassword) {
+            showErr("signupConfirmPassword", "Please confirm your password.");
+            hasError = true;
+          } else if (password !== confirmPassword) {
+            showErr("signupConfirmPassword", "Passwords do not match.");
             hasError = true;
           }
 
