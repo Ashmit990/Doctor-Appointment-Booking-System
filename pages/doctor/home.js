@@ -556,3 +556,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     lucide.createIcons();
 });
+
+// Check session when page becomes visible (e.g., on back button)
+document.addEventListener('visibilitychange', async () => {
+  if (!document.hidden) {
+    // Verify session by checking if user is still logged in
+    const response = await fetch(`${DOCTOR_API_BASE}/auth/session_info.php`, { credentials: 'include' });
+    const data = await response.json();
+    if (!data.logged_in || data.role !== 'Doctor') {
+      window.location.href = '../auth/login.html';
+    }
+  }
+});

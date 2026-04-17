@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>Doctor Dashboard - Profile Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -929,6 +932,19 @@
 
       // Start the app
       init();
+    </script>
+    <script>
+      // Check session when page becomes visible (e.g., on back button)
+      document.addEventListener('visibilitychange', async () => {
+        if (!document.hidden) {
+          // Verify session by checking if user is still logged in
+          const response = await fetch('../../api/auth/session_info.php', { credentials: 'include' });
+          const data = await response.json();
+          if (!data.logged_in || data.role !== 'Doctor') {
+            window.location.href = '../auth/login.html';
+          }
+        }
+      });
     </script>
   </body>
 </html>

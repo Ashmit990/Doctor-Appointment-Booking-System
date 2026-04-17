@@ -252,3 +252,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Refresh stats every 30 seconds
     setInterval(loadDashboardStats, 30000);
 });
+// Check session when page becomes visible (e.g., on back button)
+document.addEventListener('visibilitychange', async () => {
+  if (!document.hidden) {
+    // Verify session by checking if user is still logged in
+    const response = await fetch('../../api/auth/session_info.php', { credentials: 'include' });
+    const data = await response.json();
+    if (!data.logged_in || data.role !== 'Admin') {
+      window.location.href = '../auth/login.html';
+    }
+  }
+});
