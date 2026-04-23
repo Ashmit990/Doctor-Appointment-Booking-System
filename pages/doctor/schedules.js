@@ -210,9 +210,6 @@ async function selectScheduleDate(date) {
     month: "short",
     day: "numeric",
   });
-  if (dateObj.getTime() === today.getTime()) {
-    dateDisplay = "Today, " + dateDisplay;
-  }
   document.getElementById("schedule-date-display").textContent = dateDisplay;
 
   renderScheduleCalendar(); // re-render to update selected state style
@@ -464,17 +461,9 @@ function openAppointmentModal(aptId) {
     notesReadonly.textContent = apt.doctor_notes || "No notes provided.";
     rxReadonly.textContent = apt.prescriptions || "No prescriptions provided.";
 
-    if (apt.rating > 0) {
+    if (apt.feedback && apt.feedback.trim() !== "") {
       feedbackSec.classList.remove("hidden");
-      let starsHtml = "";
-      for (let i = 1; i <= 5; i++) {
-        starsHtml += `<i data-lucide="star" class="w-4 h-4 ${i <= apt.rating ? "text-yellow-400 fill-current" : "text-gray-300"}"></i>`;
-      }
-      document.getElementById("readonly-rating-stars").innerHTML = starsHtml;
-      document.getElementById("readonly-feedback").textContent = apt.feedback
-        ? `"${apt.feedback}"`
-        : "No specific comments left.";
-      lucide.createIcons();
+      document.getElementById("readonly-feedback").textContent = `"${apt.feedback}"`;
     } else {
       feedbackSec.classList.add("hidden");
     }

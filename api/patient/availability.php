@@ -51,6 +51,19 @@ if ($action === 'slots') {
     $stmt->execute();
     $slots = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
+    
+    // Filter out past slots if the date is today
+    $today = date('Y-m-d');
+    $current_time = date('H:i:s');
+    
+    if ($date === $today) {
+        $slots = array_filter($slots, function($slot) use ($current_time) {
+            return $slot['start_time'] > $current_time;
+        });
+        // Re-index array after filtering
+        $slots = array_values($slots);
+    }
+    
     echo json_encode(['status' => 'success', 'data' => $slots]);
     $conn->close();
     exit;

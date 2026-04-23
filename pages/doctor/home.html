@@ -112,9 +112,9 @@
         <main class="ml-0 md:ml-64 flex-1 overflow-y-auto pb-20 md:pb-0">
             <!-- TOP BAR -->
             <div class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm overflow-visible">
-                <div class="px-8 py-4 flex justify-between items-center gap-4 overflow-visible flex-wrap">
+                <div class="px-4 md:px-5 py-3 flex justify-between items-center gap-4 overflow-visible flex-wrap">
                     <div class="min-w-0 flex-1">
-                        <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
+                        <h2 class="text-lg font-bold text-gray-800">Dashboard</h2>
                         <p id="current-date" class="text-sm text-gray-500"></p>
                     </div>
                     <div class="relative flex-1 sm:flex-none min-w-0 sm:min-w-[300px]">
@@ -139,36 +139,36 @@
             </div>
 
             <!-- PAGE CONTENT -->
-            <div class="p-8">
-                <div class="space-y-8">
+            <div class="p-4 md:p-5">
+                <div class="space-y-5">
                     <!-- GREETING -->
                     <div>
-                        <h1 id="greeting-message" class="text-4xl font-bold text-gray-900">Hello, Doctor</h1>
+                        <h1 id="greeting-message" class="text-3xl font-bold text-gray-900">Hello, Doctor</h1>
                         <p class="text-gray-600 mt-2">Welcome to your dashboard</p>
                     </div>
 
                     <!-- HERO SECTION WITH STATS -->
-                    <section class="bg-[#007E85] rounded-[30px] p-7 mb-7 text-white relative overflow-hidden shadow-[0_15px_40px_rgba(0,126,133,0.25)]">
+                    <section class="bg-[#007E85] rounded-[20px] p-4 md:p-5 mb-5 text-white relative overflow-hidden shadow-[0_15px_40px_rgba(0,126,133,0.25)]">
                         <div class="max-w-2xl">
-                            <p class="text-3xl font-bold mb-2">Welcome back, Doctor</p>
-                            <p class="text-base opacity-90 mb-6">
+                            <p class="text-xl font-bold mb-2">Welcome back, Doctor</p>
+                            <p class="text-sm opacity-90 mb-4">
                                 View today's visits, patient statistics, and completed appointments.
                             </p>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <div class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20">
-                                    <p class="text-sm opacity-90 mb-2">Today's Visits</p>
-                                    <h3 id="stat-today-visits" class="text-4xl font-bold">0</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div class="bg-white/20 backdrop-blur-md rounded-2xl p-3 border border-white/20">
+                                    <p class="text-xs opacity-90 mb-1">Today's Visits</p>
+                                    <h3 id="stat-today-visits" class="text-2xl font-bold">0</h3>
                                 </div>
 
-                                <div class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20">
-                                    <p class="text-sm opacity-90 mb-2">Total Patients</p>
-                                    <h3 id="stat-total-patients" class="text-4xl font-bold">0</h3>
+                                <div class="bg-white/20 backdrop-blur-md rounded-2xl p-3 border border-white/20">
+                                    <p class="text-xs opacity-90 mb-1">Total Patients</p>
+                                    <h3 id="stat-total-patients" class="text-2xl font-bold">0</h3>
                                 </div>
 
-                                <div class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20">
-                                    <p class="text-sm opacity-90 mb-2">Completed</p>
-                                    <h3 id="stat-completed" class="text-4xl font-bold">0</h3>
+                                <div class="bg-white/20 backdrop-blur-md rounded-2xl p-3 border border-white/20">
+                                    <p class="text-xs opacity-90 mb-1">Completed</p>
+                                    <h3 id="stat-completed" class="text-2xl font-bold">0</h3>
                                 </div>
                             </div>
                         </div>
@@ -179,9 +179,9 @@
                     </section>
 
                     <!-- CALENDAR AND APPOINTMENTS -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="col-span-1 bg-white rounded-xl card-shadow p-4 sm:p-6 overflow-x-auto w-full">
-                            <div class="flex items-center justify-between mb-4">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <div class="col-span-1 bg-white rounded-[16px] card-shadow p-3 sm:p-4 overflow-x-auto w-full">
+                            <div class="flex items-center justify-between mb-3">
                                 <h3 id="calendar-month" class="font-bold text-gray-900">April 2026</h3>
                                 <div class="flex gap-2">
                                     <button onclick="prevMonth()" class="p-2 hover:bg-gray-100 rounded-lg">
@@ -197,12 +197,12 @@
                                 <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
                             </div>
 
-                            <div id="calendar-days" class="grid grid-cols-7 gap-2"></div>
+                            <div id="calendar-days" class="grid grid-cols-7 gap-1.5"></div>
                         </div>
 
-                        <div class="col-span-1 lg:col-span-2 bg-white rounded-xl card-shadow p-4 sm:p-6 overflow-x-auto w-full">
-                            <h3 class="text-lg font-bold text-gray-900 mb-4">Appointments for <span id="selected-date-display">Today</span></h3>
-                            <div id="appointments-container" class="space-y-4">
+                        <div class="col-span-1 lg:col-span-2 bg-white rounded-[16px] card-shadow p-3 sm:p-4 overflow-x-auto w-full">
+                            <h3 class="text-sm font-bold text-gray-900 mb-3">Appointments for <span id="selected-date-display">Today</span></h3>
+                            <div id="appointments-container" class="space-y-3">
                                 <div class="text-center py-8 text-gray-400">
                                     <p>Loading appointments...</p>
                                 </div>
@@ -211,15 +211,15 @@
                     </div>
 
                     <!-- COMPLETED APPOINTMENTS PANEL -->
-                    <div class="bg-white rounded-xl card-shadow p-6">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <div class="bg-white rounded-[16px] card-shadow p-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-bold text-gray-900 flex items-center gap-2">
                                 <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
                                 Completed Appointments
                             </h3>
                             <span id="completed-count" class="text-sm font-semibold text-gray-600 bg-gray-200 px-3 py-1 rounded-full">0</span>
                         </div>
-                        <div id="completed-appointments-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div id="completed-appointments-container" class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div class="text-center py-8 text-gray-400">
                                 <p>No completed appointments to display</p>
                             </div>
@@ -233,8 +233,8 @@
     <!-- Panel outside main/sidebar so nothing stacks over the hit target -->
     <div id="doctorNotificationPanel"
         class="hidden fixed w-[min(calc(100vw-2rem),390px)] max-w-[calc(100vw-2rem)] bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden z-[300] pointer-events-auto">
-        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-            <h3 class="text-lg font-bold text-gray-800">Notifications</h3>
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+            <h3 class="text-sm font-bold text-gray-800">Notifications</h3>
             <button id="doctorMarkAllReadBtn" type="button"
                 class="text-sm font-medium primary-color hover:opacity-80 transition">Mark all as read</button>
         </div>
@@ -244,50 +244,50 @@
     <!-- APPOINTMENT DETAIL MODAL -->
     <div id="appointment-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[400]">
         <div class="bg-white rounded-2xl card-shadow max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="sticky top-0 bg-primary text-white px-6 py-4 flex justify-between items-center">
-                <h3 class="text-xl font-bold" id="modal-patient-name">Patient Name</h3>
+            <div class="sticky top-0 bg-primary text-white px-4 py-3 flex justify-between items-center">
+                <h3 class="text-lg font-bold" id="modal-patient-name">Patient Name</h3>
                 <button onclick="closeAppointmentModal()" class="text-white hover:text-gray-200">
                     <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
             </div>
 
-            <div class="p-6 space-y-6">
-                <div class="grid grid-cols-2 gap-6 text-sm">
+            <div class="p-4 space-y-4">
+                <div class="grid grid-cols-2 gap-3 text-xs">
                     <div>
                         <p class="text-gray-600">Patient ID</p>
-                        <p id="modal-patient-id" class="font-semibold text-gray-900">-</p>
+                        <p id="modal-patient-id" class="font-semibold text-gray-900 text-sm">-</p>
                     </div>
                     <div>
                         <p class="text-gray-600">Date</p>
-                        <p id="modal-apt-date" class="font-semibold text-gray-900">-</p>
+                        <p id="modal-apt-date" class="font-semibold text-gray-900 text-sm">-</p>
                     </div>
                     <div>
                         <p class="text-gray-600">Time</p>
-                        <p id="modal-apt-time" class="font-semibold text-gray-900">-</p>
+                        <p id="modal-apt-time" class="font-semibold text-gray-900 text-sm">-</p>
                     </div>
                     <div>
                         <p class="text-gray-600">Room</p>
-                        <p id="modal-room-num" class="font-semibold text-gray-900">-</p>
+                        <p id="modal-room-num" class="font-semibold text-gray-900 text-sm">-</p>
                     </div>
                     <div>
                         <p class="text-gray-600">Blood Group</p>
-                        <p id="modal-blood-group" class="font-semibold text-gray-900">-</p>
+                        <p id="modal-blood-group" class="font-semibold text-gray-900 text-sm">-</p>
                     </div>
                     <div>
                         <p class="text-gray-600">Contact</p>
-                        <p id="modal-contact" class="font-semibold text-gray-900">-</p>
+                        <p id="modal-contact" class="font-semibold text-gray-900 text-sm">-</p>
                     </div>
                 </div>
 
-                <div class="border-t pt-6">
-                    <p class="text-gray-600 text-sm mb-2">Reason for Visit</p>
-                    <p id="modal-reason" class="font-semibold text-gray-900">-</p>
+                <div class="border-t pt-3">
+                    <p class="text-gray-600 text-xs mb-1">Reason for Visit</p>
+                    <p id="modal-reason" class="font-semibold text-gray-900 text-sm">-</p>
                 </div>
 
-                <div id="edit-section" class="hidden border-t pt-6 space-y-6">
+                <div id="edit-section" class="hidden border-t pt-3 space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Appointment Status</label>
-                        <select id="modal-status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                        <label class="block text-xs font-medium text-gray-700 mb-1.5">Appointment Status</label>
+                        <select id="modal-status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary text-sm">
                             <option value="Upcoming">Upcoming</option>
                             <option value="Completed">Completed</option>
                             <option value="Missed">Missed</option>
@@ -295,32 +295,32 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Doctor's Comments</label>
-                        <textarea id="modal-comments" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"></textarea>
+                        <label class="block text-xs font-medium text-gray-700 mb-1.5">Doctor's Comments</label>
+                        <textarea id="modal-comments" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary text-sm resize-none"></textarea>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Prescribed Medicines</label>
-                        <textarea id="modal-medicines" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"></textarea>
+                        <label class="block text-xs font-medium text-gray-700 mb-1.5">Prescribed Medicines</label>
+                        <textarea id="modal-medicines" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary text-sm resize-none"></textarea>
                     </div>
 
-                    <button onclick="updateAppointment()" class="w-full bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90">
+                    <button onclick="updateAppointment()" class="w-full bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 text-sm">
                         Save Appointment Details
                     </button>
                 </div>
 
-                <div id="view-section" class="hidden border-t pt-6 space-y-4">
+                <div id="view-section" class="hidden border-t pt-3 space-y-3">
                     <div>
-                        <p class="text-sm text-gray-600">Status</p>
-                        <p id="view-status" class="font-semibold text-gray-900 mt-1">-</p>
+                        <p class="text-xs text-gray-600">Status</p>
+                        <p id="view-status" class="font-semibold text-gray-900 mt-0.5 text-sm">-</p>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-600">Doctor's Comments</p>
-                        <p id="view-comments" class="font-semibold text-gray-900 mt-1">-</p>
+                        <p class="text-xs text-gray-600">Doctor's Comments</p>
+                        <p id="view-comments" class="font-semibold text-gray-900 mt-0.5 text-sm">-</p>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-600">Prescribed Medicines</p>
-                        <p id="view-medicines" class="font-semibold text-gray-900 mt-1">-</p>
+                        <p class="text-xs text-gray-600">Prescribed Medicines</p>
+                        <p id="view-medicines" class="font-semibold text-gray-900 mt-0.5 text-sm">-</p>
                     </div>
                 </div>
             </div>

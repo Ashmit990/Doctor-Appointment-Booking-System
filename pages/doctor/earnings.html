@@ -35,7 +35,7 @@
       /* Clean card design */
       .stat-card {
         background: white;
-        border-radius: 1.25rem;
+        border-radius: 0.75rem;
         transition: all 0.2s ease;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       }
@@ -61,11 +61,11 @@
         font-size: 0.75rem;
         letter-spacing: 0.05em;
         color: #475569;
-        padding: 1rem 1rem;
+        padding: 0.75rem 0.75rem;
         border-bottom: 1px solid #e2e8f0;
       }
       .data-table td {
-        padding: 1rem 1rem;
+        padding: 0.75rem 0.75rem;
         font-size: 0.875rem;
         color: #1e293b;
         border-bottom: 1px solid #f1f5f9;
@@ -119,12 +119,12 @@
     </style>
   </head>
   <body>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
       <!-- ===================== DASHBOARD VIEW ===================== -->
       <div id="dashboardView">
         <!-- Header Section -->
         <div
-          class="flex flex-col md:flex-row md:items-center md:justify-between gap-5 mb-8"
+          class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4"
         >
           <div>
             <div class="flex items-center gap-3">
@@ -134,35 +134,35 @@
                 <i class="fas fa-stethoscope text-white text-lg"></i>
               </div>
               <div>
-                <h1 class="text-2xl md:text-3xl font-bold text-slate-800">
+                <h1 class="text-lg md:text-xl font-bold text-slate-800">
                   Doctor Earnings Dashboard
                 </h1>
-                <p class="text-slate-500 text-sm mt-0.5">
+                <p class="text-slate-500 text-xs mt-0.5">
                   Track performance, revenue & completed appointments
                 </p>
               </div>
             </div>
           </div>
           <div
-            class="flex items-center gap-3 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm"
+            class="flex items-center gap-3 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm"
           >
             <i class="fas fa-calendar-alt text-[#007e85] text-sm"></i>
             <span
-              class="text-slate-600 text-sm font-medium"
+              class="text-slate-600 text-xs font-medium"
               id="currentDatePremium"
             ></span>
             <div class="w-px h-5 bg-slate-200"></div>
             <i class="fas fa-database text-[#007e85] text-sm"></i>
-            <span class="text-slate-500 text-sm">hospital / appointments</span>
+            <span class="text-slate-500 text-xs">hospital / appointments</span>
           </div>
         </div>
 
         <!-- Stats Row - 3 Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
           <!-- Total Earnings Card - Clickable -->
           <div
             id="earningsCard"
-            class="stat-card clickable-stat p-6 border-l-4 border-l-[#007e85]"
+            class="stat-card clickable-stat p-4 border-l-4 border-l-[#007e85]"
           >
             <div class="flex items-start justify-between">
               <div>
@@ -172,7 +172,7 @@
                   <i class="fas fa-chart-line mr-1"></i> Total Earnings
                 </p>
                 <p
-                  class="text-4xl font-bold text-slate-800"
+                  class="text-3xl font-bold text-slate-800"
                   id="totalEarningsAmount"
                 >
                   $0.00
@@ -193,7 +193,7 @@
           </div>
 
           <!-- Completed Appointments Card -->
-          <div class="stat-card p-6 border-l-4 border-l-emerald-500">
+          <div class="stat-card p-4 border-l-4 border-l-emerald-500">
             <div class="flex items-start justify-between">
               <div>
                 <p
@@ -203,7 +203,7 @@
                   Appointments
                 </p>
                 <p
-                  class="text-4xl font-bold text-slate-800"
+                  class="text-3xl font-bold text-slate-800"
                   id="completedCount"
                 >
                   0
@@ -224,7 +224,7 @@
           </div>
 
           <!-- Average Earnings Card -->
-          <div class="stat-card p-6 border-l-4 border-l-amber-500">
+          <div class="stat-card p-4 border-l-4 border-l-amber-500">
             <div class="flex items-start justify-between">
               <div>
                 <p
@@ -234,7 +234,7 @@
                   Session
                 </p>
                 <p
-                  class="text-4xl font-bold text-slate-800"
+                  class="text-3xl font-bold text-slate-800"
                   id="avgEarningsDashboard"
                 >
                   $0.00
@@ -254,10 +254,10 @@
         </div>
 
         <!-- Chart & Insights Row -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
           <!-- Earnings Chart -->
           <div
-            class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5 shadow-sm"
+            class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-4 shadow-sm"
           >
             <div class="flex items-center justify-between mb-4">
               <h3 class="font-semibold text-slate-700 flex items-center gap-2">
@@ -278,7 +278,7 @@
 
           <!-- Quick Insights -->
           <div
-            class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm"
+            class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm"
           >
             <h3
               class="font-semibold text-slate-700 flex items-center gap-2 mb-4"
@@ -333,7 +333,7 @@
           class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm"
         >
           <div
-            class="px-6 py-4 bg-white border-b border-slate-200 flex flex-wrap items-center justify-between gap-3"
+            class="px-4 py-3 bg-white border-b border-slate-200 flex flex-wrap items-center justify-between gap-3"
           >
             <div class="flex items-center gap-2">
               <i class="fas fa-table-list text-[#007e85]"></i>
@@ -342,13 +342,11 @@
               </h3>
             </div>
             <div class="flex gap-2">
-              <span
-                class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full"
-              >
+              <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">
                 <i class="fas fa-database mr-1"></i> hospital > appointments
               </span>
               <span
-                class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full"
+                class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full"
               >
                 <i class="fas fa-check-circle mr-1"></i> status = 'Completed'
               </span>
@@ -377,7 +375,7 @@
           </div>
 
           <div
-            class="px-6 py-3 bg-slate-50/50 border-t border-slate-100 text-right"
+            class="px-4 py-3 bg-slate-50/50 border-t border-slate-100 text-right"
           >
             <span class="text-xs text-slate-400"
               ><i class="fas fa-chart-line mr-1 text-[#007e85]"></i> Showing
@@ -390,51 +388,51 @@
       <!-- ===================== EARNINGS PAGE VIEW ===================== -->
       <div id="earningsPageView" class="hidden">
         <!-- Back Navigation -->
-        <div class="flex items-center justify-between flex-wrap gap-4 mb-8">
+        <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
           <button
             id="backToDashboardBtn"
-            class="btn-outline-teal font-medium px-5 py-2.5 rounded-xl shadow-sm flex items-center gap-2"
+            class="btn-outline-teal font-medium px-4 py-2 rounded-xl shadow-sm flex items-center gap-2"
           >
             <i class="fas fa-arrow-left text-[#007e85]"></i> Back to Dashboard
           </button>
           <div class="flex items-center gap-2">
             <i class="fas fa-chart-line text-[#007e85] text-xl"></i>
-            <h1 class="text-xl md:text-2xl font-bold text-slate-800">
+            <h1 class="text-lg md:text-xl font-bold text-slate-800">
               Detailed Earnings Report
             </h1>
           </div>
         </div>
 
         <!-- Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div
-            class="bg-white rounded-xl p-6 border-l-4 border-l-[#007e85] shadow-sm"
+            class="bg-white rounded-xl p-4 border-l-4 border-l-[#007e85] shadow-sm"
           >
-            <p class="text-slate-500 text-sm">Gross Revenue</p>
+            <p class="text-slate-500 text-xs">Gross Revenue</p>
             <p
-              class="text-3xl font-bold text-slate-800 mt-1"
+              class="text-2xl font-bold text-slate-800 mt-1"
               id="earningsPageTotal"
             >
               $0.00
             </p>
           </div>
           <div
-            class="bg-white rounded-xl p-6 border-l-4 border-l-emerald-500 shadow-sm"
+            class="bg-white rounded-xl p-4 border-l-4 border-l-emerald-500 shadow-sm"
           >
-            <p class="text-slate-500 text-sm">Completed Sessions</p>
+            <p class="text-slate-500 text-xs">Completed Sessions</p>
             <p
-              class="text-3xl font-bold text-slate-800 mt-1"
+              class="text-2xl font-bold text-slate-800 mt-1"
               id="earningsPageCompleted"
             >
               0
             </p>
           </div>
           <div
-            class="bg-white rounded-xl p-6 border-l-4 border-l-amber-500 shadow-sm"
+            class="bg-white rounded-xl p-4 border-l-4 border-l-amber-500 shadow-sm"
           >
-            <p class="text-slate-500 text-sm">Average Revenue / Appointment</p>
+            <p class="text-slate-500 text-xs">Average Revenue / Appointment</p>
             <p
-              class="text-3xl font-bold text-slate-800 mt-1"
+              class="text-2xl font-bold text-slate-800 mt-1"
               id="avgEarningsPerApp"
             >
               $0.00
@@ -443,11 +441,11 @@
         </div>
 
         <!-- Detailed Breakdown + Chart -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div
             class="lg:col-span-2 bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm"
           >
-            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/50">
+            <div class="px-4 py-3 border-b border-slate-200 bg-slate-50/50">
               <h3 class="font-semibold text-slate-700">
                 <i class="fas fa-receipt mr-2 text-[#007e85]"></i> Earnings per
                 Appointment
@@ -457,11 +455,11 @@
               <table class="data-table">
                 <thead class="sticky top-0 bg-slate-50">
                   <tr>
-                    <th class="px-5 py-3">Appt ID</th>
-                    <th class="px-5 py-3">Patient</th>
-                    <th class="px-5 py-3">Doctor</th>
-                    <th class="px-5 py-3">Date</th>
-                    <th class="px-5 py-3">Amount</th>
+                    <th class="px-4 py-2">Appt ID</th>
+                    <th class="px-4 py-2">Patient</th>
+                    <th class="px-4 py-2">Doctor</th>
+                    <th class="px-4 py-2">Date</th>
+                    <th class="px-4 py-2">Amount</th>
                   </tr>
                 </thead>
                 <tbody id="earningsDetailsTableBody"></tbody>
@@ -469,7 +467,7 @@
             </div>
           </div>
           <div
-            class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm"
+            class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm"
           >
             <h3
               class="font-semibold text-slate-700 flex items-center gap-2 mb-4"
@@ -699,7 +697,7 @@
               }) +
               " at " +
               app.time;
-            tbody.innerHTML += `<tr><td class="px-6 py-3 text-sm font-mono text-slate-500">${app.id}</td><td class="px-6 py-3 text-sm font-medium text-slate-800">${escapeHtml(app.patient)}</td><td class="px-6 py-3 text-sm text-slate-500">${escapeHtml(app.email)}</td><td class="px-6 py-3 text-sm text-slate-500">${escapeHtml(app.contact)}</td><td class="px-6 py-3 text-sm text-slate-600">${escapeHtml(app.doctor)}</td><td class="px-6 py-3 text-sm text-slate-600">${escapeHtml(formattedDate)}</td><td class="px-6 py-3 text-sm text-slate-500">${escapeHtml(app.reason)}</td><td class="px-6 py-3 text-sm font-semibold text-[#007e85]">${formatUSD(app.fee)}</td><td class="px-6 py-3"><span class="status-badge"><i class="fas fa-check-circle text-xs"></i> Completed</span></td></tr>`;
+            tbody.innerHTML += `<tr><td class="px-4 py-2 text-sm font-mono text-slate-500">${app.id}</td><td class="px-4 py-2 text-sm font-medium text-slate-800">${escapeHtml(app.patient)}</td><td class="px-4 py-2 text-sm text-slate-500">${escapeHtml(app.email)}</td><td class="px-4 py-2 text-sm text-slate-500">${escapeHtml(app.contact)}</td><td class="px-4 py-2 text-sm text-slate-600">${escapeHtml(app.doctor)}</td><td class="px-4 py-2 text-sm text-slate-600">${escapeHtml(formattedDate)}</td><td class="px-4 py-2 text-sm text-slate-500">${escapeHtml(app.reason)}</td><td class="px-4 py-2 text-sm font-semibold text-[#007e85]">${formatUSD(app.fee)}</td><td class="px-4 py-2"><span class="status-badge"><i class="fas fa-check-circle text-xs"></i> Completed</span></td></tr>`;
           });
         }
         if (trendChart) trendChart.update();
@@ -721,7 +719,7 @@
               day: "numeric",
               year: "numeric",
             });
-            detailBody.innerHTML += `<tr><td class="px-5 py-3 text-sm font-mono text-slate-500">${app.id}</td><td class="px-5 py-3 text-sm font-medium text-slate-800">${escapeHtml(app.patient)}</td><td class="px-5 py-3 text-sm text-slate-600">${escapeHtml(app.doctor)}</td><td class="px-5 py-3 text-sm text-slate-500">${escapeHtml(displayDate)}</td><td class="px-5 py-3 text-sm font-bold text-[#007e85]">${formatUSD(app.fee)}</td></tr>`;
+            detailBody.innerHTML += `<tr><td class="px-4 py-2 text-sm font-mono text-slate-500">${app.id}</td><td class="px-4 py-2 text-sm font-medium text-slate-800">${escapeHtml(app.patient)}</td><td class="px-4 py-2 text-sm text-slate-600">${escapeHtml(app.doctor)}</td><td class="px-4 py-2 text-sm text-slate-500">${escapeHtml(displayDate)}</td><td class="px-4 py-2 text-sm font-bold text-[#007e85]">${formatUSD(app.fee)}</td></tr>`;
           });
         }
         updatePatientPieChart();

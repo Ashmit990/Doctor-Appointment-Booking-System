@@ -174,53 +174,53 @@ function renderAppointments(rows) {
 
     const card = document.createElement("div");
     card.className =
-      "appointment-card relative overflow-hidden bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm hover:shadow-md";
+      "appointment-card relative overflow-hidden bg-white rounded-[20px] p-4 border border-slate-100 shadow-sm hover:shadow-md transition";
 
     card.innerHTML = `
-      <div class="absolute left-0 top-0 h-full w-1 ${lineColor} rounded-l-[24px]"></div>
+      <div class="absolute left-0 top-0 h-full w-1 ${lineColor} rounded-l-[20px]"></div>
 
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
         <div class="flex-1">
-          <div class="flex flex-wrap items-center gap-3 mb-2">
-            <h3 class="text-lg font-semibold text-slate-800">${item.doctor_name}</h3>
-            <span class="px-3 py-1 rounded-full text-xs font-semibold ${getStatusClasses(item.status)}">
+          <div class="flex flex-wrap items-center gap-2 mb-2">
+            <h3 class="text-base font-semibold text-slate-800">${item.doctor_name}</h3>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${getStatusClasses(item.status)}">
               ${formatStatus(item.status)}
             </span>
           </div>
 
-          <p class="text-sm text-slate-400 mb-4">${item.specialization || ""} • Consultation</p>
+          <p class="text-xs text-slate-500 mb-3">${item.specialization || ""} • Consultation</p>
 
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-slate-500">
-            <div class="bg-slate-50 rounded-2xl px-4 py-3">
-              <span class="block text-xs text-slate-400 mb-1">Date</span>
+          <div class="grid grid-cols-3 gap-2 text-xs text-slate-500">
+            <div class="bg-slate-50 rounded-xl px-3 py-2">
+              <span class="block text-[10px] text-slate-400 mb-0.5">Date</span>
               <span class="font-medium text-slate-700">${item.app_date}</span>
             </div>
-            <div class="bg-slate-50 rounded-2xl px-4 py-3">
-              <span class="block text-xs text-slate-400 mb-1">Time</span>
+            <div class="bg-slate-50 rounded-xl px-3 py-2">
+              <span class="block text-[10px] text-slate-400 mb-0.5">Time</span>
               <span class="font-medium text-slate-700">${formatTime12h(item.app_time)}</span>
             </div>
-            <div class="bg-slate-50 rounded-2xl px-4 py-3">
-              <span class="block text-xs text-slate-400 mb-1">Location</span>
+            <div class="bg-slate-50 rounded-xl px-3 py-2">
+              <span class="block text-[10px] text-slate-400 mb-0.5">Room</span>
               <span class="font-medium text-slate-700">${item.room_num || "—"}</span>
             </div>
           </div>
         </div>
 
-        <div class="flex flex-wrap gap-2">
-          <button type="button" data-view="${item.appointment_id}" class="view-btn px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-sm font-medium transition">
-            View details
+        <div class="flex flex-wrap gap-1.5 lg:flex-col">
+          <button type="button" data-view="${item.appointment_id}" class="view-btn px-3 py-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-medium transition whitespace-nowrap">
+            Details
           </button>
           ${
             showReschedule
-              ? `<button type="button" data-reschedule="${item.appointment_id}" class="reschedule-btn px-4 py-2.5 rounded-2xl bg-teal-600 text-white hover:bg-teal-700 text-sm font-medium shadow-sm transition">
+              ? `<button type="button" data-reschedule="${item.appointment_id}" class="reschedule-btn px-3 py-2 rounded-lg bg-teal-600 text-white hover:bg-teal-700 text-xs font-medium shadow-sm transition whitespace-nowrap">
             Reschedule
           </button>`
               : ""
           }
           ${
             item.status_key === "completed" && parseInt(item.rating || 0) === 0
-              ? `<button type="button" data-feedback="${item.appointment_id}" class="feedback-btn px-4 py-2.5 rounded-2xl bg-yellow-500 text-white hover:bg-yellow-600 text-sm font-medium shadow-sm transition flex items-center gap-1">
-            <i data-lucide="star" class="w-4 h-4"></i> Rate Visit
+              ? `<button type="button" data-feedback="${item.appointment_id}" class="feedback-btn px-3 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 text-xs font-medium shadow-sm transition flex items-center gap-1 whitespace-nowrap">
+            <i data-lucide="message-square" class="w-3 h-3"></i> Feedback
           </button>`
               : ""
           }
@@ -456,10 +456,8 @@ dashboardMarkAllReadBtn?.addEventListener("click", async () => {
 function openFeedbackModal(apt) {
     document.getElementById('feedback-doc-name').textContent = apt.doctor_name || 'Dr.';
     document.getElementById('feedback-apt-id').value = apt.appointment_id;
-    document.getElementById('feedback-rating-val').value = 0;
+    document.getElementById('feedback-rating-val').value = 5;
     document.getElementById('feedback-text').value = '';
-    
-    renderStars(0);
     
     document.getElementById('feedbackModal').classList.remove('hidden');
     document.getElementById('feedbackModal').classList.add('flex');
@@ -470,40 +468,10 @@ function closeFeedbackModal() {
     document.getElementById('feedbackModal').classList.remove('flex');
 }
 
-function renderStars(rating) {
-    const container = document.getElementById('star-rating-container');
-    container.innerHTML = '';
-    document.getElementById('feedback-rating-val').value = rating;
-    
-    for (let i = 1; i <= 5; i++) {
-        const star = document.createElement('i');
-        star.setAttribute('data-lucide', 'star');
-        star.setAttribute('data-star-index', i);
-        star.className = `w-10 h-10 cursor-pointer transition transform hover:scale-110 ${i <= rating ? 'text-yellow-400 fill-current' : 'text-slate-200'}`;
-        container.appendChild(star);
-    }
-    
-    // Use event delegation for click handling (persists after lucide renders)
-    container.onclick = (e) => {
-        const star = e.target.closest('[data-star-index]');
-        if (star) {
-            const index = parseInt(star.getAttribute('data-star-index'));
-            renderStars(index);
-        }
-    };
-    
-    lucide.createIcons();
-}
-
 async function submitFeedback() {
     const aptId = document.getElementById('feedback-apt-id').value;
-    const rating = parseInt(document.getElementById('feedback-rating-val').value);
+    const rating = 5; // Hardcoded to pass backend check
     const feedback = document.getElementById('feedback-text').value;
-    
-    if (rating === 0) {
-        alert("Please select a star rating!");
-        return;
-    }
     
     const btn = document.getElementById('submitFeedbackBtn');
     btn.innerHTML = 'Submitting...';
@@ -552,10 +520,7 @@ function checkForPendingFeedback(rows) {
   const ok = await requirePatientSession();
   if (!ok) return;
   await reload();
-  // Check feedback on load
-  if (cachedAppointments && cachedAppointments.length) {
-      checkForPendingFeedback(cachedAppointments);
-  }
+  // Auto feedback popup disabled - users can click "Leave Feedback" button manually
   try {
     const notes = await loadDashboardNotifications();
     renderDashboardNotificationList(notes);

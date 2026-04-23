@@ -136,7 +136,9 @@ window.addEventListener("message", (event) => {
 });
 
 cancelBooking.addEventListener("click", () => {
+  const patientName = document.getElementById("patientName").value;
   bookingForm.reset();
+  document.getElementById("patientName").value = patientName;
   rescheduleAppointmentId = null;
   document.getElementById("confirmBtn").textContent = "Confirm Booking";
   window.parent.postMessage({ type: "booking:close" }, "*");
@@ -157,6 +159,12 @@ document.getElementById("date").addEventListener("change", async () => {
 document.getElementById("time").addEventListener("change", () => {
   const v = document.getElementById("time").value;
   document.getElementById("availId").value = v || "";
+});
+
+// Close success modal
+document.getElementById("closeSuccessModal").addEventListener("click", () => {
+  document.getElementById("successModal").classList.add("hidden");
+  window.parent.postMessage({ type: "patient-booking-done" }, "*");
 });
 
 bookingForm.addEventListener("submit", async (e) => {
@@ -211,10 +219,21 @@ bookingForm.addEventListener("submit", async (e) => {
       }
     }
 
+    const patientName = document.getElementById("patientName").value;
     bookingForm.reset();
+    document.getElementById("patientName").value = patientName;
     rescheduleAppointmentId = null;
     document.getElementById("confirmBtn").textContent = "Confirm Booking";
-    window.parent.postMessage({ type: "patient-booking-done" }, "*");
+    
+    // Show success modal
+    const modal = document.getElementById("successModal");
+    modal.classList.remove("hidden");
+    
+    // Auto-close after 2 seconds and notify parent
+    setTimeout(() => {
+      modal.classList.add("hidden");
+      window.parent.postMessage({ type: "patient-booking-done" }, "*");
+    }, 2000);
   } catch (err) {
     console.error(err);
     alert("Something went wrong.");

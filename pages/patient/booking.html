@@ -8,39 +8,38 @@
     <link rel="stylesheet" href="booking.css" />
   </head>
   <body class="bg-white font-sans">
-    <div class="p-5 md:p-6">
-      <div class="mb-4">
-        <p class="text-sm text-slate-400 mb-2">Quick Booking Access</p>
-        <h2 class="text-2xl md:text-3xl font-bold text-slate-800">
+    <div class="p-3 md:p-4 h-full flex flex-col overflow-hidden">
+      <div class="mb-2">
+        <h2 class="text-lg font-semibold text-slate-800">
           Book Appointment
         </h2>
-        <p class="text-slate-500 mt-2">
-          Fill in the details below to schedule a new appointment.
+        <p class="text-xs text-slate-500 mt-0.5">
+          Fill in details to schedule a new appointment
         </p>
       </div>
 
-      <form id="bookingForm" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <form id="bookingForm" class="space-y-2.5 flex-1 overflow-y-auto pr-2">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">
+            <label class="block text-xs font-medium text-slate-700 mb-1.5">
               Patient Name
             </label>
             <input
               id="patientName"
               type="text"
-              placeholder="Enter patient name"
-              class="w-full border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#00A3AC]"
+              placeholder="Enter your name"
+              class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#00A3AC]"
               required
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">
+            <label class="block text-xs font-medium text-slate-700 mb-1.5">
               Doctor
             </label>
             <select
               id="doctor"
-              class="w-full border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#00A3AC]"
+              class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#00A3AC]"
               required
             >
               <option value="">Loading doctors…</option>
@@ -48,14 +47,14 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">
+            <label class="block text-xs font-medium text-slate-700 mb-1.5">
               Date
             </label>
             <select
               id="date"
-              class="w-full border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#00A3AC]"
+              class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#00A3AC]"
               required
             >
               <option value="">Select doctor first</option>
@@ -63,12 +62,12 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">
+            <label class="block text-xs font-medium text-slate-700 mb-1.5">
               Time
             </label>
             <select
               id="time"
-              class="w-full border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#00A3AC]"
+              class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#00A3AC]"
               required
             >
               <option value="">Select date first</option>
@@ -79,31 +78,30 @@
         <input type="hidden" id="availId" value="" />
 
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-2">
-            Short Description
+          <label class="block text-xs font-medium text-slate-700 mb-1.5">
+            Description
           </label>
           <textarea
             id="description"
-            rows="3"
-            placeholder="Enter short description (e.g. follow-up, fever, headache, checkup)"
-            class="w-full border border-slate-200 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#00A3AC] resize-none"
+            rows="2"
+            placeholder="e.g., follow-up, fever, checkup"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-[#00A3AC] resize-none"
+            required
           ></textarea>
         </div>
 
-        <div
-          class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2 border-t border-slate-100 mt-2"
-        >
-          <p class="text-slate-700">
-            <span class="text-sm text-slate-500">Total</span>
-            <span id="totalPrice" class="text-xl font-bold text-[#007E85] ml-2"
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 pt-1.5 border-t border-slate-100 mt-2 sticky bottom-0 bg-white pb-1">
+          <div>
+            <span class="text-xs text-slate-500">Total: </span>
+            <span id="totalPrice" class="text-base font-bold text-[#007E85]"
               >—</span
             >
-          </p>
-          <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mt-4 sm:mt-0">
+          </div>
+          <div class="flex gap-2 w-full sm:w-auto">
           <button
             type="button"
             id="cancelBooking"
-            class="border border-slate-200 hover:bg-slate-50 text-slate-700 w-full sm:w-auto px-6 py-3 rounded-2xl font-medium transition order-2 sm:order-1"
+            class="border border-slate-200 hover:bg-slate-50 text-slate-700 flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-medium transition"
           >
             Cancel
           </button>
@@ -111,7 +109,7 @@
           <button
             type="submit"
             id="confirmBtn"
-            class="bg-[#007E85] hover:bg-[#006570] text-white w-full sm:w-auto px-6 py-3 rounded-2xl font-medium transition order-1 sm:order-2"
+            class="bg-[#007E85] hover:bg-[#006570] text-white flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-medium transition"
           >
             Confirm Booking
           </button>
@@ -121,9 +119,32 @@
 
       <div
         id="bookingSuccess"
-        class="hidden mt-4 rounded-2xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-emerald-700"
+        class="hidden mt-2 rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2 text-emerald-700 text-xs"
       >
         Appointment booked successfully.
+      </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="hidden fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-[20px] shadow-lg border border-slate-100 max-w-sm w-full overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+          <h3 class="text-lg font-semibold text-slate-800">Booking Successful</h3>
+          <button id="closeSuccessModal" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition">
+            ✕
+          </button>
+        </div>
+        <div class="p-5">
+          <div class="flex flex-col items-center text-center">
+            <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mb-4">
+              <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <p class="text-base font-semibold text-slate-800 mb-1">Booking Succeed</p>
+            <p class="text-sm text-slate-500">Your appointment has been booked successfully.</p>
+          </div>
+        </div>
       </div>
     </div>
 
