@@ -147,44 +147,36 @@
                         <p class="text-gray-600 mt-2">Welcome to your dashboard</p>
                     </div>
 
-                    <!-- STATS -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-white rounded-xl card-shadow p-6">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-gray-600 text-sm font-medium">Today's Visits</p>
-                                    <p id="stat-today-visits" class="text-4xl font-bold text-gray-900 mt-2">0</p>
+                    <!-- HERO SECTION WITH STATS -->
+                    <section class="bg-[#007E85] rounded-[30px] p-7 mb-7 text-white relative overflow-hidden shadow-[0_15px_40px_rgba(0,126,133,0.25)]">
+                        <div class="max-w-2xl">
+                            <p class="text-3xl font-bold mb-2">Welcome back, Doctor</p>
+                            <p class="text-base opacity-90 mb-6">
+                                View today's visits, patient statistics, and completed appointments.
+                            </p>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20">
+                                    <p class="text-sm opacity-90 mb-2">Today's Visits</p>
+                                    <h3 id="stat-today-visits" class="text-4xl font-bold">0</h3>
                                 </div>
-                                <div class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center">
-                                    <i data-lucide="calendar" class="w-7 h-7 primary-color"></i>
+
+                                <div class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20">
+                                    <p class="text-sm opacity-90 mb-2">Total Patients</p>
+                                    <h3 id="stat-total-patients" class="text-4xl font-bold">0</h3>
+                                </div>
+
+                                <div class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20">
+                                    <p class="text-sm opacity-90 mb-2">Completed</p>
+                                    <h3 id="stat-completed" class="text-4xl font-bold">0</h3>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="bg-white rounded-xl card-shadow p-6">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-gray-600 text-sm font-medium">Total Patients</p>
-                                    <p id="stat-total-patients" class="text-4xl font-bold text-gray-900 mt-2">0</p>
-                                </div>
-                                <div class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center">
-                                    <i data-lucide="users" class="w-7 h-7 primary-color"></i>
-                                </div>
-                            </div>
+                        <div class="hidden lg:block absolute right-10 bottom-2 text-8xl opacity-15">
+                            👨‍⚕️
                         </div>
-
-                        <div class="bg-white rounded-xl card-shadow p-6">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-gray-600 text-sm font-medium">Completed</p>
-                                    <p id="stat-completed" class="text-4xl font-bold text-gray-900 mt-2">0</p>
-                                </div>
-                                <div class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center">
-                                    <i data-lucide="check-circle" class="w-7 h-7 primary-color"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    </section>
 
                     <!-- CALENDAR AND APPOINTMENTS -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

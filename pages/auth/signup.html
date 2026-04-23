@@ -627,7 +627,8 @@
         bio(v) {
           if (!v)
             return "Professional bio is required for Medical Professionals.";
-          if (v.length < 10) return "Bio must be at least 10 characters.";
+          const wordCount = v.trim().split(/\s+/).length;
+          if (wordCount < 15) return "Professional bio must contain at least 15 words (2-3 sentences) for a complete description.";
           return null;
         },
       };
