@@ -30,30 +30,85 @@ if (!$input) {
 }
 
 $doctor_id = $_SESSION['user_id'];
-$full_name = $input['full_name'] ?? null;
-$specialization = $input['specialization'] ?? null;
-$phone = $input['phone'] ?? null;
-$experience = $input['experience'] ?? null;
+$full_name = trim($input['full_name'] ?? '');
+$email = trim($input['email'] ?? '');
+$specialization = trim($input['specialization'] ?? '');
+$phone = trim($input['phone'] ?? '');
+$experience = trim($input['experience'] ?? '');
 $age = isset($input['age']) ? (int)$input['age'] : null;
-$qualification = $input['qualification'] ?? null;
-$description = $input['description'] ?? null;
-$availability_info = $input['availability_info'] ?? null;
+$qualification = trim($input['qualification'] ?? '');
+$description = trim($input['description'] ?? '');
+
+// Comprehensive validation
+$errors = [];
 
 // Validate required fields
-if (!$full_name || !$specialization) {
+if (empty($full_name)) {
+    $errors[] = 'Full name is required';
+}
+if (empty($email)) {
+    $errors[] = 'Email is required';
+}
+if (empty($specialization)) {
+    $errors[] = 'Specialization is required';
+}
+if (empty($phone)) {
+    $errors[] = 'Phone number is required';
+}
+if (empty($experience)) {
+    $errors[] = 'Years of experience is required';
+}
+if ($age === null) {
+    $errors[] = 'Age is required';
+}
+if (empty($qualification)) {
+    $errors[] = 'Qualification is required';
+}
+if (empty($description)) {
+    $errors[] = 'Professional description is required';
+}
+
+// Validate email format
+if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $errors[] = 'Email format is invalid';
+}
+
+// Validate lengths
+if (!empty($full_name) && strlen($full_name) < 2) {
+    $errors[] = 'Full name must be at least 2 characters';
+}
+if (!empty($specialization) && strlen($specialization) < 2) {
+    $errors[] = 'Specialization must be at least 2 characters';
+}
+
+// Validate phone format
+if (!empty($phone)) {
+    $digits = preg_replace('/[^\d]/', '', $phone);
+    if (strlen($digits) < 8) {
+        $errors[] = 'Phone number must have at least 8 digits';
+    }
+}
+
+// Validate age if provided
+if ($age !== null && ($age < 18 || $age > 100)) {
+    $errors[] = 'Age must be between 18 and 100';
+}
+
+// If there are validation errors, return them
+if (!empty($errors)) {
     http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'Name and specialization are required']);
+    echo json_encode(['status' => 'error', 'message' => implode('; ', $errors)]);
     exit;
 }
 
 try {
-    // Update users table (full_name)
-    $stmt = $conn->prepare("UPDATE users SET full_name = ? WHERE user_id = ?");
+    // Update users table (full_name and email)
+    $stmt = $conn->prepare("UPDATE users SET full_name = ?, email = ? WHERE user_id = ?");
     if (!$stmt) {
         throw new Exception("Prepare failed: " . $conn->error);
     }
     
-    $stmt->bind_param("ss", $full_name, $doctor_id);
+    $stmt->bind_param("sss", $full_name, $email, $doctor_id);
     if (!$stmt->execute()) {
         throw new Exception("Execute failed: " . $stmt->error);
     }
@@ -64,8 +119,7 @@ try {
         'phone' => $phone,
         'experience' => $experience,
         'qualification' => $qualification,
-        'description' => $description,
-        'availability_info' => $availability_info
+        'description' => $description
     ]);
 
     // Check if doctor profile exists
@@ -102,18 +156,19 @@ try {
         $insert_stmt->close();
     }
 
+    http_response_code(200);
     echo json_encode([
         'status' => 'success',
         'message' => 'Profile updated successfully',
         'data' => [
             'full_name' => $full_name,
+            'email' => $email,
             'specialization' => $specialization,
             'phone' => $phone,
             'experience' => $experience,
             'age' => $age,
             'qualification' => $qualification,
-            'description' => $description,
-            'availability_info' => $availability_info
+            'description' => $description
         ]
     ]);
 

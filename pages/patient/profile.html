@@ -234,44 +234,48 @@
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
-                      <input type="text" id="editName"
+                      <input type="text" id="editName" required
                         class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
                       <p class="text-xs text-red-500 hidden mt-1" id="nameError">Full name is required</p>
                     </div>
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
-                      <input type="email" id="editEmail"
+                      <input type="email" id="editEmail" required
                         class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
                       <p class="text-xs text-red-500 hidden mt-1" id="emailError">Email is required</p>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                      <input type="tel" id="editPhone"
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span class="text-red-500">*</span></label>
+                      <input type="tel" id="editPhone" required
                         class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+                      <p class="text-xs text-red-500 hidden mt-1" id="phoneError">Valid phone number required (min 8 digits)</p>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
-                      <input type="date" id="editDob"
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth <span class="text-red-500">*</span></label>
+                      <input type="date" id="editDob" required
                         class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+                      <p class="text-xs text-red-500 hidden mt-1" id="dobError">Date of birth is required</p>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Age</label>
-                      <input type="number" id="editAge" min="0" max="150"
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Age <span class="text-red-500">*</span></label>
+                      <input type="number" id="editAge" min="0" max="150" required
                         class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+                      <p class="text-xs text-red-500 hidden mt-1" id="ageError">Age must be between 0 and 150</p>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-                      <select id="editGender"
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Gender <span class="text-red-500">*</span></label>
+                      <select id="editGender" required
                         class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition">
                         <option value="">Select gender</option>
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
                         <option value="Other">Other</option>
                       </select>
+                      <p class="text-xs text-red-500 hidden mt-1" id="genderError">Gender is required</p>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Blood Group</label>
-                      <select id="editBlood"
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Blood Group <span class="text-red-500">*</span></label>
+                      <select id="editBlood" required
                         class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition">
                         <option value="">Select blood group</option>
                         <option value="A+">A+</option>
@@ -283,6 +287,7 @@
                         <option value="O+">O+</option>
                         <option value="O-">O-</option>
                       </select>
+                      <p class="text-xs text-red-500 hidden mt-1" id="bloodError">Blood group is required</p>
                     </div>
                   </div>
                 </div>
@@ -295,20 +300,23 @@
                   </h3>
                   <div class="space-y-5">
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                      <textarea id="editAddress" rows="3"
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Address <span class="text-red-500">*</span></label>
+                      <textarea id="editAddress" rows="3" required
                         class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition resize-none"></textarea>
+                      <p class="text-xs text-red-500 hidden mt-1" id="addressError">Address is required</p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact Name</label>
-                        <input type="text" id="editEmergencyName"
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="editEmergencyName" required
                           class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+                        <p class="text-xs text-red-500 hidden mt-1" id="emergencyNameError">Emergency contact name is required</p>
                       </div>
                       <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact Phone</label>
-                        <input type="tel" id="editEmergencyPhone"
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact Phone <span class="text-red-500">*</span></label>
+                        <input type="tel" id="editEmergencyPhone" required
                           class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+                        <p class="text-xs text-red-500 hidden mt-1" id="emergencyPhoneError">Emergency contact phone is required (min 8 digits)</p>
                       </div>
                     </div>
                   </div>

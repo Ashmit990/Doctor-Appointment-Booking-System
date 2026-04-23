@@ -236,6 +236,15 @@
                     <div>
                       <label
                         class="block text-xs uppercase font-semibold text-gray-400 tracking-wider"
+                        >Email</label
+                      >
+                      <p class="text-gray-800 font-medium mt-1" id="viewEmail">
+                        -
+                      </p>
+                    </div>
+                    <div>
+                      <label
+                        class="block text-xs uppercase font-semibold text-gray-400 tracking-wider"
                         >Specialization</label
                       >
                       <p
@@ -316,18 +325,6 @@
                       -
                     </p>
                   </div>
-                  <div>
-                    <label
-                      class="block text-xs uppercase font-semibold text-gray-400 tracking-wider"
-                      >Availability Info</label
-                    >
-                    <p
-                      class="text-gray-700 mt-1 bg-gray-50 p-3 rounded-xl whitespace-pre-wrap"
-                      id="viewAvailability"
-                    >
-                      -
-                    </p>
-                  </div>
                 </div>
               </div>
 
@@ -354,6 +351,7 @@
                         <input
                           type="text"
                           id="editName"
+                          required
                           class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
                         />
                         <p
@@ -366,12 +364,32 @@
                       <div>
                         <label
                           class="block text-sm font-medium text-gray-700 mb-1"
+                          >Email <span class="text-red-500">*</span></label
+                        >
+                        <input
+                          type="email"
+                          id="editEmail"
+                          required
+                          class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
+                          placeholder="doctor@example.com"
+                        />
+                        <p
+                          class="text-xs text-red-500 hidden mt-1"
+                          id="emailError"
+                        >
+                          Valid email is required
+                        </p>
+                      </div>
+                      <div>
+                        <label
+                          class="block text-sm font-medium text-gray-700 mb-1"
                           >Specialization
                           <span class="text-red-500">*</span></label
                         >
                         <input
                           type="text"
                           id="editSpecialization"
+                          required
                           class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
                           placeholder="e.g., Cardiology"
                         />
@@ -391,6 +409,7 @@
                         <input
                           type="tel"
                           id="editPhone"
+                          required
                           class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
                           placeholder="+1 (555) 000-0000"
                         />
@@ -409,9 +428,16 @@
                         <input
                           type="text"
                           id="editExperience"
+                          required
                           class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
                           placeholder="e.g., 12+ years"
                         />
+                        <p
+                          class="text-xs text-red-500 hidden mt-1"
+                          id="expError"
+                        >
+                          Experience is required
+                        </p>
                       </div>
                       <div>
                         <label
@@ -421,14 +447,16 @@
                         <input
                           type="number"
                           id="editAge"
+                          required
                           min="18"
                           max="100"
                           class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
                         />
+                        <p
                           class="text-xs text-red-500 hidden mt-1"
-                          id="expError"
+                          id="ageError"
                         >
-                          Experience is required
+                          Age must be between 18 and 100
                         </p>
                       </div>
                     </div>
@@ -454,6 +482,7 @@
                       <input
                         type="text"
                         id="editQualification"
+                        required
                         class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
                         placeholder="MD, PhD, Board Certifications"
                       />
@@ -467,26 +496,21 @@
                     <div>
                       <label
                         class="block text-sm font-medium text-gray-700 mb-1"
-                        >Professional Description</label
+                        >Professional Description <span class="text-red-500">*</span></label
                       >
                       <textarea
                         id="editDescription"
+                        required
                         rows="4"
                         class="w-full border border-gray-300 rounded-xl px-4 py-2.5 resize-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
                         placeholder="Short bio, clinical interests, expertise..."
                       ></textarea>
-                    </div>
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-gray-700 mb-1"
-                        >Availability Info</label
+                      <p
+                        class="text-xs text-red-500 hidden mt-1"
+                        id="descError"
                       >
-                      <textarea
-                        id="editAvailability"
-                        rows="3"
-                        class="w-full border border-gray-300 rounded-xl px-4 py-2.5 resize-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
-                        placeholder="Working hours, consultation availability..."
-                      ></textarea>
+                        Professional description is required
+                      </p>
                     </div>
                   </div>
 
@@ -631,6 +655,8 @@
 
         document.getElementById("viewName").textContent =
           doctorProfile.full_name || doctorProfile.name || "-";
+        document.getElementById("viewEmail").textContent =
+          doctorProfile.email || "-";
         document.getElementById("viewSpecialization").textContent =
           doctorProfile.specialization || "-";
         document.getElementById("viewPhone").textContent =
@@ -643,10 +669,6 @@
           doctorProfile.qualification || "-";
         document.getElementById("viewDescription").textContent =
           doctorProfile.description || "No description provided";
-        document.getElementById("viewAvailability").textContent =
-          doctorProfile.availability_info ||
-          doctorProfile.availability ||
-          "No availability info";
 
         document.getElementById("doctorNameDisplay").textContent =
           doctorProfile.full_name || doctorProfile.name || "Doctor";
@@ -660,6 +682,7 @@
       function fillEditForm() {
         document.getElementById("editName").value =
           doctorProfile.full_name || doctorProfile.name || "";
+        document.getElementById("editEmail").value = doctorProfile.email || "";
         document.getElementById("editSpecialization").value =
           doctorProfile.specialization || "";
         document.getElementById("editPhone").value = doctorProfile.phone || "";
@@ -670,8 +693,6 @@
           doctorProfile.qualification || "";
         document.getElementById("editDescription").value =
           doctorProfile.description || "";
-        document.getElementById("editAvailability").value =
-          doctorProfile.availability_info || doctorProfile.availability || "";
       }
 
       // Validation helpers
@@ -683,10 +704,13 @@
       function clearValidationErrors() {
         const errors = [
           "nameError",
+          "emailError",
           "specError",
           "phoneError",
           "expError",
+          "ageError",
           "qualError",
+          "descError",
         ];
         errors.forEach((id) => {
           const el = document.getElementById(id);
@@ -694,10 +718,13 @@
         });
         const inputs = [
           "editName",
+          "editEmail",
           "editSpecialization",
           "editPhone",
           "editExperience",
+          "editAge",
           "editQualification",
+          "editDescription",
         ];
         inputs.forEach((id) => {
           const input = document.getElementById(id);
@@ -724,6 +751,11 @@
         }
       }
 
+      function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+      }
+
       function validateForm() {
         clearValidationErrors();
         let isValid = true;
@@ -731,6 +763,15 @@
         const name = document.getElementById("editName").value.trim();
         if (!name) {
           setFieldError("editName", "nameError", "Full name is required", true);
+          isValid = false;
+        }
+
+        const email = document.getElementById("editEmail").value.trim();
+        if (!email) {
+          setFieldError("editEmail", "emailError", "Email is required", true);
+          isValid = false;
+        } else if (!isValidEmail(email)) {
+          setFieldError("editEmail", "emailError", "Please enter a valid email address", true);
           isValid = false;
         }
 
@@ -767,12 +808,45 @@
           isValid = false;
         }
 
+        const age = document.getElementById("editAge").value.trim();
+        if (!age) {
+          setFieldError(
+            "editAge",
+            "ageError",
+            "Age is required",
+            true,
+          );
+          isValid = false;
+        } else {
+          const ageNum = parseInt(age);
+          if (ageNum < 18 || ageNum > 100) {
+            setFieldError(
+              "editAge",
+              "ageError",
+              "Age must be between 18 and 100",
+              true,
+            );
+            isValid = false;
+          }
+        }
+
         const qual = document.getElementById("editQualification").value.trim();
         if (!qual) {
           setFieldError(
             "editQualification",
             "qualError",
             "Qualification is required",
+            true,
+          );
+          isValid = false;
+        }
+
+        const desc = document.getElementById("editDescription").value.trim();
+        if (!desc) {
+          setFieldError(
+            "editDescription",
+            "descError",
+            "Professional description is required",
             true,
           );
           isValid = false;
@@ -837,6 +911,7 @@
 
         const updatedData = {
           full_name: document.getElementById("editName").value.trim(),
+          email: document.getElementById("editEmail").value.trim(),
           specialization: document
             .getElementById("editSpecialization")
             .value.trim(),
@@ -847,9 +922,6 @@
             .getElementById("editQualification")
             .value.trim(),
           description: document.getElementById("editDescription").value.trim(),
-          availability_info: document
-            .getElementById("editAvailability")
-            .value.trim(),
         };
 
         try {

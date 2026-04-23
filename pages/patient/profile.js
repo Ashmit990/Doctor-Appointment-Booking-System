@@ -127,26 +127,142 @@ function updateViewMode() {
   document.getElementById("viewEmergencyPhone").textContent = patientProfile.emergency_contact_phone || "-";
 }
 
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+function isValidPhone(phone) {
+  if (!phone) return false;
+  const phoneDigits = phone.replace(/[\s\(\)\+-]/g, "");
+  return phoneDigits.length >= 8 && /^\d+$/.test(phoneDigits);
+}
+
+function clearValidationErrors() {
+  const errorIds = ["nameError", "emailError", "phoneError", "dobError", "ageError", "genderError", "bloodError", "addressError", "emergencyNameError", "emergencyPhoneError"];
+  errorIds.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add("hidden");
+  });
+  const inputIds = ["editName", "editEmail", "editPhone", "editDob", "editAge", "editGender", "editBlood", "editAddress", "editEmergencyName", "editEmergencyPhone"];
+  inputIds.forEach((id) => {
+    const input = document.getElementById(id);
+    if (input) {
+      input.classList.remove("border-red-500", "ring-red-100");
+      input.classList.add("border-gray-300");
+    }
+  });
+}
+
+function setFieldError(inputId, errorId, message, show) {
+  const input = document.getElementById(inputId);
+  const error = document.getElementById(errorId);
+  if (!input || !error) return;
+  if (show) {
+    error.textContent = message;
+    error.classList.remove("hidden");
+    input.classList.remove("border-gray-300");
+    input.classList.add("border-red-500");
+  } else {
+    error.classList.add("hidden");
+    input.classList.remove("border-red-500");
+    input.classList.add("border-gray-300");
+  }
+}
+
 function validateForm() {
-  const errors = {};
+  clearValidationErrors();
+  let isValid = true;
+
+  // Validate Full Name
   const name = getEditFieldValue("editName");
-  const email = getEditFieldValue("editEmail");
-
   if (!name) {
-    errors.name = true;
-    document.getElementById("nameError").classList.remove("hidden");
-  } else {
-    document.getElementById("nameError").classList.add("hidden");
+    setFieldError("editName", "nameError", "Full name is required", true);
+    isValid = false;
+  } else if (name.length < 2) {
+    setFieldError("editName", "nameError", "Name must be at least 2 characters", true);
+    isValid = false;
   }
 
+  // Validate Email
+  const email = getEditFieldValue("editEmail");
   if (!email) {
-    errors.email = true;
-    document.getElementById("emailError").classList.remove("hidden");
-  } else {
-    document.getElementById("emailError").classList.add("hidden");
+    setFieldError("editEmail", "emailError", "Email is required", true);
+    isValid = false;
+  } else if (!isValidEmail(email)) {
+    setFieldError("editEmail", "emailError", "Please enter a valid email address", true);
+    isValid = false;
   }
 
-  return Object.keys(errors).length === 0;
+  // Validate Phone Number
+  const phone = getEditFieldValue("editPhone");
+  if (!phone) {
+    setFieldError("editPhone", "phoneError", "Phone number is required", true);
+    isValid = false;
+  } else if (!isValidPhone(phone)) {
+    setFieldError("editPhone", "phoneError", "Valid phone number required (min 8 digits)", true);
+    isValid = false;
+  }
+
+  // Validate Date of Birth
+  const dob = getEditFieldValue("editDob");
+  if (!dob) {
+    setFieldError("editDob", "dobError", "Date of birth is required", true);
+    isValid = false;
+  }
+
+  // Validate Age
+  const age = getEditFieldValue("editAge");
+  if (!age) {
+    setFieldError("editAge", "ageError", "Age is required", true);
+    isValid = false;
+  } else {
+    const ageNum = parseInt(age);
+    if (ageNum < 0 || ageNum > 150) {
+      setFieldError("editAge", "ageError", "Age must be between 0 and 150", true);
+      isValid = false;
+    }
+  }
+
+  // Validate Gender
+  const gender = getEditFieldValue("editGender");
+  if (!gender) {
+    setFieldError("editGender", "genderError", "Gender is required", true);
+    isValid = false;
+  }
+
+  // Validate Blood Group
+  const blood = getEditFieldValue("editBlood");
+  if (!blood) {
+    setFieldError("editBlood", "bloodError", "Blood group is required", true);
+    isValid = false;
+  }
+
+  // Validate Address
+  const address = getEditFieldValue("editAddress");
+  if (!address) {
+    setFieldError("editAddress", "addressError", "Address is required", true);
+    isValid = false;
+  }
+
+  // Validate Emergency Contact Name
+  const emergencyName = getEditFieldValue("editEmergencyName");
+  if (!emergencyName) {
+    setFieldError("editEmergencyName", "emergencyNameError", "Emergency contact name is required", true);
+    isValid = false;
+  }
+
+  // Validate Emergency Contact Phone
+  const emergencyPhone = getEditFieldValue("editEmergencyPhone");
+  if (!emergencyPhone) {
+    setFieldError("editEmergencyPhone", "emergencyPhoneError", "Emergency contact phone is required", true);
+    isValid = false;
+  } else if (!isValidPhone(emergencyPhone)) {
+    setFieldError("editEmergencyPhone", "emergencyPhoneError", "Valid emergency phone required (min 8 digits)", true);
+    isValid = false;
+  }
+
+  return isValid;
 }
 
 function loadMockProfile() {
