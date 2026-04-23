@@ -60,8 +60,8 @@ async function loadNotifications() {
 }
 
 function applyHomeToUI(data) {
-  document.getElementById("todayBookingsCount").textContent =
-    data.today_bookings_count ?? 0;
+  document.getElementById("totalAppointmentsCount").textContent =
+    data.total_appointments ?? 0;
   document.getElementById("upcomingCount").textContent = data.upcoming_count ?? 0;
   document.getElementById("completedCount").textContent = data.completed_count ?? 0;
   document.getElementById("totalAppointments").textContent =
@@ -69,8 +69,10 @@ function applyHomeToUI(data) {
 
   const unread = data.unread_notifications ?? 0;
   const badge = document.getElementById("notificationCount");
-  badge.textContent = unread;
-  badge.classList.toggle("hidden", unread < 1);
+  if (badge) {
+    badge.textContent = unread;
+    badge.style.display = unread < 1 ? "none" : "inline-flex";
+  }
 
   const todayA = data.today_appointment;
   const nextA = data.next_appointment;
@@ -129,17 +131,15 @@ function applyHomeToUI(data) {
 // ... existing variables ...
 
 function renderNotificationList(rows) {
-  // CHANGE THIS: doctorNotificationList instead of notificationList
-  const notificationList = document.getElementById("doctorNotificationList");
+  const notificationList = document.getElementById("notificationList");
   if (!notificationList) return;
   notificationList.innerHTML = "";
 
-  // CHANGE THIS: doctorNotificationCount instead of notificationCount
   const unreadCount = rows.filter((item) => parseInt(item.is_read, 10) === 0).length;
-  const badge = document.getElementById("doctorNotificationCount");
+  const badge = document.getElementById("notificationCount");
   if (badge) {
     badge.textContent = unreadCount;
-    badge.classList.toggle("hidden", unreadCount < 1);
+    badge.style.display = unreadCount < 1 ? "none" : "inline-flex";
   }
 
   if (rows.length === 0) {
@@ -147,9 +147,60 @@ function renderNotificationList(rows) {
     return;
   }
 
-  // ... (rest of your rows.forEach logic remains the same)
+  rows.forEach((item) => {
+    const meta = notificationIcon(item.title);
+    const isUnread = parseInt(item.is_read, 10) === 0;
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = `w-full text-left px-5 py-4 border-b border-slate-50 transition hover:bg-slate-50 ${isUnread ? "bg-teal-50/30" : ""}`;
+    row.innerHTML = `
+      <div class="flex gap-4">
+        <div class="relative shrink-0">
+          <div class="w-10 h-10 rounded-full ${meta.iconBg} ${meta.iconColor} flex items-center justify-center">
+            <i data-lucide="${meta.icon}" class="w-5 h-5"></i>
+          </div>
+          ${isUnread ? '<div class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></div>' : ""}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-bold text-slate-800 break-words">${escapeHtml(item.title)}</p>
+          <p class="text-xs text-slate-600 break-words mt-0.5">${escapeHtml(normalizeNotificationText(item.message))}</p>
+          <p class="text-[10px] text-slate-400 mt-1">${new Date(item.created_at).toLocaleString()}</p>
+        </div>
+      </div>
+    `;
+
+    row.addEventListener("click", async () => {
+      if (!isUnread) return;
+      await fetch(`${API_BASE}/patient/notifications.php`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notification_id: item.notification_id }),
+      });
+      const updated = await loadNotifications();
+      renderNotificationList(updated);
+    });
+
+    notificationList.appendChild(row);
+  });
+
+  if (typeof lucide !== "undefined") lucide.createIcons();
 }
-// ... rest of the file stays the same ...
+
+function updatePatientNotificationPanelPosition() {
+  const btn = document.getElementById("doctorNotificationBtn");
+  const panel = document.getElementById("doctorNotificationPanel");
+  if (!btn || !panel || panel.classList.contains("hidden")) return;
+
+  const rect = btn.getBoundingClientRect();
+  const panelWidth = Math.min(window.innerWidth - 32, 390);
+  let left = rect.right - panelWidth;
+  if (left < 16) left = 16;
+
+  panel.style.width = `${panelWidth}px`;
+  panel.style.top = `${Math.round(rect.bottom + 8)}px`;
+  panel.style.left = `${Math.round(left)}px`;
+}
 async function refreshCalendarDots(year, month) {
   const r = await fetch(
     `${API_BASE}/patient/calendar.php?year=${year}&month=${month}`,
@@ -231,21 +282,40 @@ async function renderMiniCalendar() {
   const now = new Date();
   const y = now.getFullYear();
   const m = now.getMonth() + 1;
-  await refreshCalendarDots(y, m);
   const grid = document.getElementById("miniCalGrid");
   if (grid) buildCalendarGrid(grid, y, m, true);
+
+  try {
+    await refreshCalendarDots(y, m);
+    if (grid) buildCalendarGrid(grid, y, m, true);
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 async function openFullCalendar() {
   calViewYear = new Date().getFullYear();
   calViewMonth = new Date().getMonth() + 1;
-  await refreshCalendarDots(calViewYear, calViewMonth);
   const grid = document.getElementById("fullCalGrid");
   if (grid) buildCalendarGrid(grid, calViewYear, calViewMonth, false);
-  document.getElementById("calendarDayDetail").innerHTML =
-    '<p class="text-sm text-slate-500">Select a date to see appointments.</p>';
-  document.getElementById("calendarModal").classList.remove("hidden");
-  document.getElementById("calendarModal").classList.add("flex");
+
+  const detail = document.getElementById("calendarDayDetail");
+  const modal = document.getElementById("calendarModal");
+  if (detail) {
+    detail.innerHTML =
+      '<p class="text-sm text-slate-500">Select a date to see appointments.</p>';
+  }
+  if (modal) {
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  try {
+    await refreshCalendarDots(calViewYear, calViewMonth);
+    if (grid) buildCalendarGrid(grid, calViewYear, calViewMonth, false);
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 function closeCalendarPopup() {
@@ -317,14 +387,11 @@ document.getElementById("fullCalNavNext")?.addEventListener("click", async () =>
   if (grid) buildCalendarGrid(grid, calViewYear, calViewMonth, false);
 });
 
-// --- NOTIFICATION PANEL LOGIC (DOCTOR) ---
-const doctorNotificationBtn = document.getElementById("doctorNotificationBtn");
-const doctorNotificationPanel = document.getElementById("doctorNotificationPanel");
-const doctorMarkAllReadBtn = document.getElementById("doctorMarkAllReadBtn");
+// --- NOTIFICATION PANEL LOGIC ---
 
-function updateDoctorNotificationPanelPosition() {
-  const btn = document.getElementById("doctorNotificationBtn");
-  const panel = document.getElementById("doctorNotificationPanel");
+function updateNotificationPanelPosition() {
+  const btn = document.getElementById("notificationBtn");
+  const panel = document.getElementById("notificationPanel");
   if (!btn || !panel || panel.classList.contains("hidden")) return;
 
   const rect = btn.getBoundingClientRect();
@@ -337,43 +404,7 @@ function updateDoctorNotificationPanelPosition() {
   panel.style.left = `${Math.round(left)}px`;
 }
 
-// This matches the onclick="window.__doctorNotificationBarToggle(event)" in your HTML
-window.__doctorNotificationBarToggle = function (e) {
-  if (e) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-  const panel = document.getElementById("doctorNotificationPanel");
-  const btn = document.getElementById("doctorNotificationBtn");
-  if (!panel || !btn) return;
-
-  if (panel.classList.contains("hidden")) {
-    panel.classList.remove("hidden");
-    updateDoctorNotificationPanelPosition();
-
-    // Load notifications from the database
-    loadNotifications()
-      .then((rows) => renderNotificationList(rows))
-      .catch((err) => console.error(err));
-  } else {
-    panel.classList.add("hidden");
-  }
-};
-
-// Close panel when clicking outside
-document.addEventListener("click", (e) => {
-  const panel = document.getElementById("doctorNotificationPanel");
-  const btn = document.getElementById("doctorNotificationBtn");
-  if (!panel || panel.classList.contains("hidden") || btn.contains(e.target) || panel.contains(e.target)) {
-    return;
-  }
-  panel.classList.add("hidden");
-});
-
-// Sync position on resize
-window.addEventListener("resize", updateDoctorNotificationPanelPosition);
-
-function patientNotificationBarToggle(e) {
+window.__notificationBarToggle = function (e) {
   if (e) {
     e.preventDefault();
     e.stopPropagation();
@@ -383,60 +414,33 @@ function patientNotificationBarToggle(e) {
   if (!panel || !btn) return;
 
   if (panel.classList.contains("hidden")) {
-    // Position while still display:none so a stray fixed layer never covers the bell
-    const rect = btn.getBoundingClientRect();
-    const panelWidth = Math.min(window.innerWidth - 32, 390);
-    let left = rect.right - panelWidth;
-    if (left < 16) left = 16;
-    panel.style.width = `${panelWidth}px`;
-    panel.style.top = `${Math.round(rect.bottom + 8)}px`;
-    panel.style.left = `${Math.round(left)}px`;
     panel.classList.remove("hidden");
+    updateNotificationPanelPosition();
+
     loadNotifications()
       .then((rows) => renderNotificationList(rows))
       .catch((err) => console.error(err));
   } else {
     panel.classList.add("hidden");
   }
-}
+};
 
-window.__patientNotificationBarToggle = patientNotificationBarToggle;
-
-notificationBtn?.addEventListener(
-  "click",
-  (ev) => {
-    ev.preventDefault();
-    ev.stopPropagation();
-    patientNotificationBarToggle(ev);
-  },
-  true,
-);
-
-window.addEventListener("resize", () => updatePatientNotificationPanelPosition());
-window.addEventListener("orientationchange", () => {
-  requestAnimationFrame(() => updatePatientNotificationPanelPosition());
+document.addEventListener("click", (e) => {
+  const panel = document.getElementById("notificationPanel");
+  const btn = document.getElementById("notificationBtn");
+  if (!panel || panel.classList.contains("hidden") || btn.contains(e.target) || panel.contains(e.target)) {
+    return;
+  }
+  panel.classList.add("hidden");
 });
 
-document.addEventListener(
-  "click",
-  (e) => {
-    setTimeout(() => {
-      if (
-        !notificationPanel ||
-        !notificationBtn ||
-        notificationPanel.classList.contains("hidden") ||
-        notificationBtn.contains(e.target) ||
-        notificationPanel.contains(e.target)
-      ) {
-        return;
-      }
-      notificationPanel.classList.add("hidden");
-    }, 0);
-  },
-  false,
-);
+window.addEventListener("resize", updateNotificationPanelPosition);
+window.addEventListener("orientationchange", () => {
+  requestAnimationFrame(updateNotificationPanelPosition);
+});
 
-markAllReadBtn?.addEventListener("click", async (e) => {
+const _markAllReadBtn = document.getElementById("markAllReadBtn");
+_markAllReadBtn?.addEventListener("click", async (e) => {
   e.preventDefault();
   e.stopPropagation();
   await fetch(`${API_BASE}/patient/notifications.php`, {
@@ -462,24 +466,37 @@ document.getElementById("calendarModal").addEventListener("click", (e) => {
   const ok = await requirePatientSession();
   if (!ok) return;
 
+  setPatientGreeting("Patient");
+
+  document.getElementById("todayDateLabel").textContent = new Date().toDateString();
+
   try {
     const me = await fetch(`${API_BASE}/patient/me.php`, { credentials: "include" }).then(
       (r) => r.json(),
     );
     if (me.status === "success" && me.data) {
       const name = me.data.full_name || "Patient";
-      document.getElementById("patientNameHeading").textContent = name + "!";
+      setPatientGreeting(name);
     }
+  } catch (e) {
+    console.error(e);
+  }
 
+  try {
     const home = await loadHomeData();
     applyHomeToUI(home);
+  } catch (e) {
+    console.error(e);
+  }
 
+  try {
     const notes = await loadNotifications();
     renderNotificationList(notes);
+  } catch (e) {
+    console.error(e);
+  }
 
-    document.getElementById("todayDateLabel").textContent =
-      new Date().toDateString();
-
+  try {
     await renderMiniCalendar();
   } catch (e) {
     console.error(e);
@@ -492,9 +509,15 @@ function updateBadge(unreadCount) {
 
   if (unreadCount > 0) {
     badge.textContent = unreadCount;
-    badge.classList.remove("hidden"); // Show the red popup if there are unread items
+    badge.style.display = "inline-flex"; // Show the red popup if there are unread items
   } else {
     badge.textContent = "0";
-    badge.classList.add("hidden"); // Hide the red popup when count is 0
+    badge.style.display = "none"; // Hide the red popup when count is 0
   }
+}
+
+function setPatientGreeting(name) {
+  const el = document.getElementById("patientNameHeading");
+  if (!el) return;
+  el.textContent = name ? `${name}!` : "Patient!";
 }

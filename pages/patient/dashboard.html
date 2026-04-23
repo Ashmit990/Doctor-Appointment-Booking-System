@@ -55,45 +55,10 @@
 
     <main class="flex-1 p-4 md:p-8 pb-24 md:pb-8 w-full overflow-x-hidden">
       <div class="max-w-7xl mx-auto bg-white rounded-[32px] shadow-[0_20px_60px_rgba(15,23,42,0.08)] p-5 md:p-8">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
-          <div class="pt-2">
-
-            <h1 class="text-3xl md:text-4xl font-bold text-slate-800 leading-tight">
-              Appointments
-            </h1>
-          </div>
-
-          <div class="flex flex-col sm:flex-row gap-3 sm:items-center w-full lg:w-auto mt-4 lg:mt-0 relative">
-            <button id="dashboardNotificationBtn" type="button"
-              class="relative w-12 h-12 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-2xl font-medium transition flex items-center justify-center shrink-0"
-              title="Notifications">
-              <i data-lucide="bell" class="w-5 h-5"></i>
-              <span id="dashboardNotificationCount"
-                class="hidden absolute -top-2 -right-2 min-w-[22px] h-[22px] px-1 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center">0</span>
-            </button>
-            <div id="dashboardNotificationPanel"
-              class="hidden absolute right-0 top-14 w-[min(100vw-2rem,390px)] bg-white rounded-[24px] border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.18)] overflow-hidden z-50">
-              <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-                <h3 class="text-xl font-bold text-slate-800">Notifications</h3>
-                <button id="dashboardMarkAllReadBtn" type="button"
-                  class="text-sm font-medium text-blue-600 hover:text-blue-700 transition">Mark all as read</button>
-              </div>
-              <div id="dashboardNotificationList" class="max-h-[430px] overflow-y-auto"></div>
-            </div>
-            <div class="relative flex-1 sm:flex-none min-w-0">
-              <input id="searchInput" type="text" placeholder="Search doctor or department"
-                class="w-full sm:w-80 rounded-2xl border border-slate-200 bg-slate-50 pl-4 pr-12 py-3 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent transition" />
-
-              <button id="searchBtn" type="button"
-                class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-200/70 transition">
-                <i data-lucide="search" class="w-4 h-4"></i>
-              </button>
-            </div>
-            <button onclick="openBookingModal()"
-              class="bg-[#007E85] hover:bg-[#006570] flex-1 sm:flex-none text-center text-white px-5 py-3 rounded-2xl font-medium shadow-sm transition">
-              Book Appointment
-            </button>
-          </div>
+        <div class="mb-8">
+          <h1 class="text-3xl md:text-4xl font-bold text-slate-800 leading-tight">
+            Appointments
+          </h1>
         </div>
 
         <section
@@ -235,6 +200,7 @@
       <button type="button" id="detailRescheduleBtn"
         class="hidden mt-4 w-full py-3 rounded-2xl bg-[#007E85] text-white font-medium hover:bg-[#006570]">
         Reschedule visit
+      </button>
     </div>
   </div>
 

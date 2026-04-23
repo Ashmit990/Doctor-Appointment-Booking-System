@@ -4,7 +4,6 @@ let cachedAppointments = [];
 
 const appointmentList = document.getElementById("appointmentList");
 const emptyState = document.getElementById("emptyState");
-const searchInput = document.getElementById("searchInput");
 const filterButtons = document.querySelectorAll(".filter-btn");
 
 function goToHomePage() {
@@ -13,6 +12,11 @@ function goToHomePage() {
 
 function goToProfile() {
   window.location.href = "profile.html";
+}
+
+function setElementText(id, value) {
+  const element = document.getElementById(id);
+  if (element) element.textContent = value;
 }
 
 function dashboardNotificationIcon(title) {
@@ -109,8 +113,6 @@ function formatStatus(status) {
 
 async function fetchAppointments() {
   const params = new URLSearchParams();
-  if (activeFilter !== "all") params.set("status", activeFilter);
-  if (searchQuery) params.set("q", searchQuery);
   const r = await fetch(
     `${API_BASE}/patient/appointments.php?${params.toString()}`,
     { credentials: "include" },
@@ -120,23 +122,36 @@ async function fetchAppointments() {
   return j.data || [];
 }
 
+function getVisibleAppointments(rows) {
+  return rows.filter((item) => {
+    const matchesStatus =
+      activeFilter === "all" || String(item.status_key) === activeFilter;
+    const haystack = `${item.doctor_name || ""} ${item.specialization || ""}`.toLowerCase();
+    const matchesSearch = !searchQuery || haystack.includes(searchQuery.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
+}
+
 function renderCounts(rows) {
   const upcoming = rows.filter((a) => a.status_key === "upcoming").length;
   const completed = rows.filter((a) => a.status_key === "completed").length;
   const missed = rows.filter((a) => a.status_key === "missed").length;
 
-  document.getElementById("upcomingCount").textContent = upcoming;
-  document.getElementById("completedCount").textContent = completed;
-  document.getElementById("missedCount").textContent = missed;
-  document.getElementById("totalCount").textContent = rows.length;
+  setElementText("upcomingCount", upcoming);
+  setElementText("completedCount", completed);
+  setElementText("missedCount", missed);
+  setElementText("totalCount", rows.length);
 
   const next = rows.find((a) => a.status_key === "upcoming");
-  document.getElementById("nextAppointment").textContent = next
-    ? `${next.app_date} • ${formatTime12h(next.app_time)}`
-    : "-";
+  setElementText(
+    "nextAppointment",
+    next ? `${next.app_date} • ${formatTime12h(next.app_time)}` : "-",
+  );
 }
 
 function renderAppointments(rows) {
+  if (!appointmentList || !emptyState) return;
+
   appointmentList.innerHTML = "";
 
   if (!rows.length) {
@@ -241,17 +256,20 @@ async function reload() {
     const rows = await fetchAppointments();
     cachedAppointments = rows;
     renderCounts(rows);
-    renderAppointments(rows);
+    renderAppointments(getVisibleAppointments(rows));
   } catch (e) {
     console.error(e);
-    appointmentList.innerHTML =
-      '<p class="text-red-500 text-sm">Could not load appointments. Are you logged in?</p>';
+    if (appointmentList) {
+      appointmentList.innerHTML =
+        '<p class="text-red-500 text-sm">Could not load appointments. Are you logged in?</p>';
+    }
   }
 }
 
 function openBookingModal() {
   const modal = document.getElementById("bookingModal");
   const iframe = document.querySelector("#bookingModal iframe");
+  if (!modal || !iframe) return;
   iframe.src = `booking.html?t=${Date.now()}`;
   modal.classList.remove("hidden");
   modal.classList.add("flex");
@@ -260,6 +278,7 @@ function openBookingModal() {
 function openRescheduleModal(appointmentId) {
   const modal = document.getElementById("bookingModal");
   const iframe = document.querySelector("#bookingModal iframe");
+  if (!modal || !iframe) return;
   iframe.src = `booking.html?t=${Date.now()}`;
   modal.classList.remove("hidden");
   modal.classList.add("flex");
@@ -277,12 +296,14 @@ function openRescheduleModal(appointmentId) {
 
 function closeBookingModal() {
   const modal = document.getElementById("bookingModal");
+  if (!modal) return;
   modal.classList.add("hidden");
   modal.classList.remove("flex");
 }
 
 function showSuccessToast(title, text) {
   const toast = document.getElementById("successToast");
+  if (!toast) return;
   const t = toast.querySelector(".toast-title");
   const x = toast.querySelector(".toast-text");
   if (t) t.textContent = title;
@@ -306,6 +327,8 @@ async function openDetailModal(id) {
   }
   const a = j.data;
   const body = document.getElementById("detailModalBody");
+  const modal = document.getElementById("detailModal");
+  if (!body || !modal) return;
   body.innerHTML = `
     <div class="space-y-3 text-sm text-slate-600">
       <p><span class="text-slate-400">Doctor</span><br/><strong class="text-slate-800">${a.doctor_name}</strong> — ${a.specialization || ""}</p>
@@ -317,8 +340,8 @@ async function openDetailModal(id) {
       <p class="text-xs text-slate-400">Reschedule date shown above is your current scheduled visit. Use Reschedule on the card to pick a new slot if allowed.</p>
     </div>
   `;
-  document.getElementById("detailModal").classList.remove("hidden");
-  document.getElementById("detailModal").classList.add("flex");
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
 
   const missBtn = document.getElementById("detailRescheduleBtn");
   if (missBtn) {
@@ -332,8 +355,10 @@ async function openDetailModal(id) {
 }
 
 function closeDetailModal() {
-  document.getElementById("detailModal").classList.add("hidden");
-  document.getElementById("detailModal").classList.remove("flex");
+  const modal = document.getElementById("detailModal");
+  if (!modal) return;
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
 }
 
 filterButtons.forEach((button) => {
@@ -358,7 +383,7 @@ filterButtons.forEach((button) => {
     );
     button.classList.add("active-filter", "bg-teal-600", "text-white");
 
-    reload();
+    renderAppointments(getVisibleAppointments(cachedAppointments));
   });
 });
 
@@ -375,16 +400,20 @@ window.addEventListener("message", function (event) {
 });
 
 const searchBtn = document.getElementById("searchBtn");
-searchBtn.addEventListener("click", () => {
-  searchQuery = searchInput.value.trim();
-  reload();
-});
-searchInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
+const searchInput = document.getElementById("searchInput");
+
+if (searchBtn && searchInput) {
+  searchBtn.addEventListener("click", () => {
     searchQuery = searchInput.value.trim();
     reload();
-  }
-});
+  });
+  searchInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      searchQuery = searchInput.value.trim();
+      reload();
+    }
+  });
+}
 
 document.getElementById("closeDetailModal")?.addEventListener("click", closeDetailModal);
 document.getElementById("detailModal")?.addEventListener("click", (e) => {
