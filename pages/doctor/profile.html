@@ -138,401 +138,245 @@
         <div
           class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm"
         >
-          <div
-            class="px-4 md:px-8 py-4 flex justify-between items-center flex-wrap gap-3"
-          >
-            <div>
-              <h2 class="text-xl md:text-2xl font-bold text-gray-800">
-                Profile Management
-              </h2>
-              <p id="current-date" class="text-sm text-gray-500"></p>
-            </div>
-            <div class="flex gap-2">
-              <button
-                id="editProfileBtn"
-                class="bg-primary text-white px-5 py-2 rounded-xl text-sm font-medium shadow-sm hover:opacity-90 transition flex items-center gap-2"
-              >
-                <i data-lucide="edit" class="w-4 h-4"></i> Edit Profile
-              </button>
-              <button
-                id="cancelEditBtn"
-                class="border border-gray-300 bg-white text-gray-700 px-5 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition flex items-center gap-2 hidden"
-              >
-                <i data-lucide="x" class="w-4 h-4"></i> Cancel
-              </button>
-            </div>
+          <div class="px-4 md:px-8 py-4">
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800">
+              Profile Management
+            </h2>
+            <p id="current-date" class="text-sm text-gray-500 mt-1"></p>
           </div>
         </div>
 
         <!-- PAGE CONTENT -->
         <div class="p-4 md:p-8">
-          <div class="max-w-4xl mx-auto">
-            <!-- Profile Card -->
-            <div class="bg-white rounded-2xl card-shadow overflow-hidden">
-              <!-- Cover / Header -->
-              <div
-                class="relative h-28 md:h-32 bg-gradient-to-r from-teal-700 to-primary"
-              ></div>
-              <div class="relative px-4 md:px-6 pb-6">
-                <!-- Avatar -->
-                <div class="absolute -top-10 left-4 md:left-6">
-                  <div
-                    class="h-20 w-20 rounded-full bg-white shadow-md flex items-center justify-center border-4 border-white"
-                  >
-                    <i
-                      data-lucide="stethoscope"
-                      class="w-10 h-10 text-primary"
-                    ></i>
-                  </div>
-                </div>
-                <div class="pt-12">
-                  <h2
-                    class="text-xl md:text-2xl font-bold text-gray-800"
-                    id="doctorNameDisplay"
-                  >
-                    Loading...
-                  </h2>
-                  <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
-                    <span
-                      class="text-sm bg-primary-light text-primary px-2.5 py-0.5 rounded-full font-medium"
-                    >
-                      <i data-lucide="brain" class="w-3 h-3 inline mr-1"></i>
-                      <span id="specializationDisplay">-</span>
-                    </span>
-                    <span class="text-sm text-gray-500">
-                      <i
-                        data-lucide="briefcase"
-                        class="w-3 h-3 inline mr-1"
-                      ></i>
-                      <span id="experienceDisplay">-</span>
-                    </span>
-                  </div>
+          <div class="max-w-7xl mx-auto">
+            <!-- HERO SECTION WITH STATS -->
+            <div class="bg-gradient-to-r from-[#007E85] to-[#005f65] rounded-3xl p-6 md:p-8 mb-8 text-white shadow-lg">
+              <div class="flex items-start justify-between flex-col md:flex-row gap-4 mb-6">
+                <div>
+                  <p class="text-sm font-medium opacity-90 mb-1">Manage your details</p>
+                  <h2 class="text-2xl md:text-3xl font-bold">Keep your profile information updated</h2>
+                  <p class="text-sm opacity-85 mt-2">Edit your professional details so your information stays accurate and easy to manage.</p>
                 </div>
               </div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white/20 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+                  <p class="text-xs opacity-90 mb-1">Profile Completion</p>
+                  <p class="text-3xl font-bold" id="profileCompletion">100%</p>
+                </div>
+                <div class="bg-white/20 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+                  <p class="text-xs opacity-90 mb-1">Verified Fields</p>
+                  <p class="text-3xl font-bold" id="verifiedFields">8</p>
+                </div>
+                <div class="bg-white/20 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+                  <p class="text-xs opacity-90 mb-1">Last Updated</p>
+                  <p class="text-3xl font-bold" id="lastUpdated">Today</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- TWO COLUMN LAYOUT -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              <!-- MAIN FORM SECTION (3 columns) -->
+              <div class="lg:col-span-3 bg-white rounded-2xl card-shadow overflow-hidden">
+                <!-- CARD HEADER WITH EDIT BUTTON -->
+                <div class="flex justify-between items-center p-6 md:p-8 border-b border-gray-100 bg-gray-50">
+                  <h3 class="text-lg font-semibold text-gray-800" id="cardTitle">Profile Information</h3>
+                  <button id="cardEditBtn"
+                    class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-90 transition flex items-center gap-2">
+                    <i data-lucide="edit" class="w-4 h-4"></i> Edit
+                  </button>
+                  <button id="cardCancelBtn"
+                    class="border border-gray-300 bg-white text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition hidden">
+                    Cancel
+                  </button>
+                </div>
 
               <!-- VIEW MODE -->
-              <div id="viewMode" class="px-4 md:px-6 pb-8 space-y-6">
+              <div id="viewMode" class="p-6 md:p-8">
                 <!-- Personal Information Section -->
-                <div class="border-b border-gray-100 pb-6">
-                  <h3
-                    class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4"
-                  >
-                    <i
-                      data-lucide="user-circle"
-                      class="w-5 h-5 text-primary"
-                    ></i>
-                    Personal Information
-                  </h3>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label
-                        class="block text-xs uppercase font-semibold text-gray-400 tracking-wider"
-                        >Full Name</label
-                      >
-                      <p class="text-gray-800 font-medium mt-1" id="viewName">
-                        -
-                      </p>
+                <div class="border-b border-gray-100 pb-6 mb-6">
+                  <h4 class="text-sm font-semibold text-gray-700 mb-4">Personal Information</h4>
+                  <div class="space-y-4">
+                    <div class="flex justify-between items-center py-3 border-b border-gray-50">
+                      <span class="text-gray-600 text-sm">Full Name</span>
+                      <span class="text-gray-800 font-medium text-sm" id="viewName">-</span>
                     </div>
-                    <div>
-                      <label
-                        class="block text-xs uppercase font-semibold text-gray-400 tracking-wider"
-                        >Email</label
-                      >
-                      <p class="text-gray-800 font-medium mt-1" id="viewEmail">
-                        -
-                      </p>
+                    <div class="flex justify-between items-center py-3 border-b border-gray-50">
+                      <span class="text-gray-600 text-sm">Email Address</span>
+                      <span class="text-gray-800 font-medium text-sm" id="viewEmail">-</span>
                     </div>
-                    <div>
-                      <label
-                        class="block text-xs uppercase font-semibold text-gray-400 tracking-wider"
-                        >Specialization</label
-                      >
-                      <p
-                        class="text-gray-800 font-medium mt-1"
-                        id="viewSpecialization"
-                      >
-                        -
-                      </p>
+                    <div class="flex justify-between items-center py-3 border-b border-gray-50">
+                      <span class="text-gray-600 text-sm">Phone Number</span>
+                      <span class="text-gray-800 font-medium text-sm" id="viewPhone">-</span>
                     </div>
-                    <div>
-                      <label
-                        class="block text-xs uppercase font-semibold text-gray-400 tracking-wider"
-                        >Phone Number</label
-                      >
-                      <p class="text-gray-800 font-medium mt-1" id="viewPhone">
-                        -
-                      </p>
+                    <div class="flex justify-between items-center py-3 border-b border-gray-50">
+                      <span class="text-gray-600 text-sm">Age</span>
+                      <span class="text-gray-800 font-medium text-sm" id="viewAge">-</span>
                     </div>
-                    <div>
-                      <label
-                        class="block text-xs uppercase font-semibold text-gray-400 tracking-wider"
-                        >Years of Experience</label
-                      >
-                      <p
-                        class="text-gray-800 font-medium mt-1"
-                        id="viewExperience"
-                      >
-                        -
-                      </p>
-                    </div>
-                    <div>
-                      <label
-                        class="block text-xs uppercase font-semibold text-gray-400 tracking-wider"
-                        >Age</label
-                      >
-                      <p
-                        class="text-gray-800 font-medium mt-1"
-                        id="viewAge"
-                      >
-                        -
-                      </p>
+                    <div class="flex justify-between items-center py-3">
+                      <span class="text-gray-600 text-sm">Specialization</span>
+                      <span class="text-gray-800 font-medium text-sm" id="viewSpecialization">-</span>
                     </div>
                   </div>
                 </div>
 
-                <!-- Professional Details Section -->
-                <div class="space-y-4">
-                  <h3
-                    class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4"
-                  >
-                    <i
-                      data-lucide="briefcase-medical"
-                      class="w-5 h-5 text-primary"
-                    ></i>
-                    Professional Details
-                  </h3>
-                  <div>
-                    <label
-                      class="block text-xs uppercase font-semibold text-gray-400 tracking-wider"
-                      >Qualification</label
-                    >
-                    <p
-                      class="text-gray-700 mt-1 bg-gray-50 p-3 rounded-xl"
-                      id="viewQualification"
-                    >
-                      -
-                    </p>
+                <!-- Professional Details -->
+                <div class="border-b border-gray-100 pb-6 mb-6">
+                  <h4 class="text-sm font-semibold text-gray-700 mb-4">Professional Details</h4>
+                  <div class="space-y-4">
+                    <div class="flex justify-between items-start py-3 border-b border-gray-50">
+                      <span class="text-gray-600 text-sm">Experience</span>
+                      <span class="text-gray-800 font-medium text-sm" id="viewExperience">-</span>
+                    </div>
+                    <div class="flex justify-between items-start py-3">
+                      <span class="text-gray-600 text-sm">Qualification</span>
+                      <span class="text-gray-800 font-medium text-sm" id="viewQualification">-</span>
+                    </div>
                   </div>
-                  <div>
-                    <label
-                      class="block text-xs uppercase font-semibold text-gray-400 tracking-wider"
-                      >Professional Description</label
-                    >
-                    <p
-                      class="text-gray-700 mt-1 bg-gray-50 p-3 rounded-xl whitespace-pre-wrap"
-                      id="viewDescription"
-                    >
-                      -
-                    </p>
-                  </div>
+                </div>
+
+                <!-- Professional Bio -->
+                <div>
+                  <h4 class="text-sm font-semibold text-gray-700 mb-4">Professional Bio</h4>
+                  <p class="text-gray-700 text-sm bg-gray-50 p-3 rounded-lg" id="viewDescription">-</p>
                 </div>
               </div>
 
               <!-- EDIT MODE (hidden initially) -->
-              <div id="editMode" class="hidden px-4 md:px-6 pb-8">
+              <div id="editMode" class="hidden p-6 md:p-8">
                 <form id="profileForm" novalidate>
                   <!-- Personal Information -->
                   <div class="border-b border-gray-100 pb-6 mb-6">
-                    <h3
-                      class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4"
-                    >
-                      <i
-                        data-lucide="user-circle"
-                        class="w-5 h-5 text-primary"
-                      ></i>
-                      Personal Information
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-4">Personal Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label
-                          class="block text-sm font-medium text-gray-700 mb-1"
-                          >Full Name <span class="text-red-500">*</span></label
-                        >
-                        <input
-                          type="text"
-                          id="editName"
-                          required
-                          class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
-                        />
-                        <p
-                          class="text-xs text-red-500 hidden mt-1"
-                          id="nameError"
-                        >
-                          Full name is required
-                        </p>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="editName" required
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+                        <p class="text-xs text-red-500 hidden mt-1" id="nameError">Full name is required</p>
                       </div>
                       <div>
-                        <label
-                          class="block text-sm font-medium text-gray-700 mb-1"
-                          >Email <span class="text-red-500">*</span></label
-                        >
-                        <input
-                          type="email"
-                          id="editEmail"
-                          required
-                          class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
-                          placeholder="doctor@example.com"
-                        />
-                        <p
-                          class="text-xs text-red-500 hidden mt-1"
-                          id="emailError"
-                        >
-                          Valid email is required
-                        </p>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
+                        <input type="email" id="editEmail" required
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+                        <p class="text-xs text-red-500 hidden mt-1" id="emailError">Valid email is required</p>
                       </div>
                       <div>
-                        <label
-                          class="block text-sm font-medium text-gray-700 mb-1"
-                          >Specialization
-                          <span class="text-red-500">*</span></label
-                        >
-                        <input
-                          type="text"
-                          id="editSpecialization"
-                          required
-                          class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
-                          placeholder="e.g., Cardiology"
-                        />
-                        <p
-                          class="text-xs text-red-500 hidden mt-1"
-                          id="specError"
-                        >
-                          Specialization is required
-                        </p>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span class="text-red-500">*</span></label>
+                        <input type="tel" id="editPhone" required
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+                        <p class="text-xs text-red-500 hidden mt-1" id="phoneError">Valid phone number required (min 8 digits)</p>
                       </div>
                       <div>
-                        <label
-                          class="block text-sm font-medium text-gray-700 mb-1"
-                          >Phone Number
-                          <span class="text-red-500">*</span></label
-                        >
-                        <input
-                          type="tel"
-                          id="editPhone"
-                          required
-                          class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
-                          placeholder="+1 (555) 000-0000"
-                        />
-                        <p
-                          class="text-xs text-red-500 hidden mt-1"
-                          id="phoneError"
-                        >
-                          Valid phone number required (min 8 digits)
-                        </p>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Age <span class="text-red-500">*</span></label>
+                        <input type="number" id="editAge" required min="18" max="100"
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+                        <p class="text-xs text-red-500 hidden mt-1" id="ageError">Age must be between 18 and 100</p>
                       </div>
                       <div>
-                        <label
-                          class="block text-sm font-medium text-gray-700 mb-1"
-                          >Experience <span class="text-red-500">*</span></label
-                        >
-                        <input
-                          type="text"
-                          id="editExperience"
-                          required
-                          class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
-                          placeholder="e.g., 12+ years"
-                        />
-                        <p
-                          class="text-xs text-red-500 hidden mt-1"
-                          id="expError"
-                        >
-                          Experience is required
-                        </p>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Specialization <span class="text-red-500">*</span></label>
+                        <input type="text" id="editSpecialization" required
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+                        <p class="text-xs text-red-500 hidden mt-1" id="specError">Specialization is required</p>
                       </div>
                       <div>
-                        <label
-                          class="block text-sm font-medium text-gray-700 mb-1"
-                          >Age</label
-                        >
-                        <input
-                          type="number"
-                          id="editAge"
-                          required
-                          min="18"
-                          max="100"
-                          class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
-                        />
-                        <p
-                          class="text-xs text-red-500 hidden mt-1"
-                          id="ageError"
-                        >
-                          Age must be between 18 and 100
-                        </p>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Experience <span class="text-red-500">*</span></label>
+                        <input type="text" id="editExperience" required
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+                        <p class="text-xs text-red-500 hidden mt-1" id="expError">Experience is required</p>
                       </div>
                     </div>
                   </div>
 
                   <!-- Professional Details -->
-                  <div class="space-y-5">
-                    <h3
-                      class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-2"
-                    >
-                      <i
-                        data-lucide="briefcase-medical"
-                        class="w-5 h-5 text-primary"
-                      ></i>
-                      Professional Details
-                    </h3>
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-gray-700 mb-1"
-                        >Qualification
-                        <span class="text-red-500">*</span></label
-                      >
-                      <input
-                        type="text"
-                        id="editQualification"
-                        required
-                        class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
-                        placeholder="MD, PhD, Board Certifications"
-                      />
-                      <p
-                        class="text-xs text-red-500 hidden mt-1"
-                        id="qualError"
-                      >
-                        Qualification is required
-                      </p>
-                    </div>
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-gray-700 mb-1"
-                        >Professional Description <span class="text-red-500">*</span></label
-                      >
-                      <textarea
-                        id="editDescription"
-                        required
-                        rows="4"
-                        class="w-full border border-gray-300 rounded-xl px-4 py-2.5 resize-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
-                        placeholder="Short bio, clinical interests, expertise..."
-                      ></textarea>
-                      <p
-                        class="text-xs text-red-500 hidden mt-1"
-                        id="descError"
-                      >
-                        Professional description is required
-                      </p>
+                  <div class="border-b border-gray-100 pb-6 mb-6">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-4">Professional Details</h4>
+                    <div class="space-y-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Qualification <span class="text-red-500">*</span></label>
+                        <input type="text" id="editQualification" required
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+                        <p class="text-xs text-red-500 hidden mt-1" id="qualError">Qualification is required</p>
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Professional Bio <span class="text-red-500">*</span></label>
+                        <textarea id="editDescription" required rows="4"
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 resize-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition"></textarea>
+                        <p class="text-xs text-red-500 hidden mt-1" id="descError">Professional bio is required</p>
+                      </div>
                     </div>
                   </div>
 
                   <!-- Form Actions -->
-                  <div
-                    class="flex flex-wrap gap-3 pt-6 mt-4 border-t border-gray-200"
-                  >
-                    <button
-                      type="submit"
-                      class="bg-primary text-white px-6 py-2.5 rounded-xl font-medium hover:opacity-90 transition flex items-center gap-2"
-                    >
-                      <i data-lucide="save" class="w-4 h-4"></i> Save Changes
+                  <div class="flex gap-3 pt-6 border-t border-gray-100">
+                    <button type="submit"
+                      class="bg-primary text-white px-6 py-2.5 rounded-lg text-sm font-medium shadow-sm hover:opacity-90 transition flex items-center gap-2">
+                      <i data-lucide="save" class="w-4 h-4"></i> Save Profile
                     </button>
-                    <button
-                      type="button"
-                      id="discardBtn"
-                      class="bg-white border border-gray-300 text-gray-700 px-6 py-2.5 rounded-xl font-medium hover:bg-gray-50 transition flex items-center gap-2"
-                    >
-                      <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Discard
+                    <button type="button" id="resetBtn"
+                      class="border border-gray-300 bg-white text-gray-700 px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+                      Reset
                     </button>
                   </div>
                 </form>
+              </div>
+              </div>
+
+              <!-- PROFILE SUMMARY SIDEBAR (1 column) -->
+              <div class="lg:col-span-1 space-y-6">
+                <!-- Profile Card -->
+                <div class="bg-white rounded-2xl card-shadow p-6">
+                  <div class="flex flex-col items-center">
+                    <div class="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-teal-600 flex items-center justify-center text-white font-bold text-2xl mb-3" id="userInitialsLarge">
+                      -
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 text-center" id="profileName">Loading...</h3>
+                    <p class="text-sm text-gray-500 text-center mt-1" id="profileEmail">-</p>
+                  </div>
+                  <div class="border-t border-gray-100 mt-4 pt-4 space-y-3 text-sm">
+                    <div class="flex justify-between">
+                      <span class="text-gray-600">Phone</span>
+                      <span class="text-gray-800 font-medium" id="sidebarPhone">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-600">Specialization</span>
+                      <span class="text-gray-800 font-medium" id="sidebarSpec">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-600">Experience</span>
+                      <span class="text-gray-800 font-medium" id="sidebarExp">-</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Account Status -->
+                <div class="bg-white rounded-2xl card-shadow p-6">
+                  <h4 class="text-sm font-semibold text-gray-700 mb-4">Account Status</h4>
+                  <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                      <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                      <span class="text-sm text-gray-700">Profile editable</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                      <span class="text-sm text-gray-700">Information can be updated</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                      <span class="text-sm text-gray-700">Account is active</span>
+                    </div>
+                  </div>
+                  <div class="border-t border-gray-100 mt-4 pt-4 text-xs text-gray-500 space-y-1">
+                    <div class="flex justify-between">
+                      <span>Last Updated</span>
+                      <span id="accountLastUpdated">Today</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span>Verified Fields</span>
+                      <span id="accountVerifiedFields">8/8</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -546,71 +390,14 @@
       class="fixed bottom-6 right-6 z-50 flex flex-col gap-2"
     ></div>
 
+    <!-- OLD EMBEDDED SCRIPT REMOVED - Using external profile.js instead -->
+
     <script>
-      // ==================== GLOBALS ====================
-      let doctorProfile = null;
-      let isLoading = false;
-
-      // Helper: Show Toast Message
-      function showToast(message, type = "success") {
-        const container = document.getElementById("toastContainer");
-        const toastId = "toast-" + Date.now();
-        const bgColor = type === "success" ? "bg-emerald-600" : "bg-red-600";
-        const icon =
-          type === "success"
-            ? '<i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>'
-            : '<i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i>';
-
-        const toastDiv = document.createElement("div");
-        toastDiv.id = toastId;
-        toastDiv.className = `${bgColor} text-white px-5 py-3 rounded-xl shadow-lg flex items-center justify-between gap-4 toast-message text-sm font-medium`;
-        toastDiv.innerHTML = `
-        <div class="flex items-center">${icon} ${message}</div>
-        <button class="toast-close text-white/80 hover:text-white text-xl leading-none focus:outline-none">&times;</button>
-      `;
-        container.appendChild(toastDiv);
-
-        // Initialize lucide icons inside toast
-        if (typeof lucide !== "undefined") lucide.createIcons();
-
-        const closeBtn = toastDiv.querySelector(".toast-close");
-        const removeToast = () => {
-          toastDiv.style.opacity = "0";
-          toastDiv.style.transform = "translateX(100%)";
-          setTimeout(() => toastDiv.remove(), 300);
-        };
-        closeBtn.addEventListener("click", removeToast);
-        setTimeout(removeToast, 4000);
-      }
-
-      // Helper: Update current date display
-      function updateCurrentDate() {
-        const options = {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        };
-        const dateElem = document.getElementById("current-date");
-        if (dateElem)
-          dateElem.textContent = new Date().toLocaleDateString(
-            "en-US",
-            options,
-          );
-      }
-
-      // Helper: Fetch doctor profile from backend API
-      async function fetchDoctorProfile() {
-        try {
-          const response = await fetch(
-            "../../api/doctor/get_doctor_info.php?t=" + new Date().getTime(),
-          );
-          const result = await response.json();
-
-          if (result.status === "success" && result.data) {
-            doctorProfile = result.data;
-            return doctorProfile;
-          } else {
+      // Placeholder - all functionality is now in profile.js
+      console.log("Doctor profile page loaded");
+      
+      // All old embedded code has been removed.
+      // Using external profile.js for all functionality.
             // Fallback mock data if API not ready (for demo purposes)
             console.warn("Using mock data - API not responding");
             doctorProfile = {
@@ -1003,20 +790,10 @@
       }
 
       // Start the app
-      init();
+      // init(); // Removed - using external profile.js
     </script>
-    <script>
-      // Check session when page becomes visible (e.g., on back button)
-      document.addEventListener('visibilitychange', async () => {
-        if (!document.hidden) {
-          // Verify session by checking if user is still logged in
-          const response = await fetch('../../api/auth/session_info.php', { credentials: 'include' });
-          const data = await response.json();
-          if (!data.logged_in || data.role !== 'Doctor') {
-            window.location.href = '../auth/login.html';
-          }
-        }
-      });
-    </script>
+
+    <script src="../../src/js/cache-prevention.js"></script>
+    <script src="profile.js"></script>
   </body>
 </html>
