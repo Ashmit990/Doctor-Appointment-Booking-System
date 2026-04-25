@@ -115,19 +115,12 @@ function fillEditForm() {
   setEditFieldValue("editName", patientProfile.full_name);
   setEditFieldValue("editEmail", patientProfile.email);
   setEditFieldValue("editPhone", patientProfile.contact_number);
-<<<<<<< Updated upstream
   setEditFieldValue("editAge", patientProfile.age);
-=======
-  // Ensure age is a string and not empty
-  const ageValue = patientProfile.age !== undefined && patientProfile.age !== null ? String(patientProfile.age) : "";
-  setEditFieldValue("editAge", ageValue);
->>>>>>> Stashed changes
   setEditFieldValue("editGender", patientProfile.gender);
   setEditFieldValue("editBlood", patientProfile.blood_group);
   setEditFieldValue("editAddress", patientProfile.address);
   setEditFieldValue("editEmergencyName", patientProfile.emergency_contact_name);
   setEditFieldValue("editEmergencyPhone", patientProfile.emergency_contact_phone);
-<<<<<<< Updated upstream
 
   // Auto-set DOB from existing profile dob or calculate from age
   const dobField = document.getElementById("editDob");
@@ -192,9 +185,6 @@ function calculateProfileCompletion() {
   const filled = fields.filter(f => f !== null && f !== undefined && String(f).trim() !== "").length;
   const percent = Math.round((filled / total) * 100);
   return { filled, total, percent };
-=======
-  console.log("Form fields filled. Age field value:", document.getElementById("editAge")?.value);
->>>>>>> Stashed changes
 }
 
 function updateViewMode() {
@@ -316,11 +306,7 @@ function validateForm() {
     setFieldError("editPhone", "phoneError", "Phone number is required", true);
     isValid = false;
   } else if (!isValidPhone(phone)) {
-<<<<<<< Updated upstream
     setFieldError("editPhone", "phoneError", "Phone number must be exactly 10 digits", true);
-=======
-    setFieldError("editPhone", "phoneError", "Valid phone number required (min 8 digits)", true);
->>>>>>> Stashed changes
     isValid = false;
   }
 
@@ -402,7 +388,8 @@ function loadMockProfile() {
     address: "123 Main Street, Springfield, IL 62701",
     emergency_contact_name: "Jane Doe",
     emergency_contact_phone: "+1 (555) 123-4568"
-  };dateViewMode();
+  };
+  updateViewMode();
   document.getElementById("current-date").textContent = new Date().toDateString();
 }
 
@@ -423,6 +410,12 @@ async function loadProfile() {
     
     if (!response.ok) {
       console.warn("Response not OK:", response.statusText);
+      try {
+        const errorResult = await response.json();
+        console.error("API Error Details:", errorResult.message || errorResult);
+      } catch (parseError) {
+        console.error("Failed to parse error response:", parseError);
+      }
       loadMockProfile();
       return;
     }
@@ -465,11 +458,13 @@ async function saveProfile() {
   }
 
   const ageVal = getEditFieldValue("editAge");
+  const dobVal = getEditFieldValue("editDob");
   const payload = {
     full_name: getEditFieldValue("editName"),
     email: getEditFieldValue("editEmail"),
     contact_number: getEditFieldValue("editPhone") || null,
     age: ageVal !== "" ? parseInt(ageVal) : null,
+    dob: dobVal !== "" ? dobVal : null,
     gender: getEditFieldValue("editGender") || null,
     blood_group: getEditFieldValue("editBlood") || null,
     address: getEditFieldValue("editAddress") || null,

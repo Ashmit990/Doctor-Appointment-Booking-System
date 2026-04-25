@@ -262,17 +262,9 @@ function buildCalendarGrid(container, year, month, compact) {
     const cell = document.createElement("span");
     const hasApt = appointmentDatesInMonth.has(ds);
     const isToday = ds === todayStr;
-<<<<<<< Updated upstream
 
-    if (compact) {
-      cell.className = "mini-cal-cell";
-      if (isToday) cell.classList.add("cal-today");
-      if (ds === miniSelectedDate) cell.classList.add("cal-selected");
-    } else {
-      cell.className = "full-cal-cell calendar-day";
-      if (isToday) cell.classList.add("cal-today");
-      else cell.classList.add("text-slate-600");
-=======
+
+
     const isPast = ds < todayStr;
     
     cell.className = compact
@@ -288,7 +280,7 @@ function buildCalendarGrid(container, year, month, compact) {
       cell.style.color = "#d1d5db";
     } else {
       cell.classList.add("text-slate-600");
->>>>>>> Stashed changes
+
     }
 
     cell.textContent = String(d);
