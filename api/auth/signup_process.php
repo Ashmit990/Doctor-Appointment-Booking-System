@@ -39,12 +39,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $conn->begin_transaction();
         try {
             $stmt = $conn->prepare("INSERT INTO users (user_id, full_name, email, password_hash, role) VALUES (?, ?, ?, ?, 'Patient')");
+            if (!$stmt) {
+                throw new Exception("Prepare failed: " . $conn->error);
+            }
             $stmt->bind_param("ssss", $user_id, $full_name, $email, $password);
-            $stmt->execute();
+            if (!$stmt->execute()) {
+                throw new Exception("Execute failed: " . $stmt->error);
+            }
+            $stmt->close();
 
-            $stmt = $conn->prepare("INSERT INTO patient_profiles (user_id, dob, contact_number) VALUES (?, ?, ?)");
-            $stmt->bind_param("sss", $user_id, $dob, $phone);
-            $stmt->execute();
+            // Support both old/new schemas by inserting only columns that exist.
+            $cols = [];
+            $colRes = $conn->query("SHOW COLUMNS FROM patient_profiles");
+            if ($colRes) {
+                while ($row = $colRes->fetch_assoc()) {
+                    $cols[$row['Field']] = true;
+                }
+            }
+
+            $profileColumns = ['user_id'];
+            $profileValues = [$user_id];
+            $types = 's';
+
+            if (isset($cols['contact_number'])) {
+                $profileColumns[] = 'contact_number';
+                $profileValues[] = $phone;
+                $types .= 's';
+            }
+
+            if (isset($cols['age'])) {
+                $profileColumns[] = 'age';
+                $profileValues[] = $age;
+                $types .= 'i';
+            }
+
+            if (isset($cols['dob'])) {
+                $profileColumns[] = 'dob';
+                $profileValues[] = $dob;
+                $types .= 's';
+            }
+
+            $placeholders = implode(', ', array_fill(0, count($profileColumns), '?'));
+            $sql = "INSERT INTO patient_profiles (" . implode(', ', $profileColumns) . ") VALUES (" . $placeholders . ")";
+            $stmt = $conn->prepare($sql);
+            if (!$stmt) {
+                throw new Exception("Prepare failed: " . $conn->error);
+            }
+            $stmt->bind_param($types, ...$profileValues);
+            if (!$stmt->execute()) {
+                throw new Exception("Execute failed: " . $stmt->error);
+            }
+            $stmt->close();
             
             $conn->commit();
             echo json_encode(["status" => "success", "message" => "Patient registration successful!", "redirect" => "login.html"]);

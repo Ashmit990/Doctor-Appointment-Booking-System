@@ -177,7 +177,7 @@ bookingForm.addEventListener("submit", async (e) => {
     if (profileJson.status === "success" && profileJson.data) {
       const p = profileJson.data;
       const fields = [
-        p.full_name, p.email, p.contact_number, p.dob,
+        p.full_name, p.email, p.contact_number,
         p.age, p.gender, p.blood_group, p.address,
         p.emergency_contact_name, p.emergency_contact_phone
       ];

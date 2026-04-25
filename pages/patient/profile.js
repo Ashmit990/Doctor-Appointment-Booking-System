@@ -169,11 +169,11 @@ function fillEditForm() {
 }
 
 function calculateProfileCompletion() {
+  // Keep completion aligned with required fields shown in the profile form.
   const fields = [
     patientProfile.full_name,
     patientProfile.email,
     patientProfile.contact_number,
-    patientProfile.dob,
     patientProfile.age,
     patientProfile.gender,
     patientProfile.blood_group,

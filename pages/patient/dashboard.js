@@ -273,7 +273,7 @@ async function openBookingModal() {
     if (j.status === "success" && j.data) {
       const d = j.data;
       const fields = [
-        d.full_name, d.email, d.contact_number, d.dob,
+        d.full_name, d.email, d.contact_number,
         d.age, d.gender, d.blood_group, d.address,
         d.emergency_contact_name, d.emergency_contact_phone
       ];
