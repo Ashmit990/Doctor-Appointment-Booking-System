@@ -114,13 +114,8 @@ try {
     }
     $stmt->close();
 
-    // Update doctor_profiles table (specialization, age and store extra data in bio)
-    $bio_data = json_encode([
-        'phone' => $phone,
-        'experience' => $experience,
-        'qualification' => $qualification,
-        'description' => $description
-    ]);
+    // Update doctor_profiles table with individual columns
+    $bio_data = $description; // Store just the description in bio field
 
     // Check if doctor profile exists
     $check_stmt = $conn->prepare("SELECT user_id FROM doctor_profiles WHERE user_id = ?");
@@ -131,25 +126,27 @@ try {
     $check_stmt->close();
 
     if ($exists) {
-        // Update existing profile
-        $update_stmt = $conn->prepare("UPDATE doctor_profiles SET specialization = ?, age = ?, bio = ? WHERE user_id = ?");
+        // Update existing profile with individual columns
+        $update_stmt = $conn->prepare("UPDATE doctor_profiles SET specialization = ?, contact_number = ?, experience_years = ?, qualifications = ?, age = ?, bio = ? WHERE user_id = ?");
         if (!$update_stmt) {
             throw new Exception("Prepare failed: " . $conn->error);
         }
         
-        $update_stmt->bind_param("siss", $specialization, $age, $bio_data, $doctor_id);
+        $experience_years = (int)$experience; // Convert experience to years
+        $update_stmt->bind_param("ssissss", $specialization, $phone, $experience_years, $qualification, $age, $bio_data, $doctor_id);
         if (!$update_stmt->execute()) {
             throw new Exception("Execute failed: " . $update_stmt->error);
         }
         $update_stmt->close();
     } else {
-        // Insert new profile
-        $insert_stmt = $conn->prepare("INSERT INTO doctor_profiles (user_id, specialization, age, consultation_fee, bio) VALUES (?, ?, ?, 500.00, ?)");
+        // Insert new profile with individual columns
+        $insert_stmt = $conn->prepare("INSERT INTO doctor_profiles (user_id, specialization, contact_number, experience_years, qualifications, age, consultation_fee, bio) VALUES (?, ?, ?, ?, ?, ?, 500.00, ?)");
         if (!$insert_stmt) {
             throw new Exception("Prepare failed: " . $conn->error);
         }
         
-        $insert_stmt->bind_param("ssis", $doctor_id, $specialization, $age, $bio_data);
+        $experience_years = (int)$experience; // Convert experience to years
+        $insert_stmt->bind_param("ssissss", $doctor_id, $specialization, $phone, $experience_years, $qualification, $age, $bio_data);
         if (!$insert_stmt->execute()) {
             throw new Exception("Execute failed: " . $insert_stmt->error);
         }

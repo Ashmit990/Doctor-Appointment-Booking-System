@@ -116,6 +116,7 @@ function updateViewMode() {
   if (initialElem) initialElem.textContent = initials || "D";
   
   // Update view mode content
+  document.getElementById("viewMedicalId").textContent = doctorProfile.user_id || "-";
   document.getElementById("viewName").textContent = doctorProfile.full_name || "-";
   document.getElementById("viewEmail").textContent = doctorProfile.email || "-";
   document.getElementById("viewPhone").textContent = doctorProfile.phone || "-";
@@ -306,17 +307,38 @@ async function loadProfile() {
     }
 
     const profileData = result.data;
-    const bio = typeof profileData.bio === 'string' ? JSON.parse(profileData.bio) : (profileData.bio || {});
+    
+    // Handle both old JSON format and new individual columns format
+    let phoneValue = profileData.contact_number || "";
+    let experienceValue = profileData.experience_years || "";
+    let qualificationValue = profileData.qualifications || "";
+    let descriptionValue = profileData.bio || "";
+    let specializationValue = profileData.specialization || "";
+    
+    // Fallback for old JSON format in bio field (backwards compatibility)
+    if (!phoneValue && profileData.bio && typeof profileData.bio === 'string' && profileData.bio.startsWith('{')) {
+      try {
+        const bioData = JSON.parse(profileData.bio);
+        phoneValue = bioData.phone || phoneValue;
+        experienceValue = bioData.experience || experienceValue;
+        qualificationValue = bioData.qualification || qualificationValue;
+        descriptionValue = bioData.description || descriptionValue;
+        specializationValue = bioData.specialization || specializationValue;
+      } catch (e) {
+        console.log("Could not parse old bio format, using individual columns");
+      }
+    }
     
     doctorProfile = {
+      user_id: profileData.user_id || "",
       full_name: profileData.full_name || "",
       email: profileData.email || "",
-      phone: bio.phone || "",
+      phone: phoneValue,
       age: profileData.age || "",
-      specialization: bio.specialization || "",
-      experience: bio.experience || "",
-      qualification: bio.qualification || "",
-      description: bio.description || ""
+      specialization: specializationValue,
+      experience: experienceValue,
+      qualification: qualificationValue,
+      description: descriptionValue
     };
 
     updateViewMode();

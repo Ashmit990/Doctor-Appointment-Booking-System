@@ -33,6 +33,8 @@ try {
             a.app_time as appointment_time,
             a.room_num as room_number,
             a.reason_for_visit,
+            a.doctor_comments,
+            a.prescribed_medicines,
             a.doctor_notes,
             a.prescriptions,
             a.rating,

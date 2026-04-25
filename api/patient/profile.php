@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
 require_once __DIR__ . '/bootstrap.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -8,7 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         SELECT
             u.full_name,
             u.email,
-            pp.dob,
             pp.age,
             pp.blood_group,
             pp.contact_number,
@@ -54,10 +56,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'PUT' && $_SERVER['REQUEST_METHOD'] !== 'POST
 
 $input = json_decode(file_get_contents('php://input'), true) ?: [];
 
+// Log incoming request for debugging
+error_log("Patient profile PUT request: " . json_encode($input));
+
 // Trim and sanitize inputs
 $full_name = trim($input['full_name'] ?? '');
 $email = trim($input['email'] ?? '');
-$dob = trim($input['dob'] ?? '') ?: null;
 $age = isset($input['age']) ? (int)$input['age'] : null;
 $blood_group = trim($input['blood_group'] ?? '') ?: null;
 $contact_number = trim($input['contact_number'] ?? '') ?: null;
@@ -78,9 +82,6 @@ if (empty($email)) {
 }
 if (empty($contact_number)) {
     $errors[] = 'Phone number is required';
-}
-if (empty($dob)) {
-    $errors[] = 'Date of birth is required';
 }
 if ($age === null) {
     $errors[] = 'Age is required';
@@ -167,11 +168,10 @@ try {
 
     $pp = $conn->prepare("
         INSERT INTO patient_profiles (
-            user_id, dob, age, blood_group, contact_number, address,
+            user_id, age, blood_group, contact_number, address,
             gender, emergency_contact_name, emergency_contact_phone
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
-            dob = VALUES(dob),
             age = VALUES(age),
             blood_group = VALUES(blood_group),
             contact_number = VALUES(contact_number),
@@ -184,9 +184,8 @@ try {
         throw new Exception("Prepare failed: " . $conn->error);
     }
     $pp->bind_param(
-        "ssissssss",
+        "ssisssss",
         $patient_id,
-        $dob,
         $age,
         $blood_group,
         $contact_number,

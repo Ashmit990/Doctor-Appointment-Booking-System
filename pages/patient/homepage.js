@@ -262,6 +262,7 @@ function buildCalendarGrid(container, year, month, compact) {
     const cell = document.createElement("span");
     const hasApt = appointmentDatesInMonth.has(ds);
     const isToday = ds === todayStr;
+<<<<<<< Updated upstream
 
     if (compact) {
       cell.className = "mini-cal-cell";
@@ -271,6 +272,23 @@ function buildCalendarGrid(container, year, month, compact) {
       cell.className = "full-cal-cell calendar-day";
       if (isToday) cell.classList.add("cal-today");
       else cell.classList.add("text-slate-600");
+=======
+    const isPast = ds < todayStr;
+    
+    cell.className = compact
+      ? "text-center text-xs cursor-pointer relative py-1 rounded-lg hover:bg-slate-100"
+      : "calendar-day text-center text-sm cursor-pointer relative py-2 rounded-xl hover:bg-slate-100";
+
+    // Apply styling based on date
+    if (isToday) {
+      cell.classList.add("font-semibold");
+      cell.style.backgroundColor = "#007E85";
+      cell.style.color = "white";
+    } else if (isPast) {
+      cell.style.color = "#d1d5db";
+    } else {
+      cell.classList.add("text-slate-600");
+>>>>>>> Stashed changes
     }
 
     cell.textContent = String(d);

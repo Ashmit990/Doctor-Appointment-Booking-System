@@ -55,8 +55,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else if ($role === 'Doctor') {
         try {
             // Inserting into the staging table. Password remains plain text as requested.
+            // Store phone, bio in bio column for now - will be moved to individual columns upon admin approval
+            $bio_data = json_encode([
+                'phone' => $phone,
+                'age' => $age,
+                'bio' => $bio
+            ]);
+            
             $stmt = $conn->prepare("INSERT INTO doctor_approvals (full_name, email, password_hash, specialization, consultation_fee, bio, status) VALUES (?, ?, ?, ?, ?, ?, 'Pending')");
-            $stmt->bind_param("ssssds", $full_name, $email, $password, $specialization, $consultation_fee, $bio);
+            $stmt->bind_param("ssssds", $full_name, $email, $password, $specialization, $consultation_fee, $bio_data);
             $stmt->execute();
             
             echo json_encode(["status" => "success", "message" => "Application submitted! Please wait for Admin approval.", "redirect" => "login.html"]);

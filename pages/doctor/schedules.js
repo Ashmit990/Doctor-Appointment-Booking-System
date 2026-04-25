@@ -39,15 +39,19 @@ async function fetchAppointmentDates() {
   return [];
 }
 
-async function fetchAvailabilityDates() {
-  const response = await fetch("../../api/doctor/availability.php", {
+async function fetchAppointmentDatesForSchedule() {
+  const response = await fetch("../../api/doctor/appointments.php", {
     credentials: 'include'
   });
   const result = await response.json();
 
   if (result.status === "success" && Array.isArray(result.data)) {
-    // Return full dates in YYYY-MM-DD format for accurate filtering
-    return result.data.map((avail) => avail.available_date);
+    // Extract unique dates from appointments
+    const dates = new Set();
+    result.data.forEach((apt) => {
+      if (apt.app_date) dates.add(apt.app_date);
+    });
+    return Array.from(dates);
   }
   return [];
 }
@@ -65,8 +69,8 @@ function renderScheduleCalendar() {
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  // Fetch availability dates for this month
-  fetchAvailabilityDates().then((availabilityDates) => {
+  // Fetch appointment dates for this month
+  fetchAppointmentDatesForSchedule().then((appointmentDates) => {
     const daysContainer = document.getElementById("schedule-calendar-days");
     daysContainer.innerHTML = "";
     // Create a Set of dates for this month/year only
@@ -74,7 +78,7 @@ function renderScheduleCalendar() {
     const targetMonth = month + 1; // Convert from 0-11 to 1-12
 
     const datesThisMonth = new Set();
-    availabilityDates.forEach((dateStr) => {
+    appointmentDates.forEach((dateStr) => {
       const parts = dateStr.trim().split("-");
       if (parts.length === 3) {
         const dateYear = parseInt(parts[0]);
@@ -396,14 +400,12 @@ async function toggleSlot(startTime, endTime, availId, isPast) {
 
 function toggleFollowUpVisibility() {
   const st = document.getElementById("modal-edit-status").value;
-  const fSection = document.getElementById("followup-section");
   const bSection = document.getElementById("complete-consultation-btn");
+  // Keep followup section always visible - don't hide it based on status
   if (st === "Completed") {
-    fSection.classList.add("hidden");
     bSection.innerHTML =
       '<i data-lucide="check-circle" class="w-5 h-5"></i> Complete Consultation';
   } else {
-    fSection.classList.remove("hidden");
     bSection.innerHTML =
       '<i data-lucide="save" class="w-5 h-5"></i> Save Changes';
   }
@@ -452,14 +454,13 @@ function openAppointmentModal(aptId) {
     statusSelectWrapper.classList.add("hidden");
     notesInput.classList.add("hidden");
     rxInput.classList.add("hidden");
-    followupInputs.classList.add("hidden");
     completeBtn.classList.add("hidden");
 
     notesReadonly.classList.remove("hidden");
     rxReadonly.classList.remove("hidden");
 
-    notesReadonly.textContent = apt.doctor_notes || "No notes provided.";
-    rxReadonly.textContent = apt.prescriptions || "No prescriptions provided.";
+    notesReadonly.textContent = apt.doctor_comments || apt.doctor_notes || "No notes provided.";
+    rxReadonly.textContent = apt.prescribed_medicines || apt.prescriptions || "No prescriptions provided.";
 
     if (apt.feedback && apt.feedback.trim() !== "") {
       feedbackSec.classList.remove("hidden");

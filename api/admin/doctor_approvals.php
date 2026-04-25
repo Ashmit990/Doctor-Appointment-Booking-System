@@ -40,12 +40,32 @@ elseif ($method === 'POST') {
             $stmt->bind_param("ssss", $user_id, $data['full_name'], $data['email'], $data['password_hash']);
             $stmt->execute();
 
-            // 4. Move to Doctor Profiles
-            $stmt = $conn->prepare("INSERT INTO doctor_profiles (user_id, specialization, consultation_fee, bio) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("ssds", $user_id, $data['specialization'], $data['consultation_fee'], $data['bio']);
+            // 4. Extract data from bio JSON if it contains structured data
+            $contact_number = '';
+            $experience_years = null;
+            $qualifications = '';
+            $bio = $data['bio'];
+            $age = null;
+
+            if (strpos($data['bio'], '{') === 0) {
+                $bio_data = json_decode($data['bio'], true);
+                if (is_array($bio_data)) {
+                    $contact_number = $bio_data['phone'] ?? '';
+                    if (!empty($bio_data['experience'])) {
+                        $experience_years = (int)$bio_data['experience'];
+                    }
+                    $qualifications = $bio_data['qualification'] ?? '';
+                    $age = $bio_data['age'] ?? null;
+                    $bio = $bio_data['description'] ?? $bio_data['bio'] ?? '';
+                }
+            }
+
+            // 5. Move to Doctor Profiles with individual columns
+            $stmt = $conn->prepare("INSERT INTO doctor_profiles (user_id, specialization, contact_number, experience_years, qualifications, consultation_fee, bio, age) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssisssi", $user_id, $data['specialization'], $contact_number, $experience_years, $qualifications, $data['consultation_fee'], $bio, $age);
             $stmt->execute();
 
-            // 5. Update Staging Status
+            // 6. Update Staging Status
             $stmt = $conn->prepare("UPDATE doctor_approvals SET status = 'Accepted', reviewed_at = NOW() WHERE approval_id = ?");
             $stmt->bind_param("i", $approval_id);
             $stmt->execute();

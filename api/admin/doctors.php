@@ -33,7 +33,11 @@ try {
                     u.email,
                     dp.specialization,
                     dp.consultation_fee,
+                    dp.contact_number,
+                    dp.experience_years,
+                    dp.qualifications,
                     dp.bio,
+                    dp.age,
                     (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id) as total_appointments,
                     (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id AND status = 'Completed') as completed_appointments
                 FROM users u
@@ -65,7 +69,11 @@ try {
                     u.created_at,
                     dp.specialization,
                     dp.consultation_fee,
+                    dp.contact_number,
+                    dp.experience_years,
+                    dp.qualifications,
                     dp.bio,
+                    dp.age,
                     (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id) as total_appointments,
                     (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id AND status = 'Completed') as completed_appointments
                 FROM users u
@@ -103,7 +111,11 @@ try {
         $email = $input['email'] ?? null;
         $specialization = $input['specialization'] ?? null;
         $consultation_fee = $input['consultation_fee'] ?? null;
+        $contact_number = $input['contact_number'] ?? null;
+        $experience_years = $input['experience_years'] ?? null;
+        $qualifications = $input['qualifications'] ?? null;
         $bio = $input['bio'] ?? null;
+        $age = $input['age'] ?? null;
 
         if (!$doctor_id) {
             throw new Exception('Doctor ID required');
@@ -141,16 +153,20 @@ try {
             $n->close();
         }
 
-        // Update doctor profile
-        if ($specialization !== null || $consultation_fee !== null || $bio !== null) {
+        // Update doctor profile with individual columns
+        if ($specialization !== null || $consultation_fee !== null || $contact_number !== null || $experience_years !== null || $qualifications !== null || $bio !== null || $age !== null) {
             $stmt = $conn->prepare("
                 UPDATE doctor_profiles 
                 SET specialization = COALESCE(?, specialization),
                     consultation_fee = COALESCE(?, consultation_fee),
-                    bio = COALESCE(?, bio)
+                    contact_number = COALESCE(?, contact_number),
+                    experience_years = COALESCE(?, experience_years),
+                    qualifications = COALESCE(?, qualifications),
+                    bio = COALESCE(?, bio),
+                    age = COALESCE(?, age)
                 WHERE user_id = ?
             ");
-            $stmt->bind_param("sdss", $specialization, $consultation_fee, $bio, $doctor_id);
+            $stmt->bind_param("sdsissssi", $specialization, $consultation_fee, $contact_number, $experience_years, $qualifications, $bio, $age, $doctor_id);
             
             if (!$stmt->execute()) {
                 throw new Exception($stmt->error);

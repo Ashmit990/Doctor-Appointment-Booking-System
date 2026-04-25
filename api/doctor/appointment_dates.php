@@ -11,12 +11,12 @@ if (!isset($_SESSION['user_id'])) {
 
 $doctor_id = $_SESSION['user_id'];
 
-// Get all availability dates for calendar highlighting (from doctor_availability table)
+// Get all appointment dates for calendar highlighting (upcoming and completed)
 $stmt = $conn->prepare("
-    SELECT DISTINCT available_date 
-    FROM doctor_availability 
-    WHERE doctor_id = ? AND status IN ('Available', 'Booked')
-    ORDER BY available_date ASC
+    SELECT DISTINCT app_date 
+    FROM appointments 
+    WHERE doctor_id = ? AND status IN ('Upcoming', 'Completed')
+    ORDER BY app_date ASC
 ");
 
 $stmt->bind_param("s", $doctor_id);
@@ -26,7 +26,7 @@ $result = $stmt->get_result();
 $dates = [];
 while ($row = $result->fetch_assoc()) {
     // Return full date in YYYY-MM-DD format for accurate month/year matching
-    $dates[] = $row['available_date'];
+    $dates[] = $row['app_date'];
 }
 
 $stmt->close();

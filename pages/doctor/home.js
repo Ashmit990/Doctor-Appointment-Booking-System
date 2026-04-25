@@ -191,10 +191,10 @@ function renderCalendar() {
         const targetYear = year;
         const targetMonth = month + 1;
         
-        const datesThisMonth = new Set();
+        const appointmentDatesThisMonth = new Set();
         const completedDatesThisMonth = new Set();
         
-        // Process availability dates (red dots)
+        // Process appointment dates (red dots for both upcoming and completed)
         appointmentDates.forEach(dateStr => {
             const parts = dateStr.trim().split('-');
             if (parts.length === 3) {
@@ -203,7 +203,7 @@ function renderCalendar() {
                 const dateDay = parseInt(parts[2]);
                 
                 if (dateYear === targetYear && dateMonth === targetMonth) {
-                    datesThisMonth.add(dateDay);
+                    appointmentDatesThisMonth.add(dateDay);
                 }
             }
         });
@@ -232,23 +232,33 @@ function renderCalendar() {
             prevMonthDayCounter++;
         }
         
+        // Get today's date for comparison
+        const todayObj = new Date();
+        const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
+        
         // Current month's days
         for (let i = 1; i <= daysInMonth; i++) {
             const dayDiv = document.createElement('div');
             dayDiv.className = 'calendar-day text-center p-2 rounded-lg cursor-pointer hover:bg-blue-100 transition text-gray-900 font-medium';
             dayDiv.textContent = i;
             
-            // Mark completed appointments with checkmark
-            if (completedDatesThisMonth.has(i)) {
-                dayDiv.classList.add('has-completed');
-            }
-            // Mark availability dates with red dot
-            else if (datesThisMonth.has(i)) {
+            // Mark dates with any appointments (upcoming or completed) with red dot
+            if (appointmentDatesThisMonth.has(i) || completedDatesThisMonth.has(i)) {
                 dayDiv.classList.add('has-appointment');
             }
             
             // Add click handler
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+            
+            // Style past dates in gray
+            if (dateStr < todayStr) {
+                dayDiv.style.color = '#d1d5db';
+            } else if (dateStr === todayStr) {
+                // Highlight today's date
+                dayDiv.style.backgroundColor = '#007E85';
+                dayDiv.style.color = 'white';
+            }
+            
             dayDiv.onclick = () => loadAppointmentsForDate(dateStr);
             
             daysContainer.appendChild(dayDiv);

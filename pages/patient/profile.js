@@ -111,15 +111,23 @@ function toggleEditMode(isEdit) {
 }
 
 function fillEditForm() {
+  console.log("Filling edit form with profile data:", patientProfile);
   setEditFieldValue("editName", patientProfile.full_name);
   setEditFieldValue("editEmail", patientProfile.email);
   setEditFieldValue("editPhone", patientProfile.contact_number);
+<<<<<<< Updated upstream
   setEditFieldValue("editAge", patientProfile.age);
+=======
+  // Ensure age is a string and not empty
+  const ageValue = patientProfile.age !== undefined && patientProfile.age !== null ? String(patientProfile.age) : "";
+  setEditFieldValue("editAge", ageValue);
+>>>>>>> Stashed changes
   setEditFieldValue("editGender", patientProfile.gender);
   setEditFieldValue("editBlood", patientProfile.blood_group);
   setEditFieldValue("editAddress", patientProfile.address);
   setEditFieldValue("editEmergencyName", patientProfile.emergency_contact_name);
   setEditFieldValue("editEmergencyPhone", patientProfile.emergency_contact_phone);
+<<<<<<< Updated upstream
 
   // Auto-set DOB from existing profile dob or calculate from age
   const dobField = document.getElementById("editDob");
@@ -184,6 +192,9 @@ function calculateProfileCompletion() {
   const filled = fields.filter(f => f !== null && f !== undefined && String(f).trim() !== "").length;
   const percent = Math.round((filled / total) * 100);
   return { filled, total, percent };
+=======
+  console.log("Form fields filled. Age field value:", document.getElementById("editAge")?.value);
+>>>>>>> Stashed changes
 }
 
 function updateViewMode() {
@@ -208,7 +219,6 @@ function updateViewMode() {
   document.getElementById("viewName").textContent = patientProfile.full_name || "-";
   document.getElementById("viewEmail").textContent = patientProfile.email || "-";
   document.getElementById("viewPhone").textContent = patientProfile.contact_number || "-";
-  document.getElementById("viewDob").textContent = patientProfile.dob || "-";
   document.getElementById("viewAge").textContent = patientProfile.age || "-";
   document.getElementById("viewGender").textContent = patientProfile.gender || "-";
   document.getElementById("viewBlood").textContent = patientProfile.blood_group || "-";
@@ -306,20 +316,35 @@ function validateForm() {
     setFieldError("editPhone", "phoneError", "Phone number is required", true);
     isValid = false;
   } else if (!isValidPhone(phone)) {
+<<<<<<< Updated upstream
     setFieldError("editPhone", "phoneError", "Phone number must be exactly 10 digits", true);
+=======
+    setFieldError("editPhone", "phoneError", "Valid phone number required (min 8 digits)", true);
+>>>>>>> Stashed changes
     isValid = false;
   }
 
   // Validate Age
   const age = getEditFieldValue("editAge");
-  if (!age) {
+  console.log("Age validation - age value:", age, "type:", typeof age);
+  if (!age || age.trim() === "") {
     setFieldError("editAge", "ageError", "Age is required", true);
     isValid = false;
   } else {
-    const ageNum = parseInt(age);
-    if (ageNum < 0 || ageNum > 150) {
+    const ageNum = parseInt(age, 10);
+    console.log("Age parsed to number:", ageNum);
+    if (isNaN(ageNum) || ageNum < 0 || ageNum > 150) {
       setFieldError("editAge", "ageError", "Age must be between 0 and 150", true);
       isValid = false;
+    } else {
+      // Clear age error if validation passes
+      const ageErrorEl = document.getElementById("ageError");
+      if (ageErrorEl) ageErrorEl.classList.add("hidden");
+      const ageInputEl = document.getElementById("editAge");
+      if (ageInputEl) {
+        ageInputEl.classList.remove("border-red-500", "ring-red-100");
+        ageInputEl.classList.add("border-gray-300");
+      }
     }
   }
 
@@ -377,8 +402,7 @@ function loadMockProfile() {
     address: "123 Main Street, Springfield, IL 62701",
     emergency_contact_name: "Jane Doe",
     emergency_contact_phone: "+1 (555) 123-4568"
-  };
-  updateViewMode();
+  };dateViewMode();
   document.getElementById("current-date").textContent = new Date().toDateString();
 }
 
@@ -419,6 +443,12 @@ async function loadProfile() {
     }
     
     patientProfile = result.data;
+    console.log("Profile data loaded:", patientProfile);
+    
+    // Ensure age is properly set
+    if (!patientProfile.age || patientProfile.age === null) {
+      console.warn("Age is not set in profile, checking if we need to update it");
+    }
     updateViewMode();
     document.getElementById("current-date").textContent = new Date().toDateString();
     console.log("Profile loaded successfully:", patientProfile);
@@ -434,12 +464,12 @@ async function saveProfile() {
     return;
   }
 
+  const ageVal = getEditFieldValue("editAge");
   const payload = {
     full_name: getEditFieldValue("editName"),
     email: getEditFieldValue("editEmail"),
     contact_number: getEditFieldValue("editPhone") || null,
-    dob: getEditFieldValue("editDob") || null,
-    age: getEditFieldValue("editAge") ? parseInt(getEditFieldValue("editAge")) : null,
+    age: ageVal !== "" ? parseInt(ageVal) : null,
     gender: getEditFieldValue("editGender") || null,
     blood_group: getEditFieldValue("editBlood") || null,
     address: getEditFieldValue("editAddress") || null,
@@ -454,10 +484,25 @@ async function saveProfile() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    const result = await response.json();
+    
+    // Log response details for debugging
+    console.log("Response status:", response.status);
+    console.log("Response headers:", response.headers);
+    const responseText = await response.text();
+    console.log("Response text:", responseText);
+    
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error("Failed to parse JSON response:", parseError);
+      console.error("Response was:", responseText);
+      throw new Error(`API returned invalid JSON: ${responseText.substring(0, 100)}`);
+    }
     
     if (result.status !== "success") {
-      alert(result.message || "Save failed");
+      // Display API errors in field-specific error boxes instead of alert
+      displayApiErrors(result.message || "Save failed");
       return;
     }
 
@@ -466,7 +511,41 @@ async function saveProfile() {
     showSuccessToast();
   } catch (error) {
     console.error("Error saving profile:", error);
-    alert("Failed to save profile");
+    // Display error in a field-specific error box instead of alert
+    displayApiErrors("Failed to save profile. Please try again.");
+  }
+}
+
+function displayApiErrors(errorMessage) {
+  clearValidationErrors();
+  
+  // Parse the error message and map to appropriate fields
+  const errorMap = {
+    'full name': { inputId: 'editName', errorId: 'nameError' },
+    'email': { inputId: 'editEmail', errorId: 'emailError' },
+    'phone': { inputId: 'editPhone', errorId: 'phoneError' },
+    'age': { inputId: 'editAge', errorId: 'ageError' },
+    'gender': { inputId: 'editGender', errorId: 'genderError' },
+    'blood': { inputId: 'editBlood', errorId: 'bloodError' },
+    'address': { inputId: 'editAddress', errorId: 'addressError' },
+    'emergency contact name': { inputId: 'editEmergencyName', errorId: 'emergencyNameError' },
+    'emergency contact phone': { inputId: 'editEmergencyPhone', errorId: 'emergencyPhoneError' }
+  };
+  
+  let errorShown = false;
+  
+  // Check if specific field error matches
+  for (const [keyword, fields] of Object.entries(errorMap)) {
+    if (errorMessage.toLowerCase().includes(keyword.toLowerCase())) {
+      setFieldError(fields.inputId, fields.errorId, errorMessage, true);
+      errorShown = true;
+      break;
+    }
+  }
+  
+  // If no specific field matched, show error in the first field (name)
+  if (!errorShown) {
+    setFieldError('editName', 'nameError', errorMessage, true);
   }
 }
 

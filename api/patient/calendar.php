@@ -16,6 +16,7 @@ $stmt = $conn->prepare("
     WHERE patient_id = ?
       AND YEAR(app_date) = ?
       AND MONTH(app_date) = ?
+      AND status IN ('Upcoming', 'Completed')
 ");
 $stmt->bind_param("sii", $patient_id, $year, $month);
 $stmt->execute();

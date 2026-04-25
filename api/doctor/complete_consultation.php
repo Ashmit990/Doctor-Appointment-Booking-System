@@ -44,7 +44,7 @@ try {
     $patient_id = $apt['patient_id'];
 
     // Update appointment
-    $up = $conn->prepare("UPDATE appointments SET status = ?, doctor_notes = ?, prescriptions = ? WHERE appointment_id = ?");
+    $up = $conn->prepare("UPDATE appointments SET status = ?, doctor_comments = ?, prescribed_medicines = ? WHERE appointment_id = ?");
     $up->bind_param("sssi", $new_status, $doctor_notes, $prescriptions, $apt_id);
     if (!$up->execute()) {
         throw new Exception('Failed to update consultation notes');
