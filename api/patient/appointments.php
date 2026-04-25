@@ -29,6 +29,7 @@ $sql = "
         a.prescribed_medicines,
         a.status,
         a.rating,
+        a.feedback,
         a.created_at,
         u.full_name AS doctor_name,
         dp.specialization,

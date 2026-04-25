@@ -206,21 +206,25 @@ function renderAppointments(rows) {
           </div>
         </div>
 
-        <div class="flex flex-wrap gap-1.5 lg:flex-col">
-          <button type="button" data-view="${item.appointment_id}" class="view-btn px-3 py-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-medium transition whitespace-nowrap">
+        <div class="flex flex-wrap gap-1.5 lg:flex-col w-28 shrink-0">
+          <button type="button" data-view="${item.appointment_id}" class="view-btn w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-medium transition whitespace-nowrap text-center">
             Details
           </button>
           ${
             showReschedule
-              ? `<button type="button" data-reschedule="${item.appointment_id}" class="reschedule-btn px-3 py-2 rounded-lg bg-teal-600 text-white hover:bg-teal-700 text-xs font-medium shadow-sm transition whitespace-nowrap">
+              ? `<button type="button" data-reschedule="${item.appointment_id}" class="reschedule-btn w-full px-3 py-2 rounded-lg bg-teal-600 text-white hover:bg-teal-700 text-xs font-medium shadow-sm transition whitespace-nowrap text-center">
             Reschedule
           </button>`
               : ""
           }
           ${
-            item.status_key === "completed" && parseInt(item.rating || 0) === 0
-              ? `<button type="button" data-feedback="${item.appointment_id}" class="feedback-btn px-3 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 text-xs font-medium shadow-sm transition flex items-center gap-1 whitespace-nowrap">
-            <i data-lucide="message-square" class="w-3 h-3"></i> Feedback
+            item.status_key === "completed" && parseInt(item.rating || 0) > 0
+              ? `<button type="button" data-view-feedback="${item.appointment_id}" class="view-feedback-btn w-full px-3 py-2 rounded-lg border border-yellow-300 bg-yellow-400 text-white hover:bg-yellow-500 text-xs font-medium transition whitespace-nowrap text-center">
+            View Feedback
+          </button>`
+              : item.status_key === "completed" && parseInt(item.rating || 0) === 0
+              ? `<button type="button" data-feedback="${item.appointment_id}" class="feedback-btn w-full px-3 py-2 rounded-lg bg-yellow-400 text-white hover:bg-yellow-500 text-xs font-medium shadow-sm transition whitespace-nowrap text-center">
+            Feedback
           </button>`
               : ""
           }
@@ -249,6 +253,15 @@ function renderAppointments(rows) {
       if (apt) openFeedbackModal(apt);
     });
   });
+
+  document.querySelectorAll(".view-feedback-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      const apt = cachedAppointments.find(a => a.appointment_id == button.dataset.viewFeedback);
+      if (apt) openViewFeedbackModal(apt);
+    });
+  });
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 async function reload() {
@@ -504,68 +517,150 @@ dashboardMarkAllReadBtn?.addEventListener("click", async () => {
 });
 
 // --- FEEDBACK MODAL LOGIC ---
+
+let _fbCurrentApt = null;   // currently open appointment object
+let _fbSelectedRating = 5;  // currently selected star count
+
+function renderStarPicker(selected) {
+  const picker = document.getElementById('fb-star-picker');
+  if (!picker) return;
+  picker.innerHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.dataset.star = i;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" class="w-8 h-8 transition" fill="${i <= selected ? '#f59e0b' : 'none'}" stroke="${i <= selected ? '#f59e0b' : '#cbd5e1'}" stroke-width="1.5"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>`;
+    btn.addEventListener('click', () => {
+      _fbSelectedRating = i;
+      renderStarPicker(i);
+    });
+    btn.addEventListener('mouseover', () => renderStarPicker(i));
+    btn.addEventListener('mouseout', () => renderStarPicker(_fbSelectedRating));
+    picker.appendChild(btn);
+  }
+}
+
+function renderViewStars(rating) {
+  const el = document.getElementById('fb-view-stars');
+  if (!el) return;
+  el.innerHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    el.innerHTML += `<svg viewBox="0 0 24 24" class="w-6 h-6" fill="${i <= rating ? '#f59e0b' : 'none'}" stroke="${i <= rating ? '#f59e0b' : '#cbd5e1'}" stroke-width="1.5"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>`;
+  }
+}
+
+function showPanel(panel) {
+  document.getElementById('fbViewPanel').classList.add('hidden');
+  document.getElementById('fbWritePanel').classList.add('hidden');
+  document.getElementById(panel).classList.remove('hidden');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+/** Open to VIEW existing feedback */
+function openViewFeedbackModal(apt) {
+  _fbCurrentApt = apt;
+  document.getElementById('feedback-apt-id').value = apt.appointment_id;
+  document.getElementById('fb-view-doctor').textContent = apt.doctor_name || 'Doctor';
+  renderViewStars(parseInt(apt.rating) || 5);
+  document.getElementById('fb-view-text').textContent = apt.feedback || '(No written feedback)';
+  document.getElementById('feedbackModal').classList.remove('hidden');
+  document.getElementById('feedbackModal').classList.add('flex');
+  showPanel('fbViewPanel');
+}
+
+/** Open to WRITE new feedback */
 function openFeedbackModal(apt) {
-    document.getElementById('feedback-doc-name').textContent = apt.doctor_name || 'Dr.';
-    document.getElementById('feedback-apt-id').value = apt.appointment_id;
-    document.getElementById('feedback-rating-val').value = 5;
-    document.getElementById('feedback-text').value = '';
-    
-    document.getElementById('feedbackModal').classList.remove('hidden');
-    document.getElementById('feedbackModal').classList.add('flex');
+  _fbCurrentApt = apt;
+  _fbSelectedRating = 5;
+  document.getElementById('feedback-apt-id').value = apt.appointment_id;
+  document.getElementById('feedback-mode').value = 'new';
+  document.getElementById('fb-write-doctor').textContent = apt.doctor_name || 'Doctor';
+  document.getElementById('fb-write-title').textContent = 'Leave Feedback';
+  document.getElementById('feedback-text').value = '';
+  document.getElementById('fb-back-btn').classList.add('hidden');
+  document.getElementById('submitFeedbackBtn').textContent = 'Submit Review';
+  renderStarPicker(5);
+  document.getElementById('feedbackModal').classList.remove('hidden');
+  document.getElementById('feedbackModal').classList.add('flex');
+  showPanel('fbWritePanel');
+}
+
+/** Switch from view → edit */
+function switchToEditMode() {
+  if (!_fbCurrentApt) return;
+  _fbSelectedRating = parseInt(_fbCurrentApt.rating) || 5;
+  document.getElementById('feedback-mode').value = 'edit';
+  document.getElementById('fb-write-title').textContent = 'Edit Feedback';
+  document.getElementById('fb-write-doctor').textContent = _fbCurrentApt.doctor_name || 'Doctor';
+  document.getElementById('feedback-text').value = _fbCurrentApt.feedback || '';
+  document.getElementById('fb-back-btn').classList.remove('hidden');
+  document.getElementById('submitFeedbackBtn').textContent = 'Save Changes';
+  renderStarPicker(_fbSelectedRating);
+  showPanel('fbWritePanel');
+}
+
+/** Switch back to view */
+function switchToViewMode() {
+  showPanel('fbViewPanel');
 }
 
 function closeFeedbackModal() {
-    document.getElementById('feedbackModal').classList.add('hidden');
-    document.getElementById('feedbackModal').classList.remove('flex');
+  document.getElementById('feedbackModal').classList.add('hidden');
+  document.getElementById('feedbackModal').classList.remove('flex');
 }
 
 async function submitFeedback() {
-    const aptId = document.getElementById('feedback-apt-id').value;
-    const rating = 5; // Hardcoded to pass backend check
-    const feedback = document.getElementById('feedback-text').value;
-    
-    const btn = document.getElementById('submitFeedbackBtn');
-    btn.innerHTML = 'Submitting...';
-    btn.disabled = true;
-    
-    try {
-        const res = await fetch('../../api/patient/submit_feedback.php', {
-            method: 'POST',
-            credentials: 'include',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                appointment_id: aptId,
-                rating: rating,
-                feedback: feedback
-            })
-        });
-        const data = await res.json();
-        if (data.status === 'success') {
-            closeFeedbackModal();
-            showSuccessToast("Feedback Sent", "Thank you for your rating.");
-            reload();
-        } else {
-            alert('Error: ' + data.message);
-        }
-    } catch(e) {
-        alert('Exception: ' + e.message);
-    } finally {
-        btn.innerHTML = 'Submit Review';
-        btn.disabled = false;
+  const aptId    = document.getElementById('feedback-apt-id').value;
+  const mode     = document.getElementById('feedback-mode').value;
+  const feedback = document.getElementById('feedback-text').value.trim();
+  const rating   = _fbSelectedRating;
+
+  const btn = document.getElementById('submitFeedbackBtn');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+
+  try {
+    const isEdit = mode === 'edit';
+    const url    = isEdit
+      ? '../../api/patient/update_feedback.php'
+      : '../../api/patient/submit_feedback.php';
+
+    const res  = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ appointment_id: aptId, rating, feedback })
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+      closeFeedbackModal();
+      showSuccessToast(
+        isEdit ? 'Feedback Updated' : 'Feedback Sent',
+        isEdit ? 'Your review has been updated.' : 'Thank you for your rating.'
+      );
+      reload();
+    } else {
+      alert('Error: ' + data.message);
     }
+  } catch (e) {
+    alert('Exception: ' + e.message);
+  } finally {
+    btn.textContent = mode === 'edit' ? 'Save Changes' : 'Submit Review';
+    btn.disabled = false;
+  }
 }
 
 function checkForPendingFeedback(rows) {
-    const unrated = rows.find(a => a.status_key === "completed" && parseInt(a.rating || 0) === 0);
-    if (unrated) {
-        // Show prompt automatically for the most recent unrated one
-        const key = `prompted_feedback_${unrated.appointment_id}`;
-        if (!sessionStorage.getItem(key)) {
-            sessionStorage.setItem(key, 'true');
-            setTimeout(() => openFeedbackModal(unrated), 1000);
-        }
+  const unrated = rows.find(a => a.status_key === "completed" && parseInt(a.rating || 0) === 0);
+  if (unrated) {
+    const key = `prompted_feedback_${unrated.appointment_id}`;
+    if (!sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, 'true');
+      setTimeout(() => openFeedbackModal(unrated), 1000);
     }
+  }
 }
+
 
 (async function initDashboard() {
   const ok = await requirePatientSession();

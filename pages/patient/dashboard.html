@@ -158,31 +158,86 @@
     </div>
   </div>
 
+  <!-- ===== FEEDBACK MODAL ===== -->
   <div id="feedbackModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-    <div class="bg-white w-full max-w-sm rounded-[20px] shadow-2xl p-6 relative">
-      <button type="button" onclick="closeFeedbackModal()" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition flex items-center justify-center">
+    <div class="bg-white w-full max-w-sm rounded-[24px] shadow-2xl relative overflow-hidden">
+
+      <!-- Close btn -->
+      <button type="button" onclick="closeFeedbackModal()"
+        class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition flex items-center justify-center">
         <i data-lucide="x" class="w-4 h-4"></i>
       </button>
-      <div class="text-center mb-5">
-          <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <i data-lucide="message-square" class="w-7 h-7 text-blue-500"></i>
+
+      <!-- ── VIEW PANEL ── -->
+      <div id="fbViewPanel" class="hidden p-6">
+        <!-- Header -->
+        <div class="flex items-center gap-3 mb-5">
+          <div class="w-11 h-11 rounded-full bg-teal-50 flex items-center justify-center shrink-0">
+            <i data-lucide="message-circle" class="w-5 h-5 text-[#007E85]"></i>
           </div>
-          <h3 class="text-xl font-bold text-slate-800">Leave Feedback</h3>
-          <p class="text-xs text-slate-500 mt-1">Your experience with <span id="feedback-doc-name" class="font-semibold text-slate-700">the doctor</span></p>
+          <div>
+            <h3 class="text-base font-bold text-slate-800">My Feedback</h3>
+            <p class="text-xs text-slate-400 mt-0.5">For <span id="fb-view-doctor" class="font-semibold text-[#007E85]"></span></p>
+          </div>
+        </div>
+
+        <!-- Stars removed: text-only feedback -->
+
+        <!-- Quote card -->
+        <div class="relative bg-slate-50 border border-slate-100 rounded-2xl px-4 py-4 mb-5">
+          <svg class="absolute top-3 left-3 w-5 h-5 text-slate-200" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+          </svg>
+          <p id="fb-view-text" class="text-sm text-slate-600 leading-relaxed pl-6 break-words" style="overflow-wrap:anywhere;"></p>
+        </div>
+
+        <!-- Edit button -->
+        <button type="button" onclick="switchToEditMode()"
+          class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-white text-sm font-bold transition shadow-sm">
+          <i data-lucide="pencil" class="w-4 h-4"></i>
+          Edit Feedback
+        </button>
       </div>
-      
-      <div class="mb-4">
-          <textarea id="feedback-text" rows="3" class="w-full border border-slate-200 rounded-lg p-3 text-xs text-slate-700 focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition" placeholder="Share details about your experience..."></textarea>
+
+      <!-- ── WRITE / EDIT PANEL ── -->
+      <div id="fbWritePanel" class="hidden p-6">
+        <!-- Header -->
+        <div class="flex items-center gap-3 mb-5">
+          <div class="w-11 h-11 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
+            <i data-lucide="star" class="w-5 h-5 text-amber-400"></i>
+          </div>
+          <div>
+            <h3 id="fb-write-title" class="text-base font-bold text-slate-800">Leave Feedback</h3>
+            <p class="text-xs text-slate-400 mt-0.5">For <span id="fb-write-doctor" class="font-semibold text-slate-700"></span></p>
+          </div>
+        </div>
+
+        <!-- Textarea -->
+        <div class="mb-5">
+          <p class="text-xs text-slate-500 mb-2">Your experience</p>
+          <textarea id="feedback-text" rows="4"
+            class="w-full border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:ring-2 focus:ring-[#007E85]/30 focus:border-[#007E85] outline-none transition resize-none"
+            placeholder="Share details about your experience..."></textarea>
+        </div>
+
+        <input type="hidden" id="feedback-apt-id" value="">
+        <input type="hidden" id="feedback-mode" value="new"> <!-- new | edit -->
+
+        <div class="flex gap-2">
+          <button type="button" id="fb-back-btn" onclick="switchToViewMode()" class="hidden px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition">
+            Cancel
+          </button>
+          <button type="button" onclick="submitFeedback()"
+            id="submitFeedbackBtn"
+            class="flex-1 py-2.5 rounded-xl bg-[#007E85] hover:bg-[#006570] text-white text-sm font-bold transition shadow-sm disabled:opacity-50">
+            Submit Review
+          </button>
+        </div>
       </div>
-      
-      <input type="hidden" id="feedback-apt-id" value="">
-      <input type="hidden" id="feedback-rating-val" value="0">
-      
-      <button onclick="submitFeedback()" id="submitFeedbackBtn" class="w-full bg-yellow-500 text-white rounded-lg py-2.5 text-sm font-bold hover:bg-yellow-600 transition shadow-sm disabled:opacity-50">
-          Submit Review
-      </button>
+
     </div>
   </div>
+
 
   <script src="patient-common.js"></script>
   <script src="dashboard.js"></script>

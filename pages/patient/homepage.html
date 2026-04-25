@@ -558,7 +558,7 @@
       class="fixed inset-0 hidden items-center justify-center z-[70] bg-black/30 backdrop-blur-sm p-4"
     >
       <div
-        class="cal-modal-scroll w-full max-w-3xl bg-white rounded-[32px] shadow-[0_20px_60px_rgba(15,23,42,0.18)] border border-slate-100 overflow-hidden"
+        class="cal-modal-scroll w-full max-w-3xl bg-white rounded-[32px] shadow-[0_20px_60px_rgba(15,23,42,0.18)] border border-slate-100 overflow-hidden flex flex-col max-h-[92vh]"
       >
         <div
           class="flex items-center justify-between px-6 py-5 border-b border-slate-100"
@@ -577,6 +577,8 @@
           </button>
         </div>
 
+        <!-- Scrollable content area -->
+        <div class="apt-list-scroll flex-1 overflow-y-auto">
         <div class="p-8">
           <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-3">
@@ -624,7 +626,7 @@
             </h4>
             <div
               id="calendarDayDetail"
-              class="apt-list-scroll space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden pr-2"
+              class="space-y-2 overflow-x-hidden"
             >
               <p class="text-sm text-slate-500 leading-6">
                 Select a date on the calendar to view visit details. Red dots
@@ -632,6 +634,7 @@
               </p>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>
