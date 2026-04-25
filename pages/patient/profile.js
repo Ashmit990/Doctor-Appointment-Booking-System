@@ -45,6 +45,21 @@ function attachEventListeners() {
   resetBtn.addEventListener("click", () => {
     fillEditForm();
   });
+
+  // Auto-calculate DOB from age input
+  const ageInput = document.getElementById("editAge");
+  if (ageInput) {
+    ageInput.addEventListener("input", () => {
+      const age = parseInt(ageInput.value.trim(), 10);
+      const dobField = document.getElementById("editDob");
+      if (dobField && !isNaN(age) && age >= 0 && age <= 150) {
+        const birthYear = new Date().getFullYear() - age;
+        dobField.value = `${birthYear}-01-01`;
+      } else if (dobField) {
+        dobField.value = "";
+      }
+    });
+  }
   
   console.log("Event listeners attached successfully");
 }
@@ -99,13 +114,76 @@ function fillEditForm() {
   setEditFieldValue("editName", patientProfile.full_name);
   setEditFieldValue("editEmail", patientProfile.email);
   setEditFieldValue("editPhone", patientProfile.contact_number);
-  setEditFieldValue("editDob", patientProfile.dob ? String(patientProfile.dob).slice(0, 10) : "");
   setEditFieldValue("editAge", patientProfile.age);
   setEditFieldValue("editGender", patientProfile.gender);
   setEditFieldValue("editBlood", patientProfile.blood_group);
   setEditFieldValue("editAddress", patientProfile.address);
   setEditFieldValue("editEmergencyName", patientProfile.emergency_contact_name);
   setEditFieldValue("editEmergencyPhone", patientProfile.emergency_contact_phone);
+
+  // Auto-set DOB from existing profile dob or calculate from age
+  const dobField = document.getElementById("editDob");
+  if (dobField) {
+    if (patientProfile.dob) {
+      dobField.value = String(patientProfile.dob).slice(0, 10);
+    } else if (patientProfile.age) {
+      const birthYear = new Date().getFullYear() - parseInt(patientProfile.age, 10);
+      dobField.value = `${birthYear}-01-01`;
+    } else {
+      dobField.value = "";
+    }
+  }
+
+  // Hide "Select gender" placeholder once a gender is already chosen
+  const genderSelect = document.getElementById("editGender");
+  if (genderSelect) {
+    const placeholderOpt = genderSelect.querySelector('option[value=""]');
+    const syncGenderPlaceholder = () => {
+      if (placeholderOpt) {
+        placeholderOpt.hidden = genderSelect.value !== "";
+      }
+    };
+    syncGenderPlaceholder();
+    // Avoid duplicate listeners on repeated fillEditForm calls
+    genderSelect.removeEventListener("change", genderSelect._syncPlaceholder);
+    genderSelect._syncPlaceholder = syncGenderPlaceholder;
+    genderSelect.addEventListener("change", genderSelect._syncPlaceholder);
+  }
+
+  // Hide "Select blood group" placeholder once a blood group is already chosen
+  const bloodSelect = document.getElementById("editBlood");
+  if (bloodSelect) {
+    const bloodPlaceholderOpt = bloodSelect.querySelector('option[value=""]');
+    const syncBloodPlaceholder = () => {
+      if (bloodPlaceholderOpt) {
+        bloodPlaceholderOpt.hidden = bloodSelect.value !== "";
+      }
+    };
+    syncBloodPlaceholder();
+    // Avoid duplicate listeners on repeated fillEditForm calls
+    bloodSelect.removeEventListener("change", bloodSelect._syncPlaceholder);
+    bloodSelect._syncPlaceholder = syncBloodPlaceholder;
+    bloodSelect.addEventListener("change", bloodSelect._syncPlaceholder);
+  }
+}
+
+function calculateProfileCompletion() {
+  const fields = [
+    patientProfile.full_name,
+    patientProfile.email,
+    patientProfile.contact_number,
+    patientProfile.dob,
+    patientProfile.age,
+    patientProfile.gender,
+    patientProfile.blood_group,
+    patientProfile.address,
+    patientProfile.emergency_contact_name,
+    patientProfile.emergency_contact_phone
+  ];
+  const total = fields.length;
+  const filled = fields.filter(f => f !== null && f !== undefined && String(f).trim() !== "").length;
+  const percent = Math.round((filled / total) * 100);
+  return { filled, total, percent };
 }
 
 function updateViewMode() {
@@ -137,6 +215,22 @@ function updateViewMode() {
   document.getElementById("viewAddress").textContent = patientProfile.address || "-";
   document.getElementById("viewEmergencyName").textContent = patientProfile.emergency_contact_name || "-";
   document.getElementById("viewEmergencyPhone").textContent = patientProfile.emergency_contact_phone || "-";
+
+  // Update profile completion stats dynamically
+  const { filled, total, percent } = calculateProfileCompletion();
+  const completionEl = document.getElementById("profileCompletion");
+  const verifiedEl = document.getElementById("verifiedFields");
+  const accountVerifiedEl = document.getElementById("accountVerifiedFields");
+  const lastUpdatedEl = document.getElementById("lastUpdated");
+  const accountLastUpdatedEl = document.getElementById("accountLastUpdated");
+
+  if (completionEl) completionEl.textContent = percent + "%";
+  if (verifiedEl) verifiedEl.textContent = filled + "/" + total;
+  if (accountVerifiedEl) accountVerifiedEl.textContent = filled + "/" + total;
+
+  const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  if (lastUpdatedEl) lastUpdatedEl.textContent = today;
+  if (accountLastUpdatedEl) accountLastUpdatedEl.textContent = today;
 }
 
 function isValidEmail(email) {
@@ -147,16 +241,16 @@ function isValidEmail(email) {
 function isValidPhone(phone) {
   if (!phone) return false;
   const phoneDigits = phone.replace(/[\s\(\)\+-]/g, "");
-  return phoneDigits.length >= 8 && /^\d+$/.test(phoneDigits);
+  return phoneDigits.length === 10 && /^\d+$/.test(phoneDigits);
 }
 
 function clearValidationErrors() {
-  const errorIds = ["nameError", "emailError", "phoneError", "dobError", "ageError", "genderError", "bloodError", "addressError", "emergencyNameError", "emergencyPhoneError"];
+  const errorIds = ["nameError", "emailError", "phoneError", "ageError", "genderError", "bloodError", "addressError", "emergencyNameError", "emergencyPhoneError"];
   errorIds.forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.classList.add("hidden");
   });
-  const inputIds = ["editName", "editEmail", "editPhone", "editDob", "editAge", "editGender", "editBlood", "editAddress", "editEmergencyName", "editEmergencyPhone"];
+  const inputIds = ["editName", "editEmail", "editPhone", "editAge", "editGender", "editBlood", "editAddress", "editEmergencyName", "editEmergencyPhone"];
   inputIds.forEach((id) => {
     const input = document.getElementById(id);
     if (input) {
@@ -212,14 +306,7 @@ function validateForm() {
     setFieldError("editPhone", "phoneError", "Phone number is required", true);
     isValid = false;
   } else if (!isValidPhone(phone)) {
-    setFieldError("editPhone", "phoneError", "Valid phone number required (min 8 digits)", true);
-    isValid = false;
-  }
-
-  // Validate Date of Birth
-  const dob = getEditFieldValue("editDob");
-  if (!dob) {
-    setFieldError("editDob", "dobError", "Date of birth is required", true);
+    setFieldError("editPhone", "phoneError", "Phone number must be exactly 10 digits", true);
     isValid = false;
   }
 
@@ -270,7 +357,7 @@ function validateForm() {
     setFieldError("editEmergencyPhone", "emergencyPhoneError", "Emergency contact phone is required", true);
     isValid = false;
   } else if (!isValidPhone(emergencyPhone)) {
-    setFieldError("editEmergencyPhone", "emergencyPhoneError", "Valid emergency phone required (min 8 digits)", true);
+    setFieldError("editEmergencyPhone", "emergencyPhoneError", "Emergency phone must be exactly 10 digits", true);
     isValid = false;
   }
 

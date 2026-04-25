@@ -141,15 +141,15 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div class="bg-white/20 backdrop-blur-md rounded-lg p-3 border border-white/20">
                 <p class="text-[10px] opacity-90 mb-0.5">Profile Completion</p>
-                <p class="text-2xl font-bold" id="profileCompletion">100%</p>
+                <p class="text-2xl font-bold" id="profileCompletion">—</p>
               </div>
               <div class="bg-white/20 backdrop-blur-md rounded-lg p-3 border border-white/20">
                 <p class="text-[10px] opacity-90 mb-0.5">Verified Fields</p>
-                <p class="text-2xl font-bold" id="verifiedFields">10</p>
+                <p class="text-2xl font-bold" id="verifiedFields">—</p>
               </div>
               <div class="bg-white/20 backdrop-blur-md rounded-lg p-3 border border-white/20">
                 <p class="text-xs opacity-90 mb-1">Last Updated</p>
-                <p class="text-3xl font-bold" id="lastUpdated">Today</p>
+                <p class="text-lg font-bold" id="lastUpdated">—</p>
               </div>
             </div>
           </div>
@@ -253,16 +253,13 @@
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
                       <p class="text-xs text-red-500 hidden mt-1" id="phoneError">Valid phone number required (min 8 digits)</p>
                     </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth <span class="text-red-500">*</span></label>
-                      <input type="date" id="editDob" required
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
-                      <p class="text-xs text-red-500 hidden mt-1" id="dobError">Date of birth is required</p>
-                    </div>
+                    <!-- DOB is auto-calculated from Age (hidden field, submitted with form) -->
+                    <input type="hidden" id="editDob" />
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">Age <span class="text-red-500">*</span></label>
                       <input type="number" id="editAge" min="0" max="150" required
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+                      <p class="text-[10px] text-gray-400 mt-1">Date of birth is auto-filled from age</p>
                       <p class="text-xs text-red-500 hidden mt-1" id="ageError">Age must be between 0 and 150</p>
                     </div>
                     <div>
@@ -373,7 +370,7 @@
                   </div>
                   <div class="flex justify-between items-center">
                     <span>Verified Fields</span>
-                    <span id="accountVerifiedFields" class="text-gray-800 font-medium">10/10</span>
+                    <span id="accountVerifiedFields" class="text-gray-800 font-medium">—</span>
                   </div>
                 </div>
               </div>

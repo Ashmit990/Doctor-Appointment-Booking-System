@@ -56,48 +56,45 @@
     <main class="flex-1 p-3 md:p-6 pb-20 md:pb-6 w-full overflow-x-hidden">
       <div class="max-w-7xl mx-auto bg-white rounded-[24px] shadow-[0_20px_60px_rgba(15,23,42,0.08)] p-4 md:p-6">
         <div class="mb-5">
-          <h1 class="text-2xl md:text-3xl font-bold text-slate-800 leading-tight">
-            Appointments
-          </h1>
+          <div class="flex items-center justify-between gap-3">
+            <h1 class="text-2xl md:text-3xl font-bold text-slate-800 leading-tight">Appointments</h1>
+            <div class="relative">
+              <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+              </svg>
+              <input
+                id="searchInput"
+                type="text"
+                placeholder="Search doctor or specialization..."
+                class="pl-9 pr-4 py-2 w-56 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#007E85]/30 focus:border-[#007E85] bg-slate-50 transition"
+              />
+            </div>
+          </div>
         </div>
 
-        <section class="bg-white rounded-[24px] p-0 mb-6 relative overflow-hidden shadow-[0_15px_40px_rgba(15,23,42,0.08)] border border-slate-100 h-[580px] md:h-[520px]">
-          <iframe src="booking.html" class="w-full h-full border-0" title="Book Appointment"></iframe>
+        <section id="bookingSection" class="bg-white rounded-[24px] p-0 mb-6 relative overflow-hidden shadow-[0_15px_40px_rgba(15,23,42,0.08)] border border-slate-100">
+          <iframe
+            id="bookingIframe"
+            src="booking.html"
+            class="w-full border-0 block"
+            title="Book Appointment"
+            scrolling="no"
+            onload="fitBookingIframe(this)"
+          ></iframe>
         </section>
 
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-5">
           <div class="lg:col-span-2 bg-white rounded-[20px] p-5 border border-slate-100 shadow-sm">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
               <div>
-                <h2 class="text-lg font-semibold text-slate-800">
-                  Appointments
-                </h2>
-                <p class="text-xs text-slate-500 mt-1">
-                  Your upcoming and past visits
-                </p>
+                <h2 class="text-lg font-semibold text-slate-800">Appointments</h2>
+                <p class="text-xs text-slate-500 mt-1">Your upcoming and past visits</p>
               </div>
-
               <div class="flex flex-wrap gap-1.5">
-                <button
-                  class="filter-btn active-filter bg-[#007E85] text-white px-3 py-2 rounded-xl text-xs font-medium"
-                  data-filter="all">
-                  All
-                </button>
-                <button
-                  class="filter-btn bg-slate-100 text-slate-700 px-3 py-2 rounded-xl text-xs font-medium hover:bg-slate-200 transition"
-                  data-filter="upcoming">
-                  Upcoming
-                </button>
-                <button
-                  class="filter-btn bg-slate-100 text-slate-700 px-3 py-2 rounded-xl text-xs font-medium hover:bg-slate-200 transition"
-                  data-filter="completed">
-                  Completed
-                </button>
-                <button
-                  class="filter-btn bg-slate-100 text-slate-700 px-3 py-2 rounded-xl text-xs font-medium hover:bg-slate-200 transition"
-                  data-filter="missed">
-                  Missed
-                </button>
+                <button class="filter-btn active-filter bg-[#007E85] text-white px-3 py-2 rounded-xl text-xs font-medium" data-filter="all">All</button>
+                <button class="filter-btn bg-slate-100 text-slate-700 px-3 py-2 rounded-xl text-xs font-medium hover:bg-slate-200 transition" data-filter="upcoming">Upcoming</button>
+                <button class="filter-btn bg-slate-100 text-slate-700 px-3 py-2 rounded-xl text-xs font-medium hover:bg-slate-200 transition" data-filter="completed">Completed</button>
+                <button class="filter-btn bg-slate-100 text-slate-700 px-3 py-2 rounded-xl text-xs font-medium hover:bg-slate-200 transition" data-filter="missed">Missed</button>
               </div>
             </div>
 
@@ -128,13 +125,19 @@
   </div>
 
   <div id="bookingModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white w-full max-w-3xl h-[480px] md:h-[420px] max-h-[90vh] rounded-2xl shadow-2xl relative overflow-hidden">
+    <div id="bookingModalInner" class="bg-white w-full max-w-3xl max-h-[90vh] rounded-2xl shadow-2xl relative overflow-hidden">
       <button onclick="closeBookingModal()"
         class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white shadow flex items-center justify-center text-sm">
         ✕
       </button>
 
-      <iframe src="/booking.html" class="w-full h-full border-0"></iframe>
+      <iframe
+        id="bookingModalIframe"
+        src=""
+        class="w-full border-0 block"
+        scrolling="no"
+        onload="fitModalIframe(this)"
+      ></iframe>
     </div>
   </div>
 
@@ -147,7 +150,7 @@
       <h3 class="text-lg font-bold text-slate-800 mb-3 pr-8">
         Appointment details
       </h3>
-      <div id="detailModalBody" class="text-sm"></div>
+      <div id="detailModalBody" class="text-sm overflow-hidden" style="word-break:break-word;overflow-wrap:break-word;"></div>
       <button type="button" id="detailRescheduleBtn"
         class="hidden mt-4 w-full py-2.5 rounded-xl bg-[#007E85] text-white text-sm font-medium hover:bg-[#006570]">
         Reschedule visit
@@ -185,6 +188,30 @@
   <script src="dashboard.js"></script>
   <script>
     lucide.createIcons();
+
+    function fitBookingIframe(iframe) {
+      try {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        const height = doc.documentElement.scrollHeight || doc.body.scrollHeight;
+        iframe.style.height = height + 'px';
+      } catch (e) {
+        iframe.style.height = '340px';
+      }
+    }
+
+    function fitModalIframe(iframe) {
+      try {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        const height = doc.documentElement.scrollHeight || doc.body.scrollHeight;
+        const maxH = Math.floor(window.innerHeight * 0.88);
+        const h = Math.min(height, maxH);
+        iframe.style.height = h + 'px';
+        const inner = document.getElementById('bookingModalInner');
+        if (inner) inner.style.height = h + 'px';
+      } catch (e) {
+        iframe.style.height = '380px';
+      }
+    }
   </script>
   <div id="successToast" class="fixed inset-0 hidden items-center justify-center z-[70] bg-black/25 backdrop-blur-sm">
     <div

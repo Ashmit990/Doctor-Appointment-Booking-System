@@ -266,10 +266,46 @@ async function reload() {
   }
 }
 
-function openBookingModal() {
+async function openBookingModal() {
+  try {
+    const r = await fetch(`${API_BASE}/patient/profile.php`, { credentials: "include" });
+    const j = await r.json();
+    if (j.status === "success" && j.data) {
+      const d = j.data;
+      const fields = [
+        d.full_name, d.email, d.contact_number, d.dob,
+        d.age, d.gender, d.blood_group, d.address,
+        d.emergency_contact_name, d.emergency_contact_phone
+      ];
+      const complete = fields.every(f => f !== null && f !== undefined && String(f).trim() !== "");
+      if (!complete) {
+        const ov = document.createElement("div");
+        ov.style.cssText =
+          "position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;background:rgba(0,0,0,0.25);backdrop-filter:blur(4px);";
+        ov.innerHTML =
+          '<div style="background:#fff;border-radius:28px;box-shadow:0 20px 60px rgba(15,23,42,0.18);padding:28px 32px;width:90%;max-width:420px;text-align:center;border:1px solid #fef3c7;"><div style="margin:0 auto 16px;width:64px;height:64px;border-radius:50%;background:#fef3c7;display:flex;align-items:center;justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" style="width:32px;height:32px;color:#d97706;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><h3 style="font-size:24px;font-weight:700;color:#1e293b;margin-bottom:8px;">Profile Incomplete</h3><p style="color:#64748b;font-size:16px;">Please complete your profile before booking. Redirecting...</p></div>';
+        document.body.appendChild(ov);
+        setTimeout(function () {
+          window.location.href = "profile.html";
+        }, 2000);
+        return;
+      }
+    } else {
+      window.location.href = "profile.html";
+      return;
+    }
+  } catch (err) {
+    console.error("Profile check error:", err);
+    window.location.href = "profile.html";
+    return;
+  }
+
   const modal = document.getElementById("bookingModal");
-  const iframe = document.querySelector("#bookingModal iframe");
+  const iframe = document.getElementById("bookingModalIframe");
+  const inner = document.getElementById("bookingModalInner");
   if (!modal || !iframe) return;
+  iframe.style.height = "0px";
+  if (inner) inner.style.height = "";
   iframe.src = `booking.html?t=${Date.now()}`;
   modal.classList.remove("hidden");
   modal.classList.add("flex");
@@ -277,18 +313,21 @@ function openBookingModal() {
 
 function openRescheduleModal(appointmentId) {
   const modal = document.getElementById("bookingModal");
-  const iframe = document.querySelector("#bookingModal iframe");
+  const iframe = document.getElementById("bookingModalIframe");
+  const inner = document.getElementById("bookingModalInner");
   if (!modal || !iframe) return;
+  iframe.style.height = "0px";
+  if (inner) inner.style.height = "";
   iframe.src = `booking.html?t=${Date.now()}`;
   modal.classList.remove("hidden");
   modal.classList.add("flex");
 
   iframe.onload = () => {
+    // Auto-resize first
+    if (typeof fitModalIframe === "function") fitModalIframe(iframe);
+    // Then send reschedule context
     iframe.contentWindow.postMessage(
-      {
-        type: "START_RESCHEDULE",
-        appointment_id: appointmentId,
-      },
+      { type: "START_RESCHEDULE", appointment_id: appointmentId },
       "*",
     );
   };
@@ -334,9 +373,9 @@ async function openDetailModal(id) {
       <p><span class="text-slate-400">Doctor</span><br/><strong class="text-slate-800">${a.doctor_name}</strong> — ${a.specialization || ""}</p>
       <p><span class="text-slate-400">When</span><br/>${a.app_date} at ${formatTime12h(a.app_time)} · ${a.room_num || ""}</p>
       <p><span class="text-slate-400">Status</span><br/>${formatStatus(a.status)}</p>
-      <p><span class="text-slate-400">Reason</span><br/>${a.reason_for_visit || "—"}</p>
-      <p><span class="text-slate-400">Doctor comments</span><br/>${a.doctor_comments || "—"}</p>
-      <p><span class="text-slate-400">Prescribed medicines</span><br/>${a.prescribed_medicines || "—"}</p>
+      <p class="break-words whitespace-pre-wrap"><span class="text-slate-400">Reason</span><br/>${a.reason_for_visit || "—"}</p>
+      <p class="break-words whitespace-pre-wrap"><span class="text-slate-400">Doctor comments</span><br/>${a.doctor_comments || "—"}</p>
+      <p class="break-words whitespace-pre-wrap"><span class="text-slate-400">Prescribed medicines</span><br/>${a.prescribed_medicines || "—"}</p>
       <p class="text-xs text-slate-400">Reschedule date shown above is your current scheduled visit. Use Reschedule on the card to pick a new slot if allowed.</p>
     </div>
   `;
@@ -397,20 +436,32 @@ window.addEventListener("message", function (event) {
   if (event.data.type === "booking:close") {
     closeBookingModal();
   }
+  if (event.data.type === "profile-incomplete-redirect") {
+    const ov = document.createElement("div");
+    ov.style.cssText =
+      "position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;background:rgba(0,0,0,0.25);backdrop-filter:blur(4px);";
+    ov.innerHTML =
+      '<div style="background:#fff;border-radius:28px;box-shadow:0 20px 60px rgba(15,23,42,0.18);padding:28px 32px;width:90%;max-width:420px;text-align:center;border:1px solid #fef3c7;"><div style="margin:0 auto 16px;width:64px;height:64px;border-radius:50%;background:#fef3c7;display:flex;align-items:center;justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" style="width:32px;height:32px;color:#d97706;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><h3 style="font-size:24px;font-weight:700;color:#1e293b;margin-bottom:8px;">Profile Incomplete</h3><p style="color:#64748b;font-size:16px;">Please complete your profile before booking. Redirecting...</p></div>';
+    document.body.appendChild(ov);
+    setTimeout(function () {
+      window.location.href = "profile.html";
+    }, 2000);
+  }
 });
 
-const searchBtn = document.getElementById("searchBtn");
 const searchInput = document.getElementById("searchInput");
 
-if (searchBtn && searchInput) {
-  searchBtn.addEventListener("click", () => {
-    searchQuery = searchInput.value.trim();
-    reload();
-  });
+function applySearch(query) {
+  searchQuery = query.trim();
+  renderAppointments(getVisibleAppointments(cachedAppointments));
+}
+
+if (searchInput) {
+  searchInput.addEventListener("input", () => applySearch(searchInput.value));
   searchInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      searchQuery = searchInput.value.trim();
-      reload();
+    if (e.key === "Escape") {
+      searchInput.value = "";
+      applySearch("");
     }
   });
 }

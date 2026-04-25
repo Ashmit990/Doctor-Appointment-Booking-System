@@ -1,425 +1,800 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patient Home Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="homepage.css" />
+    <style>
+      .patient-notify-primary {
+        color: #007e85;
+      }
+      #notificationPanel.hidden {
+        pointer-events: none !important;
+      }
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Patient Home Page</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="stylesheet" href="homepage.css" />
-  <style>
-    /* Match doctor dashboard "Mark all as read" accent (#007E85) */
-    .patient-notify-primary {
-      color: #007e85;
-    }
+      /* Mini calendar cell styles */
+      .mini-cal-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        margin: 0 auto;
+        border-radius: 50%;
+        font-size: 12px;
+        cursor: pointer;
+        position: relative;
+        color: #475569;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .mini-cal-cell:hover:not(.cal-selected) {
+        background: #e0f2f2;
+        color: #007e85;
+      }
+      .mini-cal-cell.cal-today {
+        background: #e0f2f2;
+        color: #007e85;
+        font-weight: 700;
+      }
+      .mini-cal-cell.cal-selected {
+        background: #007e85 !important;
+        color: #fff !important;
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba(0, 126, 133, 0.4);
+      }
 
-    /* Fixed panel must not intercept clicks while closed (hidden + fixed edge cases) */
-    #notificationPanel.hidden {
-      pointer-events: none !important;
-    }
-  </style>
-</head>
+      /* Full calendar popup cell styles */
+      .full-cal-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        margin: 0 auto;
+        border-radius: 50%;
+        font-size: 14px;
+        cursor: pointer;
+        position: relative;
+        color: #475569;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .full-cal-cell:hover:not(.cal-selected) {
+        background: #e0f2f2;
+        color: #007e85;
+      }
+      .full-cal-cell.cal-today {
+        background: #e0f2f2;
+        color: #007e85;
+        font-weight: 700;
+        box-shadow: 0 0 0 2px #007e8566;
+      }
+      .full-cal-cell.cal-selected {
+        background: #007e85 !important;
+        color: #fff !important;
+        font-weight: 700;
+        box-shadow: 0 2px 10px rgba(0, 126, 133, 0.45);
+      }
 
-<body class="bg-slate-100 min-h-screen font-sans">
-  <div class="flex flex-col md:flex-row min-h-screen relative">
-    <aside
-      class="w-full md:w-60 bg-[#007E85] text-white flex flex-row md:flex-col items-center justify-around md:justify-start py-2 md:py-0 px-2 md:px-0 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] md:shadow-xl fixed bottom-0 md:sticky md:top-0 left-0 h-auto md:h-screen z-[100] overflow-x-auto md:overflow-y-auto">
+      /* Hide scrollbar on calendar modal outer container */
+      .cal-modal-scroll {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      .cal-modal-scroll::-webkit-scrollbar {
+        display: none;
+      }
 
-      <div class="hidden md:flex w-full px-6 py-7 items-center gap-3 border-b border-white/10 shrink-0 mb-2">
-        <img src="../../src/assets/Logo.svg" alt="Logo" class="w-8 h-8">
-        <span class="text-white font-bold text-lg">Healthcare</span>
-      </div>
+      /* Styled thin scrollbar for appointments list */
+      .apt-list-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: #007E85 #f1f5f9;
+      }
+      .apt-list-scroll::-webkit-scrollbar {
+        width: 4px;
+      }
+      .apt-list-scroll::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 99px;
+      }
+      .apt-list-scroll::-webkit-scrollbar-thumb {
+        background: #007E85;
+        border-radius: 99px;
+      }
+    </style>
+  </head>
 
-      <nav class="flex flex-row md:flex-col justify-around md:justify-start w-full md:flex-1 md:px-3 md:gap-1 md:pb-3">
-        <button
-          class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl bg-white/20 text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left"
-          title="Home">
-          <i data-lucide="house" class="w-6 h-6 md:w-5 md:h-5 text-white shrink-0"></i>
-          <span class="mt-1 md:mt-0 font-medium whitespace-nowrap">Home</span>
-        </button>
+  <body class="bg-slate-100 min-h-screen font-sans">
+    <div class="flex flex-col md:flex-row min-h-screen relative">
+      <aside
+        class="w-full md:w-60 bg-[#007E85] text-white flex flex-row md:flex-col items-center justify-around md:justify-start py-2 md:py-0 px-2 md:px-0 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] md:shadow-xl fixed bottom-0 md:sticky md:top-0 left-0 h-auto md:h-screen z-[100] overflow-x-auto md:overflow-y-auto"
+      >
+        <div
+          class="hidden md:flex w-full px-6 py-7 items-center gap-3 border-b border-white/10 shrink-0 mb-2"
+        >
+          <img src="../../src/assets/Logo.svg" alt="Logo" class="w-8 h-8" />
+          <span class="text-white font-bold text-lg">Healthcare</span>
+        </div>
 
-        <button onclick="goToDashboard()"
-          class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left"
-          title="My Appointments">
-          <i data-lucide="calendar-days" class="w-6 h-6 md:w-5 md:h-5 shrink-0"></i>
-          <span class="mt-1 md:mt-0 font-medium whitespace-nowrap">Appointments</span>
-        </button>
+        <nav
+          class="flex flex-row md:flex-col justify-around md:justify-start w-full md:flex-1 md:px-3 md:gap-1 md:pb-3"
+        >
+          <button
+            class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl bg-white/20 text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left"
+            title="Home"
+          >
+            <i
+              data-lucide="house"
+              class="w-6 h-6 md:w-5 md:h-5 text-white shrink-0"
+            ></i>
+            <span class="mt-1 md:mt-0 font-medium whitespace-nowrap">Home</span>
+          </button>
 
-        <button onclick="goToProfile()"
-          class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left"
-          title="Profile">
-          <i data-lucide="user" class="w-6 h-6 md:w-5 md:h-5 shrink-0"></i>
-          <span class="mt-1 md:mt-0 font-medium whitespace-nowrap">Profile</span>
-        </button>
+          <button
+            onclick="goToDashboard()"
+            class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left"
+            title="My Appointments"
+          >
+            <i
+              data-lucide="calendar-days"
+              class="w-6 h-6 md:w-5 md:h-5 shrink-0"
+            ></i>
+            <span class="mt-1 md:mt-0 font-medium whitespace-nowrap"
+              >Appointments</span
+            >
+          </button>
 
-        <div class="hidden md:block mt-auto border-t border-white/10 pt-3"></div>
+          <button
+            onclick="goToProfile()"
+            class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left"
+            title="Profile"
+          >
+            <i data-lucide="user" class="w-6 h-6 md:w-5 md:h-5 shrink-0"></i>
+            <span class="mt-1 md:mt-0 font-medium whitespace-nowrap"
+              >Profile</span
+            >
+          </button>
 
-        <button type="button" onclick="logoutPatient()"
-          class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl text-white/65 hover:bg-white/10 hover:text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left md:justify-start"
-          title="Logout">
-          <i data-lucide="log-out" class="w-6 h-6 md:w-5 md:h-5 shrink-0"></i>
-          <span class="mt-1 md:mt-0 font-medium whitespace-nowrap">Logout</span>
-        </button>
-      </nav>
-    </aside>
+          <div
+            class="hidden md:block mt-auto border-t border-white/10 pt-3"
+          ></div>
 
-    <main class="flex-1 overflow-x-hidden overflow-y-visible p-3 md:p-6 pb-20 md:pb-6 w-full">
-      <div
-        class="relative max-w-7xl mx-auto bg-white rounded-[24px] shadow-[0_20px_60px_rgba(15,23,42,0.08)] p-4 md:p-6">
-        <!-- TOP HEADER WITH GREETING, SEARCH, NOTIFICATION, AND BOOK BUTTON -->
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-5">
-          <div class="pt-1">
-            <h1 class="text-lg md:text-xl font-bold text-slate-800 leading-tight">
-              Good Morning
-              <span id="patientNameHeading" class="text-[#007E85]"> </span>
-            </h1>
-          </div>
+          <button
+            type="button"
+            onclick="logoutPatient()"
+            class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl text-white/65 hover:bg-white/10 hover:text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left md:justify-start"
+            title="Logout"
+          >
+            <i data-lucide="log-out" class="w-6 h-6 md:w-5 md:h-5 shrink-0"></i>
+            <span class="mt-1 md:mt-0 font-medium whitespace-nowrap"
+              >Logout</span
+            >
+          </button>
+        </nav>
+      </aside>
 
-          <!-- SEARCH BAR -->
-          <div class="flex-1 max-w-xs">
-            <div class="relative">
-              <i data-lucide="search"
-                class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-              <input type="text" placeholder="Search doctors..."
-                class="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#007E85]/30 focus:border-[#007E85] transition text-xs" />
+      <main
+        class="flex-1 overflow-x-hidden overflow-y-visible p-4 md:p-8 pb-24 md:pb-8 w-full"
+      >
+        <div
+          class="relative max-w-7xl mx-auto bg-white rounded-[32px] shadow-[0_20px_60px_rgba(15,23,42,0.08)] p-5 md:p-8"
+        >
+          <div
+            class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8"
+          >
+            <div class="pt-2">
+              <h1
+                class="text-3xl md:text-4xl font-bold text-slate-800 leading-tight"
+              >
+                Good Morning
+                <span id="patientNameHeading" class="text-[#007E85]"> </span>
+              </h1>
+            </div>
+
+            <div
+              class="flex flex-col sm:flex-row gap-3 sm:items-center w-full lg:w-auto mt-4 lg:mt-0 relative"
+            >
+              <button
+                id="notificationBtn"
+                type="button"
+                class="relative w-12 h-12 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-2xl font-medium transition flex items-center justify-center shrink-0"
+                title="Notifications"
+              >
+                <i data-lucide="bell" class="w-5 h-5"></i>
+                <span
+                  id="notificationCount"
+                  class="hidden absolute -top-2 -right-2 min-w-[22px] h-[22px] px-1 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center"
+                  >0</span
+                >
+              </button>
+              <button
+                onclick="openBookingModal()"
+                class="bg-[#007E85] hover:bg-[#006570] flex-1 sm:flex-none text-center text-white px-5 py-3 rounded-2xl font-medium shadow-sm transition"
+              >
+                Book Appointment
+              </button>
             </div>
           </div>
 
-          <!-- NOTIFICATION AND BOOK BUTTON -->
-          <div class="flex items-center gap-2">
-            <button id="notificationBtn" type="button"
-              class="relative isolate w-9 h-9 shrink-0 cursor-pointer border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg font-medium transition flex items-center justify-center"
-              title="Notifications" onclick="window.__notificationBarToggle(event)">
-              <span class="pointer-events-none flex items-center justify-center" aria-hidden="true">
-                <i data-lucide="bell" class="w-4 h-4"></i>
-              </span>
-              <span id="notificationCount"
-                class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-0.5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center pointer-events-none"
-                style="display:none;">
-                0
-              </span>
-            </button>
-
-            <button onclick="openBookingModal()"
-              class="bg-[#007E85] hover:bg-[#006570] whitespace-nowrap text-white px-3 py-2 rounded-lg text-xs font-medium shadow-sm transition flex items-center gap-1.5">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              Book Appointment
-            </button>
-          </div>
-        </div>
-
-        <!-- NOTIFICATION PANEL (Hidden by default) -->
-        <div id="notificationPanel"
-          class="hidden fixed top-20 right-8 w-[min(calc(100vw-2rem),390px)] bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden z-[300]">
-          <div class="p-4 border-b border-gray-100 flex justify-between items-center">
-            <h3 class="text-sm font-semibold text-gray-800">Notifications</h3>
-            <button id="markAllReadBtn"
-              class="text-xs text-[#007E85] hover:text-[#005f65] font-medium transition">
-              Mark all as read
-            </button>
-          </div>
-          <div id="notificationList" class="max-h-96 overflow-y-auto">
-            <!-- Notifications will be rendered here -->
-          </div>
-        </div>
-
-        <section
-          class="bg-[#007E85] rounded-[30px] p-7 mb-7 text-white relative overflow-hidden shadow-[0_15px_40px_rgba(0,126,133,0.25)] hero-panel">
-          <div class="flex items-start justify-between flex-col md:flex-row gap-4 mb-6">
+          <section
+            class="bg-[#007E85] rounded-[30px] p-7 mb-7 text-white relative overflow-hidden shadow-[0_15px_40px_rgba(0,126,133,0.25)] hero-panel"
+          >
             <div class="max-w-2xl">
               <p class="text-3xl font-bold mb-2">Welcome back</p>
 
-              <p class="text-base opacity-90 mb-0">
+              <p class="text-base opacity-90 mb-6">
                 View today's booking status, quick info, and your upcoming
                 appointments.
               </p>
-            </div>
-            <!-- <button onclick="goToProfile()"
-              class="bg-white text-primary px-5 py-2 rounded-xl text-sm font-medium shadow-md hover:opacity-90 transition flex items-center gap-2 whitespace-nowrap">
-              <i data-lucide="edit" class="w-4 h-4"></i> Edit Profile
-            </button> -->
-          </div>
 
-          <div class="max-w-2xl">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div
+                  class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
+                >
+                  <p class="text-sm opacity-90 mb-2">Today Bookings</p>
+                  <h3 id="todayBookingsCount" class="text-4xl font-bold">
+                    ...
+                  </h3>
+                </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20">
-                <p class="text-sm opacity-90 mb-2">Total Appointments</p>
-                <h3 id="totalAppointmentsCount" class="text-4xl font-bold">...</h3>
+                <div
+                  class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
+                >
+                  <p class="text-sm opacity-90 mb-2">Upcoming</p>
+                  <h3 id="upcomingCount" class="text-4xl font-bold">...</h3>
+                </div>
+
+                <div
+                  class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
+                >
+                  <p class="text-sm opacity-90 mb-2">Completed</p>
+                  <h3 id="completedCount" class="text-4xl font-bold">...</h3>
+                </div>
               </div>
-
-              <div class="bg-white/20 backdrop-blur-md rounded-2xl p-3.5 border border-white/20">
-                <p class="text-[10px] opacity-90 mb-1">Upcoming</p>
-                <h3 id="upcomingCount" class="text-3xl font-bold">...</h3>
-              </div>
-
-              <div class="bg-white/20 backdrop-blur-md rounded-2xl p-3.5 border border-white/20">
-                <p class="text-[10px] opacity-90 mb-1">Completed</p>
-                <h3 id="completedCount" class="text-3xl font-bold">...</h3>
-              </div>
-            </div>
-          </div>
-
-          <div class="hidden lg:block absolute right-5 bottom-1 text-6xl opacity-15">
-            🩺
-          </div>
-        </section>
-
-        <section class="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          <div class="lg:col-span-3 bg-white rounded-[20px] p-4 border border-slate-100 min-h-[550px]">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
-              <div>
-                <h2 class="text-base font-semibold text-slate-800">
-                  Today Status
-                </h2>
-                <p class="text-xs text-slate-500 mt-0.5">
-                  Your booking status and next visit
-                </p>
-              </div>
-
-              <div class="text-xs text-slate-400 mt-1 md:mt-0" id="todayDateLabel"></div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div>
-                <div id="todayBookingMessage" class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                  <h4 class="text-sm font-semibold text-slate-800 mb-1">
-                    No booking for today
-                  </h4>
-                  <p class="text-slate-500 text-xs">
-                    You currently have no appointment scheduled for today.
+            <div
+              class="hidden lg:block absolute right-10 bottom-2 text-8xl opacity-15"
+            >
+              🩺
+            </div>
+          </section>
+
+          <section class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+            <div
+              id="todayStatusSection"
+              class="xl:col-span-3 bg-slate-50 rounded-[28px] p-6 border border-slate-100 min-h-[720px] transition-all duration-300"
+            >
+              <div
+                class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6"
+              >
+                <div>
+                  <h2
+                    id="todayStatusTitle"
+                    class="text-xl font-semibold text-slate-800"
+                  >
+                    Today Status
+                  </h2>
+                  <p class="text-sm text-slate-400 mt-1">
+                    Your booking status and next visit details
                   </p>
                 </div>
 
-                <div id="todayBookingCard"
-                  class="hidden bg-white rounded-[16px] border border-emerald-100 p-4 shadow-sm">
-                  <div class="flex items-center justify-between mb-2">
-                    <h4 class="text-sm font-semibold text-slate-800" id="todayDoctorName">
-                      Dr. Kim
-                    </h4>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700">
-                      Today
-                    </span>
-                  </div>
-
-                  <p class="text-xs text-slate-500 mb-3" id="todayDoctorMeta">
-                    Cardiologist • Heart Care
-                  </p>
-
-                  <div class="grid grid-cols-3 gap-2 text-xs text-slate-500 mt-3">
-                    <div class="bg-slate-50 rounded-lg px-2.5 py-2">
-                      <span class="block text-[10px] text-slate-400 mb-0.5">
-                        Date
-                      </span>
-                      <span class="font-medium text-slate-700 text-xs" id="todayBookingDate">
-                        2026-03-25
-                      </span>
-                    </div>
-                    <div class="bg-slate-50 rounded-lg px-2.5 py-2">
-                      <span class="block text-[10px] text-slate-400 mb-0.5">
-                        Time
-                      </span>
-                      <span class="font-medium text-slate-700 text-xs" id="todayBookingTime">
-                        10:30 AM
-                      </span>
-                    </div>
-                    <div class="bg-slate-50 rounded-lg px-2.5 py-2">
-                      <span class="block text-[10px] text-slate-400 mb-0.5">
-                        Room
-                      </span>
-                      <span class="font-medium text-slate-700 text-xs" id="todayBookingLocation">
-                        203
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                <div
+                  class="text-sm text-slate-400 mt-2 md:mt-0"
+                  id="todayDateLabel"
+                ></div>
               </div>
 
-              <div id="nextAppointmentCard" class="bg-white rounded-[16px] border border-cyan-100 p-4 shadow-sm">
-                <div class="flex items-start justify-between mb-2">
-                  <div>
-                    <h4 class="text-sm font-semibold text-slate-800" id="nextDoctorName">
-                      Dr. Sarah Lee
+              <div class="grid grid-cols-1 xl:grid-cols-[1fr_1fr] gap-6">
+                <div>
+                  <div
+                    id="todayBookingMessage"
+                    class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                  >
+                    <h4 class="text-lg font-semibold text-slate-800 mb-2">
+                      No booking for today
                     </h4>
-                    <p class="text-xs text-slate-500" id="nextDoctorMeta">
-                      Dermatologist • Skin Care
+                    <p class="text-slate-500 text-sm">
+                      You currently have no appointment scheduled for today.
                     </p>
                   </div>
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-cyan-100 text-cyan-700 ml-2">
-                    Next
-                  </span>
+
+                  <div
+                    id="todayBookingCard"
+                    class="hidden bg-white rounded-[24px] border border-emerald-100 p-5 shadow-sm"
+                  >
+                    <div class="flex items-center justify-between mb-3">
+                      <h4
+                        class="text-xl font-semibold text-slate-800"
+                        id="todayDoctorName"
+                      >
+                        Dr. Kim
+                      </h4>
+                      <span
+                        class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700"
+                      >
+                        Today
+                      </span>
+                    </div>
+
+                    <p class="text-sm text-slate-400 mb-4" id="todayDoctorMeta">
+                      Cardiologist • Heart Care
+                    </p>
+
+                    <div
+                      class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-slate-500 mt-4"
+                    >
+                      <div class="bg-slate-50 rounded-2xl px-4 py-3">
+                        <span class="block text-xs text-slate-400 mb-1">
+                          Date
+                        </span>
+                        <span
+                          class="font-medium text-slate-700"
+                          id="todayBookingDate"
+                        >
+                          2026-03-25
+                        </span>
+                      </div>
+                      <div class="bg-slate-50 rounded-2xl px-4 py-3">
+                        <span class="block text-xs text-slate-400 mb-1">
+                          Time
+                        </span>
+                        <span
+                          class="font-medium text-slate-700"
+                          id="todayBookingTime"
+                        >
+                          10:30 AM
+                        </span>
+                      </div>
+                      <div class="bg-slate-50 rounded-2xl px-4 py-3">
+                        <span class="block text-xs text-slate-400 mb-1">
+                          Location
+                        </span>
+                        <span
+                          class="font-medium text-slate-700"
+                          id="todayBookingLocation"
+                        >
+                          Room 203
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-2 text-xs text-slate-500 mt-3">
-                  <div class="bg-slate-50 rounded-lg px-2.5 py-2">
-                    <span class="block text-[10px] text-slate-400 mb-0.5">
-                      Date
-                    </span>
-                    <span class="font-medium text-slate-700 text-xs" id="nextBookingDate">
-                      2026-03-27
+                <div
+                  id="nextAppointmentCard"
+                  class="bg-white rounded-[24px] border border-cyan-100 p-5 shadow-sm"
+                >
+                  <div class="flex items-center justify-between mb-3">
+                    <div>
+                      <h4
+                        class="text-xl font-semibold text-slate-800"
+                        id="nextDoctorName"
+                      >
+                        Dr. Sarah Lee
+                      </h4>
+                      <p class="text-sm text-slate-400" id="nextDoctorMeta">
+                        Dermatologist • Skin Care
+                      </p>
+                    </div>
+                    <span
+                      class="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-100 text-cyan-700"
+                    >
+                      Next
                     </span>
                   </div>
-                  <div class="bg-slate-50 rounded-lg px-2.5 py-2">
-                    <span class="block text-[10px] text-slate-400 mb-0.5">
-                      Time
-                    </span>
-                    <span class="font-medium text-slate-700 text-xs" id="nextBookingTime">
-                      02:00 PM
+
+                  <div
+                    class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-slate-500 mt-4"
+                  >
+                    <div class="bg-slate-50 rounded-2xl px-4 py-3">
+                      <span class="block text-xs text-slate-400 mb-1">
+                        Date
+                      </span>
+                      <span
+                        class="font-medium text-slate-700"
+                        id="nextBookingDate"
+                      >
+                        2026-03-27
+                      </span>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl px-4 py-3">
+                      <span class="block text-xs text-slate-400 mb-1">
+                        Time
+                      </span>
+                      <span
+                        class="font-medium text-slate-700"
+                        id="nextBookingTime"
+                      >
+                        02:00 PM
+                      </span>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl px-4 py-3">
+                      <span class="block text-xs text-slate-400 mb-1">
+                        Location
+                      </span>
+                      <span
+                        class="font-medium text-slate-700"
+                        id="nextBookingLocation"
+                      >
+                        Room 105
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-6">
+              <div
+                id="calendarCardBtn"
+                class="bg-white rounded-[28px] p-6 border border-slate-100 shadow-sm transition"
+              >
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-lg font-semibold text-slate-800">Calendar</h3>
+                  <button
+                    id="expandCalBtn"
+                    type="button"
+                    title="Expand calendar"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 transition text-slate-400 hover:text-slate-600"
+                  >
+                    <i data-lucide="expand" class="w-5 h-5"></i>
+                  </button>
+                </div>
+
+                <p id="miniCalTitle" class="text-sm text-slate-400 mb-4"></p>
+
+                <div
+                  id="miniCalGrid"
+                  class="grid grid-cols-7 text-xs text-slate-400 mb-4 gap-y-3 text-center"
+                ></div>
+
+                <div class="flex items-center justify-end mt-4">
+                  <a
+                    href="dashboard.html"
+                    id="calViewAllBtn"
+                    class="text-[#007E85] text-sm font-medium hover:underline"
+                    >View All</a
+                  >
+                </div>
+              </div>
+
+              <div
+                class="bg-white rounded-[28px] p-6 border border-slate-100 shadow-sm"
+              >
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                  Quick Summary
+                </h3>
+
+                <div class="space-y-4 text-sm text-slate-500">
+                  <div class="flex justify-between items-center">
+                    <span>Total Appointments</span>
+                    <span
+                      id="totalAppointments"
+                      class="font-semibold text-slate-800"
+                    >
+                      0
                     </span>
                   </div>
-                  <div class="bg-slate-50 rounded-lg px-2.5 py-2">
-                    <span class="block text-[10px] text-slate-400 mb-0.5">
-                      Room
+                  <div class="flex justify-between items-center">
+                    <span>Today’s Booking</span>
+                    <span
+                      id="todayBookingStatus"
+                      class="font-semibold text-[#007E85]"
+                    >
+                      No
                     </span>
-                    <span class="font-medium text-slate-700 text-xs" id="nextBookingLocation">
-                      105
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span>Next Doctor</span>
+                    <span
+                      id="nextDoctorSummary"
+                      class="font-semibold text-slate-800"
+                    >
+                      -
                     </span>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-
-          <div class="space-y-4">
-            <div id="calendarCardBtn"
-              class="bg-white rounded-[16px] p-3 border border-slate-100 shadow-sm hover:shadow-md transition cursor-pointer">
-              <div class="flex items-center justify-between mb-2">
-                <h3 class="text-xs font-semibold text-slate-800">Calendar</h3>
-                <i data-lucide="expand" class="w-3.5 h-3.5 text-slate-400"></i>
-              </div>
-
-              <p id="miniCalTitle" class="text-[10px] text-slate-500 mb-2"></p>
-
-              <div id="miniCalGrid" class="grid grid-cols-7 text-[8px] text-slate-400 mb-2 gap-1 text-center"></div>
-
-              <div class="flex items-center justify-between mt-2.5 pt-2.5 border-t border-slate-100">
-                <h4 class="text-xs font-semibold text-slate-800">Upcoming</h4>
-                <button type="button" onclick="goToDashboard(event)" class="text-[#007E85] text-[9px] font-medium">
-                  View All
-                </button>
-              </div>
-            </div>
-
-            <div class="bg-white rounded-[16px] p-3 border border-slate-100 shadow-sm">
-              <h3 class="text-xs font-semibold text-slate-800 mb-2.5">
-                Quick Summary
-              </h3>
-
-              <div class="space-y-2 text-xs text-slate-500">
-                <div class="flex justify-between items-center">
-                  <span>Total Appointments</span>
-                  <span id="totalAppointments" class="font-semibold text-slate-800">
-                    0
-                  </span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span>Today’s Booking</span>
-                  <span id="todayBookingStatus" class="font-semibold text-[#007E85]">
-                    No
-                  </span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span>Next Doctor</span>
-                  <span id="nextDoctorSummary" class="font-semibold text-slate-800">
-                    -
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-      </div>
-    </main>
-  </div>
-
-  <div id="bookingModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[100] p-4">
-    <div
-      class="bg-white w-full max-w-3xl h-[600px] md:h-[520px] max-h-[90vh] rounded-3xl shadow-2xl relative overflow-hidden">
-      <button onclick="closeBookingModal()"
-        class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white shadow flex items-center justify-center">
-        ✕
-      </button>
-
-      <iframe src="booking.html" class="w-full h-full border-0"></iframe>
-    </div>
-  </div>
-
-  <!-- ====================== CALENDAR POPUP START ====================== -->
-  <div id="calendarModal"
-    class="fixed inset-0 hidden items-center justify-center z-[70] bg-black/30 backdrop-blur-sm p-4">
-    <div
-      class="w-full max-w-2xl bg-white rounded-[20px] shadow-[0_20px_60px_rgba(15,23,42,0.18)] border border-slate-100 overflow-hidden">
-      <div class="flex items-center justify-between px-4 md:px-5 py-3 md:py-4 border-b border-slate-100">
-        <div>
-          <h3 class="text-lg font-bold text-slate-800">Calendar</h3>
-          <p class="text-xs text-slate-500 mt-0.5">
-            View calendar with appointment indicators
-          </p>
+          </section>
         </div>
-        <button id="closeCalendarModal"
-          class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition text-lg">
-          ✕
+      </main>
+    </div>
+
+    <div
+      id="notificationPanel"
+      class="hidden fixed w-[min(calc(100vw-2rem),390px)] bg-white rounded-[24px] border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.18)] overflow-hidden z-[200]"
+    >
+      <div
+        class="flex items-center justify-between px-5 py-4 border-b border-slate-100"
+      >
+        <h3 class="text-xl font-bold text-slate-800">Notifications</h3>
+        <button
+          id="markAllReadBtn"
+          type="button"
+          class="text-sm font-medium text-[#007E85] hover:opacity-80 transition"
+        >
+          Mark all as read
         </button>
       </div>
+      <div id="notificationList" class="max-h-[430px] overflow-y-auto"></div>
+    </div>
 
-      <div class="p-4 md:p-5 overflow-y-auto max-h-[calc(100vh-180px)]">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-2">
-            <button type="button" id="fullCalNavPrev"
-              class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm">
-              ‹
-            </button>
-            <p id="fullCalTitle" class="text-sm font-semibold text-slate-800 min-w-[140px] text-center"></p>
-            <button type="button" id="fullCalNavNext"
-              class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm">
-              ›
-            </button>
+    <div
+      id="bookingModal"
+      class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[100] p-4"
+    >
+      <div
+        class="bg-white w-full max-w-5xl max-h-[92vh] rounded-3xl shadow-2xl relative overflow-hidden transition-all duration-200"
+      >
+        <button
+          onclick="closeBookingModal()"
+          class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white shadow flex items-center justify-center"
+        >
+          ✕
+        </button>
+
+        <iframe
+          id="bookingIframeHome"
+          src="booking.html"
+          class="w-full border-0 block"
+          scrolling="no"
+          onload="fitHomeBookingIframe(this)"
+        ></iframe>
+      </div>
+    </div>
+
+    <!-- ====================== CALENDAR POPUP START ====================== -->
+    <div
+      id="calendarModal"
+      class="fixed inset-0 hidden items-center justify-center z-[70] bg-black/30 backdrop-blur-sm p-4"
+    >
+      <div
+        class="cal-modal-scroll w-full max-w-3xl bg-white rounded-[32px] shadow-[0_20px_60px_rgba(15,23,42,0.18)] border border-slate-100 overflow-hidden"
+      >
+        <div
+          class="flex items-center justify-between px-6 py-5 border-b border-slate-100"
+        >
+          <div>
+            <h3 class="text-2xl font-bold text-slate-800">Calendar</h3>
+            <p class="text-sm text-slate-400 mt-1">
+              Expanded calendar view with appointment indicator
+            </p>
           </div>
-          <div class="flex items-center gap-2 text-xs text-slate-500">
-            <span class="w-2 h-2 rounded-full bg-red-500 block"></span>
-            <span>Appointment</span>
-          </div>
+          <button
+            id="closeCalendarModal"
+            class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition"
+          >
+            ✕
+          </button>
         </div>
 
-        <div id="fullCalGrid"
-          class="calendar-popup-grid grid grid-cols-7 text-xs text-slate-400 gap-2 text-center mb-6"></div>
+        <div class="p-8">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+              <button
+                type="button"
+                id="fullCalNavPrev"
+                class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700"
+              >
+                ‹
+              </button>
+              <p
+                id="fullCalTitle"
+                class="text-lg font-semibold text-slate-800 min-w-[200px] text-center"
+              ></p>
+              <button
+                type="button"
+                id="fullCalNavNext"
+                class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700"
+              >
+                ›
+              </button>
+            </div>
+            <div class="flex items-center gap-3 text-sm text-slate-500">
+              <span
+                style="
+                  width: 8px;
+                  height: 8px;
+                  border-radius: 50%;
+                  background: #007e85;
+                  display: inline-block;
+                "
+              ></span>
+              <span>Appointment</span>
+            </div>
+          </div>
 
-        <div class="rounded-[16px] bg-slate-50 border border-slate-100 p-4">
-          <h4 class="text-xs font-semibold text-slate-800 mb-2">
-            Appointments on selected day
-          </h4>
-          <div id="calendarDayDetail" class="space-y-1.5">
-            <p class="text-xs text-slate-500 leading-5">
-              Select a date on the calendar to view visit details.
-            </p>
+          <div
+            id="fullCalGrid"
+            class="calendar-popup-grid grid grid-cols-7 text-sm text-slate-400 gap-y-5 text-center mb-8"
+          ></div>
+
+          <div class="rounded-[24px] bg-slate-50 border border-slate-100 p-5">
+            <h4 class="text-base font-semibold text-slate-800 mb-3">
+              Appointments on selected day
+            </h4>
+            <div
+              id="calendarDayDetail"
+              class="apt-list-scroll space-y-2 max-h-[280px] overflow-y-auto overflow-x-hidden pr-2"
+            >
+              <p class="text-sm text-slate-500 leading-6">
+                Select a date on the calendar to view visit details. Red dots
+                mark days with at least one appointment.
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <!-- ======================= CALENDAR POPUP END ======================= -->
+    <!-- ======================= CALENDAR POPUP END ======================= -->
 
-  <script src="patient-common.js"></script>
-  <script src="homepage.js"></script>
-  <script>
-    lucide.createIcons();
+    <script src="patient-common.js"></script>
+    <script src="homepage.js"></script>
+    <div
+      id="successToast"
+      class="fixed inset-0 hidden items-center justify-center z-[300] bg-black/25 backdrop-blur-sm"
+    >
+      <div
+        class="bg-white rounded-[28px] shadow-[0_20px_60px_rgba(15,23,42,0.18)] px-8 py-7 w-[90%] max-w-md text-center border border-emerald-100"
+      >
+        <div
+          class="mx-auto mb-4 w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-8 h-8 text-emerald-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        </div>
+        <h3 class="toast-title text-2xl font-bold text-slate-800 mb-2">
+          Success
+        </h3>
+        <p class="toast-text text-slate-500 text-base">
+          Appointment booked successfully.
+        </p>
+      </div>
+    </div>
 
-    function openBookingModal() {
-      const modal = document.getElementById("bookingModal");
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
-    }
+    <script>
+      lucide.createIcons();
 
-    function closeBookingModal() {
-      const modal = document.getElementById("bookingModal");
-      modal.classList.add("hidden");
-      modal.classList.remove("flex");
-    }
-  </script>
-  <!-- Security: Cache Prevention & Session Verification -->
-  <script src="../../src/js/cache-prevention.js"></script>
-</body>
+      async function openBookingModal() {
+        try {
+          const seg = window.location.pathname.split("/").filter(Boolean)[0];
+          const base = seg ? `/${seg}/api` : "/api";
+          const r = await fetch(`${base}/patient/profile.php`, {
+            credentials: "include",
+          });
+          const j = await r.json();
+          if (j.status === "success" && j.data) {
+            const d = j.data;
+            const fields = [
+              d.full_name,
+              d.email,
+              d.contact_number,
+              d.dob,
+              d.gender,
+              d.blood_group,
+              d.address,
+              d.emergency_contact_name,
+              d.emergency_contact_phone,
+            ];
+            const complete = fields.every((f) => f && String(f).trim() !== "");
+            if (!complete) {
+              const ov = document.createElement("div");
+              ov.style.cssText =
+                "position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;background:rgba(0,0,0,0.25);backdrop-filter:blur(4px);";
+              ov.innerHTML =
+                '<div style="background:#fff;border-radius:28px;box-shadow:0 20px 60px rgba(15,23,42,0.18);padding:28px 32px;width:90%;max-width:420px;text-align:center;border:1px solid #fef3c7;"><div style="margin:0 auto 16px;width:64px;height:64px;border-radius:50%;background:#fef3c7;display:flex;align-items:center;justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" style="width:32px;height:32px;color:#d97706;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><h3 style="font-size:24px;font-weight:700;color:#1e293b;margin-bottom:8px;">Profile Incomplete</h3><p style="color:#64748b;font-size:16px;">Please complete your profile before booking. Redirecting...</p></div>';
+              document.body.appendChild(ov);
+              setTimeout(function () {
+                window.location.href = "profile.html";
+              }, 2000);
+              return;
+            }
+          } else {
+            window.location.href = "profile.html";
+            return;
+          }
+        } catch (err) {
+          console.error("Profile check error:", err);
+          window.location.href = "profile.html";
+          return;
+        }
+        var modal = document.getElementById("bookingModal");
+        var iframe = document.getElementById("bookingIframeHome");
+        var modalInner = document.querySelector("#bookingModal > div");
+        // Reset height before loading fresh src
+        iframe.style.height = "0px";
+        if (modalInner) modalInner.style.height = "";
+        iframe.src = "booking.html?t=" + Date.now();
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
 
+      function fitHomeBookingIframe(iframe) {
+        try {
+          const doc = iframe.contentDocument || iframe.contentWindow.document;
+          const height = doc.documentElement.scrollHeight || doc.body.scrollHeight;
+          const maxH = Math.floor(window.innerHeight * 0.88);
+          const h = Math.min(height, maxH);
+          iframe.style.height = h + "px";
+          const modalInner = document.querySelector("#bookingModal > div");
+          if (modalInner) modalInner.style.height = h + "px";
+        } catch (e) {
+          iframe.style.height = "380px";
+        }
+      }
+
+      function closeBookingModal() {
+        const modal = document.getElementById("bookingModal");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+
+      function showSuccessToast(title, text) {
+        const toast = document.getElementById("successToast");
+        const t = toast.querySelector(".toast-title");
+        const x = toast.querySelector(".toast-text");
+        if (t) t.textContent = title;
+        if (x) x.textContent = text;
+        toast.classList.remove("hidden");
+        toast.classList.add("flex");
+        setTimeout(() => {
+          toast.classList.add("hidden");
+          toast.classList.remove("flex");
+        }, 2000);
+      }
+
+      window.addEventListener("message", async function (event) {
+        if (!event.data) return;
+        if (event.data.type === "booking:height") {
+          const iframe = document.querySelector("#bookingModal iframe");
+          const modalInner = document.querySelector("#bookingModal > div");
+          if (iframe && modalInner) {
+            const h = Math.min(
+              event.data.height,
+              Math.floor(window.innerHeight * 0.92),
+            );
+            iframe.style.height = h + "px";
+            modalInner.style.height = h + "px";
+          }
+        }
+        if (event.data.type === "patient-booking-done") {
+          closeBookingModal();
+          showSuccessToast("Success", "Your appointment was saved.");
+          try {
+            const home = await loadHomeData();
+            applyHomeToUI(home);
+            await renderMiniCalendar();
+          } catch (e) {
+            console.error(e);
+          }
+        }
+        if (event.data.type === "booking:close") {
+          closeBookingModal();
+        }
+      });
+    </script>
+    <!-- Security: Cache Prevention & Session Verification -->
+    <script src="../../src/js/cache-prevention.js"></script>
+  </body>
 </html>

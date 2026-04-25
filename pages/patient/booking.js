@@ -170,6 +170,33 @@ document.getElementById("closeSuccessModal").addEventListener("click", () => {
 bookingForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
+  // --- Profile completion check ---
+  try {
+    const profileRes = await fetch(`${API_BASE}/patient/profile.php`, { credentials: "include" });
+    const profileJson = await profileRes.json();
+    if (profileJson.status === "success" && profileJson.data) {
+      const p = profileJson.data;
+      const fields = [
+        p.full_name, p.email, p.contact_number, p.dob,
+        p.age, p.gender, p.blood_group, p.address,
+        p.emergency_contact_name, p.emergency_contact_phone
+      ];
+      const complete = fields.every(f => f !== null && f !== undefined && String(f).trim() !== "");
+      if (!complete) {
+        // Notify parent dashboard to show popup and redirect
+        if (window.self !== window.top) {
+          window.parent.postMessage({ type: "profile-incomplete-redirect" }, "*");
+        } else {
+          window.location.href = "profile.html";
+        }
+        return;
+      }
+    }
+  } catch (err) {
+    console.error("Profile check error:", err);
+  }
+  // --- End profile check ---
+
   const doctorId = document.getElementById("doctor").value;
   const availId = parseInt(document.getElementById("availId").value, 10);
   const description = document.getElementById("description").value.trim();
@@ -212,9 +239,7 @@ bookingForm.addEventListener("submit", async (e) => {
         return;
       }
       if (!j.appointment_id || j.appointment_id < 1) {
-        alert(
-          "Booking did not save correctly (no appointment id). Check the server log or try again.",
-        );
+        alert("Booking did not save correctly (no appointment id). Check the server log or try again.");
         return;
       }
     }
@@ -224,16 +249,9 @@ bookingForm.addEventListener("submit", async (e) => {
     document.getElementById("patientName").value = patientName;
     rescheduleAppointmentId = null;
     document.getElementById("confirmBtn").textContent = "Confirm Booking";
-    
-    // Show success modal
-    const modal = document.getElementById("successModal");
-    modal.classList.remove("hidden");
-    
-    // Auto-close after 2 seconds and notify parent
-    setTimeout(() => {
-      modal.classList.add("hidden");
-      window.parent.postMessage({ type: "patient-booking-done" }, "*");
-    }, 2000);
+
+    // Notify parent — parent handles the single success popup
+    window.parent.postMessage({ type: "patient-booking-done" }, "*");
   } catch (err) {
     console.error(err);
     alert("Something went wrong.");
