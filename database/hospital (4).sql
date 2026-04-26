@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 25, 2026 at 10:15 AM
+-- Generation Time: Apr 26, 2026 at 03:52 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -41,8 +41,9 @@ CREATE TABLE `appointments` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `doctor_notes` text DEFAULT NULL,
   `prescriptions` text DEFAULT NULL,
+  `next_followup_date` date DEFAULT NULL,
+  `next_followup_time` time DEFAULT NULL,
   `next_followup_id` int(11) DEFAULT NULL,
-  `rating` int(11) DEFAULT 0,
   `feedback` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -50,14 +51,14 @@ CREATE TABLE `appointments` (
 -- Dumping data for table `appointments`
 --
 
-INSERT INTO `appointments` (`appointment_id`, `patient_id`, `doctor_id`, `app_date`, `app_time`, `room_num`, `reason_for_visit`, `doctor_comments`, `prescribed_medicines`, `status`, `created_at`, `doctor_notes`, `prescriptions`, `next_followup_id`, `rating`, `feedback`) VALUES
-(7, 'PAT_USER', 'DOC_SARAH', '2026-04-05', '09:00:00', 'Room A1', 'Routine heart checkup', NULL, NULL, 'Completed', '2026-04-05 13:43:03', NULL, NULL, NULL, 0, NULL),
-(8, 'PAT_002', 'DOC_EMILY', '2026-04-05', '11:30:00', 'Room B3', 'Child vaccination', 'Checking Done, Patient is now completely fine.', NULL, 'Completed', '2026-04-05 13:43:03', NULL, NULL, NULL, 0, NULL),
-(9, 'PAT_003', 'DOC_MIKE', '2026-04-02', '10:00:00', 'Room C2', 'Recurring headaches', NULL, NULL, 'Completed', '2026-04-05 13:43:03', NULL, NULL, NULL, 0, NULL),
-(17, 'PAT_002', 'DOC_ARJUN', '2026-04-12', '16:00:00', 'Room A1', 'Headache', NULL, NULL, 'Completed', '2026-04-12 05:24:43', '', '', NULL, 4, ''),
-(18, 'PAT_003', 'DOC_ARJUN', '2026-04-12', '12:00:00', 'Room A1', 'Cold', '', '', 'Completed', '2026-04-12 05:27:39', NULL, NULL, NULL, 0, NULL),
-(20, 'PAT_002', 'DOC_SARAH', '2026-04-20', '11:00:00', 'Room A1', 'fever', NULL, NULL, 'Upcoming', '2026-04-19 14:03:08', NULL, NULL, NULL, 0, NULL),
-(21, 'PAT_002', 'DOC_SARAH', '2026-04-24', '09:00:00', 'Room A1', 'High Fever and Chest Pain', NULL, NULL, 'Upcoming', '2026-04-23 11:27:50', NULL, NULL, NULL, 0, NULL);
+INSERT INTO `appointments` (`appointment_id`, `patient_id`, `doctor_id`, `app_date`, `app_time`, `room_num`, `reason_for_visit`, `doctor_comments`, `prescribed_medicines`, `status`, `created_at`, `doctor_notes`, `prescriptions`, `next_followup_date`, `next_followup_time`, `next_followup_id`, `feedback`) VALUES
+(7, 'PAT_USER', 'DOC_SARAH', '2026-04-05', '09:00:00', 'Room A1', 'Routine heart checkup', NULL, NULL, 'Completed', '2026-04-05 13:43:03', NULL, NULL, NULL, NULL, NULL, NULL),
+(8, 'PAT_002', 'DOC_EMILY', '2026-04-05', '11:30:00', 'Room B3', 'Child vaccination', 'Checking Done, Patient is now completely fine.', NULL, 'Completed', '2026-04-05 13:43:03', NULL, NULL, NULL, NULL, NULL, NULL),
+(9, 'PAT_003', 'DOC_MIKE', '2026-04-02', '10:00:00', 'Room C2', 'Recurring headaches', NULL, NULL, 'Completed', '2026-04-05 13:43:03', NULL, NULL, NULL, NULL, NULL, NULL),
+(17, 'PAT_002', 'DOC_ARJUN', '2026-04-12', '16:00:00', 'Room A1', 'Headache', NULL, NULL, 'Completed', '2026-04-12 05:24:43', '', '', NULL, NULL, NULL, ''),
+(18, 'PAT_003', 'DOC_ARJUN', '2026-04-12', '12:00:00', 'Room A1', 'Cold', '', '', 'Completed', '2026-04-12 05:27:39', NULL, NULL, NULL, NULL, NULL, NULL),
+(20, 'PAT_002', 'DOC_SARAH', '2026-04-20', '11:00:00', 'Room A1', 'fever', NULL, NULL, 'Upcoming', '2026-04-19 14:03:08', NULL, NULL, NULL, NULL, NULL, NULL),
+(21, 'PAT_002', 'DOC_SARAH', '2026-04-24', '09:00:00', 'Room A1', 'High Fever and Chest Pain', NULL, NULL, 'Upcoming', '2026-04-23 11:27:50', NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -136,7 +137,8 @@ INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `s
 (45, 'DOC_SARAH', '2026-04-20', '12:00:00', '13:00:00', 'Available'),
 (48, 'DOC_ARJUN', '2026-04-23', '16:00:00', '17:00:00', 'Available'),
 (49, 'DOC_SARAH', '2026-04-24', '09:00:00', '10:00:00', 'Booked'),
-(50, 'DOC_SARAH', '2026-04-24', '15:00:00', '16:00:00', 'Available');
+(50, 'DOC_SARAH', '2026-04-24', '15:00:00', '16:00:00', 'Available'),
+(51, 'DOC_SARAH', '2026-04-26', '09:00:00', '10:00:00', 'Available');
 
 -- --------------------------------------------------------
 
@@ -146,6 +148,7 @@ INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `s
 
 CREATE TABLE `doctor_profiles` (
   `user_id` varchar(20) NOT NULL,
+  `medical_id` varchar(50) NOT NULL,
   `specialization` varchar(100) NOT NULL,
   `contact_number` varchar(20) NOT NULL,
   `experience_years` int(2) DEFAULT NULL,
@@ -159,12 +162,12 @@ CREATE TABLE `doctor_profiles` (
 -- Dumping data for table `doctor_profiles`
 --
 
-INSERT INTO `doctor_profiles` (`user_id`, `specialization`, `contact_number`, `experience_years`, `qualifications`, `consultation_fee`, `bio`, `age`) VALUES
-('DOC_ARJUN', 'Dermatologist', '', NULL, NULL, 800.00, '{\"phone\":\"9876098765\",\"experience\":\"5 years\",\"qualification\":\"Masters in Health Science\",\"description\":\"\",\"availability_info\":\"\"}', 37),
-('DOC_EA8D58', 'General', '', NULL, NULL, 500.00, 'Senior Dentist', NULL),
-('DOC_EMILY', 'Pediatrician', '', NULL, NULL, 600.00, 'Caring for children from birth to young adulthood.', NULL),
-('DOC_MIKE', 'Neurologist', '', NULL, NULL, 900.00, 'Specializes in brain and nervous system disorders.', NULL),
-('DOC_SARAH', 'Cardiology', '', NULL, NULL, 740.00, '{\"phone\":\"9871098780\",\"experience\":\"12\",\"qualification\":\"Masters in Health Science\",\"description\":\"Iam health expert. I can do literally everything. Iam the best. Please hire me ok. Otherwise tumhara khel khatam. ok then mind it ok.\"}', 50);
+INSERT INTO `doctor_profiles` (`user_id`, `medical_id`, `specialization`, `contact_number`, `experience_years`, `qualifications`, `consultation_fee`, `bio`, `age`) VALUES
+('DOC_ARJUN', '', 'Cardiology', '9876098765', 5, 'Masters in Health Science', 800.00, 'Myself Amit Mehta. Iam Cardiologist. I can literally do anything and everything so please hire me ok. bye.', 37),
+('DOC_EA8D58', '', 'General', '9876109876', 20, 'MD, FACC - Cardiology & Internal Medicine, Board Certified', 500.00, 'Senior Dentist. I can do anything and everything. I can even make dead people alive..so please hire me ok. bye', 54),
+('DOC_EMILY', '', 'Pediatrician', '', NULL, NULL, 600.00, 'Caring for children from birth to young adulthood.', NULL),
+('DOC_MIKE', '', 'Neurologist', '', NULL, NULL, 900.00, 'Specializes in brain and nervous system disorders.', NULL),
+('DOC_SARAH', '', 'Cardiology', '+1 (555) 123-4567', 15, 'MD, Board Certified Cardiologist', 740.00, 'Experienced cardiologist with 15 years of clinical practice. Specializes in interventional cardiology and heart disease prevention. Published numerous research papers in cardiac medicine.', 45);
 
 -- --------------------------------------------------------
 
@@ -229,7 +232,6 @@ INSERT INTO `notifications` (`notification_id`, `user_id`, `title`, `message`, `
 
 CREATE TABLE `patient_profiles` (
   `user_id` varchar(20) NOT NULL,
-  `dob` date DEFAULT NULL,
   `blood_group` varchar(5) DEFAULT NULL,
   `gender` varchar(20) DEFAULT NULL,
   `contact_number` varchar(15) DEFAULT NULL,
@@ -243,12 +245,12 @@ CREATE TABLE `patient_profiles` (
 -- Dumping data for table `patient_profiles`
 --
 
-INSERT INTO `patient_profiles` (`user_id`, `dob`, `blood_group`, `gender`, `contact_number`, `address`, `emergency_contact_name`, `emergency_contact_phone`, `age`) VALUES
-('PAT_002', '1995-04-12', 'O+', 'Male', '9801112223', 'Lalitpur, Nepal', NULL, NULL, 23),
-('PAT_003', '1988-11-20', 'A-', 'Male', '9803334445', 'Bhaktapur, Nepal', 'James Willson', '9871609876', 36),
-('PAT_004', '1992-06-15', 'B+', NULL, '9805556667', 'Pokhara, Nepal', NULL, NULL, NULL),
-('PAT_9628', '2006-01-01', NULL, NULL, '9876109876', NULL, NULL, NULL, NULL),
-('PAT_USER', '1990-05-15', 'O+', NULL, '9801112220', 'Kathmandu, Nepal', NULL, NULL, NULL);
+INSERT INTO `patient_profiles` (`user_id`, `blood_group`, `gender`, `contact_number`, `address`, `emergency_contact_name`, `emergency_contact_phone`, `age`) VALUES
+('PAT_002', 'O+', 'Male', '9801112223', 'Lalitpur, Nepal', 'Ashmit Dahal', '9876541098', 23),
+('PAT_003', 'A-', 'Male', '9803334445', 'Bhaktapur, Nepal', 'James Willson', '9871609876', 36),
+('PAT_004', 'B+', NULL, '9805556667', 'Pokhara, Nepal', NULL, NULL, NULL),
+('PAT_9628', NULL, NULL, '9876109876', NULL, NULL, NULL, NULL),
+('PAT_USER', 'O+', NULL, '9801112220', 'Kathmandu, Nepal', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -275,7 +277,7 @@ INSERT INTO `users` (`user_id`, `full_name`, `email`, `password_hash`, `role`, `
 ('DOC_EA8D58', 'Dr. Subodh Pokharel', 'subodh@email.com', 'hash123', 'Doctor', '2026-04-09 14:16:30'),
 ('DOC_EMILY', 'Dr. Emily Blunt', 'emily@spentra.com', 'hash123', 'Doctor', '2026-04-05 13:43:02'),
 ('DOC_MIKE', 'Dr. Mike Ross', 'mike@spentra.com', 'hash123', 'Doctor', '2026-04-05 13:43:02'),
-('DOC_SARAH', 'Dr. Sarah Lee', 'sarah@spentra.com', 'hash123', 'Doctor', '2026-04-05 13:43:02'),
+('DOC_SARAH', 'Dr. Sarah', 'sarah@spentra.com', 'hash123', 'Doctor', '2026-04-05 13:43:02'),
 ('PAT_002', 'Stacy Mitchell', 'stacy@email.com', 'hash123', 'Patient', '2026-04-05 13:43:02'),
 ('PAT_003', 'James Wilson', 'james@emal.com', 'hash123', 'Patient', '2026-04-05 13:43:02'),
 ('PAT_004', 'Elina Rodriguez', 'elina@email.com', 'hash123', 'Patient', '2026-04-05 13:43:02'),
@@ -362,7 +364,7 @@ ALTER TABLE `doctor_approvals`
 -- AUTO_INCREMENT for table `doctor_availability`
 --
 ALTER TABLE `doctor_availability`
-  MODIFY `avail_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
+  MODIFY `avail_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
 
 --
 -- AUTO_INCREMENT for table `earnings`
@@ -374,7 +376,7 @@ ALTER TABLE `earnings`
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- Constraints for dumped tables

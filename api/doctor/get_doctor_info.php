@@ -13,7 +13,7 @@ $doctor_id = $_SESSION['user_id'];
 
 try {
     $stmt = $conn->prepare("
-        SELECT u.user_id, u.full_name, u.email, dp.specialization, dp.consultation_fee, dp.age, dp.contact_number, dp.experience_years, dp.qualifications, dp.bio 
+        SELECT u.user_id, u.full_name, u.email, dp.medical_id, dp.specialization, dp.consultation_fee, dp.age, dp.contact_number, dp.experience_years, dp.qualifications, dp.bio 
         FROM users u 
         LEFT JOIN doctor_profiles dp ON u.user_id = dp.user_id 
         WHERE u.user_id = ? AND u.role = 'Doctor'

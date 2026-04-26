@@ -30,6 +30,7 @@ if (!$input) {
 }
 
 $doctor_id = $_SESSION['user_id'];
+$medical_id = trim($input['medical_id'] ?? '');
 $full_name = trim($input['full_name'] ?? '');
 $email = trim($input['email'] ?? '');
 $specialization = trim($input['specialization'] ?? '');
@@ -43,6 +44,9 @@ $description = trim($input['description'] ?? '');
 $errors = [];
 
 // Validate required fields
+if (empty($medical_id)) {
+    $errors[] = 'Medical ID is required';
+}
 if (empty($full_name)) {
     $errors[] = 'Full name is required';
 }
@@ -79,6 +83,9 @@ if (!empty($full_name) && strlen($full_name) < 2) {
 }
 if (!empty($specialization) && strlen($specialization) < 2) {
     $errors[] = 'Specialization must be at least 2 characters';
+}
+if (!empty($medical_id) && strlen($medical_id) < 4) {
+    $errors[] = 'Medical ID must be at least 4 characters';
 }
 
 // Validate phone format
@@ -127,26 +134,26 @@ try {
 
     if ($exists) {
         // Update existing profile with individual columns
-        $update_stmt = $conn->prepare("UPDATE doctor_profiles SET specialization = ?, contact_number = ?, experience_years = ?, qualifications = ?, age = ?, bio = ? WHERE user_id = ?");
+        $update_stmt = $conn->prepare("UPDATE doctor_profiles SET medical_id = ?, specialization = ?, contact_number = ?, experience_years = ?, qualifications = ?, age = ?, bio = ? WHERE user_id = ?");
         if (!$update_stmt) {
             throw new Exception("Prepare failed: " . $conn->error);
         }
         
         $experience_years = (int)$experience; // Convert experience to years
-        $update_stmt->bind_param("ssissss", $specialization, $phone, $experience_years, $qualification, $age, $bio_data, $doctor_id);
+        $update_stmt->bind_param("sssissss", $medical_id, $specialization, $phone, $experience_years, $qualification, $age, $bio_data, $doctor_id);
         if (!$update_stmt->execute()) {
             throw new Exception("Execute failed: " . $update_stmt->error);
         }
         $update_stmt->close();
     } else {
         // Insert new profile with individual columns
-        $insert_stmt = $conn->prepare("INSERT INTO doctor_profiles (user_id, specialization, contact_number, experience_years, qualifications, age, consultation_fee, bio) VALUES (?, ?, ?, ?, ?, ?, 500.00, ?)");
+        $insert_stmt = $conn->prepare("INSERT INTO doctor_profiles (user_id, medical_id, specialization, contact_number, experience_years, qualifications, age, consultation_fee, bio) VALUES (?, ?, ?, ?, ?, ?, ?, 500.00, ?)");
         if (!$insert_stmt) {
             throw new Exception("Prepare failed: " . $conn->error);
         }
         
         $experience_years = (int)$experience; // Convert experience to years
-        $insert_stmt->bind_param("ssissss", $doctor_id, $specialization, $phone, $experience_years, $qualification, $age, $bio_data);
+        $insert_stmt->bind_param("ssssisss", $doctor_id, $medical_id, $specialization, $phone, $experience_years, $qualification, $age, $bio_data);
         if (!$insert_stmt->execute()) {
             throw new Exception("Execute failed: " . $insert_stmt->error);
         }
@@ -158,6 +165,7 @@ try {
         'status' => 'success',
         'message' => 'Profile updated successfully',
         'data' => [
+            'medical_id' => $medical_id,
             'full_name' => $full_name,
             'email' => $email,
             'specialization' => $specialization,

@@ -86,6 +86,7 @@ function toggleEditMode(isEdit) {
 }
 
 function fillEditForm() {
+  setEditFieldValue("editMedicalId", doctorProfile.medical_id);
   setEditFieldValue("editName", doctorProfile.full_name);
   setEditFieldValue("editEmail", doctorProfile.email);
   setEditFieldValue("editPhone", doctorProfile.phone);
@@ -116,7 +117,8 @@ function updateViewMode() {
   if (initialElem) initialElem.textContent = initials || "D";
   
   // Update view mode content
-  document.getElementById("viewMedicalId").textContent = doctorProfile.user_id || "-";
+  document.getElementById("viewMedicalId").textContent = doctorProfile.medical_id || "-";
+  document.getElementById("viewDoctorId").textContent = doctorProfile.user_id || "-";
   document.getElementById("viewName").textContent = doctorProfile.full_name || "-";
   document.getElementById("viewEmail").textContent = doctorProfile.email || "-";
   document.getElementById("viewPhone").textContent = doctorProfile.phone || "-";
@@ -139,12 +141,12 @@ function isValidPhone(phone) {
 }
 
 function clearValidationErrors() {
-  const errorIds = ["nameError", "emailError", "phoneError", "ageError", "specError", "expError", "qualError", "descError"];
+  const errorIds = ["medicalIdError", "nameError", "emailError", "phoneError", "ageError", "specError", "expError", "qualError", "descError"];
   errorIds.forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.classList.add("hidden");
   });
-  const inputIds = ["editName", "editEmail", "editPhone", "editAge", "editSpecialization", "editExperience", "editQualification", "editDescription"];
+  const inputIds = ["editMedicalId", "editName", "editEmail", "editPhone", "editAge", "editSpecialization", "editExperience", "editQualification", "editDescription"];
   inputIds.forEach((id) => {
     const input = document.getElementById(id);
     if (input) {
@@ -173,6 +175,16 @@ function setFieldError(inputId, errorId, message, show) {
 function validateForm() {
   clearValidationErrors();
   let isValid = true;
+
+  // Validate Medical ID
+  const medicalId = getEditFieldValue("editMedicalId");
+  if (!medicalId) {
+    setFieldError("editMedicalId", "medicalIdError", "Medical ID is required", true);
+    isValid = false;
+  } else if (medicalId.length < 4) {
+    setFieldError("editMedicalId", "medicalIdError", "Medical ID must be at least 4 characters", true);
+    isValid = false;
+  }
 
   // Validate Full Name
   const name = getEditFieldValue("editName");
@@ -257,6 +269,7 @@ function validateForm() {
 function loadMockProfile() {
   console.warn("Loading mock profile for testing...");
   doctorProfile = {
+    medical_id: "MED-0000",
     full_name: "Dr. John Smith",
     email: "john.smith@example.com",
     phone: "+1 (555) 123-4567",
@@ -331,6 +344,7 @@ async function loadProfile() {
     
     doctorProfile = {
       user_id: profileData.user_id || "",
+      medical_id: profileData.medical_id || "",
       full_name: profileData.full_name || "",
       email: profileData.email || "",
       phone: phoneValue,
@@ -357,6 +371,7 @@ async function saveProfile() {
   }
 
   const payload = {
+    medical_id: getEditFieldValue("editMedicalId"),
     full_name: getEditFieldValue("editName"),
     email: getEditFieldValue("editEmail"),
     specialization: getEditFieldValue("editSpecialization"),

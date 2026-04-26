@@ -12,9 +12,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $role = ($_POST['role'] ?? '') === 'Medical Professional' ? 'Doctor' : 'Patient';
     $password = $_POST['password'] ?? ''; 
     $bio = trim($_POST['bio'] ?? '');
+    $medical_id = trim($_POST['medical_id'] ?? '');
+    $profession = trim($_POST['profession'] ?? '');
 
     // Default values for doctors (can be updated by admin later)
-    $specialization = 'General';
+    $specialization = !empty($profession) ? $profession : 'General';
     $consultation_fee = 500.00;
 
     if (empty($full_name) || empty($email) || empty($password)) {
@@ -99,17 +101,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     } else if ($role === 'Doctor') {
         try {
+            if (empty($medical_id)) {
+                throw new Exception("Medical ID is required for medical professionals.");
+            }
+
             // Inserting into the staging table. Password remains plain text as requested.
             // Store phone, bio in bio column for now - will be moved to individual columns upon admin approval
             $bio_data = json_encode([
                 'phone' => $phone,
                 'age' => $age,
+                'medical_id' => $medical_id,
+                'specialization' => $specialization,
                 'bio' => $bio
             ]);
-            
-            $stmt = $conn->prepare("INSERT INTO doctor_approvals (full_name, email, password_hash, specialization, consultation_fee, bio, status) VALUES (?, ?, ?, ?, ?, ?, 'Pending')");
-            $stmt->bind_param("ssssds", $full_name, $email, $password, $specialization, $consultation_fee, $bio_data);
+
+            // Support both schemas: with and without doctor_approvals.medical_id
+            $approvalCols = [];
+            $colRes = $conn->query("SHOW COLUMNS FROM doctor_approvals");
+            if ($colRes) {
+                while ($row = $colRes->fetch_assoc()) {
+                    $approvalCols[$row['Field']] = true;
+                }
+            }
+
+            if (isset($approvalCols['medical_id'])) {
+                $stmt = $conn->prepare("INSERT INTO doctor_approvals (full_name, email, password_hash, medical_id, specialization, consultation_fee, bio, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')");
+            } else {
+                $stmt = $conn->prepare("INSERT INTO doctor_approvals (full_name, email, password_hash, specialization, consultation_fee, bio, status) VALUES (?, ?, ?, ?, ?, ?, 'Pending')");
+            }
+
+            if (!$stmt) {
+                throw new Exception("Prepare failed: " . $conn->error);
+            }
+
+            if (isset($approvalCols['medical_id'])) {
+                $stmt->bind_param("sssssds", $full_name, $email, $password, $medical_id, $specialization, $consultation_fee, $bio_data);
+            } else {
+                $stmt->bind_param("ssssds", $full_name, $email, $password, $specialization, $consultation_fee, $bio_data);
+            }
+
             $stmt->execute();
+            $stmt->close();
             
             echo json_encode(["status" => "success", "message" => "Application submitted! Please wait for Admin approval.", "redirect" => "login.html"]);
         } catch(Exception $e) {

@@ -165,7 +165,7 @@
                 </div>
                 <div class="bg-white/20 backdrop-blur-md rounded-2xl p-3 border border-white/20">
                   <p class="text-[10px] opacity-90 mb-0.5">Verified Fields</p>
-                  <p class="text-2xl font-bold" id="verifiedFields">8</p>
+                  <p class="text-2xl font-bold" id="verifiedFields">9</p>
                 </div>
                 <div class="bg-white/20 backdrop-blur-md rounded-2xl p-3 border border-white/20">
                   <p class="text-[10px] opacity-90 mb-0.5">Last Updated</p>
@@ -200,6 +200,10 @@
                     <div class="flex justify-between items-center py-2 border-b border-gray-50">
                       <span class="text-gray-600 text-xs">Medical ID</span>
                       <span class="text-gray-800 font-medium text-xs" id="viewMedicalId">-</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 border-b border-gray-50">
+                      <span class="text-gray-600 text-xs">Doctor ID</span>
+                      <span class="text-gray-800 font-medium text-xs" id="viewDoctorId">-</span>
                     </div>
                     <div class="flex justify-between items-center py-2 border-b border-gray-50">
                       <span class="text-gray-600 text-xs">Full Name</span>
@@ -253,6 +257,12 @@
                   <div class="border-b border-gray-100 pb-4 mb-4">
                     <h4 class="text-xs font-semibold text-gray-700 mb-3">Personal Information</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Medical ID <span class="text-red-500">*</span></label>
+                        <input type="text" id="editMedicalId" required
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-xs" />
+                        <p class="text-[10px] text-red-500 hidden mt-0.5" id="medicalIdError">Medical ID is required</p>
+                      </div>
                       <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
                         <input type="text" id="editName" required
@@ -362,7 +372,7 @@
                     </div>
                     <div class="flex justify-between items-center">
                       <span>Verified Fields</span>
-                      <span id="accountVerifiedFields" class="text-gray-800 font-medium">8/8</span>
+                      <span id="accountVerifiedFields" class="text-gray-800 font-medium">9/9</span>
                     </div>
                   </div>
                 </div>
@@ -379,408 +389,7 @@
       class="fixed bottom-6 right-6 z-50 flex flex-col gap-2"
     ></div>
 
-    <!-- OLD EMBEDDED SCRIPT REMOVED - Using external profile.js instead -->
-
-    <script>
-      // Placeholder - all functionality is now in profile.js
-      console.log("Doctor profile page loaded");
-      
-      // All old embedded code has been removed.
-      // Using external profile.js for all functionality.
-            // Fallback mock data if API not ready (for demo purposes)
-            console.warn("Using mock data - API not responding");
-            doctorProfile = {
-              doctor_id: 1,
-              full_name: "Dr. Emily Watson",
-              specialization: "Cardiology",
-              phone: "+1 (555) 234-7890",
-              experience: "12+ years",
-              age: 45,
-              qualification:
-                "MD, FACC - Cardiology & Internal Medicine, Board Certified",
-              description:
-                "Experienced cardiologist with over a decade of expertise in preventive cardiology, echocardiography, and patient-centered care.",
-              availability_info:
-                "Mon-Fri: 9AM - 5PM | Sat: 10AM - 2PM (Telehealth available)",
-            };
-            return doctorProfile;
-          }
-        } catch (error) {
-          console.error("Error fetching profile:", error);
-          // Fallback mock data
-          doctorProfile = {
-            full_name: "Dr. Emily Watson",
-            specialization: "Cardiology",
-            phone: "+1 (555) 234-7890",
-            experience: "12+ years",
-            age: 45,
-            qualification:
-              "MD, FACC - Cardiology & Internal Medicine, Board Certified",
-            description:
-              "Experienced cardiologist with over a decade of expertise in preventive cardiology, echocardiography, and patient-centered care.",
-            availability_info:
-              "Mon-Fri: 9AM - 5PM | Sat: 10AM - 2PM (Telehealth available)",
-          };
-          return doctorProfile;
-        }
-      }
-
-      // Helper: Update all view fields
-      function updateViewModeDisplay() {
-        if (!doctorProfile) return;
-
-        document.getElementById("viewName").textContent =
-          doctorProfile.full_name || doctorProfile.name || "-";
-        document.getElementById("viewEmail").textContent =
-          doctorProfile.email || "-";
-        document.getElementById("viewSpecialization").textContent =
-          doctorProfile.specialization || "-";
-        document.getElementById("viewPhone").textContent =
-          doctorProfile.phone || "-";
-        document.getElementById("viewExperience").textContent =
-          doctorProfile.experience || "-";
-        document.getElementById("viewAge").textContent =
-          doctorProfile.age || "-";
-        document.getElementById("viewQualification").textContent =
-          doctorProfile.qualification || "-";
-        document.getElementById("viewDescription").textContent =
-          doctorProfile.description || "No description provided";
-
-        document.getElementById("doctorNameDisplay").textContent =
-          doctorProfile.full_name || doctorProfile.name || "Doctor";
-        document.getElementById("specializationDisplay").textContent =
-          doctorProfile.specialization || "-";
-        document.getElementById("experienceDisplay").textContent =
-          doctorProfile.experience || "-";
-      }
-
-      // Helper: Fill edit form with current profile data
-      function fillEditForm() {
-        document.getElementById("editName").value =
-          doctorProfile.full_name || doctorProfile.name || "";
-        document.getElementById("editEmail").value = doctorProfile.email || "";
-        document.getElementById("editSpecialization").value =
-          doctorProfile.specialization || "";
-        document.getElementById("editPhone").value = doctorProfile.phone || "";
-        document.getElementById("editExperience").value =
-          doctorProfile.experience || "";
-        document.getElementById("editAge").value = doctorProfile.age || "";
-        document.getElementById("editQualification").value =
-          doctorProfile.qualification || "";
-        document.getElementById("editDescription").value =
-          doctorProfile.description || "";
-      }
-
-      // Validation helpers
-      function isValidPhone(phone) {
-        const digits = phone.replace(/[\s\(\)\+-]/g, "");
-        return digits.length >= 8 && /^\d+$/.test(digits);
-      }
-
-      function clearValidationErrors() {
-        const errors = [
-          "nameError",
-          "emailError",
-          "specError",
-          "phoneError",
-          "expError",
-          "ageError",
-          "qualError",
-          "descError",
-        ];
-        errors.forEach((id) => {
-          const el = document.getElementById(id);
-          if (el) el.classList.add("hidden");
-        });
-        const inputs = [
-          "editName",
-          "editEmail",
-          "editSpecialization",
-          "editPhone",
-          "editExperience",
-          "editAge",
-          "editQualification",
-          "editDescription",
-        ];
-        inputs.forEach((id) => {
-          const input = document.getElementById(id);
-          if (input) {
-            input.classList.remove("border-red-500", "ring-red-100");
-            input.classList.add("border-gray-300");
-          }
-        });
-      }
-
-      function setFieldError(inputId, errorId, message, show) {
-        const input = document.getElementById(inputId);
-        const error = document.getElementById(errorId);
-        if (!input || !error) return;
-        if (show) {
-          error.textContent = message;
-          error.classList.remove("hidden");
-          input.classList.remove("border-gray-300");
-          input.classList.add("border-red-500");
-        } else {
-          error.classList.add("hidden");
-          input.classList.remove("border-red-500");
-          input.classList.add("border-gray-300");
-        }
-      }
-
-      function isValidEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-      }
-
-      function validateForm() {
-        clearValidationErrors();
-        let isValid = true;
-
-        const name = document.getElementById("editName").value.trim();
-        if (!name) {
-          setFieldError("editName", "nameError", "Full name is required", true);
-          isValid = false;
-        }
-
-        const email = document.getElementById("editEmail").value.trim();
-        if (!email) {
-          setFieldError("editEmail", "emailError", "Email is required", true);
-          isValid = false;
-        } else if (!isValidEmail(email)) {
-          setFieldError("editEmail", "emailError", "Please enter a valid email address", true);
-          isValid = false;
-        }
-
-        const spec = document.getElementById("editSpecialization").value.trim();
-        if (!spec) {
-          setFieldError(
-            "editSpecialization",
-            "specError",
-            "Specialization is required",
-            true,
-          );
-          isValid = false;
-        }
-
-        const phone = document.getElementById("editPhone").value.trim();
-        if (!phone || !isValidPhone(phone)) {
-          setFieldError(
-            "editPhone",
-            "phoneError",
-            "Valid phone number required (min 8 digits)",
-            true,
-          );
-          isValid = false;
-        }
-
-        const exp = document.getElementById("editExperience").value.trim();
-        if (!exp) {
-          setFieldError(
-            "editExperience",
-            "expError",
-            "Experience is required",
-            true,
-          );
-          isValid = false;
-        }
-
-        const age = document.getElementById("editAge").value.trim();
-        if (!age) {
-          setFieldError(
-            "editAge",
-            "ageError",
-            "Age is required",
-            true,
-          );
-          isValid = false;
-        } else {
-          const ageNum = parseInt(age);
-          if (ageNum < 18 || ageNum > 100) {
-            setFieldError(
-              "editAge",
-              "ageError",
-              "Age must be between 18 and 100",
-              true,
-            );
-            isValid = false;
-          }
-        }
-
-        const qual = document.getElementById("editQualification").value.trim();
-        if (!qual) {
-          setFieldError(
-            "editQualification",
-            "qualError",
-            "Qualification is required",
-            true,
-          );
-          isValid = false;
-        }
-
-        const desc = document.getElementById("editDescription").value.trim();
-        if (!desc) {
-          setFieldError(
-            "editDescription",
-            "descError",
-            "Professional description is required",
-            true,
-          );
-          isValid = false;
-        }
-
-        return isValid;
-      }
-
-      // Backend update call (PUT to update profile)
-      async function updateProfileOnServer(updatedData) {
-        // Try to call actual backend API
-        try {
-          const response = await fetch("../../api/doctor/update_profile.php", {
-            method: "PUT",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              full_name: updatedData.full_name,
-              specialization: updatedData.specialization,
-              phone: updatedData.phone,
-              experience: updatedData.experience,
-              age: updatedData.age,
-              qualification: updatedData.qualification,
-              description: updatedData.description,
-              availability_info: updatedData.availability_info,
-            }),
-          });
-          const result = await response.json();
-          if (result.status === "success") {
-            return { success: true, data: updatedData };
-          } else {
-            return {
-              success: false,
-              message: result.message || "Update failed",
-            };
-          }
-        } catch (error) {
-          console.warn(
-            "API not available, simulating successful update",
-            error,
-          );
-          // Simulate successful update if backend not ready
-          return { success: true, data: updatedData };
-        }
-      }
-
-      // Save handler
-      async function handleSave(e) {
-        e.preventDefault();
-        if (!validateForm()) {
-          showToast("Please fix the errors in the form", "error");
-          return;
-        }
-
-        const saveBtn = document.querySelector(
-          '#profileForm button[type="submit"]',
-        );
-        const originalContent = saveBtn.innerHTML;
-        saveBtn.disabled = true;
-        saveBtn.innerHTML =
-          '<span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span> Saving...';
-
-        const updatedData = {
-          full_name: document.getElementById("editName").value.trim(),
-          email: document.getElementById("editEmail").value.trim(),
-          specialization: document
-            .getElementById("editSpecialization")
-            .value.trim(),
-          phone: document.getElementById("editPhone").value.trim(),
-          experience: document.getElementById("editExperience").value.trim(),
-          age: document.getElementById("editAge").value ? parseInt(document.getElementById("editAge").value) : null,
-          qualification: document
-            .getElementById("editQualification")
-            .value.trim(),
-          description: document.getElementById("editDescription").value.trim(),
-        };
-
-        try {
-          const result = await updateProfileOnServer(updatedData);
-          if (result.success) {
-            // Update local doctorProfile
-            doctorProfile = { ...doctorProfile, ...updatedData };
-            updateViewModeDisplay();
-            showToast(
-              "Profile updated successfully! Changes reflected immediately.",
-              "success",
-            );
-            enterViewMode();
-          } else {
-            showToast(result.message || "Failed to update profile", "error");
-          }
-        } catch (err) {
-          showToast("Network error. Could not update profile.", "error");
-        } finally {
-          saveBtn.disabled = false;
-          saveBtn.innerHTML = originalContent;
-        }
-      }
-
-      // UI Mode Switchers
-      function enterViewMode() {
-        document.getElementById("viewMode").classList.remove("hidden");
-        document.getElementById("editMode").classList.add("hidden");
-        document.getElementById("editProfileBtn").classList.remove("hidden");
-        document.getElementById("cancelEditBtn").classList.add("hidden");
-        clearValidationErrors();
-      }
-
-      function enterEditMode() {
-        fillEditForm();
-        clearValidationErrors();
-        document.getElementById("viewMode").classList.add("hidden");
-        document.getElementById("editMode").classList.remove("hidden");
-        document.getElementById("editProfileBtn").classList.add("hidden");
-        document.getElementById("cancelEditBtn").classList.remove("hidden");
-        // Scroll to edit form
-        document
-          .getElementById("editMode")
-          .scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-
-      function discardChanges() {
-        enterViewMode();
-        showToast(
-          "Changes discarded. Your profile remains unchanged.",
-          "success",
-        );
-      }
-
-      // Initialize page
-      async function init() {
-        updateCurrentDate();
-        await fetchDoctorProfile();
-        updateViewModeDisplay();
-
-        // Set up event listeners
-        document
-          .getElementById("editProfileBtn")
-          .addEventListener("click", enterEditMode);
-        document
-          .getElementById("cancelEditBtn")
-          .addEventListener("click", discardChanges);
-        document
-          .getElementById("discardBtn")
-          .addEventListener("click", discardChanges);
-        document
-          .getElementById("profileForm")
-          .addEventListener("submit", handleSave);
-
-        // Initialize Lucide icons
-        if (typeof lucide !== "undefined") {
-          lucide.createIcons();
-        }
-      }
-
-      // Start the app
-      // init(); // Removed - using external profile.js
-    </script>
+    <!-- Use only external profile.js to avoid conflicting field mappings -->
 
     <script src="../../src/js/cache-prevention.js"></script>
     <script src="profile.js"></script>

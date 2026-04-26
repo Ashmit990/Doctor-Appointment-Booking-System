@@ -468,6 +468,25 @@
 
             <!-- Doctor Specific Fields -->
             <div id="doctorFieldsContainer">
+              <!-- 6. Medical ID -->
+              <div class="group mb-4">
+                <label
+                  class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Medical ID <span class="text-red-500">*</span></label
+                >
+                <input
+                  id="signupMedicalId"
+                  type="text"
+                  class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
+                  placeholder="Enter your medical registration ID"
+                  oninput="clearErr('signupMedicalId')"
+                />
+                <p
+                  id="signupMedicalId_err"
+                  class="hidden text-red-600 text-xs font-semibold mt-1"
+                ></p>
+              </div>
+
               <!-- 6. Profession Selection (Modal Trigger) -->
               <div class="group">
                 <label
@@ -945,6 +964,13 @@
           if (!v) return "Please select your profession/specialization.";
           return null;
         },
+        medicalId(v) {
+          if (!v) return "Medical ID is required for medical professionals.";
+          if (v.length < 4) return "Medical ID must be at least 4 characters.";
+          if (!/^[a-zA-Z0-9_\/-]+$/.test(v))
+            return "Medical ID can only contain letters, numbers, _, / or -.";
+          return null;
+        },
         password(v) {
           if (!v) return "Password is required.";
           if (v.length < 8) return "Password must be at least 8 characters.";
@@ -979,6 +1005,9 @@
           const confirmPassword = document.getElementById(
             "signupConfirmPassword",
           ).value;
+          const medicalId = document
+            .getElementById("signupMedicalId")
+            .value.trim();
           const bio = document.getElementById("signupBio").value.trim();
           const isDoctor = selectedRole === "Medical Professional";
 
@@ -989,6 +1018,7 @@
             "signupPhone",
             "signupPassword",
             "signupConfirmPassword",
+            "signupMedicalId",
             "signupProfession",
             "signupBio",
           ].forEach(clearErr);
@@ -1034,6 +1064,12 @@
           }
 
           if (isDoctor) {
+            const medicalIdErr = Validators.medicalId(medicalId);
+            if (medicalIdErr) {
+              showErr("signupMedicalId", medicalIdErr);
+              hasError = true;
+            }
+
             const profErr = Validators.profession(finalSelectedProfession);
             if (profErr) {
               showErr("signupProfession", profErr);
@@ -1062,6 +1098,7 @@
           formData.append("role", selectedRole);
           formData.append("password", password);
           if (isDoctor) {
+            formData.append("medical_id", medicalId);
             formData.append("bio", bio);
             formData.append("profession", finalSelectedProfession);
           }

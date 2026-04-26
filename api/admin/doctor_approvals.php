@@ -46,11 +46,13 @@ elseif ($method === 'POST') {
             $qualifications = '';
             $bio = $data['bio'];
             $age = null;
+            $medical_id = $data['medical_id'] ?? '';
 
             if (strpos($data['bio'], '{') === 0) {
                 $bio_data = json_decode($data['bio'], true);
                 if (is_array($bio_data)) {
                     $contact_number = $bio_data['phone'] ?? '';
+                    $medical_id = $bio_data['medical_id'] ?? $medical_id;
                     if (!empty($bio_data['experience'])) {
                         $experience_years = (int)$bio_data['experience'];
                     }
@@ -61,8 +63,8 @@ elseif ($method === 'POST') {
             }
 
             // 5. Move to Doctor Profiles with individual columns
-            $stmt = $conn->prepare("INSERT INTO doctor_profiles (user_id, specialization, contact_number, experience_years, qualifications, consultation_fee, bio, age) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("sssisssi", $user_id, $data['specialization'], $contact_number, $experience_years, $qualifications, $data['consultation_fee'], $bio, $age);
+            $stmt = $conn->prepare("INSERT INTO doctor_profiles (user_id, medical_id, specialization, contact_number, experience_years, qualifications, consultation_fee, bio, age) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("ssssisssi", $user_id, $medical_id, $data['specialization'], $contact_number, $experience_years, $qualifications, $data['consultation_fee'], $bio, $age);
             $stmt->execute();
 
             // 6. Update Staging Status
