@@ -1,186 +1,574 @@
 <!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /><meta http-equiv="Pragma" content="no-cache" /><meta http-equiv="Expires" content="0" /><title>Admin Profile – Healthcare</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" /><script src="https://cdn.tailwindcss.com"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
+    />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Admin Profile – Healthcare</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = { theme: { extend: { colors: { teal: { DEFAULT: "#0d7377", dark: "#0a5a5d", light: "#14a3a8", bg: "#e8f5f5" } }, fontFamily: { poppins: ["Poppins", "sans-serif"] } } } };
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              teal: {
+                DEFAULT: "#0d7377",
+                dark: "#0a5a5d",
+                light: "#14a3a8",
+                bg: "#e8f5f5",
+              },
+            },
+            fontFamily: { poppins: ["Poppins", "sans-serif"] },
+          },
+        },
+      };
     </script>
     <style>
-        body { font-family: "Poppins", sans-serif; }
-        .toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; background: #0d7377; color: white; border-radius: 8px; z-index: 1000; }
+      body {
+        font-family: "Poppins", sans-serif;
+      }
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        background: #0d7377;
+        color: white;
+        border-radius: 8px;
+        z-index: 1000;
+        animation: fadeIn 0.3s ease;
+      }
+      .toast.error {
+        background: #dc2626;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Admin ID Verification Modal */
+      #verifyModal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 200;
+        align-items: center;
+        justify-content: center;
+      }
+      #verifyModal.active {
+        display: flex;
+      }
     </style>
-</head>
-<body class="bg-gray-100 text-gray-800 flex min-h-screen">
-    <div id="overlay" class="fixed inset-0 bg-black/40 z-40 hidden lg:hidden" onclick="closeSidebar()"></div>
-    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-60 bg-teal-dark flex flex-col z-50 -translate-x-full lg:translate-x-0 transition-transform duration-300">
-        <div class="px-6 py-7 flex items-center gap-3 border-b border-white/10">
-           <img src="../../src/assets/Logo.svg" alt="">
-            <span class="text-white font-bold text-lg">Healthcare</span>
-        </div>
-        <nav class="p-3 flex-1">
-            <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 text-sm font-medium mb-1 transition-all"><svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" /></svg>Dashboard</a>
-            <a href="users.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 text-sm font-medium mb-1 transition-all"><svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" /></svg>Patients</a>
-            <a href="appointments.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 text-sm font-medium mb-1 transition-all"><svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z" /></svg>Appointments</a>
-            <a href="doctor.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 text-sm font-medium mb-1 transition-all"><svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>Doctors</a>
-            <a href="doctor_approvals.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 text-sm font-medium mb-1 transition-all">
-                <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-2 14l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>Doctor Approvals</a>
-            <a href="reports.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 text-sm font-medium mb-1 transition-all"><svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>Reports</a>
-        </nav>
-        <div class="p-3 border-t border-white/10">
-            <a href="adminprofile.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white bg-white/20 text-sm font-medium mb-1"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>Admin Profile</a>
-            <a href="../../api/auth/logout.php" class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/65 hover:bg-white/10 text-sm font-medium transition-all"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" /></svg>Logout</a>
-        </div>
+  </head>
+  <body class="bg-gray-100 text-gray-800 flex min-h-screen">
+    <div
+      id="overlay"
+      class="fixed inset-0 bg-black/40 z-40 hidden lg:hidden"
+      onclick="closeSidebar()"
+    ></div>
+
+    <!-- Sidebar -->
+    <aside
+      id="sidebar"
+      class="fixed top-0 left-0 bottom-0 w-60 bg-teal-dark flex flex-col z-50 -translate-x-full lg:translate-x-0 transition-transform duration-300"
+    >
+      <div class="px-6 py-7 flex items-center gap-3 border-b border-white/10">
+        <img src="../../src/assets/Logo.svg" alt="" />
+        <span class="text-white font-bold text-lg">Healthcare</span>
+      </div>
+      <nav class="p-3 flex-1">
+        <a
+          href="dashboard.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"
+            />
+          </svg>
+          Dashboard
+        </a>
+        <a
+          href="users.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
+            />
+          </svg>
+          Patients
+        </a>
+        <a
+          href="appointments.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
+            />
+          </svg>
+          Appointments
+        </a>
+        <a
+          href="doctor.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+            />
+          </svg>
+          Doctors
+        </a>
+        <a
+          href="doctor_approvals.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-2 14l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"
+            />
+          </svg>
+          Doctor Approvals
+        </a>
+        <a
+          href="reports.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"
+            />
+          </svg>
+          Reports
+        </a>
+      </nav>
+      <div class="p-3 border-t border-white/10">
+        <a
+          href="adminprofile.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white bg-white/20 text-sm font-medium mb-1"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+            />
+          </svg>
+          Admin Profile
+        </a>
+        <a
+          href="../../api/auth/logout.php"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/65 hover:bg-white/10 text-sm font-medium transition-all"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
+            />
+          </svg>
+          Logout
+        </a>
+      </div>
     </aside>
+
+    <!-- Main -->
     <main class="flex-1 flex flex-col lg:ml-60">
-        <header class="bg-white px-4 md:px-8 py-4 flex items-center justify-between shadow-sm sticky top-0 z-30">
-            <div class="flex items-center gap-3">
-                <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg hover:bg-gray-100"><svg class="w-5 h-5 text-teal-dark" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" /></svg></button>
-                <h1 class="text-base font-semibold text-teal-dark">Admin Profile</h1>
-            </div>
-            <div class="flex items-center gap-4">
-                <span id="current-date" class="text-xs text-gray-500 hidden sm:block"></span>
-                <div class="w-9 h-9 bg-teal rounded-full flex items-center justify-center text-white font-bold text-sm">A</div>
-            </div>
-        </header>
-        <div class="p-4 md:p-8 flex-1 overflow-y-auto max-h-screen">
-            <div class="max-w-2xl">
-                <div class="bg-white rounded-2xl shadow-md p-8 mb-6">
-                    <div class="flex justify-center mb-6">
-                        <div class="w-24 h-24 bg-teal rounded-full flex items-center justify-center text-white text-4xl font-bold">A</div>
-                    </div>
-                    <h2 class="text-2xl font-bold text-center text-teal-dark mb-2" id="profileName">Admin</h2>
-                    <p class="text-center text-gray-600 mb-8" id="profileEmail">admin@healthcare.com</p>
-                    
-                    <form onsubmit="updateProfile(event)" id="profileForm" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-                            <input id="fullName" type="text" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm" required />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-                            <input id="email" type="email" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm" required />
-                        </div>
-                        <div class="pt-4">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Change Password</h3>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Current Password</label>
-                            <input id="currentPassword" type="password" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm" placeholder="Required for verification" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">New Password (Optional)</label>
-                            <input id="newPassword" type="password" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm" placeholder="Leave blank if no change" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Confirm New Password</label>
-                            <input id="confirmPassword" type="password" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm" placeholder="Leave blank if no change" />
-                        </div>
-                        <div class="flex gap-3 pt-6">
-                            <button type="submit" class="flex-1 bg-teal text-white py-3 rounded-lg font-semibold hover:bg-teal-dark transition-colors">Save Changes</button>
-                            <button type="button" onclick="resetForm()" class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+      <header
+        class="bg-white px-4 md:px-8 py-4 flex items-center justify-between shadow-sm sticky top-0 z-30"
+      >
+        <div class="flex items-center gap-3">
+          <button
+            onclick="toggleSidebar()"
+            class="lg:hidden p-2 rounded-lg hover:bg-gray-100"
+          >
+            <svg
+              class="w-5 h-5 text-teal-dark"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+            </svg>
+          </button>
+          <h1 class="text-base font-semibold text-teal-dark">Admin Profile</h1>
         </div>
+        <div class="flex items-center gap-4">
+          <span
+            id="current-date"
+            class="text-xs text-gray-500 hidden sm:block"
+          ></span>
+          <div
+            class="w-9 h-9 bg-teal rounded-full flex items-center justify-center text-white font-bold text-sm"
+          >
+            A
+          </div>
+        </div>
+      </header>
+
+      <!-- Centered content -->
+      <div class="flex-1 flex items-center justify-center p-4 md:p-8">
+        <div class="w-full max-w-xl">
+          <div class="bg-white rounded-2xl shadow-md p-8">
+            <!-- Avatar -->
+            <div class="flex justify-center mb-6">
+              <div
+                class="w-24 h-24 bg-teal rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-lg"
+              >
+                A
+              </div>
+            </div>
+            <h2
+              class="text-2xl font-bold text-center text-teal-dark mb-1"
+              id="profileName"
+            >
+              Admin
+            </h2>
+            <p class="text-center text-gray-500 text-sm mb-8" id="profileEmail">
+              admin@healthcare.com
+            </p>
+
+            <form id="profileForm" class="space-y-4">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2"
+                  >Full Name</label
+                >
+                <input
+                  id="fullName"
+                  type="text"
+                  class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal"
+                  required
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2"
+                  >Email Address</label
+                >
+                <input
+                  id="email"
+                  type="email"
+                  class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal"
+                  required
+                />
+              </div>
+
+              <div class="pt-2">
+                <h3
+                  class="text-base font-semibold text-gray-800 mb-4 border-t pt-4"
+                >
+                  Change Password
+                </h3>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2"
+                  >Current Password</label
+                >
+                <input
+                  id="currentPassword"
+                  type="password"
+                  class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal"
+                  placeholder="Required for verification"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2"
+                  >New Password
+                  <span class="text-gray-400 font-normal"
+                    >(Optional)</span
+                  ></label
+                >
+                <input
+                  id="newPassword"
+                  type="password"
+                  class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal"
+                  placeholder="Leave blank if no change"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2"
+                  >Confirm New Password</label
+                >
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal"
+                  placeholder="Leave blank if no change"
+                />
+              </div>
+
+              <div class="flex gap-3 pt-6">
+                <button
+                  type="button"
+                  onclick="openVerifyModal()"
+                  class="flex-1 bg-teal text-white py-3 rounded-lg font-semibold hover:bg-teal-dark transition-colors"
+                >
+                  Save Changes
+                </button>
+                <button
+                  type="button"
+                  onclick="resetForm()"
+                  class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </main>
+
+    <!-- ====== Admin ID Verification Modal ====== -->
+    <div id="verifyModal" class="active" style="display: none">
+      <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm mx-4">
+        <!-- Lock icon -->
+        <div class="flex justify-center mb-4">
+          <div
+            class="w-16 h-16 bg-teal-bg rounded-full flex items-center justify-center"
+          >
+            <svg
+              class="w-8 h-8 text-teal-dark"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <h3 class="text-xl font-bold text-center text-gray-800 mb-1">
+          Verify Your Identity
+        </h3>
+        <p class="text-sm text-center text-gray-500 mb-6">
+          Enter your Admin ID to confirm changes
+        </p>
+
+        <div class="mb-4">
+          <label class="block text-sm font-semibold text-gray-700 mb-2"
+            >Admin ID</label
+          >
+          <input
+            id="adminIdInput"
+            type="text"
+            placeholder="e.g. ADM_001"
+            class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-teal focus:ring-1 focus:ring-teal"
+            onkeydown="if (event.key === 'Enter') confirmAndSave();"
+          />
+          <p id="adminIdError" class="text-red-500 text-xs mt-1 hidden">
+            Incorrect Admin ID. Please try again.
+          </p>
+        </div>
+
+        <div class="flex gap-3">
+          <button
+            onclick="confirmAndSave()"
+            class="flex-1 bg-teal text-white py-3 rounded-lg font-semibold hover:bg-teal-dark transition-colors"
+          >
+            Confirm
+          </button>
+          <button
+            onclick="closeVerifyModal()"
+            class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script>
-        function updateCurrentDate() {
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', options);
+      // ==================== DATE ====================
+      function updateCurrentDate() {
+        const options = {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        };
+        document.getElementById("current-date").textContent =
+          new Date().toLocaleDateString("en-US", options);
+      }
+
+      // ==================== LOAD PROFILE ====================
+      async function loadProfile() {
+        try {
+          const response = await fetch("../../api/admin/profile.php");
+          const result = await response.json();
+          if (result.status === "success") {
+            document.getElementById("fullName").value = result.data.full_name;
+            document.getElementById("email").value = result.data.email;
+            document.getElementById("profileName").textContent =
+              result.data.full_name;
+            document.getElementById("profileEmail").textContent =
+              result.data.email;
+          }
+        } catch (error) {
+          showToast("Error loading profile", true);
+        }
+      }
+
+      // ==================== VERIFY MODAL ====================
+      function openVerifyModal() {
+        // Basic client-side validation before showing modal
+        const newPassword = document.getElementById("newPassword").value;
+        const confirmPassword =
+          document.getElementById("confirmPassword").value;
+        const currentPassword =
+          document.getElementById("currentPassword").value;
+
+        if (newPassword && newPassword !== confirmPassword) {
+          showToast("New passwords do not match", true);
+          return;
+        }
+        if (!currentPassword) {
+          showToast("Current password is required", true);
+          return;
         }
 
-        async function loadProfile() {
-            try {
-                const response = await fetch('../../api/admin/profile.php');
-                const result = await response.json();
-                if (result.status === 'success') {
-                    document.getElementById('fullName').value = result.data.full_name;
-                    document.getElementById('email').value = result.data.email;
-                    document.getElementById('profileName').textContent = result.data.full_name;
-                    document.getElementById('profileEmail').textContent = result.data.email;
-                }
-            } catch (error) {
-                showToast('Error loading profile');
-            }
+        // Show the modal
+        document.getElementById("adminIdInput").value = "";
+        document.getElementById("adminIdError").classList.add("hidden");
+        document.getElementById("verifyModal").style.display = "flex";
+        setTimeout(() => document.getElementById("adminIdInput").focus(), 100);
+      }
+
+      function closeVerifyModal() {
+        document.getElementById("verifyModal").style.display = "none";
+        document.getElementById("adminIdInput").value = "";
+        document.getElementById("adminIdError").classList.add("hidden");
+      }
+
+      async function confirmAndSave() {
+        const enteredId = document.getElementById("adminIdInput").value.trim();
+
+        if (!enteredId) {
+          document.getElementById("adminIdError").textContent =
+            "Please enter your Admin ID.";
+          document.getElementById("adminIdError").classList.remove("hidden");
+          return;
         }
 
-        async function updateProfile(event) {
-            event.preventDefault();
-            
-            const fullName = document.getElementById('fullName').value;
-            const email = document.getElementById('email').value;
-            const currentPassword = document.getElementById('currentPassword').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
+        // Verify Admin ID against the database via PHP
+        try {
+          const verifyRes = await fetch("../../api/admin/verify_admin_id.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ admin_id: enteredId }),
+          });
+          const verifyResult = await verifyRes.json();
 
-            if (newPassword && newPassword !== confirmPassword) {
-                showToast('New passwords do not match');
-                return;
-            }
-
-            if (!currentPassword) {
-                showToast('Current password is required');
-                return;
-            }
-
-            try {
-                const formData = new FormData();
-                formData.append('full_name', fullName);
-                formData.append('email', email);
-                formData.append('current_password', currentPassword);
-                if (newPassword) formData.append('new_password', newPassword);
-
-                const response = await fetch('../../api/admin/profile.php', {
-                    method: 'PUT',
-                    body: formData
-                });
-                const result = await response.json();
-                if (result.status === 'success') {
-                    showToast('Profile updated successfully');
-                    document.getElementById('profileName').textContent = fullName;
-                    document.getElementById('profileEmail').textContent = email;
-                    document.getElementById('currentPassword').value = '';
-                    document.getElementById('newPassword').value = '';
-                    document.getElementById('confirmPassword').value = '';
-                } else {
-                    showToast(result.message || 'Error updating profile');
-                }
-            } catch (error) {
-                showToast('Error updating profile');
-            }
+          if (!verifyResult.valid) {
+            document.getElementById("adminIdError").textContent =
+              "Incorrect Admin ID. Please try again.";
+            document.getElementById("adminIdError").classList.remove("hidden");
+            document.getElementById("adminIdInput").focus();
+            return;
+          }
+        } catch (err) {
+          // Fallback: if you don't have the PHP endpoint yet, do a simple frontend check
+          // Remove this block once verify_admin_id.php is set up
+          const ADMIN_ID = "ADM_001"; // matches your database
+          if (enteredId !== ADMIN_ID) {
+            document.getElementById("adminIdError").textContent =
+              "Incorrect Admin ID. Please try again.";
+            document.getElementById("adminIdError").classList.remove("hidden");
+            document.getElementById("adminIdInput").focus();
+            return;
+          }
         }
 
-        function resetForm() {
-            loadProfile();
-            document.getElementById('currentPassword').value = '';
-            document.getElementById('newPassword').value = '';
-            document.getElementById('confirmPassword').value = '';
-        }
+        // ID is correct — proceed with saving
+        closeVerifyModal();
+        await saveProfile();
+      }
 
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
+      // ==================== SAVE PROFILE ====================
+      async function saveProfile() {
+        const fullName = document.getElementById("fullName").value;
+        const email = document.getElementById("email").value;
+        const currentPassword =
+          document.getElementById("currentPassword").value;
+        const newPassword = document.getElementById("newPassword").value;
 
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('-translate-x-full');
-            document.getElementById('overlay').classList.toggle('hidden');
-        }
+        try {
+          const formData = new FormData();
+          formData.append("full_name", fullName);
+          formData.append("email", email);
+          formData.append("current_password", currentPassword);
+          if (newPassword) formData.append("new_password", newPassword);
 
-        function closeSidebar() {
-            document.getElementById('sidebar').classList.add('-translate-x-full');
-            document.getElementById('overlay').classList.add('hidden');
-        }
+          const response = await fetch("../../api/admin/profile.php", {
+            method: "PUT",
+            body: formData,
+          });
+          const result = await response.json();
 
-        document.addEventListener('DOMContentLoaded', () => {
-            updateCurrentDate();
-            loadProfile();
-        });
+          if (result.status === "success") {
+            showToast("Profile updated successfully!");
+            document.getElementById("profileName").textContent = fullName;
+            document.getElementById("profileEmail").textContent = email;
+            document.getElementById("currentPassword").value = "";
+            document.getElementById("newPassword").value = "";
+            document.getElementById("confirmPassword").value = "";
+          } else {
+            showToast(result.message || "Error updating profile", true);
+          }
+        } catch (error) {
+          showToast("Error updating profile", true);
+        }
+      }
+
+      // ==================== RESET ====================
+      function resetForm() {
+        loadProfile();
+        document.getElementById("currentPassword").value = "";
+        document.getElementById("newPassword").value = "";
+        document.getElementById("confirmPassword").value = "";
+      }
+
+      // ==================== TOAST ====================
+      function showToast(message, isError = false) {
+        const toast = document.createElement("div");
+        toast.className = "toast" + (isError ? " error" : "");
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+      }
+
+      // ==================== SIDEBAR ====================
+      function toggleSidebar() {
+        document
+          .getElementById("sidebar")
+          .classList.toggle("-translate-x-full");
+        document.getElementById("overlay").classList.toggle("hidden");
+      }
+
+      function closeSidebar() {
+        document.getElementById("sidebar").classList.add("-translate-x-full");
+        document.getElementById("overlay").classList.add("hidden");
+      }
+
+      // ==================== INIT ====================
+      document.addEventListener("DOMContentLoaded", () => {
+        updateCurrentDate();
+        loadProfile();
+      });
     </script>
-</body>
+  </body>
 </html>

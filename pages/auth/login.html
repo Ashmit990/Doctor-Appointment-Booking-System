@@ -89,12 +89,55 @@
       #forgotModal.show {
         display: flex;
       }
+
+      /* Back Button Style - Arrow Only */
+      .back-button {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 100;
+        background: rgba(0, 126, 133, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 50px;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0, 126, 133, 0.2);
+      }
+      .back-button:hover {
+        background: rgba(0, 126, 133, 0.2);
+        transform: translateX(-3px);
+      }
+      .back-button svg {
+        width: 22px;
+        height: 22px;
+        color: #007e85;
+      }
     </style>
   </head>
-  <body
-    class="bg-[#F2F2F2] m-0 p-0 overflow-hidden h-screen tracking-[1.1px]"
-  >
-    <!-- ✅ Forgot Password Modal -->
+  <body class="bg-[#F2F2F2] m-0 p-0 overflow-hidden h-screen tracking-[1.1px]">
+    <!-- BACK BUTTON - Arrow Only -->
+    <div class="back-button" onclick="goToLandingPage()">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M10 19l-7-7m0 0l7-7m-7 7h18"
+        />
+      </svg>
+    </div>
+
+    <!-- Forgot Password Modal -->
     <div
       id="forgotModal"
       class="fixed inset-0 z-50 items-center justify-center bg-black/40 backdrop-blur-sm"
@@ -236,7 +279,6 @@
                 >Sign up</a
               >
             </p>
-            <!-- ✅ ADDED: Forgot Password -->
             <button
               onclick="
                 document.getElementById('forgotModal').classList.add('show')
@@ -247,7 +289,10 @@
             </button>
           </div>
 
-          <p id="loginError" class="hidden text-red-600 text-sm font-semibold mb-4 text-center"></p>
+          <p
+            id="loginError"
+            class="hidden text-red-600 text-sm font-semibold mb-4 text-center"
+          ></p>
 
           <button
             onclick="handleLogin()"
@@ -293,6 +338,11 @@
     </div>
 
     <script>
+      // Go to Landing Page (Homepage)
+      function goToLandingPage() {
+        window.location.href = "../../index.html";
+      }
+
       function handleLogin() {
         const email = document.getElementById("loginEmail").value.trim();
         const password = document.getElementById("loginPassword").value.trim();
@@ -320,7 +370,8 @@
             if (data.status === "success") {
               window.location.href = data.redirect;
             } else {
-              errorEl.textContent = data.message || "Email or password didn't match.";
+              errorEl.textContent =
+                data.message || "Email or password didn't match.";
               errorEl.classList.remove("hidden");
             }
           })

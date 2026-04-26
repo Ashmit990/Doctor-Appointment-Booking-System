@@ -2,13 +2,14 @@
   DOCTORS PAGE - MANAGE DOCTORS
   ============================
   Clean reorganized version with all utilities first
+  NOTE: Edit functionality has been completely removed per requirements.
+  Only delete action remains.
 */
 
 // ==================== GLOBAL STATE ====================
 let currentPage = 1;
 let allDoctors = [];
 let filteredDoctors = [];
-let currentEditId = null;
 let openBioId = null; // track which bio is open
 
 console.log("✓ doctor.js file loading...");
@@ -150,23 +151,22 @@ function displayDoctors() {
                                 <polyline points="6 9 12 15 18 9"/>
                             </svg>
                         </button>
-                     </td>
+                      </td>
                     <td class="px-5 py-4 text-sm">${doc.specialization || "N/A"}</td>
                     <td class="px-5 py-4 text-sm hidden md:table-cell">${email}</td>
                     <td class="px-5 py-4 text-sm">${doc.total_appointments || 0}</td>
                     <td class="px-5 py-4">
                         <div class="flex gap-2">
-                            <button onclick="openEditModal('${docId}', '${fullName}', '${email}', '${(doc.bio || "").replace(/'/g, "\\'")}')" class="text-xs px-3 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 font-semibold">Edit</button>
                             <button onclick="deleteDoctor('${docId}')" class="text-xs px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 font-semibold">Delete</button>
                         </div>
-                     </td>
-                 </tr>
+                      </td>
+                  </tr>
             `;
 
       // Bio dropdown row — only shown when this doctor is open
       if (isOpen) {
         html += `
-                 <tr>
+                  <tr>
                     <td colspan="5" style="padding:0;">
                         <div style="border-left:3px solid #0d7377; background:#e8f5f5;" class="flex items-start gap-4 px-6 py-4">
                             <div class="w-11 h-11 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0" style="background:#c5e8e8;">
@@ -184,8 +184,8 @@ function displayDoctors() {
                                 </p>
                             </div>
                         </div>
-                     </td>
-                 </tr>
+                      </td>
+                  </tr>
                 `;
       }
     }
@@ -213,101 +213,9 @@ function filterDoctors() {
   displayDoctors();
 }
 
-// ==================== EDIT MODAL ====================
-function openEditModal(doctorId, name, email, bio = "") {
-  try {
-    console.log("► Opening edit for:", doctorId);
-    currentEditId = doctorId;
-
-    const editName = document.getElementById("editName");
-    const editEmail = document.getElementById("editEmail");
-    const editBio = document.getElementById("editBio");
-
-    if (editName) editName.value = name;
-    if (editEmail) editEmail.value = email;
-    if (editBio) editBio.value = bio;
-
-    const modal = document.getElementById("editModal");
-    if (modal) modal.classList.add("active");
-  } catch (e) {
-    console.error("✗ Modal error:", e);
-  }
-}
-
-function closeEditModal() {
-  try {
-    document.getElementById("editModal").classList.remove("active");
-    currentEditId = null;
-  } catch (e) {
-    console.error("✗ Close modal error:", e);
-  }
-}
-
-// ==================== FORM HANDLER ====================
-function handleFormSubmit(e) {
-  console.log(">>> FORM SUBMITTED");
-  e.preventDefault();
-  saveDoctor(e);
-}
-
-// ==================== SAVE ====================
-async function saveDoctor(event) {
-  event.preventDefault();
-  console.log("═══ SAVE START ═══");
-  console.log("ID:", currentEditId);
-
-  const name = (document.getElementById("editName")?.value || "").trim();
-  const email = (document.getElementById("editEmail")?.value || "").trim();
-  const bio = (document.getElementById("editBio")?.value || "").trim();
-
-  console.log("Data:", { name, email, bio });
-
-  if (!currentEditId || !name || !email) {
-    console.warn("⚠ Validation failed");
-    showToast("Please fill in all fields");
-    return;
-  }
-
-  try {
-    console.log("► Sending to API...");
-
-    const payload = {
-      doctor_id: currentEditId,
-      full_name: name,
-      email: email,
-      bio: bio,
-    };
-
-    const response = await fetch("../../api/admin/doctors.php", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(payload),
-    });
-
-    console.log("✓ Response:", response.status);
-    const result = await response.json();
-    console.log("✓ Result:", result);
-
-    if (result.status === "success") {
-      console.log("✓✓✓ SUCCESS ✓✓✓");
-      showToast("Doctor updated!");
-      closeEditModal();
-      loadDoctors(currentPage);
-    } else {
-      console.warn("✗ API error:", result.message);
-      showToast(result.message || "Error saving");
-    }
-  } catch (error) {
-    console.error("✗ Exception:", error);
-    showToast("Error: " + error.message);
-  }
-  console.log("═══ SAVE END ═══");
-}
-
 // ==================== DELETE ====================
 async function deleteDoctor(doctorId) {
-  if (!confirm("Delete this doctor?")) return;
+  if (!confirm("Delete this doctor? This action cannot be undone.")) return;
 
   try {
     const response = await fetch("../../api/admin/doctors.php", {
@@ -319,12 +227,14 @@ async function deleteDoctor(doctorId) {
 
     const result = await response.json();
     if (result.status === "success") {
-      showToast("Doctor deleted!");
+      showToast("Doctor deleted successfully!");
+      // Refresh the current page after deletion
       loadDoctors(currentPage);
     } else {
-      showToast("Error deleting doctor");
+      showToast(result.message || "Error deleting doctor");
     }
   } catch (error) {
+    console.error("Delete error:", error);
     showToast("Error: " + error.message);
   }
 }
@@ -356,20 +266,13 @@ function initPage() {
   try {
     console.log("╔═══════════════════════════════════╗");
     console.log("║   DOCTORS PAGE INITIALIZATION     ║");
+    console.log("║   (Edit functionality removed)    ║");
     console.log("╚═══════════════════════════════════╝");
 
     updateCurrentDate();
     loadDoctors();
 
-    const editForm = document.getElementById("editForm");
-    if (editForm) {
-      editForm.addEventListener("submit", handleFormSubmit);
-      console.log("✓ Form listener attached");
-    } else {
-      console.warn("⚠ editForm not found");
-    }
-
-    console.log("✓ Page ready");
+    console.log("✓ Page ready - Delete only mode");
   } catch (err) {
     console.error("✗ INIT ERROR:", err);
     showToast("Page load error: " + err.message);

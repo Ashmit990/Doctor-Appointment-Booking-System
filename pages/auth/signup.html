@@ -45,19 +45,15 @@
         border-bottom-color: #dc2626;
       }
 
-      .dropdown-animate {
-        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-      }
-
-      #doctorBioContainer {
+      #doctorFieldsContainer {
         transition: all 0.4s ease-in-out;
         max-height: 0;
         overflow: hidden;
         opacity: 0;
       }
 
-      #doctorBioContainer.show {
-        max-height: 200px;
+      #doctorFieldsContainer.show {
+        max-height: 600px;
         opacity: 1;
         margin-top: 1.25rem;
       }
@@ -105,6 +101,16 @@
           transform: translateX(0);
         }
       }
+      @keyframes modalFadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
 
       .animate-fade-in {
         animation: fadeIn 0.6s ease-out forwards;
@@ -115,12 +121,201 @@
       .animate-slide-right {
         animation: slideRight 0.8s ease-out forwards;
       }
+
+      /* Back Button Style - Arrow Only */
+      .back-button {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 100;
+        background: rgba(0, 126, 133, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 50px;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0, 126, 133, 0.2);
+      }
+      .back-button:hover {
+        background: rgba(0, 126, 133, 0.2);
+        transform: translateX(-3px);
+      }
+      .back-button svg {
+        width: 22px;
+        height: 22px;
+        color: #007e85;
+      }
+
+      /* Profession Modal Styles */
+      .profession-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+      }
+      .profession-modal.show {
+        display: flex;
+      }
+      .modal-content {
+        background: white;
+        border-radius: 24px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow: hidden;
+        animation: modalFadeIn 0.3s ease-out;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      }
+      .modal-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f8fafb;
+      }
+      .modal-body {
+        padding: 20px 24px;
+        max-height: 60vh;
+        overflow-y: auto;
+      }
+      .modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        background: #f8fafb;
+      }
+      .profession-option-modal {
+        padding: 12px 16px;
+        margin: 8px 0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid #e5e7eb;
+      }
+      .profession-option-modal:hover {
+        background: #007e85;
+        color: white;
+        border-color: #007e85;
+        transform: translateX(5px);
+      }
+      .profession-option-modal.selected {
+        background: #007e85;
+        color: white;
+        border-color: #007e85;
+      }
+      .selected-profession-display {
+        background: #f1f5f9;
+        padding: 12px 16px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid #e2e8f0;
+      }
+      .selected-profession-display:hover {
+        border-color: #007e85;
+        background: #f8fafc;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #007e85;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-size: 13px;
+      }
     </style>
   </head>
 
   <body class="overflow-x-hidden tracking-[1.1px]">
+    <!-- BACK BUTTON - Arrow Only -->
+    <div class="back-button" onclick="goToLandingPage()">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M10 19l-7-7m0 0l7-7m-7 7h18"
+        />
+      </svg>
+    </div>
+
+    <!-- Profession Selection Popup Modal -->
+    <div id="professionModal" class="profession-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="text-xl font-bold text-[#007E85]">
+            Select Specialization
+          </h2>
+          <button
+            onclick="closeProfessionModal()"
+            class="text-gray-400 hover:text-gray-600 transition"
+          >
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="grid grid-cols-1 gap-2" id="professionOptionsList">
+            <!-- Options will be populated here -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            onclick="closeProfessionModal()"
+            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition"
+          >
+            Cancel
+          </button>
+          <button
+            onclick="confirmProfessionSelection()"
+            class="px-4 py-2 bg-[#007E85] text-white rounded-lg hover:bg-[#00666c] transition"
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="flex min-h-screen w-full relative animate-fade-in">
-      <!-- ── Left Panel ─────────────────────────────────────────────────── -->
+      <!-- Left Panel -->
       <div
         class="w-full lg:w-[45%] flex flex-col justify-center px-10 xl:px-24 z-20 relative bg-[#F8FAFB]"
       >
@@ -151,9 +346,8 @@
             <div class="group">
               <label
                 class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                >Full Name</label
               >
-                Full Name
-              </label>
               <input
                 id="signupFullName"
                 type="text"
@@ -170,9 +364,8 @@
             <div class="group">
               <label
                 class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                >Age</label
               >
-                Age
-              </label>
               <input
                 id="signupAge"
                 type="number"
@@ -189,9 +382,8 @@
             <div class="group">
               <label
                 class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                >Email Address</label
               >
-                Email Address
-              </label>
               <input
                 id="signupEmail"
                 type="email"
@@ -208,9 +400,8 @@
             <div class="group">
               <label
                 class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                >Phone Number</label
               >
-                Phone Number
-              </label>
               <input
                 id="signupPhone"
                 type="tel"
@@ -227,9 +418,8 @@
             <div class="relative group">
               <label
                 class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                >Register as</label
               >
-                Register as
-              </label>
               <button
                 type="button"
                 id="customSelectBtn"
@@ -255,7 +445,6 @@
                   </svg>
                 </div>
               </button>
-
               <div
                 id="dropdownMenu"
                 class="hidden absolute left-0 w-full mt-2 glass-card rounded-xl overflow-hidden z-50 dropdown-animate opacity-0 -translate-y-2"
@@ -277,32 +466,76 @@
               </div>
             </div>
 
-            <!-- Doctor Bio -->
-            <div id="doctorBioContainer">
-              <label
-                class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-              >
-                Professional Bio
-              </label>
-              <textarea
-                id="signupBio"
-                rows="2"
-                class="w-full p-3 rounded-xl border-2 border-slate-100 bg-slate-50 focus:border-[#007E85] focus:bg-white outline-none text-slate-800 text-sm transition-all resize-none shadow-inner"
-                oninput="clearErr('signupBio')"
-              ></textarea>
-              <p
-                id="signupBio_err"
-                class="hidden text-red-600 text-xs font-semibold mt-1"
-              ></p>
+            <!-- Doctor Specific Fields -->
+            <div id="doctorFieldsContainer">
+              <!-- 6. Profession Selection (Modal Trigger) -->
+              <div class="group">
+                <label
+                  class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Profession / Specialization
+                  <span class="text-red-500">*</span></label
+                >
+                <div
+                  id="professionDisplay"
+                  class="selected-profession-display"
+                  onclick="openProfessionModal()"
+                >
+                  <span id="selectedProfessionText" class="text-gray-500"
+                    >Click to select specialization</span
+                  >
+                  <svg
+                    class="w-5 h-5 text-[#007E85]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+                <input type="hidden" id="selectedProfessionValue" value="" />
+                <p
+                  id="signupProfession_err"
+                  class="hidden text-red-600 text-xs font-semibold mt-1"
+                ></p>
+              </div>
+
+              <!-- 7. Professional Bio -->
+              <div class="group mt-4">
+                <label
+                  class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Professional Bio <span class="text-red-500">*</span></label
+                >
+                <textarea
+                  id="signupBio"
+                  rows="3"
+                  class="w-full p-3 rounded-xl border-2 border-slate-100 bg-slate-50 focus:border-[#007E85] focus:bg-white outline-none text-slate-800 text-sm transition-all resize-none shadow-inner"
+                  placeholder="Describe your experience, qualifications, and specialties (minimum 15 words)..."
+                  oninput="
+                    updateBioWordCount();
+                    clearErr('signupBio');
+                  "
+                ></textarea>
+                <p
+                  id="signupBio_err"
+                  class="hidden text-red-600 text-xs font-semibold mt-1"
+                ></p>
+                <p class="text-xs text-gray-400 mt-1" id="bioWordCount">
+                  0 words (minimum 15 required)
+                </p>
+              </div>
             </div>
 
-            <!-- 6. Password -->
+            <!-- 8. Password -->
             <div class="group">
               <label
                 class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                >Create Password</label
               >
-                Create Password
-              </label>
               <div class="relative">
                 <input
                   id="signupPassword"
@@ -310,7 +543,6 @@
                   class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none pr-10"
                   oninput="clearErr('signupPassword')"
                 />
-                <!-- Eye toggle -->
                 <button
                   type="button"
                   onclick="togglePass()"
@@ -340,7 +572,6 @@
                   </svg>
                 </button>
               </div>
-              <!-- Password strength bar -->
               <div
                 class="mt-2 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden"
               >
@@ -359,13 +590,12 @@
               ></p>
             </div>
 
-            <!-- 7. Confirm Password -->
+            <!-- 9. Confirm Password -->
             <div class="group">
               <label
                 class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                >Confirm Password</label
               >
-                Confirm Password
-              </label>
               <div class="relative">
                 <input
                   id="signupConfirmPassword"
@@ -413,7 +643,7 @@
               <button
                 type="submit"
                 id="submitBtn"
-                class="w-full bg-[#007E85] text-white font-bold py-4 xl:py-5 rounded-xl text-base xl:text-lg shadow-lg hover:bg-[#00666c] transition-all hover:-translate-y-0.5 active:scale-[0.98] mt-[-5px]"
+                class="w-full bg-[#007E85] text-white font-bold py-4 xl:py-5 rounded-xl text-base xl:text-lg shadow-lg hover:bg-[#00666c] transition-all hover:-translate-y-0.5 active:scale-[0.98]"
               >
                 Register Now
               </button>
@@ -430,7 +660,7 @@
         </div>
       </div>
 
-      <!-- ── Right Panel ────────────────────────────────────────────────── -->
+      <!-- Right Panel -->
       <div
         class="hidden lg:block w-[55%] relative overflow-hidden bg-[#F8FAFB]"
       >
@@ -443,22 +673,107 @@
             alt="Healthcare Professional"
             class="h-[102%] object-contain transform scale-110 mt-10"
           />
-          <div
-            class="absolute bottom-20 left-20 glass-card px-6 py-4 rounded-2xl flex items-center gap-4 animate-pulse"
-          ></div>
         </div>
       </div>
     </div>
 
     <script src="../../src/js/scroll-animations.js"></script>
     <script>
-      // ── Dropdown logic (unchanged) ────────────────────────────────────────
+      // Professions list
+      const professions = [
+        { icon: "🦷", name: "Dentist" },
+        { icon: "🏥", name: "General Physician" },
+        { icon: "🧴", name: "Dermatologist" },
+        { icon: "👶", name: "Pediatrician" },
+        { icon: "🧠", name: "Neurologist" },
+        { icon: "❤️", name: "Cardiologist" },
+        { icon: "🦴", name: "Orthopedic" },
+        { icon: "👁️", name: "Ophthalmologist" },
+        { icon: "🧠", name: "Psychiatrist" },
+        { icon: "📋", name: "Radiologist" },
+        { icon: "💉", name: "Anesthesiologist" },
+        { icon: "🔬", name: "Pathologist" },
+        { icon: "👩‍⚕️", name: "Gynecologist" },
+        { icon: "🏥", name: "Emergency Medicine" },
+        { icon: "📌", name: "Other" },
+      ];
+
+      let tempSelectedProfession = "";
+      let finalSelectedProfession = "";
+
+      // Populate profession modal
+      function populateProfessionModal() {
+        const container = document.getElementById("professionOptionsList");
+        container.innerHTML = "";
+        professions.forEach((prof) => {
+          const div = document.createElement("div");
+          div.className = "profession-option-modal";
+          div.setAttribute("data-profession", prof.name);
+          div.innerHTML = `<span class="text-xl">${prof.icon}</span><span class="font-medium">${prof.name}</span>`;
+          div.onclick = () => selectProfessionInModal(prof.name, div);
+          container.appendChild(div);
+        });
+      }
+
+      function selectProfessionInModal(profession, element) {
+        // Remove selected class from all
+        document.querySelectorAll(".profession-option-modal").forEach((el) => {
+          el.classList.remove("selected");
+        });
+        element.classList.add("selected");
+        tempSelectedProfession = profession;
+      }
+
+      function openProfessionModal() {
+        tempSelectedProfession = finalSelectedProfession;
+        populateProfessionModal();
+        // Highlight the previously selected one
+        if (tempSelectedProfession) {
+          document
+            .querySelectorAll(".profession-option-modal")
+            .forEach((el) => {
+              if (
+                el.getAttribute("data-profession") === tempSelectedProfession
+              ) {
+                el.classList.add("selected");
+              }
+            });
+        }
+        document.getElementById("professionModal").classList.add("show");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeProfessionModal() {
+        document.getElementById("professionModal").classList.remove("show");
+        document.body.style.overflow = "";
+      }
+
+      function confirmProfessionSelection() {
+        if (tempSelectedProfession) {
+          finalSelectedProfession = tempSelectedProfession;
+          document.getElementById("selectedProfessionText").innerHTML =
+            `<span class="chip">${finalSelectedProfession}</span>`;
+          document.getElementById("selectedProfessionValue").value =
+            finalSelectedProfession;
+          clearErr("signupProfession");
+        }
+        closeProfessionModal();
+      }
+
+      // Go to Landing Page
+      function goToLandingPage() {
+        window.location.href = "../../index.html";
+      }
+
+      // Role Dropdown logic
       const customSelectBtn = document.getElementById("customSelectBtn");
       const dropdownMenu = document.getElementById("dropdownMenu");
       const chevron = document.getElementById("chevron");
       const selectedValueDisplay = document.getElementById("selectedValue");
       const options = document.querySelectorAll(".option-item");
-      const bioContainer = document.getElementById("doctorBioContainer");
+      const doctorFieldsContainer = document.getElementById(
+        "doctorFieldsContainer",
+      );
 
       customSelectBtn.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -471,11 +786,11 @@
           }, 10);
           chevron.classList.add("rotate-180");
         } else {
-          closeDropdown();
+          closeRoleDropdown();
         }
       });
 
-      function closeDropdown() {
+      function closeRoleDropdown() {
         dropdownMenu.classList.add("opacity-0", "-translate-y-2");
         dropdownMenu.classList.remove("opacity-100", "translate-y-0");
         chevron.classList.remove("rotate-180");
@@ -490,17 +805,42 @@
           selectedValueDisplay.innerText = option.innerText;
           selectedRole = option.innerText;
           if (val === "doctor") {
-            bioContainer.classList.add("show");
+            doctorFieldsContainer.classList.add("show");
           } else {
-            bioContainer.classList.remove("show");
+            doctorFieldsContainer.classList.remove("show");
+            // Reset profession when switching to patient
+            finalSelectedProfession = "";
+            document.getElementById("selectedProfessionText").innerHTML =
+              "Click to select specialization";
+            document.getElementById("selectedProfessionValue").value = "";
           }
-          closeDropdown();
+          closeRoleDropdown();
         });
       });
 
-      window.onclick = () => closeDropdown();
+      window.onclick = (e) => {
+        if (customSelectBtn && !customSelectBtn.contains(e.target)) {
+          closeRoleDropdown();
+        }
+      };
 
-      // ── Password visibility toggle ────────────────────────────────────────
+      // Bio word counter
+      function updateBioWordCount() {
+        const bioTextarea = document.getElementById("signupBio");
+        const wordCountSpan = document.getElementById("bioWordCount");
+        const text = bioTextarea.value.trim();
+        const wordCount = text === "" ? 0 : text.split(/\s+/).length;
+        wordCountSpan.textContent = `${wordCount} words (minimum 15 required)`;
+        if (wordCount >= 15) {
+          wordCountSpan.classList.add("text-green-600");
+          wordCountSpan.classList.remove("text-red-500");
+        } else {
+          wordCountSpan.classList.remove("text-green-600");
+          wordCountSpan.classList.add("text-red-500");
+        }
+      }
+
+      // Password visibility toggle
       function togglePass() {
         const input = document.getElementById("signupPassword");
         const icon = document.getElementById("eyeIcon");
@@ -517,20 +857,18 @@
         icon.style.opacity = show ? "0.45" : "1";
       }
 
-      // ── Password strength meter ───────────────────────────────────────────
+      // Password strength meter
       document
         .getElementById("signupPassword")
         .addEventListener("input", function () {
           const v = this.value;
           const bar = document.getElementById("strengthBar");
           const lbl = document.getElementById("strengthLabel");
-
           let score = 0;
           if (v.length >= 8) score++;
           if (/[A-Z]/.test(v)) score++;
           if (/[0-9]/.test(v)) score++;
           if (/[!@#$%^&*()\-_=+\[\]{};':"\\|,.<>\/?]/.test(v)) score++;
-
           const levels = [
             { w: "0", bg: "", label: "" },
             { w: "25%", bg: "bg-red-500", label: "Weak" },
@@ -538,11 +876,9 @@
             { w: "75%", bg: "bg-yellow-400", label: "Good" },
             { w: "100%", bg: "bg-green-500", label: "Strong" },
           ];
-
           bar.className = "h-full rounded-full transition-all duration-500";
           bar.classList.add(levels[score].bg);
           bar.style.width = levels[score].w;
-
           const colors = [
             "text-slate-400",
             "text-red-500",
@@ -554,7 +890,7 @@
           lbl.textContent = levels[score].label;
         });
 
-      // ── Error helpers ─────────────────────────────────────────────────────
+      // Error helpers
       function showErr(id, msg) {
         const input = document.getElementById(id);
         const err = document.getElementById(id + "_err");
@@ -575,34 +911,29 @@
         }
       }
 
-      // ── Validators ────────────────────────────────────────────────────────
+      // Validators
       const Validators = {
         fullName(v) {
           if (!v) return "Full name is required.";
           if (v.length < 2) return "Name must be at least 2 characters.";
           if (!/^[a-zA-Z\s\-']+$/.test(v))
-            return "Name must contain letters only — no numbers or special characters.";
+            return "Name must contain letters only.";
           return null;
         },
-
         age(v) {
           if (!v) return "Age is required.";
-          if (!/^\d+$/.test(v))
-            return "Age must be a whole number — no letters or decimals.";
+          if (!/^\d+$/.test(v)) return "Age must be a whole number.";
           const n = parseInt(v, 10);
-          if (n < 1) return "Please enter a valid age.";
-          if (n < 18) return "You must be at least 18 years old to register.";
+          if (n < 18) return "You must be at least 18 years old.";
           if (n > 120) return "Please enter a valid age.";
           return null;
         },
-
         email(v) {
           if (!v) return "Email address is required.";
           if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v))
-            return "Enter a valid email address — it must include @ and a domain.";
+            return "Enter a valid email address.";
           return null;
         },
-
         phone(v) {
           if (!v) return "Phone number is required.";
           const digits = v.replace(/[\s\-()]/g, "");
@@ -610,30 +941,29 @@
             return "Phone number must be exactly 10 digits.";
           return null;
         },
-
-        password(v) {
-          if (!v) return "Password is required.";
-          if (v.length < 8)
-            return "Password must be at least 8 characters long.";
-          if (!/[A-Z]/.test(v))
-            return "Password must include at least one uppercase letter.";
-          if (!/[0-9]/.test(v))
-            return "Password must include at least one number.";
-          if (!/[!@#$%^&*()\-_=+\[\]{};':"\\|,.<>\/?]/.test(v))
-            return "Password must include at least one special character (e.g. ! @ # $ %).";
+        profession(v) {
+          if (!v) return "Please select your profession/specialization.";
           return null;
         },
-
+        password(v) {
+          if (!v) return "Password is required.";
+          if (v.length < 8) return "Password must be at least 8 characters.";
+          if (!/[A-Z]/.test(v))
+            return "Password must include an uppercase letter.";
+          if (!/[0-9]/.test(v)) return "Password must include a number.";
+          if (!/[!@#$%^&*()\-_=+\[\]{};':"\\|,.<>\/?]/.test(v))
+            return "Password must include a special character.";
+          return null;
+        },
         bio(v) {
-          if (!v)
-            return "Professional bio is required for Medical Professionals.";
+          if (!v) return "Professional bio is required.";
           const wordCount = v.trim().split(/\s+/).length;
-          if (wordCount < 15) return "Professional bio must contain at least 15 words (2-3 sentences) for a complete description.";
+          if (wordCount < 15) return "Bio must contain at least 15 words.";
           return null;
         },
       };
 
-      // ── Form submit ───────────────────────────────────────────────────────
+      // Form submit
       document
         .getElementById("signupForm")
         .addEventListener("submit", function (e) {
@@ -646,11 +976,12 @@
           const email = document.getElementById("signupEmail").value.trim();
           const phone = document.getElementById("signupPhone").value.trim();
           const password = document.getElementById("signupPassword").value;
-          const confirmPassword = document.getElementById("signupConfirmPassword").value;
+          const confirmPassword = document.getElementById(
+            "signupConfirmPassword",
+          ).value;
           const bio = document.getElementById("signupBio").value.trim();
           const isDoctor = selectedRole === "Medical Professional";
 
-          // Clear all errors first
           [
             "signupFullName",
             "signupAge",
@@ -658,6 +989,7 @@
             "signupPhone",
             "signupPassword",
             "signupConfirmPassword",
+            "signupProfession",
             "signupBio",
           ].forEach(clearErr);
 
@@ -702,6 +1034,12 @@
           }
 
           if (isDoctor) {
+            const profErr = Validators.profession(finalSelectedProfession);
+            if (profErr) {
+              showErr("signupProfession", profErr);
+              hasError = true;
+            }
+
             const bioErr = Validators.bio(bio);
             if (bioErr) {
               showErr("signupBio", bioErr);
@@ -709,10 +1047,8 @@
             }
           }
 
-          // Stop here — do NOT submit if anything is invalid
           if (hasError) return;
 
-          // All valid — send to backend
           const btn = document.getElementById("submitBtn");
           const origText = btn.innerText;
           btn.innerText = "Registering...";
@@ -725,7 +1061,10 @@
           formData.append("age", age);
           formData.append("role", selectedRole);
           formData.append("password", password);
-          if (isDoctor) formData.append("bio", bio);
+          if (isDoctor) {
+            formData.append("bio", bio);
+            formData.append("profession", finalSelectedProfession);
+          }
 
           fetch("../../api/auth/signup_process.php", {
             method: "POST",
@@ -736,35 +1075,15 @@
               btn.innerText = origText;
               btn.disabled = false;
               if (data.status === "success") {
-                if (data.redirect) {
-                  window.location.href = data.redirect;
-                } else {
-                  window.location.href = "login.html";
-                }
+                window.location.href = data.redirect || "login.html";
               } else {
-                // Show server error on the relevant field if possible
-                if (data.field) {
-                  showErr(
-                    "signup" +
-                      data.field.charAt(0).toUpperCase() +
-                      data.field.slice(1),
-                    data.message,
-                  );
-                } else {
-                  showErr(
-                    "signupEmail",
-                    data.message || "Registration failed. Please try again.",
-                  );
-                }
+                showErr("signupEmail", data.message || "Registration failed.");
               }
             })
             .catch(() => {
               btn.innerText = origText;
               btn.disabled = false;
-              showErr(
-                "signupEmail",
-                "Could not connect to the server. Please try again.",
-              );
+              showErr("signupEmail", "Could not connect to the server.");
             });
         });
     </script>
