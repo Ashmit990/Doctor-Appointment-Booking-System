@@ -2,770 +2,329 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, user-scalable=yes"
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
     />
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <title>Mediwealth | Doctor Earnings Dashboard</title>
-    <!-- Tailwind CSS + Font Awesome + Chart.js -->
+    <title>Doctor Dashboard - Earnings</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <style>
       * {
-        font-family:
-          "Inter",
-          system-ui,
-          -apple-system,
-          sans-serif;
+        font-family: "Inter", sans-serif;
       }
       body {
-        background: #f8fafc;
+        background: #f9fafb;
       }
-      /* Clean card design */
+      .primary-color {
+        color: #007e85;
+      }
+      .bg-primary {
+        background-color: #007e85;
+      }
+      .bg-primary-light {
+        background-color: rgba(0, 126, 133, 0.1);
+      }
+      .card-shadow {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      }
+      .sidebar {
+        background: #007e85;
+      }
+      .nav-link {
+        transition: all 0.3s ease;
+        color: white;
+      }
+      .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+      .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.3);
+      }
       .stat-card {
-        background: white;
-        border-radius: 0.75rem;
-        transition: all 0.2s ease;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
       }
       .stat-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 24px -12px rgba(0, 126, 133, 0.15);
-      }
-      .clickable-stat {
-        cursor: pointer;
-      }
-      .clickable-stat:active {
-        transform: scale(0.98);
-      }
-      /* Table styling - clean and spacious */
-      .data-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-      }
-      .data-table th {
-        background: #f8fafc;
-        font-weight: 600;
-        font-size: 0.75rem;
-        letter-spacing: 0.05em;
-        color: #475569;
-        padding: 0.75rem 0.75rem;
-        border-bottom: 1px solid #e2e8f0;
-      }
-      .data-table td {
-        padding: 0.75rem 0.75rem;
-        font-size: 0.875rem;
-        color: #1e293b;
-        border-bottom: 1px solid #f1f5f9;
-      }
-      .data-table tr:hover td {
-        background-color: #f0fdfa;
-      }
-      /* Badge styling */
-      .status-badge {
-        background: rgba(0, 126, 133, 0.08);
-        color: #007e85;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.7rem;
-        font-weight: 500;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.375rem;
-      }
-      /* Scrollbar */
-      ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #e2e8f0;
-        border-radius: 10px;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #007e85;
-        border-radius: 10px;
-      }
-      .btn-teal {
-        background: #007e85;
-        color: white;
-        transition: all 0.2s;
-      }
-      .btn-teal:hover {
-        background: #006168;
-        transform: scale(0.98);
-      }
-      .btn-outline-teal {
-        border: 1px solid #e2e8f0;
-        background: white;
-        transition: all 0.2s;
-      }
-      .btn-outline-teal:hover {
-        border-color: #007e85;
-        background: #f0fdfa;
+        transform: translateY(-4px);
+        box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.15);
       }
     </style>
   </head>
-  <body>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
-      <!-- ===================== DASHBOARD VIEW ===================== -->
-      <div id="dashboardView">
-        <!-- Header Section -->
-        <div
-          class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4"
+  <body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+      <!-- SIDEBAR -->
+      <aside
+        class="sidebar w-full md:w-64 text-white shadow-lg fixed bottom-0 md:top-0 h-auto md:h-full overflow-x-auto md:overflow-y-auto z-40"
+      >
+        <div class="hidden md:block p-8 border-b border-gray-700">
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center"
+            >
+              <img src="../../src/assets/Logo.svg" alt="" />
+            </div>
+            <h1 class="text-xl font-bold">Healthcare</h1>
+          </div>
+        </div>
+        <nav
+          class="p-2 md:p-6 flex flex-row md:flex-col gap-2 md:gap-0 space-y-0 md:space-y-2 justify-around md:justify-start md:flex-1"
         >
-          <div>
-            <div class="flex items-center gap-3">
-              <div
-                class="h-11 w-11 rounded-xl bg-[#007e85] flex items-center justify-center shadow-sm"
-              >
-                <i class="fas fa-stethoscope text-white text-lg"></i>
-              </div>
-              <div>
-                <h1 class="text-lg md:text-xl font-bold text-slate-800">
-                  Doctor Earnings Dashboard
-                </h1>
-                <p class="text-slate-500 text-xs mt-0.5">
-                  Track performance, revenue & completed appointments
-                </p>
-              </div>
-            </div>
-          </div>
-          <div
-            class="flex items-center gap-3 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm"
+          <a
+            href="home.html"
+            class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base"
           >
-            <i class="fas fa-calendar-alt text-[#007e85] text-sm"></i>
-            <span
-              class="text-slate-600 text-xs font-medium"
-              id="currentDatePremium"
-            ></span>
-            <div class="w-px h-5 bg-slate-200"></div>
-            <i class="fas fa-database text-[#007e85] text-sm"></i>
-            <span class="text-slate-500 text-xs">hospital / appointments</span>
-          </div>
-        </div>
-
-        <!-- Stats Row - 3 Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
-          <!-- Total Earnings Card - Clickable -->
-          <div
-            id="earningsCard"
-            class="stat-card clickable-stat p-4 border-l-4 border-l-[#007e85]"
+            <i data-lucide="home" class="w-5 h-5"></i><span>Home</span>
+          </a>
+          <a
+            href="schedules.html"
+            class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base"
           >
-            <div class="flex items-start justify-between">
-              <div>
-                <p
-                  class="text-[#007e85] text-xs font-semibold uppercase tracking-wider mb-2"
-                >
-                  <i class="fas fa-chart-line mr-1"></i> Total Earnings
-                </p>
-                <p
-                  class="text-3xl font-bold text-slate-800"
-                  id="totalEarningsAmount"
-                >
-                  $0.00
-                </p>
-                <p class="text-xs text-[#007e85] mt-3 flex items-center gap-1">
-                  <i class="fas fa-hand-pointer"></i> Click for detailed report
-                </p>
-              </div>
-              <div class="bg-[#007e85]/10 p-3 rounded-xl">
-                <i class="fas fa-dollar-sign text-[#007e85] text-xl"></i>
-              </div>
-            </div>
-            <div
-              class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-400"
-            >
-              <i class="far fa-clock mr-1"></i> From completed appointments
-            </div>
-          </div>
-
-          <!-- Completed Appointments Card -->
-          <div class="stat-card p-4 border-l-4 border-l-emerald-500">
-            <div class="flex items-start justify-between">
-              <div>
-                <p
-                  class="text-emerald-600 text-xs font-semibold uppercase tracking-wider mb-2"
-                >
-                  <i class="fas fa-check-circle mr-1"></i> Completed
-                  Appointments
-                </p>
-                <p
-                  class="text-3xl font-bold text-slate-800"
-                  id="completedCount"
-                >
-                  0
-                </p>
-                <p class="text-xs text-slate-500 mt-3">
-                  Successful consultations
-                </p>
-              </div>
-              <div class="bg-emerald-50 p-3 rounded-xl">
-                <i class="fas fa-user-md text-emerald-600 text-xl"></i>
-              </div>
-            </div>
-            <div
-              class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-400"
-            >
-              <i class="fas fa-chart-line mr-1"></i> Performance metric
-            </div>
-          </div>
-
-          <!-- Average Earnings Card -->
-          <div class="stat-card p-4 border-l-4 border-l-amber-500">
-            <div class="flex items-start justify-between">
-              <div>
-                <p
-                  class="text-amber-600 text-xs font-semibold uppercase tracking-wider mb-2"
-                >
-                  <i class="fas fa-chart-simple mr-1"></i> Avg. Earnings /
-                  Session
-                </p>
-                <p
-                  class="text-3xl font-bold text-slate-800"
-                  id="avgEarningsDashboard"
-                >
-                  $0.00
-                </p>
-                <p class="text-xs text-slate-500 mt-3">Per completed visit</p>
-              </div>
-              <div class="bg-amber-50 p-3 rounded-xl">
-                <i class="fas fa-calculator text-amber-600 text-xl"></i>
-              </div>
-            </div>
-            <div
-              class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-400"
-            >
-              <i class="fas fa-trend-up mr-1"></i> Revenue efficiency
-            </div>
-          </div>
-        </div>
-
-        <!-- Chart & Insights Row -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
-          <!-- Earnings Chart -->
-          <div
-            class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-4 shadow-sm"
+            <i data-lucide="calendar" class="w-5 h-5"></i><span>Schedules</span>
+          </a>
+          <a
+            href="earnings.html"
+            class="nav-link active flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base"
           >
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="font-semibold text-slate-700 flex items-center gap-2">
-                <i class="fas fa-chart-line text-[#007e85]"></i> Weekly Earnings
-                Trend
-              </h3>
-              <span
-                class="text-xs text-slate-400 bg-slate-50 px-2.5 py-1 rounded-full"
-                >Last 7 days</span
-              >
-            </div>
-            <canvas
-              id="earningsChart"
-              height="180"
-              style="max-height: 200px; width: 100%"
-            ></canvas>
-          </div>
-
-          <!-- Quick Insights -->
-          <div
-            class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm"
+            <i data-lucide="dollar-sign" class="w-5 h-5"></i
+            ><span>Earnings</span>
+          </a>
+          <a
+            href="profile.html"
+            class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base"
           >
-            <h3
-              class="font-semibold text-slate-700 flex items-center gap-2 mb-4"
-            >
-              <i class="fas fa-chart-pie text-[#007e85]"></i> Revenue Insights
-            </h3>
-            <div class="space-y-4">
-              <div
-                class="flex justify-between items-center pb-2 border-b border-slate-100"
-              >
-                <span class="text-sm text-slate-500">Top Patient</span>
-                <span class="font-semibold text-slate-800" id="topPatientLabel"
-                  >—</span
-                >
-              </div>
-              <div
-                class="flex justify-between items-center pb-2 border-b border-slate-100"
-              >
-                <span class="text-sm text-slate-500">Highest Fee</span>
-                <span class="font-semibold text-slate-800" id="highestFeeLabel"
-                  >—</span
-                >
-              </div>
-              <div
-                class="flex justify-between items-center pb-2 border-b border-slate-100"
-              >
-                <span class="text-sm text-slate-500">Total Completed</span>
-                <span
-                  class="font-semibold text-slate-800"
-                  id="totalAppointmentsLabel"
-                  >0</span
-                >
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="text-sm text-slate-500">Total Revenue</span>
-                <span class="font-bold text-[#007e85]" id="totalRevenueLabel"
-                  >$0.00</span
-                >
-              </div>
-            </div>
-            <div
-              class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-400"
-            >
-              <i class="fas fa-lightbulb mr-1"></i> Based on completed
-              appointments
-            </div>
-          </div>
-        </div>
+            <i data-lucide="user" class="w-5 h-5"></i><span>Profile</span>
+          </a>
+          <div
+            class="hidden md:block mt-auto border-t border-gray-600 pt-3"
+          ></div>
+          <a
+            href="../../api/auth/logout.php"
+            class="flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:bg-red-600 transition text-red-300 hover:text-white text-[10px] md:text-base"
+          >
+            <i data-lucide="log-out" class="w-5 h-5"></i><span>Logout</span>
+          </a>
+        </nav>
+      </aside>
 
-        <!-- Completed Appointments Table - Clean & Managed -->
+      <!-- MAIN CONTENT -->
+      <main class="ml-0 md:ml-64 flex-1 overflow-y-auto pb-20 md:pb-0">
         <div
-          class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm"
+          class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm"
         >
-          <div
-            class="px-4 py-3 bg-white border-b border-slate-200 flex flex-wrap items-center justify-between gap-3"
-          >
-            <div class="flex items-center gap-2">
-              <i class="fas fa-table-list text-[#007e85]"></i>
-              <h3 class="font-semibold text-slate-700">
-                Completed Appointments
+          <div class="px-8 py-4">
+            <div>
+              <h2 class="text-2xl font-bold text-gray-800">
+                Earnings Dashboard
+              </h2>
+              <p id="current-date" class="text-sm text-gray-500"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-8">
+          <!-- Stats Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-xl card-shadow p-6 stat-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 text-sm font-medium">
+                    Total Earnings
+                  </p>
+                  <p
+                    id="totalEarnings"
+                    class="text-4xl font-bold text-gray-900 mt-2"
+                  >
+                    $0
+                  </p>
+                </div>
+                <div
+                  class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center"
+                >
+                  <i data-lucide="wallet" class="w-7 h-7 primary-color"></i>
+                </div>
+              </div>
+            </div>
+            <div class="bg-white rounded-xl card-shadow p-6 stat-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 text-sm font-medium">
+                    Completed Appointments
+                  </p>
+                  <p
+                    id="totalCompleted"
+                    class="text-4xl font-bold text-gray-900 mt-2"
+                  >
+                    0
+                  </p>
+                </div>
+                <div
+                  class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center"
+                >
+                  <i
+                    data-lucide="check-circle"
+                    class="w-7 h-7 primary-color"
+                  ></i>
+                </div>
+              </div>
+            </div>
+            <div class="bg-white rounded-xl card-shadow p-6 stat-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-600 text-sm font-medium">
+                    Average Per Visit
+                  </p>
+                  <p
+                    id="avgPerVisit"
+                    class="text-4xl font-bold text-gray-900 mt-2"
+                  >
+                    $0
+                  </p>
+                </div>
+                <div
+                  class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center"
+                >
+                  <i
+                    data-lucide="trending-up"
+                    class="w-7 h-7 primary-color"
+                  ></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transactions Table -->
+          <div class="bg-white rounded-xl card-shadow overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100">
+              <h3 class="text-lg font-bold text-gray-900">
+                Transaction History
               </h3>
             </div>
-            <div class="flex gap-2">
-              <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">
-                <i class="fas fa-database mr-1"></i> hospital > appointments
-              </span>
-              <span
-                class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full"
-              >
-                <i class="fas fa-check-circle mr-1"></i> status = 'Completed'
-              </span>
-            </div>
-          </div>
-
-          <div class="overflow-x-auto">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>APPOINTMENT ID</th>
-                  <th>PATIENT NAME</th>
-                  <th>EMAIL</th>
-                  <th>CONTACT</th>
-                  <th>DOCTOR</th>
-                  <th>DATE & TIME</th>
-                  <th>REASON</th>
-                  <th>FEE</th>
-                  <th>STATUS</th>
-                </tr>
-              </thead>
-              <tbody id="appointmentsTableBody">
-                <!-- Dynamic rows will be injected here -->
-              </tbody>
-            </table>
-          </div>
-
-          <div
-            class="px-4 py-3 bg-slate-50/50 border-t border-slate-100 text-right"
-          >
-            <span class="text-xs text-slate-400"
-              ><i class="fas fa-chart-line mr-1 text-[#007e85]"></i> Showing
-              completed appointments only</span
-            >
-          </div>
-        </div>
-      </div>
-
-      <!-- ===================== EARNINGS PAGE VIEW ===================== -->
-      <div id="earningsPageView" class="hidden">
-        <!-- Back Navigation -->
-        <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
-          <button
-            id="backToDashboardBtn"
-            class="btn-outline-teal font-medium px-4 py-2 rounded-xl shadow-sm flex items-center gap-2"
-          >
-            <i class="fas fa-arrow-left text-[#007e85]"></i> Back to Dashboard
-          </button>
-          <div class="flex items-center gap-2">
-            <i class="fas fa-chart-line text-[#007e85] text-xl"></i>
-            <h1 class="text-lg md:text-xl font-bold text-slate-800">
-              Detailed Earnings Report
-            </h1>
-          </div>
-        </div>
-
-        <!-- Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div
-            class="bg-white rounded-xl p-4 border-l-4 border-l-[#007e85] shadow-sm"
-          >
-            <p class="text-slate-500 text-xs">Gross Revenue</p>
-            <p
-              class="text-2xl font-bold text-slate-800 mt-1"
-              id="earningsPageTotal"
-            >
-              $0.00
-            </p>
-          </div>
-          <div
-            class="bg-white rounded-xl p-4 border-l-4 border-l-emerald-500 shadow-sm"
-          >
-            <p class="text-slate-500 text-xs">Completed Sessions</p>
-            <p
-              class="text-2xl font-bold text-slate-800 mt-1"
-              id="earningsPageCompleted"
-            >
-              0
-            </p>
-          </div>
-          <div
-            class="bg-white rounded-xl p-4 border-l-4 border-l-amber-500 shadow-sm"
-          >
-            <p class="text-slate-500 text-xs">Average Revenue / Appointment</p>
-            <p
-              class="text-2xl font-bold text-slate-800 mt-1"
-              id="avgEarningsPerApp"
-            >
-              $0.00
-            </p>
-          </div>
-        </div>
-
-        <!-- Detailed Breakdown + Chart -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div
-            class="lg:col-span-2 bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm"
-          >
-            <div class="px-4 py-3 border-b border-slate-200 bg-slate-50/50">
-              <h3 class="font-semibold text-slate-700">
-                <i class="fas fa-receipt mr-2 text-[#007e85]"></i> Earnings per
-                Appointment
-              </h3>
-            </div>
-            <div class="overflow-x-auto max-h-[400px] overflow-y-auto">
-              <table class="data-table">
-                <thead class="sticky top-0 bg-slate-50">
-                  <tr>
-                    <th class="px-4 py-2">Appt ID</th>
-                    <th class="px-4 py-2">Patient</th>
-                    <th class="px-4 py-2">Doctor</th>
-                    <th class="px-4 py-2">Date</th>
-                    <th class="px-4 py-2">Amount</th>
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-50">
+                  <tr class="text-left text-sm font-semibold text-gray-600">
+                    <th class="px-6 py-3">Appointment Date</th>
+                    <th class="px-6 py-3">Patient Name</th>
+                    <th class="px-6 py-3">Appointment ID</th>
+                    <th class="px-6 py-3">Amount</th>
+                    <th class="px-6 py-3">Payment Date</th>
+                    <th class="px-6 py-3">Status</th>
                   </tr>
                 </thead>
-                <tbody id="earningsDetailsTableBody"></tbody>
+                <tbody id="earningsTable" class="divide-y divide-gray-100">
+                  <!-- Empty table body - will be populated when data exists -->
+                </tbody>
               </table>
             </div>
           </div>
-          <div
-            class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm"
-          >
-            <h3
-              class="font-semibold text-slate-700 flex items-center gap-2 mb-4"
-            >
-              <i class="fas fa-chart-pie text-[#007e85]"></i> Revenue by Patient
-            </h3>
-            <canvas
-              id="patientPieChart"
-              height="200"
-              style="max-height: 220px"
-            ></canvas>
-            <div class="mt-4 text-xs text-slate-400 text-center">
-              Distribution of earnings by patient
-            </div>
-          </div>
         </div>
-      </div>
+      </main>
     </div>
 
     <script>
-      // ============================================================
-      // EXACT DATA FROM YOUR COMPLETED APPOINTMENTS TABLE
-      // ============================================================
-      const appointmentsData = [
-        {
-          id: 106,
-          patient: "James Wilson",
-          email: "james@email.com",
-          contact: "9803334445",
-          doctor: "Dr. Sarah",
-          date: "2026-04-12",
-          time: "11:00 AM",
-          reason: "Hypertension follow-up",
-          fee: 160,
-          status: "Completed",
-        },
-        {
-          id: 104,
-          patient: "Stacy Mitchell",
-          email: "stacy@email.com",
-          contact: "9801112223",
-          doctor: "Dr. Sarah",
-          date: "2026-04-08",
-          time: "02:30 PM",
-          reason: "Follow-up on headache treatment",
-          fee: 175,
-          status: "Completed",
-        },
-        {
-          id: 102,
-          patient: "John Doe",
-          email: "john@email.com",
-          contact: "9801112220",
-          doctor: "Dr. Emily",
-          date: "2026-04-05",
-          time: "11:30 AM",
-          reason: "Child vaccination",
-          fee: 120,
-          status: "Completed",
-        },
-        {
-          id: 101,
-          patient: "James Wilson",
-          email: "james@email.com",
-          contact: "9803334445",
-          doctor: "Dr. Sarah",
-          date: "2026-04-05",
-          time: "09:00 AM",
-          reason: "Routine heart checkup",
-          fee: 180,
-          status: "Completed",
-        },
-        {
-          id: 103,
-          patient: "Stacy Mitchell",
-          email: "stacy@email.com",
-          contact: "9801112223",
-          doctor: "Dr. Mike",
-          date: "2026-04-02",
-          time: "10:00 AM",
-          reason: "Recurring headaches",
-          fee: 150,
-          status: "Completed",
-        },
-      ];
+      let earningsData = [];
 
-      function getCompleted() {
-        return appointmentsData;
-      }
-      function totalEarnings() {
-        return getCompleted().reduce((s, a) => s + a.fee, 0);
-      }
-      function completedCount() {
-        return getCompleted().length;
-      }
-      function avgEarnings() {
-        let t = totalEarnings(),
-          c = completedCount();
-        return c === 0 ? 0 : t / c;
-      }
-      function getTopPatient() {
-        const revenue = new Map();
-        getCompleted().forEach((a) =>
-          revenue.set(a.patient, (revenue.get(a.patient) || 0) + a.fee),
-        );
-        let top = "",
-          max = 0;
-        for (let [p, r] of revenue)
-          if (r > max) {
-            max = r;
-            top = p;
-          }
-        return top || "N/A";
-      }
-      function getHighestFee() {
-        return Math.max(...getCompleted().map((a) => a.fee), 0);
-      }
-      function formatUSD(amt) {
-        return new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(amt);
-      }
-      function escapeHtml(str) {
-        if (!str) return "";
-        return str.replace(
-          /[&<>]/g,
-          (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[m],
-        );
-      }
-
-      let trendChart, patientPieChart;
-
-      function initTrendChart() {
-        const ctx = document.getElementById("earningsChart")?.getContext("2d");
-        if (!ctx) return;
-        if (trendChart) trendChart.destroy();
-        trendChart = new Chart(ctx, {
-          type: "line",
-          data: {
-            labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-            datasets: [
-              {
-                label: "Earnings (USD)",
-                data: [150, 180, 120, 175, 160, 0, 0],
-                borderColor: "#007e85",
-                backgroundColor: "rgba(0,126,133,0.04)",
-                tension: 0.3,
-                fill: true,
-                pointBackgroundColor: "#007e85",
-                pointRadius: 4,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: { legend: { labels: { color: "#64748b" } } },
-            scales: {
-              y: { grid: { color: "#e2e8f0" }, ticks: { color: "#64748b" } },
-              x: { ticks: { color: "#64748b" } },
-            },
-          },
-        });
-      }
-
-      function updatePatientPieChart() {
-        const revenue = new Map();
-        getCompleted().forEach((a) =>
-          revenue.set(a.patient, (revenue.get(a.patient) || 0) + a.fee),
-        );
-        const ctx = document
-          .getElementById("patientPieChart")
-          ?.getContext("2d");
-        if (!ctx) return;
-        if (patientPieChart) patientPieChart.destroy();
-        patientPieChart = new Chart(ctx, {
-          type: "pie",
-          data: {
-            labels: Array.from(revenue.keys()),
-            datasets: [
-              {
-                data: Array.from(revenue.values()),
-                backgroundColor: ["#007e85", "#2c9ca3", "#4db6bd", "#7ccfd6"],
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-              legend: {
-                position: "bottom",
-                labels: { color: "#475569", font: { size: 10 } },
-              },
-            },
-          },
-        });
-      }
-
-      function renderDashboard() {
-        document.getElementById("totalEarningsAmount").innerText =
-          formatUSD(totalEarnings());
-        document.getElementById("completedCount").innerText = completedCount();
-        document.getElementById("avgEarningsDashboard").innerText =
-          formatUSD(avgEarnings());
-        document.getElementById("topPatientLabel").innerText = getTopPatient();
-        document.getElementById("highestFeeLabel").innerText =
-          formatUSD(getHighestFee());
-        document.getElementById("totalAppointmentsLabel").innerText =
-          completedCount();
-        document.getElementById("totalRevenueLabel").innerText =
-          formatUSD(totalEarnings());
-
-        const tbody = document.getElementById("appointmentsTableBody");
-        if (tbody) {
-          tbody.innerHTML = "";
-          const sorted = [...getCompleted()].sort(
-            (a, b) => new Date(b.date) - new Date(a.date),
-          );
-          sorted.forEach((app) => {
-            const formattedDate =
-              new Date(app.date).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              }) +
-              " at " +
-              app.time;
-            tbody.innerHTML += `<tr><td class="px-4 py-2 text-sm font-mono text-slate-500">${app.id}</td><td class="px-4 py-2 text-sm font-medium text-slate-800">${escapeHtml(app.patient)}</td><td class="px-4 py-2 text-sm text-slate-500">${escapeHtml(app.email)}</td><td class="px-4 py-2 text-sm text-slate-500">${escapeHtml(app.contact)}</td><td class="px-4 py-2 text-sm text-slate-600">${escapeHtml(app.doctor)}</td><td class="px-4 py-2 text-sm text-slate-600">${escapeHtml(formattedDate)}</td><td class="px-4 py-2 text-sm text-slate-500">${escapeHtml(app.reason)}</td><td class="px-4 py-2 text-sm font-semibold text-[#007e85]">${formatUSD(app.fee)}</td><td class="px-4 py-2"><span class="status-badge"><i class="fas fa-check-circle text-xs"></i> Completed</span></td></tr>`;
-          });
-        }
-        if (trendChart) trendChart.update();
-      }
-
-      function renderEarningsPage() {
-        document.getElementById("earningsPageTotal").innerText =
-          formatUSD(totalEarnings());
-        document.getElementById("earningsPageCompleted").innerText =
-          completedCount();
-        document.getElementById("avgEarningsPerApp").innerText =
-          formatUSD(avgEarnings());
-        const detailBody = document.getElementById("earningsDetailsTableBody");
-        if (detailBody) {
-          detailBody.innerHTML = "";
-          getCompleted().forEach((app) => {
-            const displayDate = new Date(app.date).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            });
-            detailBody.innerHTML += `<tr><td class="px-4 py-2 text-sm font-mono text-slate-500">${app.id}</td><td class="px-4 py-2 text-sm font-medium text-slate-800">${escapeHtml(app.patient)}</td><td class="px-4 py-2 text-sm text-slate-600">${escapeHtml(app.doctor)}</td><td class="px-4 py-2 text-sm text-slate-500">${escapeHtml(displayDate)}</td><td class="px-4 py-2 text-sm font-bold text-[#007e85]">${formatUSD(app.fee)}</td></tr>`;
-          });
-        }
-        updatePatientPieChart();
-      }
-
-      const dashboardDiv = document.getElementById("dashboardView"),
-        earningsDiv = document.getElementById("earningsPageView");
-      function showDashboard() {
-        dashboardDiv.classList.remove("hidden");
-        earningsDiv.classList.add("hidden");
-        renderDashboard();
-        initTrendChart();
-      }
-      function showEarningsPage() {
-        dashboardDiv.classList.add("hidden");
-        earningsDiv.classList.remove("hidden");
-        renderEarningsPage();
-      }
-
-      document
-        .getElementById("earningsCard")
-        ?.addEventListener("click", showEarningsPage);
-      document
-        .getElementById("backToDashboardBtn")
-        ?.addEventListener("click", showDashboard);
-      document.getElementById("currentDatePremium").innerText =
-        new Date().toLocaleDateString("en-US", {
+      function updateCurrentDate() {
+        const options = {
           weekday: "long",
           year: "numeric",
           month: "long",
           day: "numeric",
-        });
-      showDashboard();
-      initTrendChart();
-    </script>
-    <script>
-      // Check session when page becomes visible (e.g., on back button)
-      document.addEventListener('visibilitychange', async () => {
-        if (!document.hidden) {
-          // Verify session by checking if user is still logged in
-          const response = await fetch('../../api/auth/session_info.php', { credentials: 'include' });
-          const data = await response.json();
-          if (!data.logged_in || data.role !== 'Doctor') {
-            window.location.href = '../auth/login.html';
+        };
+        document.getElementById("current-date").textContent =
+          new Date().toLocaleDateString("en-US", options);
+      }
+
+      async function loadEarnings() {
+        try {
+          const response = await fetch(
+            "../../api/doctor/get_earnings.php?t=" + Date.now(),
+            {
+              credentials: "include",
+              headers: { "Cache-Control": "no-cache" },
+            },
+          );
+          const result = await response.json();
+
+          if (result.status === "success") {
+            earningsData = result.data || [];
+            renderDashboard();
+          } else {
+            earningsData = [];
+            renderDashboard();
           }
+        } catch (error) {
+          console.error("Fetch error:", error);
+          earningsData = [];
+          renderDashboard();
         }
+      }
+
+      function renderDashboard() {
+        const total = earningsData.reduce(
+          (sum, item) => sum + (item.amount || 0),
+          0,
+        );
+        const count = earningsData.length;
+        const avg = count > 0 ? total / count : 0;
+
+        document.getElementById("totalEarnings").textContent =
+          `$${total.toFixed(2)}`;
+        document.getElementById("totalCompleted").textContent = count;
+        document.getElementById("avgPerVisit").textContent =
+          `$${avg.toFixed(2)}`;
+
+        renderTable();
+        lucide.createIcons();
+      }
+
+      function renderTable() {
+        const tbody = document.getElementById("earningsTable");
+
+        if (!earningsData || earningsData.length === 0) {
+          tbody.innerHTML = "";
+          return;
+        }
+
+        tbody.innerHTML = earningsData
+          .map(
+            (item) => `
+                <tr class="hover:bg-gray-50 border-b border-gray-100">
+                    <td class="px-6 py-3 text-sm text-gray-700">${item.app_date || "-"}</td>
+                    <td class="px-6 py-3 text-sm font-medium text-gray-800">${escapeHtml(item.patient_name || "Unknown Patient")}</td>
+                    <td class="px-6 py-3 text-sm text-gray-500">#${item.appointment_id || "-"}</td>
+                    <td class="px-6 py-3 text-sm font-semibold text-primary">$${(item.amount || 0).toFixed(2)}</td>
+                    <td class="px-6 py-3 text-sm text-gray-500">${item.payment_date || "-"}</td>
+                    <td class="px-6 py-3"><span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">${item.status || "Paid"}</span></td>
+                </tr>
+            `,
+          )
+          .join("");
+      }
+
+      function escapeHtml(str) {
+        if (!str) return "";
+        return str.replace(/[&<>]/g, function (m) {
+          if (m === "&") return "&amp;";
+          if (m === "<") return "&lt;";
+          if (m === ">") return "&gt;";
+          return m;
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        updateCurrentDate();
+        loadEarnings();
+        lucide.createIcons();
       });
     </script>
   </body>
