@@ -1,9 +1,6 @@
 /*
   USERS PAGE - PATIENTS MANAGEMENT
   ================================
-  Clean reorganized version with all utilities first
-  NOTE: Edit functionality has been completely removed per requirements.
-  Only delete action remains.
 */
 
 // ==================== GLOBAL STATE ====================
@@ -13,12 +10,15 @@ let filteredPatients = [];
 
 console.log("✓ users.js file loading...");
 
-// ==================== UTILITIES (Must be first!) ====================
-function showToast(message) {
+// ==================== UTILITIES ====================
+function showToast(message, isError = false) {
   try {
     const toast = document.createElement("div");
     toast.className = "toast";
     toast.textContent = message;
+    if (isError) {
+      toast.style.background = "#dc2626";
+    }
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
   } catch (e) {
@@ -76,33 +76,60 @@ async function loadPatients(page = 1) {
     console.log("► Fetching patients page:", page);
 
     const response = await fetch(
-      `../../api/admin/patients.php?page=${page}&limit=10`,
+      `/Doctor-Appointment-Booking-System/api/admin/patients.php?page=${page}&limit=10`,
       {
+        method: "GET",
         credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
     );
 
-    console.log("✓ API Response:", response.status);
+    console.log("✓ API Response Status:", response.status);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
     const result = await response.json();
-    console.log("✓ Data received:", result);
+    console.log("✓ API Response:", result);
 
     if (result && result.status === "success") {
       allPatients = result.data || [];
-      filteredPatients = result.data || [];
+      filteredPatients = [...allPatients];
+
+      console.log(`✓ Loaded ${allPatients.length} patients`);
 
       const totalPagesEl = document.getElementById("total-pages");
       if (totalPagesEl) {
         totalPagesEl.textContent = result.pages || 1;
       }
 
+      const currentPageEl = document.getElementById("current-page");
+      if (currentPageEl) {
+        currentPageEl.textContent = page;
+      }
+
       displayPatients();
     } else {
-      console.warn("⚠ API returned error");
-      showToast("Error loading patients");
+      const errorMsg = result?.message || "Unknown error from API";
+      console.error("⚠ API error:", errorMsg);
+      showToast(errorMsg, true);
+
+      const tbody = document.getElementById("patients-table-body");
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-red-500">Error: ${errorMsg}</td></tr>`;
+      }
     }
   } catch (error) {
     console.error("✗ Fetch error:", error);
-    showToast("Error loading patients: " + error.message);
+    showToast("Error: " + error.message, true);
+
+    const tbody = document.getElementById("patients-table-body");
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-red-500">Connection Error: ${error.message}<br><br>Make sure XAMPP is running and try again.</td></tr>`;
+    }
   }
 }
 
@@ -125,28 +152,32 @@ function displayPatients() {
 
     let html = "";
     for (const patient of filteredPatients) {
-      const fullName = (patient.full_name || "").replace(/'/g, "\\'");
-      const email = (patient.email || "").replace(/'/g, "\\'");
+      const fullName = (patient.full_name || "Unknown").replace(/'/g, "\\'");
+      const email = (patient.email || "N/A").replace(/'/g, "\\'");
+      const contactNumber = patient.contact_number || "N/A";
+      const totalAppointments = patient.total_appointments || 0;
+      const userId = patient.user_id;
 
       html += `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="px-5 py-4 text-sm font-semibold">${fullName}</td>
-                    <td class="px-5 py-4 text-sm">${email}</td>
-                    <td class="px-5 py-4 text-sm hidden md:table-cell">${patient.contact_number || "N/A"}</td>
-                    <td class="px-5 py-4 text-sm">${patient.total_appointments || 0}</td>
-                    <td class="px-5 py-4">
-                        <div class="flex gap-2">
-                            <button onclick="deletePatient('${patient.user_id}')" class="text-xs px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 font-semibold">Delete</button>
-                        </div>
-                      </td>
-                  </tr>
-            `;
+        <tr class="border-b hover:bg-gray-50">
+          <td class="px-5 py-4 text-sm font-semibold">${fullName}</td>
+          <td class="px-5 py-4 text-sm">${email}</td>
+          <td class="px-5 py-4 text-sm hidden md:table-cell">${contactNumber}</td>
+          <td class="px-5 py-4 text-sm">${totalAppointments}</td>
+          <td class="px-5 py-4">
+            <button onclick="deletePatient('${userId}')" class="text-xs px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 font-semibold">
+              Delete
+            </button>
+          </td>
+        </tr>
+      `;
     }
 
     tbody.innerHTML = html;
     console.log("✓ Table updated");
   } catch (e) {
     console.error("✗ Display error:", e);
+    showToast("Error displaying patients: " + e.message, true);
   }
 }
 
@@ -155,12 +186,20 @@ function filterPatients() {
   const searchText = (
     document.getElementById("searchInput")?.value || ""
   ).toLowerCase();
-  filteredPatients = allPatients.filter(
-    (p) =>
-      (p.full_name || "").toLowerCase().includes(searchText) ||
-      (p.email || "").toLowerCase().includes(searchText) ||
-      (p.contact_number && p.contact_number.includes(searchText)),
-  );
+
+  if (!searchText) {
+    filteredPatients = [...allPatients];
+  } else {
+    filteredPatients = allPatients.filter(
+      (p) =>
+        (p.full_name || "").toLowerCase().includes(searchText) ||
+        (p.email || "").toLowerCase().includes(searchText) ||
+        (p.contact_number &&
+          p.contact_number.toLowerCase().includes(searchText)),
+    );
+  }
+
+  console.log(`Filtered to ${filteredPatients.length} patients`);
   displayPatients();
 }
 
@@ -169,23 +208,30 @@ async function deletePatient(patientId) {
   if (!confirm("Delete this patient? This action cannot be undone.")) return;
 
   try {
-    const response = await fetch("../../api/admin/patients.php", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ patient_id: patientId }),
-    });
+    console.log("► Deleting patient:", patientId);
+
+    const response = await fetch(
+      "/Doctor-Appointment-Booking-System/api/admin/patients.php",
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ patient_id: patientId }),
+      },
+    );
 
     const result = await response.json();
+    console.log("✓ Delete response:", result);
+
     if (result.status === "success") {
       showToast("Patient deleted successfully!");
       loadPatients(currentPage);
     } else {
-      showToast(result.message || "Error deleting patient");
+      showToast(result.message || "Error deleting patient", true);
     }
   } catch (error) {
-    console.error("Delete error:", error);
-    showToast("Error: " + error.message);
+    console.error("✗ Delete error:", error);
+    showToast("Error: " + error.message, true);
   }
 }
 
@@ -216,15 +262,12 @@ function initPage() {
   try {
     console.log("╔═══════════════════════════════════╗");
     console.log("║   USERS PAGE INITIALIZATION       ║");
-    console.log("║   (Edit functionality removed)    ║");
     console.log("╚═══════════════════════════════════╝");
-
     updateCurrentDate();
-    loadPatients();
-
-    console.log("✓ Page ready - Delete only mode");
+    loadPatients(1);
+    console.log("✓ Page ready");
   } catch (err) {
     console.error("✗ INIT ERROR:", err);
-    showToast("Page load error: " + err.message);
+    showToast("Page load error: " + err.message, true);
   }
 }
