@@ -287,10 +287,7 @@ function buildCalendarGrid(container, year, month, compact) {
     cell.dataset.date = ds;
 
     if (hasApt) {
-      const dot = document.createElement("div");
-      dot.style.cssText =
-        "position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:#007E85;";
-      cell.appendChild(dot);
+      cell.classList.add("has-appointment");
     }
 
     cell.addEventListener("click", (e) => {
@@ -585,6 +582,13 @@ document.getElementById("calendarModal").addEventListener("click", (e) => {
       new Date().toDateString();
 
     await renderMiniCalendar();
+    
+    // Check for follow-up reminders (for tomorrow's appointments)
+    try {
+      await fetch(`${API_BASE}/patient/check_followup_reminders.php`, { credentials: 'include' });
+    } catch (err) {
+      console.error('Error checking follow-up reminders:', err);
+    }
   } catch (e) {
     console.error(e);
   }

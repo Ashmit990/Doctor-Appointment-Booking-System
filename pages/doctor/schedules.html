@@ -250,28 +250,31 @@
 
                     <div class="space-y-3">
                         <div id="edit-status-wrapper">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Appointment Status</label>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Appointment Status <span class="text-red-500">*</span></label>
                             <select id="modal-edit-status" onchange="toggleFollowUpVisibility()"
-                                class="w-full text-xs border border-gray-300 rounded-lg p-2 focus:ring-primary focus:border-primary">
+                                class="w-full text-xs border border-gray-300 rounded-lg p-2 focus:ring-primary focus:border-primary" required>
                                 <option value="Upcoming">Upcoming</option>
                                 <option value="Completed">Completed</option>
                                 <option value="Missed">Missed (No Show)</option>
                             </select>
+                            <p id="status-error" class="text-red-500 text-xs mt-1 hidden">Status is required</p>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Doctor's Notes</label>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Doctor's Notes <span class="text-red-500">*</span></label>
                             <textarea id="modal-doctor-notes"
                                 class="w-full text-xs border border-gray-300 rounded-lg p-2 focus:ring-primary focus:border-primary resize-none"
-                                rows="2" placeholder="Enter findings and notes..."></textarea>
+                                rows="2" placeholder="Enter findings and notes..." required></textarea>
+                            <p id="notes-error" class="text-red-500 text-xs mt-1 hidden">Doctor's notes are required</p>
                             <p id="readonly-doctor-notes"
                                 class="hidden font-semibold text-gray-800 bg-gray-50 p-2 rounded-lg border border-gray-100 text-xs whitespace-pre-wrap">
                             </p>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Prescriptions</label>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Prescriptions <span class="text-red-500">*</span></label>
                             <textarea id="modal-prescriptions"
                                 class="w-full text-xs border border-gray-300 rounded-lg p-2 focus:ring-primary focus:border-primary resize-none"
-                                rows="2" placeholder="e.g. Paracetamol 500mg - 1x/day"></textarea>
+                                rows="2" placeholder="e.g. Paracetamol 500mg - 1x/day" required></textarea>
+                            <p id="prescriptions-error" class="text-red-500 text-xs mt-1 hidden">Prescriptions are required</p>
                             <p id="readonly-prescriptions"
                                 class="hidden font-semibold text-gray-800 bg-gray-50 p-2 rounded-lg border border-gray-100 text-xs whitespace-pre-wrap">
                             </p>
@@ -295,6 +298,7 @@
                                     <option value="16:00:00">04:00 PM - 05:00 PM</option>
                                 </select>
                             </div>
+                            <p id="followup-date-error" class="text-red-500 text-xs mt-1 hidden">Follow-up date cannot be in the past</p>
                         </div>
 
                         <div id="feedback-section" class="hidden pt-4 border-t border-gray-100">
@@ -303,6 +307,19 @@
                             <p id="readonly-feedback"
                                 class="text-sm italic text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100 border-l-4 border-l-blue-400">
                             </p>
+                        </div>
+
+                        <!-- Patient History Timeline -->
+                        <div id="patient-history-section" class="pt-4 border-t border-gray-100">
+                            <button type="button" onclick="togglePatientHistory()" class="font-bold text-gray-900 mb-3 flex items-center gap-2 w-full text-sm hover:text-primary transition">
+                                <i data-lucide="history" class="w-5 h-5"></i> Patient Medical History
+                                <i id="history-toggle-icon" data-lucide="chevron-down" class="w-4 h-4 ml-auto"></i>
+                            </button>
+                            <div id="patient-history-content" class="hidden space-y-3 max-h-96 overflow-y-auto">
+                                <div id="history-timeline" class="space-y-4 text-xs">
+                                    <p class="text-gray-500 text-center py-4">Loading history...</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

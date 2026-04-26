@@ -43,9 +43,15 @@ try {
 
     $patient_id = $apt['patient_id'];
 
-    // Update appointment
-    $up = $conn->prepare("UPDATE appointments SET status = ?, doctor_comments = ?, prescribed_medicines = ? WHERE appointment_id = ?");
-    $up->bind_param("sssi", $new_status, $doctor_notes, $prescriptions, $apt_id);
+    // Update appointment with consultation data AND follow-up dates if provided
+    if ($followup_date !== '' && $followup_time !== '') {
+        $up = $conn->prepare("UPDATE appointments SET status = ?, doctor_comments = ?, prescribed_medicines = ?, next_followup_date = ?, next_followup_time = ? WHERE appointment_id = ?");
+        $up->bind_param("sssssi", $new_status, $doctor_notes, $prescriptions, $followup_date, $followup_time, $apt_id);
+    } else {
+        $up = $conn->prepare("UPDATE appointments SET status = ?, doctor_comments = ?, prescribed_medicines = ? WHERE appointment_id = ?");
+        $up->bind_param("sssi", $new_status, $doctor_notes, $prescriptions, $apt_id);
+    }
+    
     if (!$up->execute()) {
         throw new Exception('Failed to update consultation notes');
     }
@@ -68,13 +74,21 @@ try {
 
     // Follow-up logic
     if ($followup_date !== '' && $followup_time !== '') {
-        // Ensure availability
+        // Try to book available slot for follow-up
         $chk = $conn->prepare("SELECT avail_id, status FROM doctor_availability WHERE doctor_id = ? AND available_date = ? AND start_time = ? FOR UPDATE");
         $chk->bind_param("sss", $doctor_id, $followup_date, $followup_time);
         $chk->execute();
         $slot = $chk->get_result()->fetch_assoc();
         $chk->close();
 
+        // Always send follow-up notification when dates are set
+        $fmsg = "{$doc_name} has scheduled a follow-up appointment for you on " . date('M d, Y', strtotime($followup_date)) . " at " . date('h:i A', strtotime($followup_time)) . ".";
+        $n2 = $conn->prepare("INSERT INTO notifications (user_id, title, message, is_read, created_at) VALUES (?, 'Follow-up Scheduled', ?, 0, NOW())");
+        $n2->bind_param("ss", $patient_id, $fmsg);
+        $n2->execute();
+        $n2->close();
+
+        // If slot exists and is available, create new appointment for follow-up
         if ($slot && $slot['status'] === 'Available') {
             // Block the slot
             $bk = $conn->prepare("UPDATE doctor_availability SET status = 'Booked' WHERE avail_id = ?");
@@ -82,21 +96,12 @@ try {
             $bk->execute();
             $bk->close();
 
-            // Insert new appointment
-            $reason = "Follow-up via consultation";
+            // Insert new appointment for follow-up
+            $reason = "Follow-up consultation";
             $ins = $conn->prepare("INSERT INTO appointments (patient_id, doctor_id, app_date, app_time, reason_for_visit, status) VALUES (?, ?, ?, ?, ?, 'Upcoming')");
             $ins->bind_param("sssss", $patient_id, $doctor_id, $followup_date, $followup_time, $reason);
             $ins->execute();
             $ins->close();
-
-            // Notify about follow-up
-            $fmsg = "{$doc_name} has scheduled a follow-up appointment for you on {$followup_date} at {$followup_time}.";
-            $n2 = $conn->prepare("INSERT INTO notifications (user_id, title, message, is_read, created_at) VALUES (?, 'Follow-up Scheduled', ?, 0, NOW())");
-            $n2->bind_param("ss", $patient_id, $fmsg);
-            $n2->execute();
-            $n2->close();
-        } else {
-            throw new Exception("Follow-up time slot is not available or hasn't been set to 'Available' in your schedule.");
         }
     }
 

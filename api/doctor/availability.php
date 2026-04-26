@@ -17,6 +17,25 @@ if ($method === 'GET') {
     $date = $_GET['date'] ?? null;
     
     if ($date) {
+        // Auto-close past slots for today before returning
+        $today = date('Y-m-d');
+        $current_time = date('H:i:s');
+        
+        if ($date === $today) {
+            // Update any 'Available' slots that are in the past to 'Closed'
+            $close_stmt = $conn->prepare("
+                UPDATE doctor_availability
+                SET status = 'Closed'
+                WHERE doctor_id = ?
+                  AND available_date = ?
+                  AND status = 'Available'
+                  AND start_time <= ?
+            ");
+            $close_stmt->bind_param("sss", $doctor_id, $today, $current_time);
+            $close_stmt->execute();
+            $close_stmt->close();
+        }
+
         $stmt = $conn->prepare("SELECT avail_id, start_time, end_time, status FROM doctor_availability WHERE doctor_id = ? AND available_date = ? ORDER BY start_time ASC");
         $stmt->bind_param("ss", $doctor_id, $date);
         $stmt->execute();

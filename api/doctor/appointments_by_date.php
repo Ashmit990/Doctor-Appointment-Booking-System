@@ -37,7 +37,6 @@ try {
             a.prescribed_medicines,
             a.doctor_notes,
             a.prescriptions,
-            a.rating,
             a.feedback,
             a.status,
             u.full_name as patient_name,

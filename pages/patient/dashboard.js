@@ -673,4 +673,11 @@ function checkForPendingFeedback(rows) {
   } catch (err) {
     console.error(err);
   }
+  
+  // Check for follow-up reminders (for tomorrow's appointments)
+  try {
+    await fetch(`${API_BASE}/patient/check_followup_reminders.php`, { credentials: 'include' });
+  } catch (err) {
+    console.error('Error checking follow-up reminders:', err);
+  }
 })();

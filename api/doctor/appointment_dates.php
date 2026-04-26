@@ -11,11 +11,11 @@ if (!isset($_SESSION['user_id'])) {
 
 $doctor_id = $_SESSION['user_id'];
 
-// Get all appointment dates for calendar highlighting (upcoming and completed)
+// Get all appointment dates for calendar highlighting (except cancelled)
 $stmt = $conn->prepare("
     SELECT DISTINCT app_date 
     FROM appointments 
-    WHERE doctor_id = ? AND status IN ('Upcoming', 'Completed')
+    WHERE doctor_id = ? AND status IN ('Upcoming', 'Completed', 'Missed')
     ORDER BY app_date ASC
 ");
 

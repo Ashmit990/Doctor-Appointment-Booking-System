@@ -26,6 +26,20 @@ if ($doctor_id === '' || $avail_id < 1) {
 $conn->begin_transaction();
 
 try {
+    // Auto-close past slots first (for today only)
+    $today = date('Y-m-d');
+    $current_time = date('H:i:s');
+    $close_stmt = $conn->prepare("
+        UPDATE doctor_availability
+        SET status = 'Closed'
+        WHERE available_date = ?
+          AND status = 'Available'
+          AND start_time <= ?
+    ");
+    $close_stmt->bind_param("ss", $today, $current_time);
+    $close_stmt->execute();
+    $close_stmt->close();
+
     $stmt = $conn->prepare("
         SELECT avail_id, doctor_id, available_date, start_time, end_time, status
         FROM doctor_availability

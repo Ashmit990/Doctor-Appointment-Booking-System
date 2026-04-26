@@ -97,6 +97,17 @@ try {
     $stmt->close();
 
     // 9. Available Slots Today
+    // Auto-close past slots first
+    $current_time = date('H:i:s');
+    $close_stmt = $conn->prepare("
+        UPDATE doctor_availability
+        SET status = 'Closed'
+        WHERE doctor_id = ? AND available_date = ? AND status = 'Available' AND start_time <= ?
+    ");
+    $close_stmt->bind_param("sss", $doctor_id, $today, $current_time);
+    $close_stmt->execute();
+    $close_stmt->close();
+
     $stmt = $conn->prepare("
         SELECT avail_id, start_time, end_time, status
         FROM doctor_availability

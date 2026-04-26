@@ -312,10 +312,10 @@ async function loadScheduleForDate(date) {
         return;
       }
 
-      // Check Availability (OPEN vs BLOCKED)
+      // Check Availability (OPEN vs BLOCKED vs CLOSED)
       const avail = availability.find((a) => a.start_time === slot.start);
 
-      if (avail) {
+      if (avail && avail.status === 'Available') {
         // OPEN slot
         gridContainer.innerHTML += `
                     <div class="flex items-center justify-between p-4 bg-white border-2 border-green-400 rounded-xl shadow-sm hover:border-green-500 transition">
@@ -329,6 +329,18 @@ async function loadScheduleForDate(date) {
                         <button onclick="toggleSlot('${slot.start}', '${slot.end}', ${avail.avail_id}, ${slotIsPast})" class="bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 px-4 py-1.5 rounded-lg text-sm font-semibold transition ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}">
                             Block Slot
                         </button>
+                    </div>`;
+      } else if (avail && avail.status === 'Closed') {
+        // CLOSED slot (past time)
+        gridContainer.innerHTML += `
+                    <div class="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-xl opacity-60">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="clock-off" class="text-red-400 w-5 h-5"></i>
+                            <div>
+                                <span class="font-medium text-red-600">${slot.label}</span>
+                                <p class="text-xs text-red-500 mt-0.5">Slot closed (past time)</p>
+                            </div>
+                        </div>
                     </div>`;
       } else {
         // BLOCKED slot
@@ -446,15 +458,22 @@ function openAppointmentModal(aptId) {
   const rxReadonly = document.getElementById("readonly-prescriptions");
   const feedbackSec = document.getElementById("feedback-section");
   const completeBtn = document.getElementById("complete-consultation-btn");
+  const appointmentLockMsg = document.getElementById("appointment-lock-message") || createLockMessage();
 
   completeBtn.dataset.aptId = apt.apt_id;
 
+  // Check if appointment has started
+  const appointmentDateTime = new Date(`${apt.app_date}T${apt.appointment_time}`);
+  const now = new Date();
+  const hasAppointmentStarted = now >= appointmentDateTime;
+
   if (apt.status === "Completed") {
-    // Read-only Mode
+    // Read-only Mode - Already Completed
     statusSelectWrapper.classList.add("hidden");
     notesInput.classList.add("hidden");
     rxInput.classList.add("hidden");
     completeBtn.classList.add("hidden");
+    appointmentLockMsg.classList.add("hidden");
 
     notesReadonly.classList.remove("hidden");
     rxReadonly.classList.remove("hidden");
@@ -468,12 +487,42 @@ function openAppointmentModal(aptId) {
     } else {
       feedbackSec.classList.add("hidden");
     }
+  } else if (!hasAppointmentStarted) {
+    // Lock Mode - Appointment hasn't started yet
+    statusSelectWrapper.classList.add("hidden");
+    notesInput.classList.add("hidden");
+    rxInput.classList.add("hidden");
+    completeBtn.classList.add("hidden");
+    
+    notesReadonly.classList.remove("hidden");
+    rxReadonly.classList.remove("hidden");
+    
+    notesReadonly.textContent = "Appointment editing is locked until the appointment time starts.";
+    rxReadonly.textContent = "You can edit this appointment starting from " + new Date(appointmentDateTime).toLocaleString();
+    
+    appointmentLockMsg.classList.remove("hidden");
+    appointmentLockMsg.innerHTML = `
+      <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
+        <div class="flex items-start gap-2">
+          <i data-lucide="lock" class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <p class="font-semibold text-amber-900 text-sm">Appointment Not Yet Started</p>
+            <p class="text-amber-800 text-xs mt-1">This appointment is scheduled for <strong>${new Date(appointmentDateTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</strong> at <strong>${new Date(appointmentDateTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</strong>.</p>
+            <p class="text-amber-800 text-xs mt-1">You can edit consultation details only after the appointment starts.</p>
+          </div>
+        </div>
+      </div>
+    `;
+    lucide.createIcons();
+    
+    feedbackSec.classList.add("hidden");
   } else {
-    // Edit Mode (Upcoming or Missed)
+    // Edit Mode (Upcoming or Missed) - Appointment has started
     statusSelectWrapper.classList.remove("hidden");
     notesInput.classList.remove("hidden");
     rxInput.classList.remove("hidden");
     completeBtn.classList.remove("hidden");
+    appointmentLockMsg.classList.add("hidden");
 
     notesReadonly.classList.add("hidden");
     rxReadonly.classList.add("hidden");
@@ -484,20 +533,83 @@ function openAppointmentModal(aptId) {
     rxInput.value = apt.prescriptions || "";
     document.getElementById("modal-followup-date").value = "";
     document.getElementById("modal-followup-time").value = "";
+    
+    // Set min date to today to prevent selecting past dates
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    document.getElementById("modal-followup-date").setAttribute("min", todayStr);
+    document.getElementById("followup-date-error").classList.add("hidden");
+    
     toggleFollowUpVisibility();
   }
 
   document.getElementById("appointment-modal").classList.remove("hidden");
+  
+  // Load patient history
+  loadPatientHistory(apt.patient_id);
+}
+
+// Helper function to create lock message container if it doesn't exist
+function createLockMessage() {
+  let lockMsg = document.getElementById("appointment-lock-message");
+  if (!lockMsg) {
+    lockMsg = document.createElement("div");
+    lockMsg.id = "appointment-lock-message";
+    const consultationWorkspace = document.getElementById("consultation-workspace");
+    consultationWorkspace.insertBefore(lockMsg, consultationWorkspace.firstChild);
+  }
+  return lockMsg;
 }
 
 async function submitConsultation() {
   const aptId = document.getElementById("complete-consultation-btn").dataset
     .aptId;
-  const statusVal = document.getElementById("modal-edit-status").value;
-  const notes = document.getElementById("modal-doctor-notes").value;
-  const rx = document.getElementById("modal-prescriptions").value;
+  const statusVal = document.getElementById("modal-edit-status").value.trim();
+  const notes = document.getElementById("modal-doctor-notes").value.trim();
+  const rx = document.getElementById("modal-prescriptions").value.trim();
   const fDate = document.getElementById("modal-followup-date").value;
   const fTime = document.getElementById("modal-followup-time").value;
+
+  // Clear previous error messages
+  document.getElementById("status-error").classList.add("hidden");
+  document.getElementById("notes-error").classList.add("hidden");
+  document.getElementById("prescriptions-error").classList.add("hidden");
+  document.getElementById("followup-date-error").classList.add("hidden");
+
+  // Validation
+  let hasErrors = false;
+
+  if (!statusVal) {
+    document.getElementById("status-error").classList.remove("hidden");
+    hasErrors = true;
+  }
+
+  if (!notes) {
+    document.getElementById("notes-error").classList.remove("hidden");
+    hasErrors = true;
+  }
+
+  if (!rx) {
+    document.getElementById("prescriptions-error").classList.remove("hidden");
+    hasErrors = true;
+  }
+
+  // Validate follow-up date (if provided, must not be in the past)
+  if (fDate) {
+    const selectedDate = new Date(fDate + "T00:00:00");
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+      document.getElementById("followup-date-error").classList.remove("hidden");
+      hasErrors = true;
+    }
+  }
+
+  if (hasErrors) {
+    alert("Please fill in all required fields (marked with *) and ensure follow-up date is not in the past");
+    return;
+  }
 
   const btn = document.getElementById("complete-consultation-btn");
   const oldText = btn.innerHTML;
@@ -537,6 +649,61 @@ async function submitConsultation() {
 function closeAppointmentModal() {
   document.getElementById("appointment-modal").classList.add("hidden");
 }
+
+// Load patient medical history
+async function loadPatientHistory(patientId) {
+  const historyContent = document.getElementById("history-timeline");
+  historyContent.innerHTML = '<p class="text-gray-500 text-center py-4">Loading history...</p>';
+
+  try {
+    const res = await fetch(`../../api/doctor/patient_history.php?patient_id=${encodeURIComponent(patientId)}`);
+    const data = await res.json();
+
+    if (data.status === 'success' && data.data.length > 0) {
+      historyContent.innerHTML = data.data.map(apt => `
+        <div class="relative pl-6 border-l-2 border-primary pb-4">
+          <div class="absolute w-3 h-3 bg-primary rounded-full -left-1.5 top-1"></div>
+          <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
+            <div class="flex justify-between items-start mb-2">
+              <div>
+                <p class="font-semibold text-gray-900 text-xs">${apt.doctor_name || '-'}</p>
+                <p class="text-[10px] text-gray-500">${apt.specialization || 'Consultation'}</p>
+              </div>
+              <span class="text-[10px] bg-green-100 text-green-800 px-2 py-1 rounded">Completed</span>
+            </div>
+            <p class="text-[10px] text-gray-600 mb-2">📅 ${new Date(apt.app_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${apt.app_time}</p>
+            ${apt.reason_for_visit ? `<p class="text-[10px] text-gray-600 mb-2"><strong>Visit:</strong> ${apt.reason_for_visit}</p>` : ''}
+            ${apt.doctor_comments ? `<p class="text-[10px] text-gray-700 mb-2 p-2 bg-white rounded border-l-2 border-blue-400"><strong>Notes:</strong> ${apt.doctor_comments}</p>` : ''}
+            ${apt.prescribed_medicines ? `<p class="text-[10px] text-gray-700 p-2 bg-white rounded border-l-2 border-green-400"><strong>Medicines:</strong> ${apt.prescribed_medicines}</p>` : ''}
+          </div>
+        </div>
+      `).join('');
+    } else {
+      historyContent.innerHTML = '<p class="text-gray-500 text-center py-4 text-xs">No completed appointments found</p>';
+    }
+    
+    lucide.createIcons();
+  } catch (e) {
+    historyContent.innerHTML = '<p class="text-red-500 text-center py-4 text-xs">Error loading history</p>';
+  }
+}
+
+// Toggle patient history section
+function togglePatientHistory() {
+  const content = document.getElementById('patient-history-content');
+  const icon = document.getElementById('history-toggle-icon');
+  
+  content.classList.toggle('hidden');
+  
+  if (content.classList.contains('hidden')) {
+    icon.setAttribute('data-lucide', 'chevron-down');
+  } else {
+    icon.setAttribute('data-lucide', 'chevron-up');
+  }
+  
+  lucide.createIcons();
+}
+
 
 function prevMonthSchedule() {
   scheduleMonth.setMonth(scheduleMonth.getMonth() - 1);
