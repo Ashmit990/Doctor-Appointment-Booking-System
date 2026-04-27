@@ -56,6 +56,18 @@ async function fetchAppointmentDatesForSchedule() {
   return [];
 }
 
+async function fetchCompletedAppointmentsForSchedule() {
+  const response = await fetch("../../api/doctor/completed_appointments.php", {
+    credentials: 'include'
+  });
+  const result = await response.json();
+
+  if (result.status === "success") {
+    return result.dates || [];
+  }
+  return [];
+}
+
 function renderScheduleCalendar() {
   const year = scheduleMonth.getFullYear();
   const month = scheduleMonth.getMonth();
@@ -69,8 +81,8 @@ function renderScheduleCalendar() {
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  // Fetch appointment dates for this month
-  fetchAppointmentDatesForSchedule().then((appointmentDates) => {
+  // Fetch both appointment dates and completed appointments for this month
+  Promise.all([fetchAppointmentDatesForSchedule(), fetchCompletedAppointmentsForSchedule()]).then(([appointmentDates, completedDates]) => {
     const daysContainer = document.getElementById("schedule-calendar-days");
     daysContainer.innerHTML = "";
     // Create a Set of dates for this month/year only
@@ -78,6 +90,8 @@ function renderScheduleCalendar() {
     const targetMonth = month + 1; // Convert from 0-11 to 1-12
 
     const datesThisMonth = new Set();
+    const completedDatesThisMonth = new Set();
+
     appointmentDates.forEach((dateStr) => {
       const parts = dateStr.trim().split("-");
       if (parts.length === 3) {
@@ -88,6 +102,20 @@ function renderScheduleCalendar() {
         // Only add if it matches this year AND this month
         if (dateYear === targetYear && dateMonth === targetMonth) {
           datesThisMonth.add(dateDay);
+        }
+      }
+    });
+
+    completedDates.forEach((dateStr) => {
+      const parts = dateStr.trim().split("-");
+      if (parts.length === 3) {
+        const dateYear = parseInt(parts[0]);
+        const dateMonth = parseInt(parts[1]);
+        const dateDay = parseInt(parts[2]);
+
+        // Only add if it matches this year AND this month
+        if (dateYear === targetYear && dateMonth === targetMonth) {
+          completedDatesThisMonth.add(dateDay);
         }
       }
     });
@@ -111,8 +139,12 @@ function renderScheduleCalendar() {
         "calendar-day cursor-pointer hover:bg-primary-light rounded-lg";
       dayDiv.textContent = i;
 
-      // Add red dot if doctor has set availability for this date in this month/year
-      if (datesThisMonth.has(i)) {
+      // Add green checkmark if doctor has completed appointments for this date
+      if (completedDatesThisMonth.has(i)) {
+        dayDiv.classList.add("has-completed");
+      }
+      // Add red dot if doctor has set availability for this date (but not completed)
+      else if (datesThisMonth.has(i)) {
         dayDiv.classList.add("has-appointment");
       }
 
@@ -424,7 +456,46 @@ function toggleFollowUpVisibility() {
   lucide.createIcons();
 }
 
-function openAppointmentModal(aptId) {
+let fetchedAvailability = [];
+
+window.updateFollowupTimes = function() {
+    const dateSelect = document.getElementById("modal-followup-date");
+    const timeSelect = document.getElementById("modal-followup-time");
+    const selectedDate = dateSelect.value;
+    
+    if (!selectedDate) {
+        timeSelect.innerHTML = '<option value="">-- Select Date First --</option>';
+        timeSelect.disabled = true;
+        return;
+    }
+    
+    timeSelect.innerHTML = '<option value="">-- Select Time Slot --</option>';
+    
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const currentHour = today.getHours();
+    const currentMinute = today.getMinutes();
+    const currentTimeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}:00`;
+    
+    // Filter available slots for this date
+    const slotsForDate = fetchedAvailability.filter(slot => {
+        if (slot.available_date !== selectedDate) return false;
+        if (selectedDate === todayStr && slot.start_time <= currentTimeStr) return false;
+        return true;
+    }).sort((a, b) => a.start_time.localeCompare(b.start_time));
+    
+    if (slotsForDate.length > 0) {
+        slotsForDate.forEach(slot => {
+            timeSelect.innerHTML += `<option value="${slot.start_time}">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</option>`;
+        });
+        timeSelect.disabled = false;
+    } else {
+        timeSelect.innerHTML = '<option value="">-- No Times Available --</option>';
+        timeSelect.disabled = true;
+    }
+};
+
+async function openAppointmentModal(aptId) {
   const apt = storedAppointmentsForModal.find((a) => a.apt_id == aptId);
   if (!apt) return;
 
@@ -529,16 +600,63 @@ function openAppointmentModal(aptId) {
     feedbackSec.classList.add("hidden");
 
     statusSelect.value = apt.status === "Upcoming" ? "Upcoming" : apt.status;
-    notesInput.value = apt.doctor_notes || "";
-    rxInput.value = apt.prescriptions || "";
-    document.getElementById("modal-followup-date").value = "";
+    notesInput.value = apt.doctor_comments || apt.doctor_notes || "";
+    rxInput.value = apt.prescribed_medicines || apt.prescriptions || "";
     document.getElementById("modal-followup-time").value = "";
+    document.getElementById("followup-date-error").classList.add("hidden");
     
-    // Set min date to today to prevent selecting past dates
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-    document.getElementById("modal-followup-date").setAttribute("min", todayStr);
-    document.getElementById("followup-date-error").classList.add("hidden");
+    
+    // Fetch doctor's configured schedules to populate follow-up date select
+    try {
+        const availRes = await fetch('../../api/doctor/availability.php', { credentials: 'include' });
+        const availData = await availRes.json();
+        
+        const fDateSelect = document.getElementById("modal-followup-date");
+        fDateSelect.innerHTML = '<option value="">-- Select Date --</option>';
+        
+        const fTimeSelect = document.getElementById("modal-followup-time");
+        fTimeSelect.innerHTML = '<option value="">-- Select Date First --</option>';
+        fTimeSelect.disabled = true;
+        
+        if (availData.status === 'success' && availData.data) {
+            // Save globally for time filtering
+            fetchedAvailability = availData.data.filter(slot => slot.status === 'Available');
+            
+            const currentHour = today.getHours();
+            const currentMinute = today.getMinutes();
+            const currentTimeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}:00`;
+
+            // Filter out slots that are in the past
+            const validSlots = fetchedAvailability.filter(slot => {
+                if (slot.available_date > todayStr) return true;
+                if (slot.available_date === todayStr && slot.start_time > currentTimeStr) return true;
+                return false;
+            });
+            
+            // Get unique future dates
+            const uniqueDates = [...new Set(validSlots.map(slot => slot.available_date))].sort();
+            
+            if (uniqueDates.length > 0) {
+                uniqueDates.forEach(date => {
+                    const dateObj = new Date(date + "T00:00:00");
+                    const dateDisplay = dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+                    fDateSelect.innerHTML += `<option value="${date}">${dateDisplay}</option>`;
+                });
+                document.getElementById("followup-section").classList.remove("hidden");
+            } else {
+                document.getElementById("followup-section").classList.add("hidden");
+            }
+        } else {
+            fetchedAvailability = [];
+            document.getElementById("followup-section").classList.add("hidden");
+        }
+    } catch (e) {
+        console.error("Failed to fetch availability:", e);
+        fetchedAvailability = [];
+        document.getElementById("followup-section").classList.add("hidden");
+    }
     
     toggleFollowUpVisibility();
   }

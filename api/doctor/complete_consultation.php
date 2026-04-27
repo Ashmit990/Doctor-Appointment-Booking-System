@@ -66,11 +66,13 @@ try {
     $dnItem->close();
 
     // Notification for Completion
-    $msg = "Your appointment with {$doc_name} has been marked as Completed. Please provide feedback on your dashboard.";
-    $n1 = $conn->prepare("INSERT INTO notifications (user_id, title, message, is_read, created_at) VALUES (?, 'Consultation Completed', ?, 0, NOW())");
-    $n1->bind_param("ss", $patient_id, $msg);
-    $n1->execute();
-    $n1->close();
+    if ($new_status === 'Completed') {
+        $msg = "Your appointment with {$doc_name} has been marked as Completed. Please provide feedback on your dashboard.";
+        $n1 = $conn->prepare("INSERT INTO notifications (user_id, title, message, is_read, created_at) VALUES (?, 'Consultation Completed', ?, 0, NOW())");
+        $n1->bind_param("ss", $patient_id, $msg);
+        $n1->execute();
+        $n1->close();
+    }
 
     // Follow-up logic
     if ($followup_date !== '' && $followup_time !== '') {

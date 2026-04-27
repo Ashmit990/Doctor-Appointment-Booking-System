@@ -85,6 +85,31 @@
             background: #ef4444;
             border-radius: 50%;
         }
+
+        .calendar-day.has-completed {
+            position: relative;
+            font-weight: bold;
+            color: #10b981;
+        }
+
+        .calendar-day.has-completed::after {
+            content: '✓';
+            position: absolute;
+            bottom: -4px;
+            right: 2px;
+            width: 18px;
+            height: 18px;
+            background: #10b981;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            line-height: 1;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 
@@ -284,18 +309,13 @@
                             <label class="block text-xs font-medium text-gray-700 mb-1">Set Next Follow-up
                                 (Optional)</label>
                             <div class="grid grid-cols-2 gap-2">
-                                <input type="date" id="modal-followup-date"
+                                <select id="modal-followup-date" onchange="updateFollowupTimes()"
                                     class="w-full text-xs border border-gray-300 rounded-lg p-2 focus:ring-primary focus:border-primary">
-                                <select id="modal-followup-time"
-                                    class="w-full text-xs border border-gray-300 rounded-lg p-2 focus:ring-primary focus:border-primary">
-                                    <option value="">-- Select Time Slot --</option>
-                                    <option value="09:00:00">09:00 AM - 10:00 AM</option>
-                                    <option value="10:00:00">10:00 AM - 11:00 AM</option>
-                                    <option value="11:00:00">11:00 AM - 12:00 PM</option>
-                                    <option value="12:00:00">12:00 PM - 01:00 PM</option>
-                                    <option value="14:00:00">02:00 PM - 03:00 PM</option>
-                                    <option value="15:00:00">03:00 PM - 04:00 PM</option>
-                                    <option value="16:00:00">04:00 PM - 05:00 PM</option>
+                                    <option value="">-- Select Date --</option>
+                                </select>
+                                <select id="modal-followup-time" disabled
+                                    class="w-full text-xs border border-gray-300 rounded-lg p-2 focus:ring-primary focus:border-primary disabled:opacity-50">
+                                    <option value="">-- Select Date First --</option>
                                 </select>
                             </div>
                             <p id="followup-date-error" class="text-red-500 text-xs mt-1 hidden">Follow-up date cannot be in the past</p>

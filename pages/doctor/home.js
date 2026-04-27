@@ -242,8 +242,12 @@ function renderCalendar() {
             dayDiv.className = 'calendar-day text-center p-2 rounded-lg cursor-pointer hover:bg-blue-100 transition text-gray-900 font-medium';
             dayDiv.textContent = i;
             
-            // Mark dates with any appointments (upcoming or completed) with red dot
-            if (appointmentDatesThisMonth.has(i) || completedDatesThisMonth.has(i)) {
+            // Mark dates with completed appointments with checkmark
+            if (completedDatesThisMonth.has(i)) {
+                dayDiv.classList.add('has-completed');
+            } 
+            // Mark dates with upcoming appointments with red dot
+            else if (appointmentDatesThisMonth.has(i)) {
                 dayDiv.classList.add('has-appointment');
             }
             
@@ -336,21 +340,13 @@ async function openAppointmentModal(appointmentID) {
         const editSection = document.getElementById('edit-section');
         const viewSection = document.getElementById('view-section');
         
-        if (apt.app_date === today) {
-            editSection.classList.remove('hidden');
-            viewSection.classList.add('hidden');
-            document.getElementById('modal-status').value = apt.status || 'Upcoming';
-            document.getElementById('modal-comments').value = apt.doctor_comments || '';
-            document.getElementById('modal-medicines').value = apt.prescribed_medicines || '';
-        } else {
-            editSection.classList.add('hidden');
-            viewSection.classList.remove('hidden');
-            const status = apt.status || 'Not set';
-            document.getElementById('view-status').textContent = status;
-            document.getElementById('view-status').className = `font-semibold mt-1 px-3 py-1 rounded-full text-sm inline-block ${getStatusBadgeClass(status)}`;
-            document.getElementById('view-comments').textContent = apt.doctor_comments || 'No comments added';
-            document.getElementById('view-medicines').textContent = apt.prescribed_medicines || 'No medicines prescribed';
-        }
+        editSection.classList.add('hidden');
+        viewSection.classList.remove('hidden');
+        const status = apt.status || 'Not set';
+        document.getElementById('view-status').textContent = status;
+        document.getElementById('view-status').className = `font-semibold mt-1 px-3 py-1 rounded-full text-sm inline-block ${getStatusBadgeClass(status)}`;
+        document.getElementById('view-comments').textContent = apt.doctor_comments || 'No comments added';
+        document.getElementById('view-medicines').textContent = apt.prescribed_medicines || 'No medicines prescribed';
         
         document.getElementById('appointment-modal').classList.remove('hidden');
     }
