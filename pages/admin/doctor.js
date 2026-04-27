@@ -1,20 +1,19 @@
 /*
   DOCTORS PAGE - MANAGE DOCTORS
   ============================
-  Clean reorganized version with all utilities first
-  NOTE: Edit functionality has been completely removed per requirements.
-  Only delete action remains.
+  Admin can click on doctor name to see a popup with FULL details
+  (phone number, age, bio, qualifications, experience, consultation fee, etc.)
+  NO dropdowns - only modal popup
 */
 
 // ==================== GLOBAL STATE ====================
 let currentPage = 1;
 let allDoctors = [];
 let filteredDoctors = [];
-let openBioId = null; // track which bio is open
 
 console.log("✓ doctor.js file loading...");
 
-// ==================== UTILITIES (Must be first!) ====================
+// ==================== UTILITIES ====================
 function showToast(message) {
   try {
     const toast = document.createElement("div");
@@ -62,10 +61,199 @@ function closeSidebar() {
   }
 }
 
-// ==================== BIO TOGGLE ====================
-function toggleBio(id) {
-  openBioId = openBioId === id ? null : id;
-  displayDoctors();
+// ==================== DOCTOR DETAILS MODAL ====================
+async function viewDoctorDetails(doctorId) {
+  try {
+    console.log("Fetching details for doctor:", doctorId);
+
+    const modal = document.getElementById("doctorModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBody = document.getElementById("modalBody");
+
+    if (!modal || !modalBody) {
+      console.error("Modal elements not found!");
+      return;
+    }
+
+    // Show loading state
+    modal.classList.add("active");
+    modalBody.innerHTML = `
+      <div class="flex justify-center py-12">
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-teal-600"></div>
+        <p class="ml-3 text-gray-500">Loading doctor information...</p>
+      </div>
+    `;
+
+    // Fetch full doctor details from API
+    const response = await fetch(
+      `../../api/admin/doctors.php?doctor_id=${doctorId}`,
+      {
+        credentials: "include",
+      },
+    );
+
+    const result = await response.json();
+    console.log("Doctor details response:", result);
+
+    if (result.status === "success" && result.data) {
+      const doc = result.data;
+
+      if (modalTitle) {
+        modalTitle.textContent = `Dr. ${doc.full_name || "Doctor"} - Profile`;
+      }
+
+      // Format the details nicely
+      modalBody.innerHTML = `
+        <div class="space-y-6">
+          <!-- Header with avatar -->
+          <div class="flex items-center gap-4 pb-4 border-b">
+            <div class="w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0d7377" stroke-width="1.5">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <div>
+              <h4 class="text-xl font-bold text-gray-800">${escapeHtml(doc.full_name || "N/A")}</h4>
+              <p class="text-teal-600 font-medium">${escapeHtml(doc.specialization || "Specialization not specified")}</p>
+            </div>
+          </div>
+          
+          <!-- Contact Information -->
+          <div>
+            <h5 class="text-sm font-semibold text-teal-dark uppercase tracking-wider mb-3">Contact Information</h5>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 rounded-xl p-4">
+              <div>
+                <p class="text-xs text-gray-400">Email Address</p>
+                <p class="text-sm font-medium text-gray-700">${escapeHtml(doc.email || "N/A")}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400">Phone Number</p>
+                <p class="text-sm font-medium text-gray-700">${escapeHtml(doc.contact_number || "Not provided")}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400">Age</p>
+                <p class="text-sm font-medium text-gray-700">${doc.age || "Not provided"}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400">Medical ID</p>
+                <p class="text-sm font-medium text-gray-700">${escapeHtml(doc.medical_id || "Not provided")}</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Professional Details -->
+          <div>
+            <h5 class="text-sm font-semibold text-teal-dark uppercase tracking-wider mb-3">Professional Details</h5>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 rounded-xl p-4">
+              <div>
+                <p class="text-xs text-gray-400">Specialization</p>
+                <p class="text-sm font-medium text-gray-700">${escapeHtml(doc.specialization || "Not specified")}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400">Consultation Fee</p>
+                <p class="text-sm font-medium text-gray-700">${doc.consultation_fee ? "₹" + doc.consultation_fee : "Not set"}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400">Experience (Years)</p>
+                <p class="text-sm font-medium text-gray-700">${doc.experience_years || "Not specified"}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400">Qualifications</p>
+                <p class="text-sm font-medium text-gray-700">${escapeHtml(doc.qualifications || "Not specified")}</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Bio / About -->
+          <div>
+            <h5 class="text-sm font-semibold text-teal-dark uppercase tracking-wider mb-3">About / Bio</h5>
+            <div class="bg-gray-50 rounded-xl p-4">
+              <p class="text-sm text-gray-700 leading-relaxed">${escapeHtml(doc.bio || "No bio provided yet.")}</p>
+            </div>
+          </div>
+          
+          <!-- Statistics -->
+          <div>
+            <h5 class="text-sm font-semibold text-teal-dark uppercase tracking-wider mb-3">Practice Statistics</h5>
+            <div class="grid grid-cols-2 gap-4 bg-gray-50 rounded-xl p-4">
+              <div class="text-center">
+                <p class="text-2xl font-bold text-teal-600">${doc.total_appointments || 0}</p>
+                <p class="text-xs text-gray-400">Total Appointments</p>
+              </div>
+              <div class="text-center">
+                <p class="text-2xl font-bold text-green-600">${doc.completed_appointments || 0}</p>
+                <p class="text-xs text-gray-400">Completed Appointments</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      modalBody.innerHTML = `
+        <div class="text-center py-8 text-red-500">
+          <svg class="w-12 h-12 mx-auto mb-3 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p>Failed to load doctor details.</p>
+          <p class="text-sm mt-2">${escapeHtml(result.message || "Please try again later.")}</p>
+        </div>
+      `;
+    }
+  } catch (error) {
+    console.error("Error fetching doctor details:", error);
+    const modalBody = document.getElementById("modalBody");
+    if (modalBody) {
+      modalBody.innerHTML = `
+        <div class="text-center py-8 text-red-500">
+          <svg class="w-12 h-12 mx-auto mb-3 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p>Error loading doctor details.</p>
+          <p class="text-sm mt-2">${error.message}</p>
+        </div>
+      `;
+    }
+  }
+}
+
+function closeDoctorModal() {
+  const modal = document.getElementById("doctorModal");
+  if (modal) {
+    modal.classList.remove("active");
+  }
+}
+
+// Close modal when clicking outside
+document.addEventListener("click", function (event) {
+  const modal = document.getElementById("doctorModal");
+  const modalContent = modal?.querySelector(".modal-content");
+  if (
+    modal &&
+    modal.classList.contains("active") &&
+    modalContent &&
+    !modalContent.contains(event.target)
+  ) {
+    closeDoctorModal();
+  }
+});
+
+// Close modal with Escape key
+document.addEventListener("keydown", function (event) {
+  if (event.key === "Escape") {
+    closeDoctorModal();
+  }
+});
+
+// Helper function to escape HTML
+function escapeHtml(str) {
+  if (!str) return "";
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 // ==================== LOAD DATA ====================
@@ -87,11 +275,16 @@ async function loadDoctors(page = 1) {
 
     if (result && result.status === "success") {
       allDoctors = result.data || [];
-      filteredDoctors = result.data || [];
+      filteredDoctors = [...allDoctors];
 
       const totalPagesEl = document.getElementById("total-pages");
       if (totalPagesEl) {
         totalPagesEl.textContent = result.pages || 1;
+      }
+
+      const currentPageEl = document.getElementById("current-page");
+      if (currentPageEl) {
+        currentPageEl.textContent = currentPage;
       }
 
       displayDoctors();
@@ -124,74 +317,34 @@ function displayDoctors() {
 
     let html = "";
     for (const doc of filteredDoctors) {
-      const fullName = (doc.full_name || "").replace(/'/g, "\\'");
-      const email = (doc.email || "").replace(/'/g, "\\'");
+      const fullName = doc.full_name || "Unknown";
+      const email = doc.email || "";
       const docId = doc.user_id;
-      const isOpen = openBioId === docId;
-
-      // Use bio from API if available, otherwise use a default
-      const bio = doc.bio
-        ? doc.bio
-        : `${doc.full_name || "This doctor"} is a qualified ${doc.specialization || "specialist"} registered on our healthcare platform. Full bio will be available once the doctor updates their profile.`;
 
       html += `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="px-5 py-4 text-sm font-semibold">
-                        <button
-                            onclick="toggleBio('${docId}')"
-                            style="font-family:inherit; font-size:inherit; font-weight:inherit;"
-                            class="flex items-center gap-1.5 text-left text-gray-800 hover:text-teal-700 bg-transparent border-none p-0 cursor-pointer"
-                        >
-                            ${fullName}
-                            <svg
-                                style="transition:transform 0.2s ease; transform:${isOpen ? "rotate(180deg)" : "rotate(0deg)"}; flex-shrink:0;"
-                                width="14" height="14" viewBox="0 0 24 24"
-                                fill="none" stroke="#0d7377" stroke-width="2.5"
-                            >
-                                <polyline points="6 9 12 15 18 9"/>
-                            </svg>
-                        </button>
-                      </td>
-                    <td class="px-5 py-4 text-sm">${doc.specialization || "N/A"}</td>
-                    <td class="px-5 py-4 text-sm hidden md:table-cell">${email}</td>
-                    <td class="px-5 py-4 text-sm">${doc.total_appointments || 0}</td>
-                    <td class="px-5 py-4">
-                        <div class="flex gap-2">
-                            <button onclick="deleteDoctor('${docId}')" class="text-xs px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 font-semibold">Delete</button>
-                        </div>
-                      </td>
-                  </tr>
-            `;
-
-      // Bio dropdown row — only shown when this doctor is open
-      if (isOpen) {
-        html += `
-                  <tr>
-                    <td colspan="5" style="padding:0;">
-                        <div style="border-left:3px solid #0d7377; background:#e8f5f5;" class="flex items-start gap-4 px-6 py-4">
-                            <div class="w-11 h-11 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0" style="background:#c5e8e8;">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d7377" stroke-width="2">
-                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                                    <circle cx="12" cy="7" r="4"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <p style="margin:0 0 4px; font-weight:600; color:#0a5a5d; font-size:14px;">
-                                    ${doc.full_name || ""} &mdash; ${doc.specialization || ""}
-                                </p>
-                                <p style="margin:0; font-size:13px; color:#374151; line-height:1.7;">
-                                    ${bio}
-                                </p>
-                            </div>
-                        </div>
-                      </td>
-                  </tr>
-                `;
-      }
+        <tr class="border-b hover:bg-gray-50">
+          <td class="px-5 py-4 text-sm font-semibold">
+            <button
+              onclick="viewDoctorDetails('${docId}')"
+              class="text-left text-gray-800 hover:text-teal-700 bg-transparent border-none p-0 cursor-pointer font-semibold hover:underline"
+            >
+              ${escapeHtml(fullName)}
+            </button>
+           </td>
+          <td class="px-5 py-4 text-sm">${escapeHtml(doc.specialization || "N/A")}</td>
+          <td class="px-5 py-4 text-sm hidden md:table-cell">${escapeHtml(email)}</td>
+          <td class="px-5 py-4 text-sm">${doc.total_appointments || 0}</td>
+          <td class="px-5 py-4">
+            <button onclick="deleteDoctor('${docId}')" class="text-xs px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 font-semibold transition">
+              Delete
+            </button>
+          </td>
+        </tr>
+      `;
     }
 
     tbody.innerHTML = html;
-    console.log("✓ Table updated");
+    console.log("✓ Table updated - no dropdowns, click name for modal");
   } catch (e) {
     console.error("✗ Display error:", e);
   }
@@ -215,7 +368,12 @@ function filterDoctors() {
 
 // ==================== DELETE ====================
 async function deleteDoctor(doctorId) {
-  if (!confirm("Delete this doctor? This action cannot be undone.")) return;
+  if (
+    !confirm(
+      "⚠️ Delete this doctor?\n\nThis action cannot be undone. All associated appointments and data will be removed.",
+    )
+  )
+    return;
 
   try {
     const response = await fetch("../../api/admin/doctors.php", {
@@ -227,8 +385,7 @@ async function deleteDoctor(doctorId) {
 
     const result = await response.json();
     if (result.status === "success") {
-      showToast("Doctor deleted successfully!");
-      // Refresh the current page after deletion
+      showToast("✓ Doctor deleted successfully!");
       loadDoctors(currentPage);
     } else {
       showToast(result.message || "Error deleting doctor");
@@ -245,17 +402,13 @@ function nextPage() {
     document.getElementById("total-pages")?.textContent || "1",
   );
   if (currentPage < totalPages) {
-    currentPage++;
-    document.getElementById("current-page").textContent = currentPage;
-    loadDoctors(currentPage);
+    loadDoctors(currentPage + 1);
   }
 }
 
 function previousPage() {
   if (currentPage > 1) {
-    currentPage--;
-    document.getElementById("current-page").textContent = currentPage;
-    loadDoctors(currentPage);
+    loadDoctors(currentPage - 1);
   }
 }
 
@@ -266,13 +419,17 @@ function initPage() {
   try {
     console.log("╔═══════════════════════════════════╗");
     console.log("║   DOCTORS PAGE INITIALIZATION     ║");
-    console.log("║   (Edit functionality removed)    ║");
+    console.log("║   ✓ Click doctor name for modal   ║");
+    console.log("║   ✓ No dropdowns                  ║");
+    console.log("║   ✓ Full details in popup         ║");
     console.log("╚═══════════════════════════════════╝");
 
     updateCurrentDate();
     loadDoctors();
 
-    console.log("✓ Page ready - Delete only mode");
+    console.log(
+      "✓ Page ready - Click doctor name to see full details in modal",
+    );
   } catch (err) {
     console.error("✗ INIT ERROR:", err);
     showToast("Page load error: " + err.message);
