@@ -274,8 +274,14 @@ function buildCalendarGrid(container, year, month, compact) {
     // Apply styling based on date
     if (isToday) {
       cell.classList.add("font-semibold");
-      cell.style.backgroundColor = "#007E85";
-      cell.style.color = "white";
+      if (compact) {
+        cell.style.backgroundColor = "#007e85";
+        cell.style.color = "#fff";
+        cell.style.borderRadius = "0.5rem";
+      } else {
+        cell.style.backgroundColor = "#e0f2f2";
+        cell.style.color = "#007e85";
+      }
     } else if (isPast) {
       cell.style.color = "#d1d5db";
     } else {

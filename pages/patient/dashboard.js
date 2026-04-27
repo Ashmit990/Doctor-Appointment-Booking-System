@@ -218,11 +218,11 @@ function renderAppointments(rows) {
               : ""
           }
           ${
-            item.status_key === "completed" && parseInt(item.rating || 0) > 0
+            item.status_key === "completed" && item.feedback
               ? `<button type="button" data-view-feedback="${item.appointment_id}" class="view-feedback-btn w-full px-3 py-2 rounded-lg border border-yellow-300 bg-yellow-400 text-white hover:bg-yellow-500 text-xs font-medium transition whitespace-nowrap text-center">
             View Feedback
           </button>`
-              : item.status_key === "completed" && parseInt(item.rating || 0) === 0
+              : item.status_key === "completed" && !item.feedback
               ? `<button type="button" data-feedback="${item.appointment_id}" class="feedback-btn w-full px-3 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 text-xs font-medium shadow-sm transition whitespace-nowrap text-center">
             Feedback
           </button>`
@@ -519,35 +519,6 @@ dashboardMarkAllReadBtn?.addEventListener("click", async () => {
 // --- FEEDBACK MODAL LOGIC ---
 
 let _fbCurrentApt = null;   // currently open appointment object
-let _fbSelectedRating = 5;  // currently selected star count
-
-function renderStarPicker(selected) {
-  const picker = document.getElementById('fb-star-picker');
-  if (!picker) return;
-  picker.innerHTML = '';
-  for (let i = 1; i <= 5; i++) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.dataset.star = i;
-    btn.innerHTML = `<svg viewBox="0 0 24 24" class="w-8 h-8 transition" fill="${i <= selected ? '#f59e0b' : 'none'}" stroke="${i <= selected ? '#f59e0b' : '#cbd5e1'}" stroke-width="1.5"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>`;
-    btn.addEventListener('click', () => {
-      _fbSelectedRating = i;
-      renderStarPicker(i);
-    });
-    btn.addEventListener('mouseover', () => renderStarPicker(i));
-    btn.addEventListener('mouseout', () => renderStarPicker(_fbSelectedRating));
-    picker.appendChild(btn);
-  }
-}
-
-function renderViewStars(rating) {
-  const el = document.getElementById('fb-view-stars');
-  if (!el) return;
-  el.innerHTML = '';
-  for (let i = 1; i <= 5; i++) {
-    el.innerHTML += `<svg viewBox="0 0 24 24" class="w-6 h-6" fill="${i <= rating ? '#f59e0b' : 'none'}" stroke="${i <= rating ? '#f59e0b' : '#cbd5e1'}" stroke-width="1.5"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>`;
-  }
-}
 
 function showPanel(panel) {
   document.getElementById('fbViewPanel').classList.add('hidden');
@@ -561,7 +532,6 @@ function openViewFeedbackModal(apt) {
   _fbCurrentApt = apt;
   document.getElementById('feedback-apt-id').value = apt.appointment_id;
   document.getElementById('fb-view-doctor').textContent = apt.doctor_name || 'Doctor';
-  renderViewStars(parseInt(apt.rating) || 5);
   document.getElementById('fb-view-text').textContent = apt.feedback || '(No written feedback)';
   document.getElementById('feedbackModal').classList.remove('hidden');
   document.getElementById('feedbackModal').classList.add('flex');
@@ -571,7 +541,6 @@ function openViewFeedbackModal(apt) {
 /** Open to WRITE new feedback */
 function openFeedbackModal(apt) {
   _fbCurrentApt = apt;
-  _fbSelectedRating = 5;
   document.getElementById('feedback-apt-id').value = apt.appointment_id;
   document.getElementById('feedback-mode').value = 'new';
   document.getElementById('fb-write-doctor').textContent = apt.doctor_name || 'Doctor';
@@ -579,7 +548,6 @@ function openFeedbackModal(apt) {
   document.getElementById('feedback-text').value = '';
   document.getElementById('fb-back-btn').classList.add('hidden');
   document.getElementById('submitFeedbackBtn').textContent = 'Submit Review';
-  renderStarPicker(5);
   document.getElementById('feedbackModal').classList.remove('hidden');
   document.getElementById('feedbackModal').classList.add('flex');
   showPanel('fbWritePanel');
@@ -588,14 +556,12 @@ function openFeedbackModal(apt) {
 /** Switch from view → edit */
 function switchToEditMode() {
   if (!_fbCurrentApt) return;
-  _fbSelectedRating = parseInt(_fbCurrentApt.rating) || 5;
   document.getElementById('feedback-mode').value = 'edit';
   document.getElementById('fb-write-title').textContent = 'Edit Feedback';
   document.getElementById('fb-write-doctor').textContent = _fbCurrentApt.doctor_name || 'Doctor';
   document.getElementById('feedback-text').value = _fbCurrentApt.feedback || '';
   document.getElementById('fb-back-btn').classList.remove('hidden');
   document.getElementById('submitFeedbackBtn').textContent = 'Save Changes';
-  renderStarPicker(_fbSelectedRating);
   showPanel('fbWritePanel');
 }
 
@@ -613,7 +579,6 @@ async function submitFeedback() {
   const aptId    = document.getElementById('feedback-apt-id').value;
   const mode     = document.getElementById('feedback-mode').value;
   const feedback = document.getElementById('feedback-text').value.trim();
-  const rating   = _fbSelectedRating;
 
   const btn = document.getElementById('submitFeedbackBtn');
   btn.textContent = 'Saving...';
@@ -629,7 +594,7 @@ async function submitFeedback() {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ appointment_id: aptId, rating, feedback })
+      body: JSON.stringify({ appointment_id: aptId, feedback })
     });
     const data = await res.json();
     if (data.status === 'success') {
@@ -651,7 +616,7 @@ async function submitFeedback() {
 }
 
 function checkForPendingFeedback(rows) {
-  const unrated = rows.find(a => a.status_key === "completed" && parseInt(a.rating || 0) === 0);
+  const unrated = rows.find(a => a.status_key === "completed" && !a.feedback);
   if (unrated) {
     const key = `prompted_feedback_${unrated.appointment_id}`;
     if (!sessionStorage.getItem(key)) {

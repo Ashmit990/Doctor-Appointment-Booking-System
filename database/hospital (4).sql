@@ -44,7 +44,8 @@ CREATE TABLE `appointments` (
   `next_followup_date` date DEFAULT NULL,
   `next_followup_time` time DEFAULT NULL,
   `next_followup_id` int(11) DEFAULT NULL,
-  `feedback` text DEFAULT NULL
+  `feedback` text DEFAULT NULL,
+  `rating` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --

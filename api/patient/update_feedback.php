@@ -10,11 +10,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'PUT' && $_SERVER['REQUEST_METHOD'] !== 'POST
 
 $input = json_decode(file_get_contents('php://input'), true) ?: [];
 $apt_id  = isset($input['appointment_id']) ? (int) $input['appointment_id'] : 0;
-$rating  = isset($input['rating'])         ? (int) $input['rating']         : 0;
 $feedback = trim($input['feedback'] ?? '');
 
-if ($apt_id < 1 || $rating < 1 || $rating > 5) {
-    echo json_encode(['status' => 'error', 'message' => 'Valid appointment_id and 1-5 rating required']);
+if ($apt_id < 1 || $feedback === '') {
+    echo json_encode(['status' => 'error', 'message' => 'Valid appointment_id and feedback text required']);
     $conn->close();
     exit;
 }
@@ -22,7 +21,7 @@ if ($apt_id < 1 || $rating < 1 || $rating > 5) {
 $conn->begin_transaction();
 
 try {
-    $stmt = $conn->prepare("SELECT status, rating FROM appointments WHERE appointment_id = ? AND patient_id = ? FOR UPDATE");
+    $stmt = $conn->prepare("SELECT status FROM appointments WHERE appointment_id = ? AND patient_id = ? FOR UPDATE");
     $stmt->bind_param("is", $apt_id, $patient_id);
     $stmt->execute();
     $apt = $stmt->get_result()->fetch_assoc();
@@ -35,8 +34,8 @@ try {
         throw new Exception('Only completed appointments can be rated');
     }
 
-    $up = $conn->prepare("UPDATE appointments SET rating = ?, feedback = ? WHERE appointment_id = ? AND patient_id = ?");
-    $up->bind_param("isis", $rating, $feedback, $apt_id, $patient_id);
+    $up = $conn->prepare("UPDATE appointments SET feedback = ? WHERE appointment_id = ? AND patient_id = ?");
+    $up->bind_param("sis", $feedback, $apt_id, $patient_id);
     $up->execute();
     $up->close();
 
