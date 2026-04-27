@@ -2,6 +2,30 @@ let scheduleMonth = new Date(2026, 3); // April 2026
 let selectedScheduleDate = null;
 let currentEditAvailId = null;
 
+// Toast notification helper
+function showToast(message, type = 'info') {
+  const toastContainer = document.getElementById('toast-container') || (() => {
+    const container = document.createElement('div');
+    container.id = 'toast-container';
+    container.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;';
+    document.body.appendChild(container);
+    return container;
+  })();
+
+  const toast = document.createElement('div');
+  const bgColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6';
+  toast.style.cssText = `background-color: ${bgColor}; color: white; padding: 12px 16px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s forwards; min-width: 250px;`;
+  toast.textContent = message;
+  
+  toastContainer.appendChild(toast);
+  
+  setTimeout(() => {
+    if (toastContainer.contains(toast)) {
+      toastContainer.removeChild(toast);
+    }
+  }, 3000);
+}
+
 function updateCurrentDate() {
   const options = {
     weekday: "long",
@@ -462,6 +486,7 @@ window.updateFollowupTimes = function() {
     const dateSelect = document.getElementById("modal-followup-date");
     const timeSelect = document.getElementById("modal-followup-time");
     const selectedDate = dateSelect.value;
+    const apt = storedAppointmentsForModal.find((a) => a.apt_id == document.getElementById("complete-consultation-btn").dataset.aptId);
     
     if (!selectedDate) {
         timeSelect.innerHTML = '<option value="">-- Select Date First --</option>';
@@ -484,12 +509,28 @@ window.updateFollowupTimes = function() {
         return true;
     }).sort((a, b) => a.start_time.localeCompare(b.start_time));
     
+    // Track added times to avoid duplicates
+    const addedTimes = new Set();
+    
     if (slotsForDate.length > 0) {
         slotsForDate.forEach(slot => {
             timeSelect.innerHTML += `<option value="${slot.start_time}">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</option>`;
+            addedTimes.add(slot.start_time);
         });
         timeSelect.disabled = false;
     } else {
+        timeSelect.disabled = true;
+    }
+    
+    // If this is the previously scheduled followup date, include the previous time even if not available
+    if (apt && apt.next_followup_date === selectedDate && apt.next_followup_time && !addedTimes.has(apt.next_followup_time)) {
+        const timeLabel = `${formatTime12h(apt.next_followup_time)} (Previously Scheduled)`;
+        timeSelect.innerHTML += `<option value="${apt.next_followup_time}">${timeLabel}</option>`;
+        timeSelect.disabled = false;
+    }
+    
+    // If no slots at all
+    if (slotsForDate.length === 0 && (!apt || apt.next_followup_date !== selectedDate || !apt.next_followup_time)) {
         timeSelect.innerHTML = '<option value="">-- No Times Available --</option>';
         timeSelect.disabled = true;
     }
@@ -498,6 +539,11 @@ window.updateFollowupTimes = function() {
 async function openAppointmentModal(aptId) {
   const apt = storedAppointmentsForModal.find((a) => a.apt_id == aptId);
   if (!apt) return;
+
+  console.log("=== OPENING APPOINTMENT MODAL ===");
+  console.log("Appointment data:", apt);
+  console.log("Next Followup Date:", apt.next_followup_date);
+  console.log("Next Followup Time:", apt.next_followup_time);
 
   document.getElementById("modal-patient-name").textContent =
     apt.patient_name || "Unknown Patient";
@@ -638,13 +684,40 @@ async function openAppointmentModal(aptId) {
             // Get unique future dates
             const uniqueDates = [...new Set(validSlots.map(slot => slot.available_date))].sort();
             
+            console.log("Unique dates available:", uniqueDates);
+            console.log("Appointment next_followup_date:", apt.next_followup_date);
+            
+            // Also include existing followup date if it exists (even if not in current availability)
+            if (apt.next_followup_date && !uniqueDates.includes(apt.next_followup_date)) {
+                console.log("Adding existing followup date to options");
+                uniqueDates.push(apt.next_followup_date);
+                uniqueDates.sort();
+            }
+            
             if (uniqueDates.length > 0) {
                 uniqueDates.forEach(date => {
                     const dateObj = new Date(date + "T00:00:00");
                     const dateDisplay = dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
-                    fDateSelect.innerHTML += `<option value="${date}">${dateDisplay}</option>`;
+                    const isExistingDate = date === apt.next_followup_date ? " (Previously Scheduled)" : "";
+                    fDateSelect.innerHTML += `<option value="${date}">${dateDisplay}${isExistingDate}</option>`;
                 });
                 document.getElementById("followup-section").classList.remove("hidden");
+                
+                // Pre-populate existing followup date and time if available
+                if (apt.next_followup_date) {
+                    console.log("Setting followup date to:", apt.next_followup_date);
+                    fDateSelect.value = apt.next_followup_date;
+                    // Trigger updateFollowupTimes to populate the time options
+                    updateFollowupTimes();
+                    // Set the previously saved time if it exists
+                    if (apt.next_followup_time) {
+                        console.log("Setting followup time to:", apt.next_followup_time);
+                        setTimeout(() => {
+                            fTimeSelect.value = apt.next_followup_time;
+                            console.log("Followup time set, current value:", fTimeSelect.value);
+                        }, 100); // Small delay to ensure time options are populated
+                    }
+                }
             } else {
                 document.getElementById("followup-section").classList.add("hidden");
             }
@@ -687,6 +760,12 @@ async function submitConsultation() {
   const rx = document.getElementById("modal-prescriptions").value.trim();
   const fDate = document.getElementById("modal-followup-date").value;
   const fTime = document.getElementById("modal-followup-time").value;
+
+  console.log("=== SUBMITTING CONSULTATION ===");
+  console.log("Appointment ID:", aptId);
+  console.log("Status:", statusVal);
+  console.log("Followup Date:", fDate);
+  console.log("Followup Time:", fTime);
 
   // Clear previous error messages
   document.getElementById("status-error").classList.add("hidden");
@@ -735,29 +814,48 @@ async function submitConsultation() {
   btn.disabled = true;
 
   try {
+    const payload = {
+      appointment_id: aptId,
+      status: statusVal,
+      doctor_notes: notes,
+      prescriptions: rx,
+      followup_date: fDate,
+      followup_time: fTime,
+    };
+    
+    console.log("Sending payload:", payload);
+
     const res = await fetch("../../api/doctor/complete_consultation.php", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        appointment_id: aptId,
-        status: statusVal,
-        doctor_notes: notes,
-        prescriptions: rx,
-        followup_date: fDate,
-        followup_time: fTime,
-      }),
+      body: JSON.stringify(payload),
     });
 
     const data = await res.json();
+    console.log("API Response:", data);
+    
     if (data.status === "success") {
+      // Show success message with followup info if applicable
+      if (fDate && fTime) {
+        const dateObj = new Date(fDate + "T00:00:00");
+        const dateDisplay = dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+        const timeDisplay = formatTime12h(fTime);
+        showToast(`✓ Consultation saved! Follow-up scheduled for ${dateDisplay} at ${timeDisplay}`, "success");
+      } else {
+        showToast("✓ Consultation saved successfully!", "success");
+      }
+      
       closeAppointmentModal();
       loadScheduleForDate(selectedScheduleDate);
     } else {
       alert("Error: " + data.message);
+      showToast("Error: " + data.message, "error");
     }
   } catch (e) {
+    console.error("Submission error:", e);
     alert("Exception: " + e.message);
+    showToast("Error: " + e.message, "error");
   } finally {
     btn.innerHTML = oldText;
     btn.disabled = false;

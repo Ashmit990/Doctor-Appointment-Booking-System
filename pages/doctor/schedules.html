@@ -110,6 +110,24 @@
             line-height: 1;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 

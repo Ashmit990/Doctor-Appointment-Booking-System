@@ -27,6 +27,8 @@ try {
             a.prescriptions,
             a.feedback,
             a.status,
+            a.next_followup_date,
+            a.next_followup_time,
             u.full_name as patient_name,
             pp.contact_number,
             pp.blood_group
