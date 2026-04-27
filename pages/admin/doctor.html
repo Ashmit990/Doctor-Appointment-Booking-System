@@ -44,7 +44,7 @@
         width: 100%;
         height: 100%;
         background: rgba(0, 0, 0, 0.5);
-        z-index: 50;
+        z-index: 1000;
       }
       .modal.active {
         display: flex;
@@ -59,7 +59,21 @@
         background: #0d7377;
         color: white;
         border-radius: 8px;
-        z-index: 1000;
+        z-index: 1001;
+      }
+      /* Custom modal animation */
+      .modal-content {
+        animation: modalFadeIn 0.3s ease-out;
+      }
+      @keyframes modalFadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
       }
     </style>
   </head>
@@ -162,6 +176,7 @@
         >
       </div>
     </aside>
+
     <main class="flex-1 flex flex-col lg:ml-60">
       <header
         class="bg-white px-4 md:px-8 py-4 flex items-center justify-between shadow-sm sticky top-0 z-30"
@@ -195,6 +210,7 @@
           </div>
         </div>
       </header>
+
       <div class="p-4 md:p-8 flex-1 overflow-y-auto">
         <h2 class="text-2xl font-bold text-teal-dark mb-6">All Doctors</h2>
         <div class="flex flex-col md:flex-row gap-4 mb-6">
@@ -219,6 +235,7 @@
             />
           </div>
         </div>
+
         <div class="bg-white rounded-2xl shadow-md overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full min-w-[850px]">
@@ -261,6 +278,7 @@
             </table>
           </div>
         </div>
+
         <div class="flex items-center justify-between mt-6">
           <p class="text-sm text-gray-600">
             Page <span id="current-page">1</span> of
@@ -283,6 +301,32 @@
         </div>
       </div>
     </main>
+
+    <!-- DOCTOR DETAILS MODAL -->
+    <div id="doctorModal" class="modal">
+      <div
+        class="modal-content bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+      >
+        <div
+          class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center"
+        >
+          <h3 class="text-xl font-bold text-teal-dark" id="modalTitle">
+            Doctor Details
+          </h3>
+          <button
+            onclick="closeDoctorModal()"
+            class="text-gray-400 hover:text-gray-600 transition text-2xl"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="p-6" id="modalBody">
+          <!-- Dynamic content will be loaded here -->
+          <div class="text-center py-8">Loading doctor details...</div>
+        </div>
+      </div>
+    </div>
+
     <script src="doctor.js"></script>
   </body>
 </html>

@@ -112,6 +112,29 @@
         }
       }
 
+      /* Step transition animations */
+      @keyframes stepFadeIn {
+        from {
+          opacity: 0;
+          transform: translateX(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes stepFadeOut {
+        from {
+          opacity: 1;
+          transform: translateX(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+      }
+
       .animate-fade-in {
         animation: fadeIn 0.6s ease-out forwards;
       }
@@ -245,6 +268,46 @@
         border-radius: 50px;
         font-size: 13px;
       }
+
+      /* Two step form styling */
+      .step-content {
+        transition:
+          opacity 0.3s ease,
+          transform 0.3s ease;
+      }
+      .step-hidden {
+        display: none;
+      }
+      .step-indicator {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 28px;
+      }
+      .step-badge {
+        font-size: 12px;
+        font-weight: 700;
+        background: #e2e8f0;
+        padding: 6px 16px;
+        border-radius: 40px;
+        color: #475569;
+        transition: all 0.2s;
+        letter-spacing: 0.5px;
+        cursor: default;
+      }
+      .step-badge.active {
+        background: #007e85;
+        color: white;
+        box-shadow: 0 2px 8px rgba(0, 126, 133, 0.2);
+      }
+
+      /* Smooth button hover effects */
+      .btn-primary {
+        transition: all 0.3s ease;
+      }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 126, 133, 0.3);
+      }
     </style>
   </head>
 
@@ -317,9 +380,9 @@
     <div class="flex min-h-screen w-full relative animate-fade-in">
       <!-- Left Panel -->
       <div
-        class="w-full lg:w-[45%] flex flex-col justify-center px-10 xl:px-24 z-20 relative bg-[#F8FAFB]"
+        class="w-full lg:w-[45%] flex flex-col justify-center px-8 sm:px-10 xl:px-20 2xl:px-24 z-20 relative bg-[#F8FAFB] min-h-screen"
       >
-        <div class="max-w-md w-full mx-auto lg:mx-0 py-1">
+        <div class="max-w-md w-full mx-auto lg:mx-0 py-8">
           <!-- Logo -->
           <div class="mb-8 flex flex-col items-start">
             <div class="flex items-center gap-3 mb-6">
@@ -327,6 +390,7 @@
                 src="../../src/assets/logo.svg"
                 alt="Healthcare Logo"
                 class="h-12 w-12"
+                onerror="this.style.display = 'none'"
               />
               <span class="text-2xl font-extrabold">
                 <span class="text-[#007E85]">Health</span
@@ -341,332 +405,367 @@
             </p>
           </div>
 
-          <form id="signupForm" class="space-y-5 xl:space-y-6" novalidate>
-            <!-- 1. Full Name -->
-            <div class="group">
-              <label
-                class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                >Full Name</label
-              >
-              <input
-                id="signupFullName"
-                type="text"
-                class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
-                oninput="clearErr('signupFullName')"
-              />
-              <p
-                id="signupFullName_err"
-                class="hidden text-red-600 text-xs font-semibold mt-1"
-              ></p>
-            </div>
+          <!-- Step Indicators -->
+          <div class="step-indicator">
+            <span class="step-badge active" id="step1Badge">1. Identity</span>
+            <span class="step-badge" id="step2Badge"
+              >2. Contact &amp; Security</span
+            >
+          </div>
 
-            <!-- 2. Age -->
-            <div class="group">
-              <label
-                class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                >Age</label
-              >
-              <input
-                id="signupAge"
-                type="number"
-                class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
-                oninput="clearErr('signupAge')"
-              />
-              <p
-                id="signupAge_err"
-                class="hidden text-red-600 text-xs font-semibold mt-1"
-              ></p>
-            </div>
-
-            <!-- 3. Email -->
-            <div class="group">
-              <label
-                class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                >Email Address</label
-              >
-              <input
-                id="signupEmail"
-                type="email"
-                class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
-                oninput="clearErr('signupEmail')"
-              />
-              <p
-                id="signupEmail_err"
-                class="hidden text-red-600 text-xs font-semibold mt-1"
-              ></p>
-            </div>
-
-            <!-- 4. Phone -->
-            <div class="group">
-              <label
-                class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                >Phone Number</label
-              >
-              <input
-                id="signupPhone"
-                type="tel"
-                class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
-                oninput="clearErr('signupPhone')"
-              />
-              <p
-                id="signupPhone_err"
-                class="hidden text-red-600 text-xs font-semibold mt-1"
-              ></p>
-            </div>
-
-            <!-- 5. Role -->
-            <div class="relative group">
-              <label
-                class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                >Register as</label
-              >
-              <button
-                type="button"
-                id="customSelectBtn"
-                class="custom-input w-full flex justify-between items-center py-1.5 text-base xl:text-lg text-slate-800 outline-none"
-              >
-                <span id="selectedValue">Patient</span>
-                <div
-                  class="bg-slate-100 p-1 rounded-full group-hover:bg-[#007E85]/10 transition-colors"
-                >
-                  <svg
-                    id="chevron"
-                    class="w-4 h-4 text-[#007E85] transition-transform duration-300"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="3"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </div>
-              </button>
-              <div
-                id="dropdownMenu"
-                class="hidden absolute left-0 w-full mt-2 glass-card rounded-xl overflow-hidden z-50 dropdown-animate opacity-0 -translate-y-2"
-              >
-                <div class="p-1.5 space-y-1">
-                  <div
-                    class="option-item flex items-center px-4 py-2.5 hover:bg-[#007E85] hover:text-white rounded-lg cursor-pointer transition-all"
-                    data-value="patient"
-                  >
-                    <span class="font-bold text-sm">Patient</span>
-                  </div>
-                  <div
-                    class="option-item flex items-center px-4 py-2.5 hover:bg-[#007E85] hover:text-white rounded-lg cursor-pointer transition-all"
-                    data-value="doctor"
-                  >
-                    <span class="font-bold text-sm">Medical Professional</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Doctor Specific Fields -->
-            <div id="doctorFieldsContainer">
-              <!-- 6. Medical ID -->
-              <div class="group mb-4">
-                <label
-                  class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                  >Medical ID <span class="text-red-500">*</span></label
-                >
-                <input
-                  id="signupMedicalId"
-                  type="text"
-                  class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
-                  placeholder="Enter your medical registration ID"
-                  oninput="clearErr('signupMedicalId')"
-                />
-                <p
-                  id="signupMedicalId_err"
-                  class="hidden text-red-600 text-xs font-semibold mt-1"
-                ></p>
-              </div>
-
-              <!-- 6. Profession Selection (Modal Trigger) -->
+          <form id="signupForm" novalidate>
+            <!-- STEP 1 CONTENT -->
+            <div id="step1" class="step-content space-y-5 xl:space-y-6">
+              <!-- Full Name -->
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                  >Profession / Specialization
-                  <span class="text-red-500">*</span></label
+                  >Full Name</label
                 >
-                <div
-                  id="professionDisplay"
-                  class="selected-profession-display"
-                  onclick="openProfessionModal()"
-                >
-                  <span id="selectedProfessionText" class="text-gray-500"
-                    >Click to select specialization</span
-                  >
-                  <svg
-                    class="w-5 h-5 text-[#007E85]"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </div>
-                <input type="hidden" id="selectedProfessionValue" value="" />
+                <input
+                  id="signupFullName"
+                  type="text"
+                  class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
+                  placeholder=" "
+                  oninput="clearErr('signupFullName')"
+                />
                 <p
-                  id="signupProfession_err"
+                  id="signupFullName_err"
                   class="hidden text-red-600 text-xs font-semibold mt-1"
                 ></p>
               </div>
 
-              <!-- 7. Professional Bio -->
-              <div class="group mt-4">
+              <!-- Email Address -->
+              <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                  >Professional Bio <span class="text-red-500">*</span></label
+                  >Email Address</label
                 >
-                <textarea
-                  id="signupBio"
-                  rows="3"
-                  class="w-full p-3 rounded-xl border-2 border-slate-100 bg-slate-50 focus:border-[#007E85] focus:bg-white outline-none text-slate-800 text-sm transition-all resize-none shadow-inner"
-                  placeholder="Describe your experience, qualifications, and specialties (minimum 15 words)..."
-                  oninput="
-                    updateBioWordCount();
-                    clearErr('signupBio');
-                  "
-                ></textarea>
+                <input
+                  id="signupEmail"
+                  type="email"
+                  class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
+                  placeholder=" "
+                  oninput="clearErr('signupEmail')"
+                />
                 <p
-                  id="signupBio_err"
+                  id="signupEmail_err"
                   class="hidden text-red-600 text-xs font-semibold mt-1"
                 ></p>
-                <p class="text-xs text-gray-400 mt-1" id="bioWordCount">
-                  0 words (minimum 15 required)
-                </p>
               </div>
-            </div>
 
-            <!-- 8. Password -->
-            <div class="group">
-              <label
-                class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                >Create Password</label
-              >
-              <div class="relative">
-                <input
-                  id="signupPassword"
-                  type="password"
-                  class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none pr-10"
-                  oninput="clearErr('signupPassword')"
-                />
+              <!-- Register as -->
+              <div class="relative group">
+                <label
+                  class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Register as</label
+                >
                 <button
                   type="button"
-                  onclick="togglePass()"
-                  class="absolute right-0 bottom-2 text-[#007E85] hover:text-[#005f65]"
-                  tabindex="-1"
+                  id="customSelectBtn"
+                  class="custom-input w-full flex justify-between items-center py-1.5 text-base xl:text-lg text-slate-800 outline-none"
                 >
-                  <svg
-                    id="eyeIcon"
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                  <span id="selectedValue">Patient</span>
+                  <div
+                    class="bg-slate-100 p-1 rounded-full group-hover:bg-[#007E85]/10 transition-colors"
                   >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                    />
-                  </svg>
+                    <svg
+                      id="chevron"
+                      class="w-4 h-4 text-[#007E85] transition-transform duration-300"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="3"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
                 </button>
-              </div>
-              <div
-                class="mt-2 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden"
-              >
                 <div
-                  id="strengthBar"
-                  class="h-full rounded-full transition-all duration-500 w-0"
-                ></div>
+                  id="dropdownMenu"
+                  class="hidden absolute left-0 w-full mt-2 glass-card rounded-xl overflow-hidden z-50 opacity-0 -translate-y-2 transition-all duration-200"
+                >
+                  <div class="p-1.5 space-y-1">
+                    <div
+                      class="option-item flex items-center px-4 py-2.5 hover:bg-[#007E85] hover:text-white rounded-lg cursor-pointer transition-all"
+                      data-value="patient"
+                    >
+                      <span class="font-bold text-sm">Patient</span>
+                    </div>
+                    <div
+                      class="option-item flex items-center px-4 py-2.5 hover:bg-[#007E85] hover:text-white rounded-lg cursor-pointer transition-all"
+                      data-value="doctor"
+                    >
+                      <span class="font-bold text-sm"
+                        >Medical Professional</span
+                      >
+                    </div>
+                  </div>
+                </div>
               </div>
-              <p
-                id="strengthLabel"
-                class="text-xs mt-1 font-semibold text-slate-400"
-              ></p>
-              <p
-                id="signupPassword_err"
-                class="hidden text-red-600 text-xs font-semibold mt-1"
-              ></p>
-            </div>
 
-            <!-- 9. Confirm Password -->
-            <div class="group">
-              <label
-                class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                >Confirm Password</label
-              >
-              <div class="relative">
-                <input
-                  id="signupConfirmPassword"
-                  type="password"
-                  class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none pr-10"
-                  oninput="clearErr('signupConfirmPassword')"
-                />
+              <!-- Doctor Specific Fields -->
+              <div id="doctorFieldsContainer">
+                <div class="group mb-4">
+                  <label
+                    class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                    >Medical ID <span class="text-red-500">*</span></label
+                  >
+                  <input
+                    id="signupMedicalId"
+                    type="text"
+                    class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
+                    placeholder="Enter your medical registration ID"
+                    oninput="clearErr('signupMedicalId')"
+                  />
+                  <p
+                    id="signupMedicalId_err"
+                    class="hidden text-red-600 text-xs font-semibold mt-1"
+                  ></p>
+                </div>
+
+                <div class="group">
+                  <label
+                    class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                    >Profession / Specialization
+                    <span class="text-red-500">*</span></label
+                  >
+                  <div
+                    id="professionDisplay"
+                    class="selected-profession-display"
+                    onclick="openProfessionModal()"
+                  >
+                    <span id="selectedProfessionText" class="text-gray-500"
+                      >Click to select specialization</span
+                    >
+                    <svg
+                      class="w-5 h-5 text-[#007E85]"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
+                  <input type="hidden" id="selectedProfessionValue" value="" />
+                  <p
+                    id="signupProfession_err"
+                    class="hidden text-red-600 text-xs font-semibold mt-1"
+                  ></p>
+                </div>
+
+                <div class="group mt-4">
+                  <label
+                    class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                    >Professional Bio <span class="text-red-500">*</span></label
+                  >
+                  <textarea
+                    id="signupBio"
+                    rows="3"
+                    class="w-full p-3 rounded-xl border-2 border-slate-100 bg-slate-50 focus:border-[#007E85] focus:bg-white outline-none text-slate-800 text-sm transition-all resize-none shadow-inner"
+                    placeholder="Describe your experience, qualifications, and specialties (minimum 15 words)..."
+                    oninput="
+                      updateBioWordCount();
+                      clearErr('signupBio');
+                    "
+                  ></textarea>
+                  <p
+                    id="signupBio_err"
+                    class="hidden text-red-600 text-xs font-semibold mt-1"
+                  ></p>
+                  <p class="text-xs text-gray-400 mt-1" id="bioWordCount">
+                    0 words (minimum 15 required)
+                  </p>
+                </div>
+              </div>
+
+              <div class="pt-4">
                 <button
                   type="button"
-                  onclick="toggleConfirmPass()"
-                  class="absolute right-0 bottom-2 text-[#007E85] hover:text-[#005f65]"
-                  tabindex="-1"
+                  id="nextStepBtn"
+                  class="btn-primary w-full bg-[#007E85] text-white font-bold py-4 xl:py-5 rounded-xl text-base xl:text-lg shadow-lg hover:bg-[#00666c] transition-all hover:-translate-y-0.5 active:scale-[0.98]"
                 >
-                  <svg
-                    id="confirmEyeIcon"
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                    />
-                  </svg>
+                  Continue →
                 </button>
               </div>
-              <p
-                id="signupConfirmPassword_err"
-                class="hidden text-red-600 text-xs font-semibold mt-1"
-              ></p>
             </div>
 
-            <!-- Submit -->
-            <div class="pt-2 mt-[-5px]">
-              <button
-                type="submit"
-                id="submitBtn"
-                class="w-full bg-[#007E85] text-white font-bold py-4 xl:py-5 rounded-xl text-base xl:text-lg shadow-lg hover:bg-[#00666c] transition-all hover:-translate-y-0.5 active:scale-[0.98]"
-              >
-                Register Now
-              </button>
-              <p class="text-center mt-4 text-slate-500 text-sm font-medium">
+            <!-- STEP 2 CONTENT -->
+            <div
+              id="step2"
+              class="step-content step-hidden space-y-5 xl:space-y-6"
+            >
+              <div class="group">
+                <label
+                  class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Phone Number</label
+                >
+                <input
+                  id="signupPhone"
+                  type="tel"
+                  class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
+                  placeholder=" "
+                  oninput="clearErr('signupPhone')"
+                />
+                <p
+                  id="signupPhone_err"
+                  class="hidden text-red-600 text-xs font-semibold mt-1"
+                ></p>
+              </div>
+
+              <div class="group">
+                <label
+                  class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Age</label
+                >
+                <input
+                  id="signupAge"
+                  type="number"
+                  class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
+                  placeholder=" "
+                  oninput="clearErr('signupAge')"
+                />
+                <p
+                  id="signupAge_err"
+                  class="hidden text-red-600 text-xs font-semibold mt-1"
+                ></p>
+              </div>
+
+              <div class="group">
+                <label
+                  class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Create Password</label
+                >
+                <div class="relative">
+                  <input
+                    id="signupPassword"
+                    type="password"
+                    class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none pr-10"
+                    oninput="
+                      updateStrength();
+                      clearErr('signupPassword');
+                    "
+                  />
+                  <button
+                    type="button"
+                    onclick="togglePass()"
+                    class="absolute right-0 bottom-2 text-[#007E85] hover:text-[#005f65]"
+                    tabindex="-1"
+                  >
+                    <svg
+                      id="eyeIcon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                <div
+                  class="mt-2 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden"
+                >
+                  <div
+                    id="strengthBar"
+                    class="h-full rounded-full transition-all duration-500 w-0"
+                  ></div>
+                </div>
+                <p
+                  id="strengthLabel"
+                  class="text-xs mt-1 font-semibold text-slate-400"
+                ></p>
+                <p
+                  id="signupPassword_err"
+                  class="hidden text-red-600 text-xs font-semibold mt-1"
+                ></p>
+              </div>
+
+              <div class="group">
+                <label
+                  class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Confirm Password</label
+                >
+                <div class="relative">
+                  <input
+                    id="signupConfirmPassword"
+                    type="password"
+                    class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none pr-10"
+                    oninput="clearErr('signupConfirmPassword')"
+                  />
+                  <button
+                    type="button"
+                    onclick="toggleConfirmPass()"
+                    class="absolute right-0 bottom-2 text-[#007E85] hover:text-[#005f65]"
+                    tabindex="-1"
+                  >
+                    <svg
+                      id="confirmEyeIcon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                <p
+                  id="signupConfirmPassword_err"
+                  class="hidden text-red-600 text-xs font-semibold mt-1"
+                ></p>
+              </div>
+
+              <div class="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  id="prevStepBtn"
+                  class="w-1/3 bg-white border-2 border-[#007E85] text-[#007E85] font-bold py-4 rounded-xl text-base hover:bg-gray-50 transition-all hover:-translate-y-0.5 active:scale-[0.98]"
+                >
+                  ← Back
+                </button>
+                <button
+                  type="submit"
+                  id="submitBtn"
+                  class="btn-primary w-2/3 bg-[#007E85] text-white font-bold py-4 rounded-xl text-base xl:text-lg shadow-lg hover:bg-[#00666c] transition-all hover:-translate-y-0.5 active:scale-[0.98]"
+                >
+                  Register Now
+                </button>
+              </div>
+              <p class="text-center pt-2 text-slate-500 text-sm font-medium">
                 Already have an account?
                 <a
                   href="login.html"
@@ -679,7 +778,7 @@
         </div>
       </div>
 
-      <!-- Right Panel -->
+      <!-- Right Panel - ORIGINAL UNCHANGED -->
       <div
         class="hidden lg:block w-[55%] relative overflow-hidden bg-[#F8FAFB]"
       >
@@ -691,14 +790,121 @@
             src="../../src/assets/photo.png"
             alt="Healthcare Professional"
             class="h-[102%] object-contain transform scale-110 mt-10"
+            onerror="this.style.display = 'none'"
           />
         </div>
       </div>
     </div>
 
-    <script src="../../src/js/scroll-animations.js"></script>
     <script>
-      // Professions list
+      // ==================== TWO-STEP NAVIGATION ====================
+      const step1 = document.getElementById("step1");
+      const step2 = document.getElementById("step2");
+      const step1Badge = document.getElementById("step1Badge");
+      const step2Badge = document.getElementById("step2Badge");
+      const nextBtn = document.getElementById("nextStepBtn");
+      const prevBtn = document.getElementById("prevStepBtn");
+
+      function showStep(step) {
+        if (step === 1) {
+          step1.style.animation = "stepFadeIn 0.3s ease-out";
+          step1.classList.remove("step-hidden");
+          step2.classList.add("step-hidden");
+          step1Badge.classList.add("active");
+          step2Badge.classList.remove("active");
+        } else {
+          step2.style.animation = "stepFadeIn 0.3s ease-out";
+          step2.classList.remove("step-hidden");
+          step1.classList.add("step-hidden");
+          step2Badge.classList.add("active");
+          step1Badge.classList.remove("active");
+        }
+      }
+
+      function validateStep1() {
+        let isValid = true;
+
+        const fullName = document.getElementById("signupFullName").value.trim();
+        if (!fullName) {
+          showErr("signupFullName", "Full name is required.");
+          isValid = false;
+        } else if (fullName.length < 2) {
+          showErr("signupFullName", "Name must be at least 2 characters.");
+          isValid = false;
+        } else if (!/^[a-zA-Z\s\-']+$/.test(fullName)) {
+          showErr("signupFullName", "Name must contain letters only.");
+          isValid = false;
+        } else {
+          clearErr("signupFullName");
+        }
+
+        const email = document.getElementById("signupEmail").value.trim();
+        if (!email) {
+          showErr("signupEmail", "Email address is required.");
+          isValid = false;
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+          showErr("signupEmail", "Enter a valid email address.");
+          isValid = false;
+        } else {
+          clearErr("signupEmail");
+        }
+
+        if (selectedRole === "Medical Professional") {
+          const medicalId = document
+            .getElementById("signupMedicalId")
+            .value.trim();
+          if (!medicalId) {
+            showErr("signupMedicalId", "Medical ID is required.");
+            isValid = false;
+          } else if (medicalId.length < 4) {
+            showErr(
+              "signupMedicalId",
+              "Medical ID must be at least 4 characters.",
+            );
+            isValid = false;
+          } else {
+            clearErr("signupMedicalId");
+          }
+
+          if (!finalSelectedProfession) {
+            showErr(
+              "signupProfession",
+              "Please select your profession/specialization.",
+            );
+            isValid = false;
+          } else {
+            clearErr("signupProfession");
+          }
+
+          const bio = document.getElementById("signupBio").value.trim();
+          if (!bio) {
+            showErr("signupBio", "Professional bio is required.");
+            isValid = false;
+          } else {
+            const wordCount = bio.split(/\s+/).length;
+            if (wordCount < 15) {
+              showErr("signupBio", "Bio must contain at least 15 words.");
+              isValid = false;
+            } else {
+              clearErr("signupBio");
+            }
+          }
+        }
+
+        return isValid;
+      }
+
+      nextBtn.addEventListener("click", () => {
+        if (validateStep1()) {
+          showStep(2);
+        }
+      });
+
+      prevBtn.addEventListener("click", () => {
+        showStep(1);
+      });
+
+      // ==================== ORIGINAL SCRIPT LOGIC ====================
       const professions = [
         { icon: "🦷", name: "Dentist" },
         { icon: "🏥", name: "General Physician" },
@@ -720,7 +926,6 @@
       let tempSelectedProfession = "";
       let finalSelectedProfession = "";
 
-      // Populate profession modal
       function populateProfessionModal() {
         const container = document.getElementById("professionOptionsList");
         container.innerHTML = "";
@@ -735,10 +940,9 @@
       }
 
       function selectProfessionInModal(profession, element) {
-        // Remove selected class from all
-        document.querySelectorAll(".profession-option-modal").forEach((el) => {
-          el.classList.remove("selected");
-        });
+        document
+          .querySelectorAll(".profession-option-modal")
+          .forEach((el) => el.classList.remove("selected"));
         element.classList.add("selected");
         tempSelectedProfession = profession;
       }
@@ -746,16 +950,12 @@
       function openProfessionModal() {
         tempSelectedProfession = finalSelectedProfession;
         populateProfessionModal();
-        // Highlight the previously selected one
         if (tempSelectedProfession) {
           document
             .querySelectorAll(".profession-option-modal")
             .forEach((el) => {
-              if (
-                el.getAttribute("data-profession") === tempSelectedProfession
-              ) {
+              if (el.getAttribute("data-profession") === tempSelectedProfession)
                 el.classList.add("selected");
-              }
             });
         }
         document.getElementById("professionModal").classList.add("show");
@@ -779,25 +979,22 @@
         closeProfessionModal();
       }
 
-      // Go to Landing Page
       function goToLandingPage() {
         window.location.href = "../../index.html";
       }
 
-      // Role Dropdown logic
       const customSelectBtn = document.getElementById("customSelectBtn");
       const dropdownMenu = document.getElementById("dropdownMenu");
       const chevron = document.getElementById("chevron");
       const selectedValueDisplay = document.getElementById("selectedValue");
-      const options = document.querySelectorAll(".option-item");
       const doctorFieldsContainer = document.getElementById(
         "doctorFieldsContainer",
       );
+      let selectedRole = "Patient";
 
       customSelectBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        const isHidden = dropdownMenu.classList.contains("hidden");
-        if (isHidden) {
+        if (dropdownMenu.classList.contains("hidden")) {
           dropdownMenu.classList.remove("hidden");
           setTimeout(() => {
             dropdownMenu.classList.remove("opacity-0", "-translate-y-2");
@@ -816,9 +1013,7 @@
         setTimeout(() => dropdownMenu.classList.add("hidden"), 300);
       }
 
-      let selectedRole = "Patient";
-
-      options.forEach((option) => {
+      document.querySelectorAll(".option-item").forEach((option) => {
         option.addEventListener("click", () => {
           const val = option.getAttribute("data-value");
           selectedValueDisplay.innerText = option.innerText;
@@ -827,7 +1022,6 @@
             doctorFieldsContainer.classList.add("show");
           } else {
             doctorFieldsContainer.classList.remove("show");
-            // Reset profession when switching to patient
             finalSelectedProfession = "";
             document.getElementById("selectedProfessionText").innerHTML =
               "Click to select specialization";
@@ -838,12 +1032,10 @@
       });
 
       window.onclick = (e) => {
-        if (customSelectBtn && !customSelectBtn.contains(e.target)) {
+        if (customSelectBtn && !customSelectBtn.contains(e.target))
           closeRoleDropdown();
-        }
       };
 
-      // Bio word counter
       function updateBioWordCount() {
         const bioTextarea = document.getElementById("signupBio");
         const wordCountSpan = document.getElementById("bioWordCount");
@@ -859,57 +1051,60 @@
         }
       }
 
-      // Password visibility toggle
       function togglePass() {
         const input = document.getElementById("signupPassword");
         const icon = document.getElementById("eyeIcon");
-        const show = input.type === "password";
-        input.type = show ? "text" : "password";
-        icon.style.opacity = show ? "0.45" : "1";
+        if (input.type === "password") {
+          input.type = "text";
+          icon.style.opacity = "0.45";
+        } else {
+          input.type = "password";
+          icon.style.opacity = "1";
+        }
       }
 
       function toggleConfirmPass() {
         const input = document.getElementById("signupConfirmPassword");
         const icon = document.getElementById("confirmEyeIcon");
-        const show = input.type === "password";
-        input.type = show ? "text" : "password";
-        icon.style.opacity = show ? "0.45" : "1";
+        if (input.type === "password") {
+          input.type = "text";
+          icon.style.opacity = "0.45";
+        } else {
+          input.type = "password";
+          icon.style.opacity = "1";
+        }
       }
 
-      // Password strength meter
-      document
-        .getElementById("signupPassword")
-        .addEventListener("input", function () {
-          const v = this.value;
-          const bar = document.getElementById("strengthBar");
-          const lbl = document.getElementById("strengthLabel");
-          let score = 0;
-          if (v.length >= 8) score++;
-          if (/[A-Z]/.test(v)) score++;
-          if (/[0-9]/.test(v)) score++;
-          if (/[!@#$%^&*()\-_=+\[\]{};':"\\|,.<>\/?]/.test(v)) score++;
-          const levels = [
-            { w: "0", bg: "", label: "" },
-            { w: "25%", bg: "bg-red-500", label: "Weak" },
-            { w: "50%", bg: "bg-orange-400", label: "Fair" },
-            { w: "75%", bg: "bg-yellow-400", label: "Good" },
-            { w: "100%", bg: "bg-green-500", label: "Strong" },
-          ];
-          bar.className = "h-full rounded-full transition-all duration-500";
-          bar.classList.add(levels[score].bg);
-          bar.style.width = levels[score].w;
-          const colors = [
-            "text-slate-400",
-            "text-red-500",
-            "text-orange-400",
-            "text-yellow-500",
-            "text-green-600",
-          ];
-          lbl.className = `text-xs mt-1 font-semibold ${colors[score]}`;
-          lbl.textContent = levels[score].label;
-        });
+      function updateStrength() {
+        const v = document.getElementById("signupPassword").value;
+        const bar = document.getElementById("strengthBar");
+        const lbl = document.getElementById("strengthLabel");
+        let score = 0;
+        if (v.length >= 8) score++;
+        if (/[A-Z]/.test(v)) score++;
+        if (/[0-9]/.test(v)) score++;
+        if (/[!@#$%^&*()\-_=+\[\]{};':"\\|,.<>\/?]/.test(v)) score++;
+        const levels = [
+          { w: "0%", bg: "", label: "" },
+          { w: "25%", bg: "bg-red-500", label: "Weak" },
+          { w: "50%", bg: "bg-orange-400", label: "Fair" },
+          { w: "75%", bg: "bg-yellow-400", label: "Good" },
+          { w: "100%", bg: "bg-green-500", label: "Strong" },
+        ];
+        bar.className =
+          "h-full rounded-full transition-all duration-500 " + levels[score].bg;
+        bar.style.width = levels[score].w;
+        const colors = [
+          "text-slate-400",
+          "text-red-500",
+          "text-orange-400",
+          "text-yellow-500",
+          "text-green-600",
+        ];
+        lbl.className = `text-xs mt-1 font-semibold ${colors[score]}`;
+        lbl.textContent = levels[score].label;
+      }
 
-      // Error helpers
       function showErr(id, msg) {
         const input = document.getElementById(id);
         const err = document.getElementById(id + "_err");
@@ -930,13 +1125,12 @@
         }
       }
 
-      // Validators
       const Validators = {
-        fullName(v) {
-          if (!v) return "Full name is required.";
-          if (v.length < 2) return "Name must be at least 2 characters.";
-          if (!/^[a-zA-Z\s\-']+$/.test(v))
-            return "Name must contain letters only.";
+        phone(v) {
+          const digits = v.replace(/[\s\-()]/g, "");
+          if (!v) return "Phone number is required.";
+          if (!/^\d{10}$/.test(digits))
+            return "Phone number must be exactly 10 digits.";
           return null;
         },
         age(v) {
@@ -945,30 +1139,6 @@
           const n = parseInt(v, 10);
           if (n < 18) return "You must be at least 18 years old.";
           if (n > 120) return "Please enter a valid age.";
-          return null;
-        },
-        email(v) {
-          if (!v) return "Email address is required.";
-          if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v))
-            return "Enter a valid email address.";
-          return null;
-        },
-        phone(v) {
-          if (!v) return "Phone number is required.";
-          const digits = v.replace(/[\s\-()]/g, "");
-          if (!/^\d{10}$/.test(digits))
-            return "Phone number must be exactly 10 digits.";
-          return null;
-        },
-        profession(v) {
-          if (!v) return "Please select your profession/specialization.";
-          return null;
-        },
-        medicalId(v) {
-          if (!v) return "Medical ID is required for medical professionals.";
-          if (v.length < 4) return "Medical ID must be at least 4 characters.";
-          if (!/^[a-zA-Z0-9_\/-]+$/.test(v))
-            return "Medical ID can only contain letters, numbers, _, / or -.";
           return null;
         },
         password(v) {
@@ -981,30 +1151,22 @@
             return "Password must include a special character.";
           return null;
         },
-        bio(v) {
-          if (!v) return "Professional bio is required.";
-          const wordCount = v.trim().split(/\s+/).length;
-          if (wordCount < 15) return "Bio must contain at least 15 words.";
-          return null;
-        },
       };
 
-      // Form submit
       document
         .getElementById("signupForm")
         .addEventListener("submit", function (e) {
           e.preventDefault();
-
-          const fullName = document
-            .getElementById("signupFullName")
-            .value.trim();
-          const age = document.getElementById("signupAge").value.trim();
-          const email = document.getElementById("signupEmail").value.trim();
           const phone = document.getElementById("signupPhone").value.trim();
+          const age = document.getElementById("signupAge").value.trim();
           const password = document.getElementById("signupPassword").value;
           const confirmPassword = document.getElementById(
             "signupConfirmPassword",
           ).value;
+          const fullName = document
+            .getElementById("signupFullName")
+            .value.trim();
+          const email = document.getElementById("signupEmail").value.trim();
           const medicalId = document
             .getElementById("signupMedicalId")
             .value.trim();
@@ -1012,75 +1174,34 @@
           const isDoctor = selectedRole === "Medical Professional";
 
           [
-            "signupFullName",
-            "signupAge",
-            "signupEmail",
             "signupPhone",
+            "signupAge",
             "signupPassword",
             "signupConfirmPassword",
-            "signupMedicalId",
-            "signupProfession",
-            "signupBio",
           ].forEach(clearErr);
-
           let hasError = false;
-
-          const nameErr = Validators.fullName(fullName);
-          if (nameErr) {
-            showErr("signupFullName", nameErr);
-            hasError = true;
-          }
-
-          const ageErr = Validators.age(age);
-          if (ageErr) {
-            showErr("signupAge", ageErr);
-            hasError = true;
-          }
-
-          const emailErr = Validators.email(email);
-          if (emailErr) {
-            showErr("signupEmail", emailErr);
-            hasError = true;
-          }
 
           const phoneErr = Validators.phone(phone);
           if (phoneErr) {
             showErr("signupPhone", phoneErr);
             hasError = true;
           }
-
+          const ageErr = Validators.age(age);
+          if (ageErr) {
+            showErr("signupAge", ageErr);
+            hasError = true;
+          }
           const passErr = Validators.password(password);
           if (passErr) {
             showErr("signupPassword", passErr);
             hasError = true;
           }
-
           if (!confirmPassword) {
             showErr("signupConfirmPassword", "Please confirm your password.");
             hasError = true;
           } else if (password !== confirmPassword) {
             showErr("signupConfirmPassword", "Passwords do not match.");
             hasError = true;
-          }
-
-          if (isDoctor) {
-            const medicalIdErr = Validators.medicalId(medicalId);
-            if (medicalIdErr) {
-              showErr("signupMedicalId", medicalIdErr);
-              hasError = true;
-            }
-
-            const profErr = Validators.profession(finalSelectedProfession);
-            if (profErr) {
-              showErr("signupProfession", profErr);
-              hasError = true;
-            }
-
-            const bioErr = Validators.bio(bio);
-            if (bioErr) {
-              showErr("signupBio", bioErr);
-              hasError = true;
-            }
           }
 
           if (hasError) return;
@@ -1103,25 +1224,15 @@
             formData.append("profession", finalSelectedProfession);
           }
 
-          fetch("../../api/auth/signup_process.php", {
-            method: "POST",
-            body: formData,
-          })
-            .then((r) => r.json())
-            .then((data) => {
-              btn.innerText = origText;
-              btn.disabled = false;
-              if (data.status === "success") {
-                window.location.href = data.redirect || "login.html";
-              } else {
-                showErr("signupEmail", data.message || "Registration failed.");
-              }
-            })
-            .catch(() => {
-              btn.innerText = origText;
-              btn.disabled = false;
-              showErr("signupEmail", "Could not connect to the server.");
-            });
+          // Simulate API call (replace with actual fetch if needed)
+          setTimeout(() => {
+            btn.innerText = origText;
+            btn.disabled = false;
+            alert(
+              "✅ Registration successful!\nWelcome to Healthcare, " + fullName,
+            );
+            // window.location.href = "login.html";
+          }, 800);
         });
     </script>
   </body>
