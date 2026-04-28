@@ -17,12 +17,25 @@ if ($method === 'GET') {
     $date = $_GET['date'] ?? null;
     
     if ($date) {
-        // Auto-close past slots for today before returning
+        // Auto-close past slots before returning
         $today = date('Y-m-d');
         $current_time = date('H:i:s');
         
-        if ($date === $today) {
-            // Update any 'Available' slots that are in the past to 'Closed'
+        // Close all slots for dates in the past
+        if ($date < $today) {
+            // For past dates, close ALL slots
+            $close_stmt = $conn->prepare("
+                UPDATE doctor_availability
+                SET status = 'Closed'
+                WHERE doctor_id = ?
+                  AND available_date = ?
+                  AND status IN ('Available', 'Blocked')
+            ");
+            $close_stmt->bind_param("ss", $doctor_id, $date);
+            $close_stmt->execute();
+            $close_stmt->close();
+        } elseif ($date === $today) {
+            // For today, close only 'Available' slots that are in the past (by time)
             $close_stmt = $conn->prepare("
                 UPDATE doctor_availability
                 SET status = 'Closed'
@@ -115,7 +128,7 @@ elseif ($method === 'PUT') {
     $stmt->close();
 }
 elseif ($method === 'DELETE') {
-    // Delete availability
+    // Block/Unblock availability (toggle status between Available and Blocked)
     $avail_id = $_GET['avail_id'] ?? null;
     
     if (!$avail_id) {
@@ -129,24 +142,44 @@ elseif ($method === 'DELETE') {
         exit;
     }
     
-    // Verify ownership
-    $verify = $conn->prepare("SELECT avail_id FROM doctor_availability WHERE avail_id = ? AND doctor_id = ?");
+    // Verify ownership and get current status
+    $verify = $conn->prepare("SELECT status FROM doctor_availability WHERE avail_id = ? AND doctor_id = ?");
     $verify->bind_param("is", $avail_id, $doctor_id);
     $verify->execute();
+    $result = $verify->get_result();
     
-    if ($verify->get_result()->num_rows === 0) {
+    if ($result->num_rows === 0) {
         echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
         exit;
     }
+    
+    $row = $result->fetch_assoc();
+    $current_status = $row['status'];
     $verify->close();
     
-    $stmt = $conn->prepare("DELETE FROM doctor_availability WHERE avail_id = ?");
-    $stmt->bind_param("i", $avail_id);
+    // Only allow toggling between Available and Blocked
+    // Closed and Booked slots should not be toggled
+    if ($current_status === 'Available') {
+        $toggle_status = 'Blocked';
+    } elseif ($current_status === 'Blocked') {
+        $toggle_status = 'Available';
+    } else {
+        // Cannot toggle Closed, Booked, or other statuses
+        echo json_encode(['status' => 'error', 'message' => 'Cannot toggle slots with status: ' . $current_status]);
+        exit;
+    }
+    
+    $stmt = $conn->prepare("UPDATE doctor_availability SET status = ? WHERE avail_id = ?");
+    $stmt->bind_param("si", $toggle_status, $avail_id);
     
     if ($stmt->execute()) {
-        echo json_encode(['status' => 'success', 'message' => 'Availability deleted']);
+        echo json_encode([
+            'status' => 'success', 
+            'message' => 'Availability ' . strtolower($toggle_status),
+            'new_status' => $toggle_status
+        ]);
     } else {
-        echo json_encode(['status' => 'error', 'message' => 'Failed to delete']);
+        echo json_encode(['status' => 'error', 'message' => 'Failed to update']);
     }
     $stmt->close();
 }

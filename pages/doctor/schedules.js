@@ -174,11 +174,19 @@ function renderScheduleCalendar() {
 
       const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
       
-      if (dateStr < todayStr) {
+      // Mark selected date with special styling
+      if (dateStr === selectedScheduleDate) {
+        dayDiv.style.backgroundColor = "#10b981";
+        dayDiv.style.color = "white";
+        dayDiv.style.fontWeight = "bold";
+        dayDiv.style.borderRadius = "8px";
+      } else if (dateStr < todayStr) {
         dayDiv.style.color = "#d1d5db";
       } else if (dateStr === todayStr) {
         dayDiv.style.backgroundColor = "#007E85";
         dayDiv.style.color = "white";
+        dayDiv.style.fontWeight = "bold";
+        dayDiv.style.borderRadius = "8px";
       }
 
       dayDiv.onclick = () => selectScheduleDate(dateStr);
@@ -197,56 +205,7 @@ function renderScheduleCalendar() {
   });
 }
 
-const FIX_SLOTS = [
-  {
-    start: "09:00:00",
-    end: "10:00:00",
-    label: "09:00 AM - 10:00 AM",
-    isLunch: false,
-  },
-  {
-    start: "10:00:00",
-    end: "11:00:00",
-    label: "10:00 AM - 11:00 AM",
-    isLunch: false,
-  },
-  {
-    start: "11:00:00",
-    end: "12:00:00",
-    label: "11:00 AM - 12:00 PM",
-    isLunch: false,
-  },
-  {
-    start: "12:00:00",
-    end: "13:00:00",
-    label: "12:00 PM - 01:00 PM",
-    isLunch: false,
-  },
-  {
-    start: "13:00:00",
-    end: "14:00:00",
-    label: "01:00 PM - 02:00 PM",
-    isLunch: true,
-  },
-  {
-    start: "14:00:00",
-    end: "15:00:00",
-    label: "02:00 PM - 03:00 PM",
-    isLunch: false,
-  },
-  {
-    start: "15:00:00",
-    end: "16:00:00",
-    label: "03:00 PM - 04:00 PM",
-    isLunch: false,
-  },
-  {
-    start: "16:00:00",
-    end: "17:00:00",
-    label: "04:00 PM - 05:00 PM",
-    isLunch: false,
-  },
-];
+
 
 function formatTime12h(timeStr) {
   if (!timeStr) return "";
@@ -270,7 +229,18 @@ async function selectScheduleDate(date) {
     month: "short",
     day: "numeric",
   });
-  document.getElementById("schedule-date-display").textContent = dateDisplay;
+
+  // Calculate and display week info
+  const startOfWeek = new Date(dateObj);
+  const dayOfWeek = dateObj.getDay();
+  startOfWeek.setDate(dateObj.getDate() - dayOfWeek); // Start from Sunday
+  
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Saturday
+  
+  const weekDisplay = `${startOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${endOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
+  
+  document.getElementById("schedule-date-display").textContent = `${dateDisplay} (Week: ${weekDisplay})`;
 
   renderScheduleCalendar(); // re-render to update selected state style
   await loadScheduleForDate(date);
@@ -303,6 +273,7 @@ async function loadScheduleForDate(date) {
     const availability = availData.status === "success" ? availData.data : [];
     const appointments = aptData.status === "success" ? aptData.data : [];
     storedAppointmentsForModal = appointments;
+    fetchedAvailability = availData.status === "success" ? (availData.data || []) : [];
 
     // Compare date with today to disable past slots
     const today = new Date();
@@ -311,112 +282,111 @@ async function loadScheduleForDate(date) {
     const isToday = date === todayStr;
     const currentHour = today.getHours();
     const currentMinute = today.getMinutes();
+    const currentTimeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}:00`;
 
     gridContainer.style.opacity = "1";
     gridContainer.innerHTML = "";
 
-    FIX_SLOTS.forEach((slot) => {
-      let slotIsPast = isPastDay;
-      if (isToday) {
-        const [h, m] = slot.start.split(":").map(Number);
-        if (h < currentHour || (h === currentHour && m < currentMinute)) {
-          slotIsPast = true;
+    // Check if there are any custom availability slots (from schedule setup)
+    const hasCustomSlots = availability && availability.length > 0;
+
+    if (hasCustomSlots) {
+      // Display ALL availability slots from database (including schedule setup slots)
+      availability.forEach((slot) => {
+        let slotIsPast = isPastDay;
+        if (isToday) {
+          if (slot.start_time <= currentTimeStr) {
+            slotIsPast = true;
+          }
         }
-      }
 
-      // Check Lunch
-      if (slot.isLunch) {
-        gridContainer.innerHTML += `
-                    <div class="flex items-center justify-between p-4 bg-orange-50 border border-orange-100 rounded-xl">
-                        <div class="flex items-center gap-3">
-                            <i data-lucide="book-open" class="text-orange-500 w-5 h-5"></i>
-                            <span class="font-medium text-orange-700">${slot.label}</span>
-                        </div>
-                        <span class="font-semibold text-orange-600 tracking-wide uppercase text-sm">Lunch Break</span>
-                    </div>`;
-        return;
-      }
-
-      // Check Appointment
-      const apt = appointments.find((a) => a.appointment_time === slot.start);
-      if (apt) {
-        if (apt.status === "Completed") {
+        // Check Appointment for this slot
+        const apt = appointments.find((a) => a.appointment_time === slot.start_time);
+        
+        if (apt) {
+          // Slot has an appointment
+          if (apt.status === "Completed") {
+            gridContainer.innerHTML += `
+              <div onclick="openAppointmentModal(${apt.apt_id})" class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition shadow-sm">
+                <div class="flex items-center gap-3">
+                  <i data-lucide="check-circle" class="text-gray-500 w-5 h-5"></i>
+                  <div>
+                    <span class="font-semibold text-gray-500 line-through">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
+                    <p class="text-xs text-gray-400 mt-0.5">Patient: ${apt.patient_name}</p>
+                  </div>
+                </div>
+                <span class="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">Completed</span>
+              </div>`;
+          } else {
+            gridContainer.innerHTML += `
+              <div onclick="openAppointmentModal(${apt.apt_id})" class="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-xl cursor-pointer hover:bg-blue-100 transition shadow-sm">
+                <div class="flex items-center gap-3">
+                  <i data-lucide="user" class="text-blue-600 w-5 h-5"></i>
+                  <div>
+                    <span class="font-semibold text-blue-900">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
+                    <p class="text-sm font-medium text-blue-700 mt-0.5">${apt.patient_name} <span class="opacity-75 font-normal ml-1">(${apt.status})</span></p>
+                  </div>
+                </div>
+                <button class="bg-white border border-blue-200 text-blue-600 px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-50 transition">View Details</button>
+              </div>`;
+          }
+        } else if (slot.status === 'Available') {
+          // Available slot (no appointment)
           gridContainer.innerHTML += `
-                        <div onclick="openAppointmentModal(${apt.apt_id})" class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition shadow-sm">
-                            <div class="flex items-center gap-3">
-                                <i data-lucide="check-circle" class="text-gray-500 w-5 h-5"></i>
-                                <div>
-                                    <span class="font-semibold text-gray-500 line-through">${slot.label}</span>
-                                    <p class="text-xs text-gray-400 mt-0.5">Patient: ${apt.patient_name}</p>
-                                </div>
-                            </div>
-                            <span class="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">Completed</span>
-                        </div>`;
-        } else {
+            <div class="flex items-center justify-between p-4 bg-white border-2 border-green-400 rounded-xl shadow-sm hover:border-green-500 transition">
+              <div class="flex items-center gap-3">
+                <i data-lucide="clock" class="text-green-500 w-5 h-5"></i>
+                <div>
+                  <span class="font-bold text-gray-900">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
+                  <p class="text-xs text-green-600 font-medium mt-0.5">Available for booking</p>
+                </div>
+              </div>
+              <button onclick="toggleSlot('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, ${slotIsPast})" class="bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 px-4 py-1.5 rounded-lg text-sm font-semibold transition ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}">
+                Block Slot
+              </button>
+            </div>`;
+        } else if (slot.status === 'Blocked') {
+          // Blocked slot
           gridContainer.innerHTML += `
-                        <div onclick="openAppointmentModal(${apt.apt_id})" class="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-xl cursor-pointer hover:bg-blue-100 transition shadow-sm">
-                            <div class="flex items-center gap-3">
-                                <i data-lucide="user" class="text-blue-600 w-5 h-5"></i>
-                                <div>
-                                    <span class="font-semibold text-blue-900">${slot.label}</span>
-                                    <p class="text-sm font-medium text-blue-700 mt-0.5">${apt.patient_name} <span class="opacity-75 font-normal ml-1">(${apt.status})</span></p>
-                                </div>
-                            </div>
-                            <button class="bg-white border border-blue-200 text-blue-600 px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-50 transition">View Details</button>
-                        </div>`;
+            <div class="flex items-center justify-between p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+              <div class="flex items-center gap-3">
+                <i data-lucide="lock" class="text-yellow-500 w-5 h-5"></i>
+                <div>
+                  <span class="font-medium text-yellow-700">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
+                  <p class="text-xs text-yellow-600 mt-0.5">Blocked</p>
+                </div>
+              </div>
+              <button onclick="toggleSlot('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, ${slotIsPast})" class="bg-white border border-yellow-300 text-yellow-600 hover:bg-yellow-50 px-4 py-1.5 rounded-lg text-sm font-semibold transition shadow-sm ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}">
+                Unblock Slot
+              </button>
+            </div>`;
+        } else if (slot.status === 'Closed') {
+          // Closed slot (past time)
+          gridContainer.innerHTML += `
+            <div class="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-xl opacity-60">
+              <div class="flex items-center gap-3">
+                <i data-lucide="clock-off" class="text-red-400 w-5 h-5"></i>
+                <div>
+                  <span class="font-medium text-red-600">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
+                  <p class="text-xs text-red-500 mt-0.5">Slot closed (past time)</p>
+                </div>
+              </div>
+            </div>`;
         }
-        return;
-      }
-
-      // Check Availability (OPEN vs BLOCKED vs CLOSED)
-      const avail = availability.find((a) => a.start_time === slot.start);
-
-      if (avail && avail.status === 'Available') {
-        // OPEN slot
-        gridContainer.innerHTML += `
-                    <div class="flex items-center justify-between p-4 bg-white border-2 border-green-400 rounded-xl shadow-sm hover:border-green-500 transition">
-                        <div class="flex items-center gap-3">
-                            <i data-lucide="clock" class="text-green-500 w-5 h-5"></i>
-                            <div>
-                                <span class="font-bold text-gray-900">${slot.label}</span>
-                                <p class="text-xs text-green-600 font-medium mt-0.5">Available for booking</p>
-                            </div>
-                        </div>
-                        <button onclick="toggleSlot('${slot.start}', '${slot.end}', ${avail.avail_id}, ${slotIsPast})" class="bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 px-4 py-1.5 rounded-lg text-sm font-semibold transition ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}">
-                            Block Slot
-                        </button>
-                    </div>`;
-      } else if (avail && avail.status === 'Closed') {
-        // CLOSED slot (past time)
-        gridContainer.innerHTML += `
-                    <div class="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-xl opacity-60">
-                        <div class="flex items-center gap-3">
-                            <i data-lucide="clock-off" class="text-red-400 w-5 h-5"></i>
-                            <div>
-                                <span class="font-medium text-red-600">${slot.label}</span>
-                                <p class="text-xs text-red-500 mt-0.5">Slot closed (past time)</p>
-                            </div>
-                        </div>
-                    </div>`;
-      } else {
-        // BLOCKED slot
-        gridContainer.innerHTML += `
-                    <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-xl">
-                        <div class="flex items-center gap-3">
-                            <i data-lucide="lock" class="text-gray-400 w-5 h-5"></i>
-                            <div>
-                                <span class="font-medium text-gray-500">${slot.label}</span>
-                                <p class="text-xs text-gray-400 mt-0.5">Unavailable</p>
-                            </div>
-                        </div>
-                        <button onclick="toggleSlot('${slot.start}', '${slot.end}', null, ${slotIsPast})" class="bg-white border border-gray-300 text-gray-600 hover:bg-gray-100 px-4 py-1.5 rounded-lg text-sm font-semibold transition shadow-sm ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}">
-                            Open Slot
-                        </button>
-                    </div>`;
-      }
-    });
+      });
+    } else {
+      // No custom slots set - show empty state message
+      gridContainer.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-12 text-center">
+          <i data-lucide="calendar-x" class="text-gray-400 w-12 h-12 mb-4"></i>
+          <p class="text-gray-600 text-lg font-medium">No schedule set for this date</p>
+          <p class="text-gray-400 text-sm mt-2">Please set your weekly schedule from the Home page first</p>
+        </div>
+      `;
+    }
     lucide.createIcons();
   } catch (e) {
+    console.error('Error loading schedule:', e);
     gridContainer.style.opacity = "1";
     gridContainer.innerHTML =
       '<div class="text-center py-12 text-red-500"><p>Failed to load slots. Please try again.</p></div>';
@@ -431,7 +401,7 @@ async function toggleSlot(startTime, endTime, availId, isPast) {
   const date = selectedScheduleDate;
 
   if (availId) {
-    // DELETE
+    // Toggle block/unblock status
     const response = await fetch(
       `../../api/doctor/availability.php?avail_id=${availId}`,
       { 
@@ -443,25 +413,7 @@ async function toggleSlot(startTime, endTime, availId, isPast) {
     if (result.status === "success") {
       loadScheduleForDate(date);
     } else {
-      alert("Error blocking slot: " + result.message);
-    }
-  } else {
-    // POST
-    const response = await fetch("../../api/doctor/availability.php", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        avail_date: date,
-        start_time: startTime,
-        end_time: endTime,
-      }),
-    });
-    const result = await response.json();
-    if (result.status === "success") {
-      loadScheduleForDate(date);
-    } else {
-      alert("Error opening slot: " + result.message);
+      alert("Error toggling slot: " + result.message);
     }
   }
 }

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Schedule Setup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        
+        /* Unskippable modal backdrop - covers entire screen */
+        .schedule-setup-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .schedule-setup-modal.active {
+            display: flex;
+        }
+        
+        /* Modal container - cannot be closed */
+        .modal-container {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        /* Header */
+        .modal-header {
+            background: linear-gradient(135deg, #007E85 0%, #005a61 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        /* Body */
+        .modal-body {
+            padding: 32px;
+        }
+        
+        /* Day selector grid */
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .day-checkbox {
+            display: none;
+        }
+        
+        .day-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .day-label:hover {
+            border-color: #007E85;
+            background-color: rgba(0, 126, 133, 0.05);
+        }
+        
+        .day-checkbox:checked + .day-label {
+            background-color: #007E85;
+            color: white;
+            border-color: #007E85;
+        }
+        
+        /* Time slots section */
+        .day-section {
+            display: none;
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .day-section.active {
+            display: block;
+        }
+        
+        .day-section-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: #1f2937;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .day-section-title .day-badge {
+            background: #007E85;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        
+        /* Time slot inputs */
+        .time-slot {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 12px;
+            align-items: end;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+        
+        .time-slot label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        
+        .time-slot input[type="time"] {
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.3s ease;
+        }
+        
+        .time-slot input[type="time"]:focus {
+            outline: none;
+            border-color: #007E85;
+            box-shadow: 0 0 0 3px rgba(0, 126, 133, 0.1);
+        }
+        
+        .btn-remove-slot {
+            padding: 8px 12px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.3s ease;
+        }
+        
+        .btn-remove-slot:hover {
+            background: #dc2626;
+        }
+        
+        .btn-add-slot {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: #007E85;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 8px;
+            transition: background 0.3s ease;
+        }
+        
+        .btn-add-slot:hover {
+            background: #005a61;
+        }
+        
+        /* Info boxes */
+        .info-box {
+            background: #e0f2f1;
+            border-left: 4px solid #007E85;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: #004f54;
+        }
+        
+        .error-box {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: #7f1d1d;
+            display: none;
+        }
+        
+        .error-box.show {
+            display: block;
+        }
+        
+        /* Footer / Buttons */
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            padding: 24px 32px;
+            background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            border-radius: 0 0 12px 12px;
+        }
+        
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #007E85;
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #005a61;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 126, 133, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        /* Loading state */
+        .btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Success message */
+        .success-message {
+            display: none;
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        /* Prevent scrolling when modal is open */
+        body.schedule-modal-open {
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <!-- Unskippable Schedule Setup Modal -->
+    <div class="schedule-setup-modal" id="scheduleSetupModal">
+        <div class="modal-container">
+            <!-- Header -->
+            <div class="modal-header">
+                <div class="flex items-center gap-3 mb-2">
+                    <i data-lucide="calendar-check" class="w-6 h-6"></i>
+                    <h2 class="text-2xl font-bold">Set Your Weekly Schedule</h2>
+                </div>
+                <p class="text-sm text-gray-100 opacity-90">This is required before you can start accepting patient appointments.</p>
+            </div>
+            
+            <!-- Body -->
+            <div class="modal-body">
+                <!-- Info Message -->
+                <div class="info-box">
+                    <strong>📌 Important:</strong> You must select at least one working day with time slots to proceed. This schedule will help patients book appointments with you.
+                </div>
+                
+                <!-- Error Message -->
+                <div class="error-box" id="errorBox"></div>
+                
+                <!-- Success Message -->
+                <div class="success-message" id="successMessage">
+                    ✓ Schedule saved successfully! Redirecting...
+                </div>
+                
+                <form id="scheduleForm">
+                    <!-- Day Selection -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Select Working Days</h3>
+                        <div class="days-grid" id="daysGrid">
+                            <!-- Days will be generated by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <!-- Time Slots per Day -->
+                    <div id="timeSlotsContainer">
+                        <!-- Dynamic day sections will be added here -->
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="submitScheduleBtn">
+                    Save Schedule & Continue
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

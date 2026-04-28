@@ -479,6 +479,34 @@ async function loadAllAppointmentsForSearch() {
     }
 }
 
+/**
+ * Check if doctor has completed schedule setup on first login
+ * If not, show the unskippable schedule setup modal
+ */
+async function checkAndShowScheduleSetup() {
+    try {
+        const response = await fetch(`${DOCTOR_API_BASE}/doctor/check_schedule_setup.php`);
+        const result = await response.json();
+        
+        // schedule_setup_completed = true means doctor HAS available slots for this week
+        // schedule_setup_completed = false means doctor NEEDS to setup schedule for this week
+        if (result.status === 'success' && !result.schedule_setup_completed) {
+            console.log('No available slots for this week - showing schedule setup popup');
+            
+            // Initialize and show the schedule setup modal
+            if (typeof window.scheduleSetup !== 'undefined' && window.scheduleSetup.open) {
+                setTimeout(() => {
+                    window.scheduleSetup.open();
+                }, 500); // Small delay to ensure DOM is ready
+            }
+        } else if (result.status === 'success') {
+            console.log('Schedule setup already has slots for this week');
+        }
+    } catch (error) {
+        console.error('Error checking schedule setup status:', error);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById('doctorNotificationBtn');
     const panel = document.getElementById('doctorNotificationPanel');
@@ -519,6 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCurrentDate();
     loadDoctorProfile();
     loadAllAppointmentsForSearch();
+    checkAndShowScheduleSetup();
     loadHomePageData();
     loadDoctorNotifications().then((rows) => renderDoctorNotificationList(rows));
 
