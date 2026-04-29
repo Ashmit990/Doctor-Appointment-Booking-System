@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
+    />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Doctor Leaderboard – Healthcare</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              teal: {
+                DEFAULT: "#0d7377",
+                dark: "#0a5a5d",
+                light: "#14a3a8",
+                bg: "#e8f5f5",
+              },
+            },
+            fontFamily: { poppins: ["Poppins", "sans-serif"] },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        background: #0d7377;
+        color: white;
+        border-radius: 8px;
+        z-index: 1000;
+        animation: fadeIn 0.3s ease;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Tier badge glow effects */
+      .tier-platinum {
+        background: linear-gradient(135deg, #e8f4fd, #c8e6f5);
+        color: #1565c0;
+        border: 1px solid #90caf9;
+      }
+      .tier-gold {
+        background: linear-gradient(135deg, #fffde7, #fff9c4);
+        color: #f57f17;
+        border: 1px solid #ffe082;
+      }
+      .tier-silver {
+        background: linear-gradient(135deg, #f5f5f5, #eeeeee);
+        color: #546e7a;
+        border: 1px solid #bdbdbd;
+      }
+      .tier-bronze {
+        background: linear-gradient(135deg, #fbe9e7, #ffccbc);
+        color: #bf360c;
+        border: 1px solid #ffab91;
+      }
+
+      /* Rank podium highlight for top 3 */
+      .rank-1 {
+        background: linear-gradient(90deg, #fffde7 0%, #fff 100%);
+      }
+      .rank-2 {
+        background: linear-gradient(90deg, #f5f5f5 0%, #fff 100%);
+      }
+      .rank-3 {
+        background: linear-gradient(90deg, #fbe9e7 0%, #fff 100%);
+      }
+
+      /* Performance bar */
+      .perf-bar-bg {
+        background: #e8f5f5;
+        border-radius: 9999px;
+        overflow: hidden;
+        height: 6px;
+      }
+      .perf-bar-fill {
+        height: 6px;
+        border-radius: 9999px;
+        background: linear-gradient(90deg, #0d7377, #14a3a8);
+        transition: width 0.6s ease;
+      }
+
+      /* Modal */
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 200;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal.active {
+        display: flex;
+      }
+
+      /* Animated rank number */
+      @keyframes countUp {
+        from {
+          opacity: 0;
+          transform: scale(0.7);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      .rank-anim {
+        animation: countUp 0.4s ease forwards;
+      }
+
+      /* Top 3 crown icons */
+      .crown-1 {
+        color: #f9a825;
+      }
+      .crown-2 {
+        color: #90a4ae;
+      }
+      .crown-3 {
+        color: #bf8040;
+      }
+
+      /* Fix for sidebar links - prevent jumping */
+      #sidebar nav a,
+      #sidebar .border-t a {
+        min-height: 48px;
+        transition: all 0.2s ease;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 text-gray-800 flex min-h-screen">
+    <div
+      id="overlay"
+      class="fixed inset-0 bg-black/40 z-40 hidden lg:hidden"
+      onclick="closeSidebar()"
+    ></div>
+
+    <!-- Sidebar -->
+    <aside
+      id="sidebar"
+      class="fixed top-0 left-0 bottom-0 w-60 bg-teal-dark flex flex-col z-50 -translate-x-full lg:translate-x-0 transition-transform duration-300"
+    >
+      <div class="px-6 py-7 flex items-center gap-3 border-b border-white/10">
+        <img src="../../src/assets/Logo.svg" alt="" />
+        <span class="text-white font-bold text-lg">Healthcare</span>
+      </div>
+      <nav class="p-3 flex-1">
+        <a
+          href="dashboard.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"
+            />
+          </svg>
+          Dashboard
+        </a>
+        <a
+          href="leaderboard.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white bg-white/20 text-sm font-medium mb-1"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M7.5 21H2V9h5.5v12zm7.25-18h-5.5v18h5.5V3zM22 11h-5.5v10H22V11z"
+            />
+          </svg>
+          Leaderboard
+        </a>
+        <a
+          href="users.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
+            />
+          </svg>
+          Patients
+        </a>
+        <a
+          href="appointments.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
+            />
+          </svg>
+          Appointments
+        </a>
+        <a
+          href="doctor.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+            />
+          </svg>
+          Doctors
+        </a>
+        <a
+          href="doctor_approvals.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-2 14l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"
+            />
+          </svg>
+          Doctor Approvals
+        </a>
+        <a
+          href="reports.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-sm font-medium mb-1 transition-all"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"
+            />
+          </svg>
+          Reports
+        </a>
+      </nav>
+      <div class="p-3 border-t border-white/10">
+        <a
+          href="adminprofile.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/65 hover:bg-white/10 hover:text-white text-sm font-medium transition-all"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+            />
+          </svg>
+          Admin Profile
+        </a>
+        <a
+          href="../../api/auth/logout.php"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/65 hover:bg-white/10 hover:text-white text-sm font-medium transition-all"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
+            />
+          </svg>
+          Logout
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col lg:ml-60">
+      <header
+        class="bg-white px-4 md:px-8 py-4 flex items-center justify-between shadow-sm sticky top-0 z-30"
+      >
+        <div class="flex items-center gap-3">
+          <button
+            onclick="toggleSidebar()"
+            class="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <svg
+              class="w-5 h-5 text-teal-dark"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+            </svg>
+          </button>
+          <h1 class="text-base font-semibold text-teal-dark">
+            Doctor Leaderboard
+          </h1>
+        </div>
+        <div class="flex items-center gap-4">
+          <span id="current-date" class="text-xs text-gray-500 hidden sm:block"></span>
+          <div class="w-9 h-9 bg-teal rounded-full flex items-center justify-center text-white font-bold text-sm">A</div>
+        </div>
+      </header>
+
+      <div class="p-4 md:p-8 flex-1 overflow-y-auto">
+        <h2 class="text-2xl font-bold text-teal-dark mb-2">Doctor Leaderboard</h2>
+        <p class="text-sm text-gray-500 mb-6">
+          Rankings based on completed appointments, ratings, and overall performance.
+        </p>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8" id="summary-cards">
+          <div class="bg-white rounded-2xl p-5 shadow-md">
+            <div class="w-10 h-10 rounded-xl bg-yellow-100 text-yellow-600 flex items-center justify-center mb-2 text-lg">🥇</div>
+            <div class="text-2xl font-bold text-gray-800" id="stat-platinum">–</div>
+            <div class="text-xs text-gray-500 font-medium">Platinum Tier</div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 shadow-md">
+            <div class="w-10 h-10 rounded-xl bg-yellow-50 text-yellow-500 flex items-center justify-center mb-2 text-lg">🥈</div>
+            <div class="text-2xl font-bold text-gray-800" id="stat-gold">–</div>
+            <div class="text-xs text-gray-500 font-medium">Gold Tier</div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 shadow-md">
+            <div class="w-10 h-10 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center mb-2 text-lg">🥉</div>
+            <div class="text-2xl font-bold text-gray-800" id="stat-silver">–</div>
+            <div class="text-xs text-gray-500 font-medium">Silver Tier</div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 shadow-md">
+            <div class="w-10 h-10 rounded-xl bg-teal-bg text-teal flex items-center justify-center mb-2">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+            <div class="text-2xl font-bold text-gray-800" id="stat-total">–</div>
+            <div class="text-xs text-gray-500 font-medium">Total Doctors</div>
+          </div>
+        </div>
+
+        <!-- Filters & Search -->
+        <div class="flex flex-col sm:flex-row gap-3 mb-5">
+          <div class="flex-1 flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm">
+            <svg class="w-4 h-4 text-gray-400 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5z"/>
+            </svg>
+            <input id="searchInput" type="text" placeholder="Search by name or specialization..." oninput="filterLeaderboard()" class="border-none outline-none text-sm w-full bg-transparent" />
+          </div>
+          <select id="tierFilter" onchange="filterLeaderboard()" class="bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium shadow-sm">
+            <option value="">All Tiers</option>
+            <option value="Platinum">🏆 Platinum</option>
+            <option value="Gold">🥇 Gold</option>
+            <option value="Silver">🥈 Silver</option>
+            <option value="Bronze">🥉 Bronze</option>
+          </select>
+          <select id="sortFilter" onchange="filterLeaderboard()" class="bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium shadow-sm">
+            <option value="points">Sort by Points</option>
+            <option value="completed">Sort by Completed</option>
+            <option value="rating">Sort by Rating</option>
+          </select>
+          <button onclick="loadLeaderboard()" class="bg-teal text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-teal-dark transition-colors shadow-sm flex items-center gap-2 shrink-0">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+            </svg>Refresh
+          </button>
+        </div>
+
+        <!-- Leaderboard Table -->
+        <div class="bg-white rounded-2xl shadow-md overflow-hidden mb-6">
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[700px]">
+              <thead class="bg-gray-50 border-b">
+                <tr>
+                  <th class="text-left text-xs text-gray-400 font-semibold px-5 py-4 uppercase w-16">Rank</th>
+                  <th class="text-left text-xs text-gray-400 font-semibold px-5 py-4 uppercase">Doctor</th>
+                  <th class="text-left text-xs text-gray-400 font-semibold px-5 py-4 uppercase hidden sm:table-cell">Specialization</th>
+                  <th class="text-left text-xs text-gray-400 font-semibold px-5 py-4 uppercase">Tier</th>
+                  <th class="text-left text-xs text-gray-400 font-semibold px-5 py-4 uppercase">Points</th>
+                  <th class="text-left text-xs text-gray-400 font-semibold px-5 py-4 uppercase hidden md:table-cell">Performance</th>
+                  <th class="text-left text-xs text-gray-400 font-semibold px-5 py-4 uppercase">Action</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-table-body">
+                <tr><td colspan="7" class="text-center py-10 text-gray-500">Loading leaderboard...</td</tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <p class="text-xs text-gray-400 text-right" id="last-updated"></p>
+      </div>
+    </main>
+
+    <!-- Doctor Detail Modal -->
+    <div id="doctorModal" class="modal">
+      <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center rounded-t-2xl">
+          <h3 class="text-lg font-bold text-teal-dark" id="modalDoctorName">Doctor Details</h3>
+          <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+        </div>
+        <div class="p-6" id="modalBody">Loading...</div>
+      </div>
+    </div>
+
+    <script src="leaderboard.js"></script>
+  </body>
+</html>
