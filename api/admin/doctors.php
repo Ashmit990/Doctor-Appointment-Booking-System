@@ -4,12 +4,9 @@ require_once '../config/db.php';
 
 header('Content-Type: application/json');
 
-// Debug logging
-error_log('Session user_id: ' . (isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 'NOT SET'));
-error_log('Session role: ' . (isset($_SESSION['role']) ? $_SESSION['role'] : 'NOT SET'));
-
+// Check if admin is logged in
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
-    echo json_encode(['status' => 'error', 'message' => 'Unauthorized - Session: ' . json_encode($_SESSION)]);
+    echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
     exit;
 }
 
@@ -17,25 +14,25 @@ try {
     $method = $_SERVER['REQUEST_METHOD'];
 
     if ($method === 'GET') {
-        // Get all doctors
-        $page = $_GET['page'] ?? 1;
-        $limit = $_GET['limit'] ?? 10;
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
         $offset = ($page - 1) * $limit;
         $doctor_id = $_GET['doctor_id'] ?? null;
-        $status_filter = $_GET['status'] ?? 'all'; // all, approved, pending
 
         if ($doctor_id) {
-            // Get specific doctor with details
+            // Get single doctor with ALL details - Using correct column names
             $stmt = $conn->prepare("
                 SELECT 
                     u.user_id,
                     u.full_name,
                     u.email,
+                    u.created_at,
+                    dp.medical_id,
                     dp.specialization,
-                    dp.consultation_fee,
                     dp.contact_number,
                     dp.experience_years,
                     dp.qualifications,
+                    dp.consultation_fee,
                     dp.bio,
                     dp.age,
                     (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id) as total_appointments,
@@ -50,7 +47,8 @@ try {
             $stmt->close();
 
             if (!$doctor) {
-                throw new Exception('Doctor not found');
+                echo json_encode(['status' => 'error', 'message' => 'Doctor not found']);
+                exit;
             }
 
             echo json_encode([
@@ -59,23 +57,14 @@ try {
             ]);
 
         } else {
-            // Get all doctors list - we need to add an 'approved' field to track approval status
-            // For now, we'll assume all registered doctors are approved
+            // Get all doctors for listing
             $stmt = $conn->prepare("
                 SELECT 
                     u.user_id,
                     u.full_name,
                     u.email,
-                    u.created_at,
-                    dp.specialization,
-                    dp.consultation_fee,
-                    dp.contact_number,
-                    dp.experience_years,
-                    dp.qualifications,
-                    dp.bio,
-                    dp.age,
-                    (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id) as total_appointments,
-                    (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id AND status = 'Completed') as completed_appointments
+                    COALESCE(dp.specialization, 'Not Specified') as specialization,
+                    (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id) as total_appointments
                 FROM users u
                 LEFT JOIN doctor_profiles dp ON u.user_id = dp.user_id
                 WHERE u.role = 'Doctor'
@@ -90,116 +79,47 @@ try {
             // Get total count
             $stmt = $conn->prepare("SELECT COUNT(*) as total FROM users WHERE role = 'Doctor'");
             $stmt->execute();
-            $count_result = $stmt->get_result()->fetch_assoc();
+            $total_result = $stmt->get_result()->fetch_assoc();
+            $total = $total_result['total'];
             $stmt->close();
 
             echo json_encode([
                 'status' => 'success',
                 'data' => $doctors,
-                'total' => $count_result['total'],
+                'total' => $total,
                 'page' => $page,
-                'pages' => ceil($count_result['total'] / $limit)
+                'pages' => ceil($total / $limit)
             ]);
         }
 
-    } elseif ($method === 'PUT') {
-        // Update doctor
+    } elseif ($method === 'DELETE') {
         $input = json_decode(file_get_contents("php://input"), true);
-        
         $doctor_id = $input['doctor_id'] ?? null;
-        $full_name = $input['full_name'] ?? null;
-        $email = $input['email'] ?? null;
-        $specialization = $input['specialization'] ?? null;
-        $consultation_fee = $input['consultation_fee'] ?? null;
-        $contact_number = $input['contact_number'] ?? null;
-        $experience_years = $input['experience_years'] ?? null;
-        $qualifications = $input['qualifications'] ?? null;
-        $bio = $input['bio'] ?? null;
-        $age = $input['age'] ?? null;
 
         if (!$doctor_id) {
-            throw new Exception('Doctor ID required');
+            echo json_encode(['status' => 'error', 'message' => 'Doctor ID required']);
+            exit;
         }
 
-        $stmt = $conn->prepare("SELECT full_name, email FROM users WHERE user_id = ? AND role = 'Doctor'");
+        // Delete from doctor_profiles first
+        $stmt = $conn->prepare("DELETE FROM doctor_profiles WHERE user_id = ?");
         $stmt->bind_param("s", $doctor_id);
         $stmt->execute();
-        $before = $stmt->get_result()->fetch_assoc();
         $stmt->close();
-
-        if (!$before) {
-            throw new Exception('Doctor not found');
-        }
-
-        // Update user info
-        $stmt = $conn->prepare("UPDATE users SET full_name = ?, email = ? WHERE user_id = ? AND role = 'Doctor'");
-        $stmt->bind_param("sss", $full_name, $email, $doctor_id);
         
-        if (!$stmt->execute()) {
-            throw new Exception($stmt->error);
-        }
-        $stmt->close();
-
-        $nameChanged = trim((string) $before['full_name']) !== trim((string) $full_name);
-        $emailChanged = strcasecmp(trim((string) $before['email']), trim((string) $email)) !== 0;
-        if ($nameChanged || $emailChanged) {
-            $msg = 'An administrator updated your account. Your display name is now: '
-                . $full_name . '. Your email is now: ' . $email . '.';
-            $n = $conn->prepare(
-                "INSERT INTO notifications (user_id, title, message, is_read, created_at) VALUES (?, 'Account updated by admin', ?, 0, NOW())"
-            );
-            $n->bind_param("ss", $doctor_id, $msg);
-            $n->execute();
-            $n->close();
-        }
-
-        // Update doctor profile with individual columns
-        if ($specialization !== null || $consultation_fee !== null || $contact_number !== null || $experience_years !== null || $qualifications !== null || $bio !== null || $age !== null) {
-            $stmt = $conn->prepare("
-                UPDATE doctor_profiles 
-                SET specialization = COALESCE(?, specialization),
-                    consultation_fee = COALESCE(?, consultation_fee),
-                    contact_number = COALESCE(?, contact_number),
-                    experience_years = COALESCE(?, experience_years),
-                    qualifications = COALESCE(?, qualifications),
-                    bio = COALESCE(?, bio),
-                    age = COALESCE(?, age)
-                WHERE user_id = ?
-            ");
-            $stmt->bind_param("sdsissssi", $specialization, $consultation_fee, $contact_number, $experience_years, $qualifications, $bio, $age, $doctor_id);
-            
-            if (!$stmt->execute()) {
-                throw new Exception($stmt->error);
-            }
-            $stmt->close();
-        }
-
-        echo json_encode([
-            'status' => 'success',
-            'message' => 'Doctor updated successfully'
-        ]);
-
-    } elseif ($method === 'DELETE') {
-        // Delete doctor
-        $input = json_decode(file_get_contents("php://input"), true);
-        $doctor_id = $input['doctor_id'] ?? null;
-
-        if (!$doctor_id) {
-            throw new Exception('Doctor ID required');
-        }
-
+        // Delete from users
         $stmt = $conn->prepare("DELETE FROM users WHERE user_id = ? AND role = 'Doctor'");
         $stmt->bind_param("s", $doctor_id);
         
-        if (!$stmt->execute()) {
-            throw new Exception($stmt->error);
+        if ($stmt->execute()) {
+            echo json_encode(['status' => 'success', 'message' => 'Doctor deleted successfully']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Failed to delete doctor']);
         }
         $stmt->close();
 
-        echo json_encode([
-            'status' => 'success',
-            'message' => 'Doctor deleted successfully'
-        ]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Method not allowed']);
     }
 
 } catch (Exception $e) {

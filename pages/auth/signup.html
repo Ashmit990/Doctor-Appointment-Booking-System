@@ -35,12 +35,10 @@
         transition: all 0.3s ease;
         border-bottom: 2px solid #e5e7eb;
       }
-
       .custom-input:focus {
         border-color: #007e85;
         padding-left: 4px;
       }
-
       .custom-input.input-error {
         border-bottom-color: #dc2626;
       }
@@ -51,7 +49,6 @@
         overflow: hidden;
         opacity: 0;
       }
-
       #doctorFieldsContainer.show {
         max-height: 600px;
         opacity: 1;
@@ -69,50 +66,34 @@
           transform: translateY(0px) scale(1.1);
         }
       }
-      .float-hero {
-        animation: float 6s ease-in-out infinite;
-      }
-
       @keyframes fadeIn {
-        0% {
+        from {
           opacity: 0;
         }
-        100% {
+        to {
           opacity: 1;
         }
       }
       @keyframes slideUp {
-        0% {
+        from {
           opacity: 0;
           transform: translateY(30px);
         }
-        100% {
+        to {
           opacity: 1;
           transform: translateY(0);
-        }
-      }
-      @keyframes slideRight {
-        0% {
-          opacity: 0;
-          transform: translateX(-30px);
-        }
-        100% {
-          opacity: 1;
-          transform: translateX(0);
         }
       }
       @keyframes modalFadeIn {
         from {
           opacity: 0;
-          transform: scale(0.95);
+          transform: scale(0.92);
         }
         to {
           opacity: 1;
           transform: scale(1);
         }
       }
-
-      /* Step transition animations */
       @keyframes stepFadeIn {
         from {
           opacity: 0;
@@ -124,28 +105,11 @@
         }
       }
 
-      @keyframes stepFadeOut {
-        from {
-          opacity: 1;
-          transform: translateX(0);
-        }
-        to {
-          opacity: 0;
-          transform: translateX(-20px);
-        }
-      }
-
       .animate-fade-in {
         animation: fadeIn 0.6s ease-out forwards;
       }
-      .animate-slide-up {
-        animation: slideUp 0.7s ease-out forwards;
-      }
-      .animate-slide-right {
-        animation: slideRight 0.8s ease-out forwards;
-      }
 
-      /* Back Button Style - Arrow Only */
+      /* ── Back button ── */
       .back-button {
         position: fixed;
         top: 20px;
@@ -173,14 +137,11 @@
         color: #007e85;
       }
 
-      /* Profession Modal Styles */
+      /* ── Profession modal ── */
       .profession-modal {
         display: none;
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        inset: 0;
         background: rgba(0, 0, 0, 0.5);
         backdrop-filter: blur(4px);
         z-index: 1000;
@@ -232,16 +193,12 @@
         gap: 12px;
         border: 1px solid #e5e7eb;
       }
-      .profession-option-modal:hover {
-        background: #007e85;
-        color: white;
-        border-color: #007e85;
-        transform: translateX(5px);
-      }
+      .profession-option-modal:hover,
       .profession-option-modal.selected {
         background: #007e85;
         color: white;
         border-color: #007e85;
+        transform: translateX(5px);
       }
       .selected-profession-display {
         background: #f1f5f9;
@@ -269,15 +226,7 @@
         font-size: 13px;
       }
 
-      /* Two step form styling */
-      .step-content {
-        transition:
-          opacity 0.3s ease,
-          transform 0.3s ease;
-      }
-      .step-hidden {
-        display: none;
-      }
+      /* ── Step badges ── */
       .step-indicator {
         display: flex;
         gap: 12px;
@@ -292,15 +241,21 @@
         color: #475569;
         transition: all 0.2s;
         letter-spacing: 0.5px;
-        cursor: default;
       }
       .step-badge.active {
         background: #007e85;
         color: white;
         box-shadow: 0 2px 8px rgba(0, 126, 133, 0.2);
       }
+      .step-content {
+        transition:
+          opacity 0.3s ease,
+          transform 0.3s ease;
+      }
+      .step-hidden {
+        display: none;
+      }
 
-      /* Smooth button hover effects */
       .btn-primary {
         transition: all 0.3s ease;
       }
@@ -308,11 +263,48 @@
         transform: translateY(-2px);
         box-shadow: 0 10px 25px -5px rgba(0, 126, 133, 0.3);
       }
+
+      /* ══════════════════════════════════════════════════
+         SUCCESS / ERROR MODAL  — centered overlay
+      ══════════════════════════════════════════════════ */
+      #feedbackModal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(6px);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+      }
+      #feedbackModal.show {
+        display: flex;
+      }
+
+      .feedback-modal-box {
+        background: white;
+        border-radius: 28px;
+        max-width: 420px;
+        width: 90%;
+        padding: 40px 36px;
+        text-align: center;
+        animation: modalFadeIn 0.35s ease-out;
+        box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
+      }
+      .feedback-icon-ring {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+      }
     </style>
   </head>
 
   <body class="overflow-x-hidden tracking-[1.1px]">
-    <!-- BACK BUTTON - Arrow Only -->
+    <!-- BACK BUTTON -->
     <div class="back-button" onclick="goToLandingPage()">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -329,7 +321,29 @@
       </svg>
     </div>
 
-    <!-- Profession Selection Popup Modal -->
+    <!-- ══════════════════════════════════════════
+         CENTERED FEEDBACK MODAL (success + error)
+    ══════════════════════════════════════════ -->
+    <div id="feedbackModal">
+      <div class="feedback-modal-box">
+        <div id="feedbackIconRing" class="feedback-icon-ring"></div>
+        <h2
+          id="feedbackTitle"
+          class="text-2xl font-extrabold text-slate-800 mb-3"
+        ></h2>
+        <p
+          id="feedbackMessage"
+          class="text-slate-500 text-sm leading-relaxed mb-8"
+        ></p>
+        <button
+          id="feedbackBtn"
+          onclick="handleFeedbackClose()"
+          class="w-full bg-[#007E85] text-white font-bold py-3.5 rounded-xl text-base hover:bg-[#00666c] transition-all hover:-translate-y-0.5 active:scale-[0.98]"
+        ></button>
+      </div>
+    </div>
+
+    <!-- Profession Selection Modal -->
     <div id="professionModal" class="profession-modal">
       <div class="modal-content">
         <div class="modal-header">
@@ -356,9 +370,7 @@
           </button>
         </div>
         <div class="modal-body">
-          <div class="grid grid-cols-1 gap-2" id="professionOptionsList">
-            <!-- Options will be populated here -->
-          </div>
+          <div class="grid grid-cols-1 gap-2" id="professionOptionsList"></div>
         </div>
         <div class="modal-footer">
           <button
@@ -378,7 +390,7 @@
     </div>
 
     <div class="flex min-h-screen w-full relative animate-fade-in">
-      <!-- Left Panel -->
+      <!-- ── Left Panel ── -->
       <div
         class="w-full lg:w-[45%] flex flex-col justify-center px-8 sm:px-10 xl:px-20 2xl:px-24 z-20 relative bg-[#F8FAFB] min-h-screen"
       >
@@ -414,14 +426,14 @@
           </div>
 
           <form id="signupForm" novalidate>
-            <!-- STEP 1 CONTENT -->
+            <!-- ── STEP 1 ── -->
             <div id="step1" class="step-content space-y-5 xl:space-y-6">
-              <!-- Full Name -->
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                  >Full Name</label
                 >
+                  Full Name
+                </label>
                 <input
                   id="signupFullName"
                   type="text"
@@ -435,12 +447,12 @@
                 ></p>
               </div>
 
-              <!-- Email Address -->
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                  >Email Address</label
                 >
+                  Email Address
+                </label>
                 <input
                   id="signupEmail"
                   type="email"
@@ -454,12 +466,12 @@
                 ></p>
               </div>
 
-              <!-- Register as -->
               <div class="relative group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                  >Register as</label
                 >
+                  Register as
+                </label>
                 <button
                   type="button"
                   id="customSelectBtn"
@@ -508,13 +520,14 @@
                 </div>
               </div>
 
-              <!-- Doctor Specific Fields -->
+              <!-- Doctor-only fields -->
               <div id="doctorFieldsContainer">
                 <div class="group mb-4">
                   <label
                     class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                    >Medical ID <span class="text-red-500">*</span></label
                   >
+                    Medical ID <span class="text-red-500">*</span>
+                  </label>
                   <input
                     id="signupMedicalId"
                     type="text"
@@ -531,9 +544,10 @@
                 <div class="group">
                   <label
                     class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                    >Profession / Specialization
-                    <span class="text-red-500">*</span></label
                   >
+                    Profession / Specialization
+                    <span class="text-red-500">*</span>
+                  </label>
                   <div
                     id="professionDisplay"
                     class="selected-profession-display"
@@ -566,8 +580,9 @@
                 <div class="group mt-4">
                   <label
                     class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                    >Professional Bio <span class="text-red-500">*</span></label
                   >
+                    Professional Bio <span class="text-red-500">*</span>
+                  </label>
                   <textarea
                     id="signupBio"
                     rows="3"
@@ -598,8 +613,9 @@
                 </button>
               </div>
             </div>
+            <!-- /step1 -->
 
-            <!-- STEP 2 CONTENT -->
+            <!-- ── STEP 2 ── -->
             <div
               id="step2"
               class="step-content step-hidden space-y-5 xl:space-y-6"
@@ -607,8 +623,9 @@
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                  >Phone Number</label
                 >
+                  Phone Number
+                </label>
                 <input
                   id="signupPhone"
                   type="tel"
@@ -625,8 +642,9 @@
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                  >Age</label
                 >
+                  Age
+                </label>
                 <input
                   id="signupAge"
                   type="number"
@@ -643,8 +661,9 @@
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                  >Create Password</label
                 >
+                  Create Password
+                </label>
                 <div class="relative">
                   <input
                     id="signupPassword"
@@ -679,7 +698,8 @@
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7
+                               -1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                       />
                     </svg>
                   </button>
@@ -705,8 +725,9 @@
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
-                  >Confirm Password</label
                 >
+                  Confirm Password
+                </label>
                 <div class="relative">
                   <input
                     id="signupConfirmPassword"
@@ -738,7 +759,8 @@
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7
+                               -1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                       />
                     </svg>
                   </button>
@@ -765,6 +787,7 @@
                   Register Now
                 </button>
               </div>
+
               <p class="text-center pt-2 text-slate-500 text-sm font-medium">
                 Already have an account?
                 <a
@@ -774,11 +797,12 @@
                 >
               </p>
             </div>
+            <!-- /step2 -->
           </form>
         </div>
       </div>
 
-      <!-- Right Panel - ORIGINAL UNCHANGED -->
+      <!-- ── Right Panel ── -->
       <div
         class="hidden lg:block w-[55%] relative overflow-hidden bg-[#F8FAFB]"
       >
@@ -795,9 +819,107 @@
         </div>
       </div>
     </div>
+    <!-- /flex wrapper -->
 
     <script>
-      // ==================== TWO-STEP NAVIGATION ====================
+      // ═══════════════════════════════════════════════════════════════
+      //  CENTERED FEEDBACK MODAL
+      //  — used for SUCCESS (patient & doctor) and ERROR messages
+      //  — no inline error divs anywhere in this file
+      // ═══════════════════════════════════════════════════════════════
+      let _redirectOnClose = false; // true only for patient success
+
+      function _openFeedbackModal(
+        iconHtml,
+        iconBg,
+        title,
+        message,
+        btnLabel,
+        redirect,
+      ) {
+        _redirectOnClose = !!redirect;
+
+        const ring = document.getElementById("feedbackIconRing");
+        ring.style.background = iconBg;
+        ring.innerHTML = iconHtml;
+
+        document.getElementById("feedbackTitle").textContent = title;
+        document.getElementById("feedbackMessage").innerHTML = message;
+        document.getElementById("feedbackBtn").textContent = btnLabel;
+
+        document.getElementById("feedbackModal").classList.add("show");
+        document.body.style.overflow = "hidden";
+      }
+
+      function handleFeedbackClose() {
+        document.getElementById("feedbackModal").classList.remove("show");
+        document.body.style.overflow = "";
+        if (_redirectOnClose) {
+          window.location.href = "login.html"; // ← patient redirect
+        }
+      }
+
+      // ── Patient success ─────────────────────────────────────────────
+      function showPatientSuccess(fullName) {
+        _openFeedbackModal(
+          `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-green-500"
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+           <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+         </svg>`,
+          "linear-gradient(135deg,#d1fae5,#a7f3d0)",
+          "Welcome to Healthcare!",
+          `Thank you for registering, <strong>${fullName}</strong>! 🎉<br><br>
+         Your account has been created successfully. You can now
+         <strong>sign in</strong> and start booking appointments with our
+         world-class medical professionals.`,
+          "Go to Login →",
+          true, // ← redirect = true
+        );
+      }
+
+      // ── Doctor success ──────────────────────────────────────────────
+      function showDoctorSuccess(fullName) {
+        _openFeedbackModal(
+          `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-teal-500"
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+           <path stroke-linecap="round" stroke-linejoin="round"
+                 d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944
+                    a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9
+                    c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03
+                    9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+         </svg>`,
+          "linear-gradient(135deg,#ccfbf1,#99f6e4)",
+          "Application Submitted!",
+          `Thank you, <strong>${fullName}</strong>! 🎉<br><br>
+         Your registration as a <strong>Medical Professional</strong> has been received.
+         Our admin team will review your credentials and
+         <strong>contact you once you are approved</strong>.<br><br>
+         You'll receive an email notification with further instructions.`,
+          "Got it, I'll wait!",
+          false, // ← no redirect
+        );
+      }
+
+      // ── Error (any failure) ─────────────────────────────────────────
+      function showErrorModal(msg) {
+        _openFeedbackModal(
+          `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-red-500"
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+           <path stroke-linecap="round" stroke-linejoin="round"
+                 d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94
+                    a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+         </svg>`,
+          "linear-gradient(135deg,#fee2e2,#fecaca)",
+          "Registration Failed",
+          msg,
+          "Try Again",
+          false,
+        );
+      }
+
+      // ═══════════════════════════════════════════════════════════════
+      //  TWO-STEP NAVIGATION
+      // ═══════════════════════════════════════════════════════════════
       const step1 = document.getElementById("step1");
       const step2 = document.getElementById("step2");
       const step1Badge = document.getElementById("step1Badge");
@@ -805,8 +927,8 @@
       const nextBtn = document.getElementById("nextStepBtn");
       const prevBtn = document.getElementById("prevStepBtn");
 
-      function showStep(step) {
-        if (step === 1) {
+      function showStep(n) {
+        if (n === 1) {
           step1.style.animation = "stepFadeIn 0.3s ease-out";
           step1.classList.remove("step-hidden");
           step2.classList.add("step-hidden");
@@ -822,89 +944,69 @@
       }
 
       function validateStep1() {
-        let isValid = true;
-
+        let ok = true;
         const fullName = document.getElementById("signupFullName").value.trim();
         if (!fullName) {
           showErr("signupFullName", "Full name is required.");
-          isValid = false;
+          ok = false;
         } else if (fullName.length < 2) {
           showErr("signupFullName", "Name must be at least 2 characters.");
-          isValid = false;
+          ok = false;
         } else if (!/^[a-zA-Z\s\-']+$/.test(fullName)) {
           showErr("signupFullName", "Name must contain letters only.");
-          isValid = false;
-        } else {
-          clearErr("signupFullName");
-        }
+          ok = false;
+        } else clearErr("signupFullName");
 
         const email = document.getElementById("signupEmail").value.trim();
         if (!email) {
           showErr("signupEmail", "Email address is required.");
-          isValid = false;
+          ok = false;
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
           showErr("signupEmail", "Enter a valid email address.");
-          isValid = false;
-        } else {
-          clearErr("signupEmail");
-        }
+          ok = false;
+        } else clearErr("signupEmail");
 
         if (selectedRole === "Medical Professional") {
-          const medicalId = document
-            .getElementById("signupMedicalId")
-            .value.trim();
-          if (!medicalId) {
+          const mid = document.getElementById("signupMedicalId").value.trim();
+          if (!mid) {
             showErr("signupMedicalId", "Medical ID is required.");
-            isValid = false;
-          } else if (medicalId.length < 4) {
+            ok = false;
+          } else if (mid.length < 4) {
             showErr(
               "signupMedicalId",
               "Medical ID must be at least 4 characters.",
             );
-            isValid = false;
-          } else {
-            clearErr("signupMedicalId");
-          }
+            ok = false;
+          } else clearErr("signupMedicalId");
 
           if (!finalSelectedProfession) {
             showErr(
               "signupProfession",
               "Please select your profession/specialization.",
             );
-            isValid = false;
-          } else {
-            clearErr("signupProfession");
-          }
+            ok = false;
+          } else clearErr("signupProfession");
 
           const bio = document.getElementById("signupBio").value.trim();
           if (!bio) {
             showErr("signupBio", "Professional bio is required.");
-            isValid = false;
-          } else {
-            const wordCount = bio.split(/\s+/).length;
-            if (wordCount < 15) {
-              showErr("signupBio", "Bio must contain at least 15 words.");
-              isValid = false;
-            } else {
-              clearErr("signupBio");
-            }
-          }
+            ok = false;
+          } else if (bio.split(/\s+/).length < 15) {
+            showErr("signupBio", "Bio must contain at least 15 words.");
+            ok = false;
+          } else clearErr("signupBio");
         }
-
-        return isValid;
+        return ok;
       }
 
       nextBtn.addEventListener("click", () => {
-        if (validateStep1()) {
-          showStep(2);
-        }
+        if (validateStep1()) showStep(2);
       });
+      prevBtn.addEventListener("click", () => showStep(1));
 
-      prevBtn.addEventListener("click", () => {
-        showStep(1);
-      });
-
-      // ==================== ORIGINAL SCRIPT LOGIC ====================
+      // ═══════════════════════════════════════════════════════════════
+      //  PROFESSION MODAL
+      // ═══════════════════════════════════════════════════════════════
       const professions = [
         { icon: "🦷", name: "Dentist" },
         { icon: "🏥", name: "General Physician" },
@@ -939,11 +1041,11 @@
         });
       }
 
-      function selectProfessionInModal(profession, element) {
+      function selectProfessionInModal(profession, el) {
         document
           .querySelectorAll(".profession-option-modal")
-          .forEach((el) => el.classList.remove("selected"));
-        element.classList.add("selected");
+          .forEach((e) => e.classList.remove("selected"));
+        el.classList.add("selected");
         tempSelectedProfession = profession;
       }
 
@@ -983,6 +1085,9 @@
         window.location.href = "../../index.html";
       }
 
+      // ═══════════════════════════════════════════════════════════════
+      //  ROLE DROPDOWN
+      // ═══════════════════════════════════════════════════════════════
       const customSelectBtn = document.getElementById("customSelectBtn");
       const dropdownMenu = document.getElementById("dropdownMenu");
       const chevron = document.getElementById("chevron");
@@ -1016,8 +1121,8 @@
       document.querySelectorAll(".option-item").forEach((option) => {
         option.addEventListener("click", () => {
           const val = option.getAttribute("data-value");
-          selectedValueDisplay.innerText = option.innerText;
-          selectedRole = option.innerText;
+          selectedValueDisplay.innerText = option.innerText.trim();
+          selectedRole = option.innerText.trim();
           if (val === "doctor") {
             doctorFieldsContainer.classList.add("show");
           } else {
@@ -1036,43 +1141,30 @@
           closeRoleDropdown();
       };
 
+      // ═══════════════════════════════════════════════════════════════
+      //  HELPERS
+      // ═══════════════════════════════════════════════════════════════
       function updateBioWordCount() {
-        const bioTextarea = document.getElementById("signupBio");
-        const wordCountSpan = document.getElementById("bioWordCount");
-        const text = bioTextarea.value.trim();
+        const text = document.getElementById("signupBio").value.trim();
         const wordCount = text === "" ? 0 : text.split(/\s+/).length;
-        wordCountSpan.textContent = `${wordCount} words (minimum 15 required)`;
-        if (wordCount >= 15) {
-          wordCountSpan.classList.add("text-green-600");
-          wordCountSpan.classList.remove("text-red-500");
-        } else {
-          wordCountSpan.classList.remove("text-green-600");
-          wordCountSpan.classList.add("text-red-500");
-        }
+        const span = document.getElementById("bioWordCount");
+        span.textContent = `${wordCount} words (minimum 15 required)`;
+        span.classList.toggle("text-green-600", wordCount >= 15);
+        span.classList.toggle("text-red-500", wordCount < 15);
       }
 
       function togglePass() {
         const input = document.getElementById("signupPassword");
         const icon = document.getElementById("eyeIcon");
-        if (input.type === "password") {
-          input.type = "text";
-          icon.style.opacity = "0.45";
-        } else {
-          input.type = "password";
-          icon.style.opacity = "1";
-        }
+        input.type = input.type === "password" ? "text" : "password";
+        icon.style.opacity = input.type === "text" ? "0.45" : "1";
       }
 
       function toggleConfirmPass() {
         const input = document.getElementById("signupConfirmPassword");
         const icon = document.getElementById("confirmEyeIcon");
-        if (input.type === "password") {
-          input.type = "text";
-          icon.style.opacity = "0.45";
-        } else {
-          input.type = "password";
-          icon.style.opacity = "1";
-        }
+        input.type = input.type === "password" ? "text" : "password";
+        icon.style.opacity = input.type === "text" ? "0.45" : "1";
       }
 
       function updateStrength() {
@@ -1127,9 +1219,9 @@
 
       const Validators = {
         phone(v) {
-          const digits = v.replace(/[\s\-()]/g, "");
+          const d = v.replace(/[\s\-()\+]/g, "");
           if (!v) return "Phone number is required.";
-          if (!/^\d{10}$/.test(digits))
+          if (!/^\d{10}$/.test(d))
             return "Phone number must be exactly 10 digits.";
           return null;
         },
@@ -1153,10 +1245,14 @@
         },
       };
 
+      // ═══════════════════════════════════════════════════════════════
+      //  FORM SUBMIT
+      // ═══════════════════════════════════════════════════════════════
       document
         .getElementById("signupForm")
-        .addEventListener("submit", function (e) {
+        .addEventListener("submit", async function (e) {
           e.preventDefault();
+
           const phone = document.getElementById("signupPhone").value.trim();
           const age = document.getElementById("signupAge").value.trim();
           const password = document.getElementById("signupPassword").value;
@@ -1186,16 +1282,19 @@
             showErr("signupPhone", phoneErr);
             hasError = true;
           }
+
           const ageErr = Validators.age(age);
           if (ageErr) {
             showErr("signupAge", ageErr);
             hasError = true;
           }
+
           const passErr = Validators.password(password);
           if (passErr) {
             showErr("signupPassword", passErr);
             hasError = true;
           }
+
           if (!confirmPassword) {
             showErr("signupConfirmPassword", "Please confirm your password.");
             hasError = true;
@@ -1206,9 +1305,13 @@
 
           if (hasError) return;
 
+          // Loading state
           const btn = document.getElementById("submitBtn");
           const origText = btn.innerText;
-          btn.innerText = "Registering...";
+          btn.innerHTML = `<svg class="animate-spin inline w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+      </svg> Registering...`;
           btn.disabled = true;
 
           const formData = new FormData();
@@ -1222,17 +1325,55 @@
             formData.append("medical_id", medicalId);
             formData.append("bio", bio);
             formData.append("profession", finalSelectedProfession);
+            formData.append("specialization", finalSelectedProfession);
           }
 
-          // Simulate API call (replace with actual fetch if needed)
-          setTimeout(() => {
-            btn.innerText = origText;
-            btn.disabled = false;
-            alert(
-              "✅ Registration successful!\nWelcome to Healthcare, " + fullName,
+          try {
+            const response = await fetch("../../api/auth/signup_process.php", {
+              method: "POST",
+              body: formData,
+            });
+
+            const text = await response.text();
+            let data;
+            try {
+              data = JSON.parse(text);
+            } catch {
+              console.error("Non-JSON response:", text);
+              // ✅ Centered error modal — no inline div
+              showErrorModal("Server error. Please try again.");
+              return;
+            }
+
+            if (data.success) {
+              // ✅ Correct modal per role
+              if (isDoctor) {
+                showDoctorSuccess(fullName);
+              } else {
+                showPatientSuccess(fullName); // closes → redirects to login.html
+              }
+            } else {
+              const errMsg =
+                data.message || "Registration failed. Please try again.";
+              if (errMsg.toLowerCase().includes("email")) {
+                // Go back to step 1 and highlight the email field inline
+                showStep(1);
+                showErr("signupEmail", errMsg);
+              } else {
+                // ✅ All other errors → centered modal
+                showErrorModal(errMsg);
+              }
+            }
+          } catch (err) {
+            console.error("Fetch error:", err);
+            // ✅ Network errors → centered modal
+            showErrorModal(
+              "Network error. Please check your connection and try again.",
             );
-            // window.location.href = "login.html";
-          }, 800);
+          } finally {
+            btn.innerHTML = origText;
+            btn.disabled = false;
+          }
         });
     </script>
   </body>
