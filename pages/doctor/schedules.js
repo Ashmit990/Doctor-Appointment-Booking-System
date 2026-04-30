@@ -421,8 +421,11 @@ async function toggleSlot(startTime, endTime, availId, isPast) {
 function toggleFollowUpVisibility() {
   const st = document.getElementById("modal-edit-status").value;
   const bSection = document.getElementById("complete-consultation-btn");
-  // Keep followup section always visible - don't hide it based on status
-  if (st === "Completed") {
+
+  if (followupLocked) {
+    bSection.innerHTML =
+      '<i data-lucide="save" class="w-5 h-5"></i> Save Changes';
+  } else if (st === "Completed") {
     bSection.innerHTML =
       '<i data-lucide="check-circle" class="w-5 h-5"></i> Complete Consultation';
   } else {
@@ -433,6 +436,7 @@ function toggleFollowUpVisibility() {
 }
 
 let fetchedAvailability = [];
+let followupLocked = false;
 
 window.updateFollowupTimes = function() {
     const dateSelect = document.getElementById("modal-followup-date");
@@ -530,6 +534,7 @@ async function openAppointmentModal(aptId) {
   const appointmentLockMsg = document.getElementById("appointment-lock-message") || createLockMessage();
 
   completeBtn.dataset.aptId = apt.apt_id;
+  followupLocked = apt.status === "Completed";
 
   // Check if appointment has started
   const appointmentDateTime = new Date(`${apt.app_date}T${apt.appointment_time}`);
@@ -537,18 +542,24 @@ async function openAppointmentModal(aptId) {
   const hasAppointmentStarted = now >= appointmentDateTime;
 
   if (apt.status === "Completed") {
-    // Read-only Mode - Already Completed
-    statusSelectWrapper.classList.add("hidden");
-    notesInput.classList.add("hidden");
-    rxInput.classList.add("hidden");
-    completeBtn.classList.add("hidden");
+    // Completed appointments can still be updated, but follow-up stays locked.
+    statusSelectWrapper.classList.remove("hidden");
+    notesInput.classList.remove("hidden");
+    rxInput.classList.remove("hidden");
+    completeBtn.classList.remove("hidden");
     appointmentLockMsg.classList.add("hidden");
 
-    notesReadonly.classList.remove("hidden");
-    rxReadonly.classList.remove("hidden");
+    notesReadonly.classList.add("hidden");
+    rxReadonly.classList.add("hidden");
 
-    notesReadonly.textContent = apt.doctor_comments || apt.doctor_notes || "No notes provided.";
-    rxReadonly.textContent = apt.prescribed_medicines || apt.prescriptions || "No prescriptions provided.";
+    statusSelect.value = apt.status || "Completed";
+    notesInput.value = apt.doctor_comments || apt.doctor_notes || "";
+    rxInput.value = apt.prescribed_medicines || apt.prescriptions || "";
+
+    followupInputs.classList.add("hidden");
+    document.getElementById("modal-followup-date").value = "";
+    document.getElementById("modal-followup-time").value = "";
+    document.getElementById("modal-followup-time").disabled = true;
 
     if (apt.feedback && apt.feedback.trim() !== "") {
       feedbackSec.classList.remove("hidden");
@@ -556,6 +567,8 @@ async function openAppointmentModal(aptId) {
     } else {
       feedbackSec.classList.add("hidden");
     }
+
+    toggleFollowUpVisibility();
   } else if (!hasAppointmentStarted) {
     // Lock Mode - Appointment hasn't started yet
     statusSelectWrapper.classList.add("hidden");
@@ -710,8 +723,13 @@ async function submitConsultation() {
   const statusVal = document.getElementById("modal-edit-status").value.trim();
   const notes = document.getElementById("modal-doctor-notes").value.trim();
   const rx = document.getElementById("modal-prescriptions").value.trim();
-  const fDate = document.getElementById("modal-followup-date").value;
-  const fTime = document.getElementById("modal-followup-time").value;
+  let fDate = document.getElementById("modal-followup-date").value;
+  let fTime = document.getElementById("modal-followup-time").value;
+
+  if (followupLocked) {
+    fDate = "";
+    fTime = "";
+  }
 
   console.log("=== SUBMITTING CONSULTATION ===");
   console.log("Appointment ID:", aptId);

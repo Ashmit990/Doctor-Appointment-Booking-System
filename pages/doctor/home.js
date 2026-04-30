@@ -327,6 +327,7 @@ async function openAppointmentModal(appointmentID) {
     if (result.status === 'success' && result.data) {
         const apt = result.data;
         const today = new Date().toISOString().split('T')[0];
+        const isCompleted = apt.status === 'Completed';
         
         document.getElementById('modal-patient-name').textContent = apt.patient_name;
         document.getElementById('modal-patient-id').textContent = apt.patient_id;
@@ -339,14 +340,26 @@ async function openAppointmentModal(appointmentID) {
         
         const editSection = document.getElementById('edit-section');
         const viewSection = document.getElementById('view-section');
-        
-        editSection.classList.add('hidden');
-        viewSection.classList.remove('hidden');
-        const status = apt.status || 'Not set';
-        document.getElementById('view-status').textContent = status;
-        document.getElementById('view-status').className = `font-semibold mt-1 px-3 py-1 rounded-full text-sm inline-block ${getStatusBadgeClass(status)}`;
-        document.getElementById('view-comments').textContent = apt.doctor_comments || 'No comments added';
-        document.getElementById('view-medicines').textContent = apt.prescribed_medicines || 'No medicines prescribed';
+        const modalStatus = document.getElementById('modal-status');
+        const modalComments = document.getElementById('modal-comments');
+        const modalMedicines = document.getElementById('modal-medicines');
+
+        if (isCompleted) {
+            editSection.classList.remove('hidden');
+            viewSection.classList.add('hidden');
+
+            modalStatus.value = apt.status || 'Completed';
+            modalComments.value = apt.doctor_comments || '';
+            modalMedicines.value = apt.prescribed_medicines || '';
+        } else {
+            editSection.classList.add('hidden');
+            viewSection.classList.remove('hidden');
+            const status = apt.status || 'Not set';
+            document.getElementById('view-status').textContent = status;
+            document.getElementById('view-status').className = `font-semibold mt-1 px-3 py-1 rounded-full text-sm inline-block ${getStatusBadgeClass(status)}`;
+            document.getElementById('view-comments').textContent = apt.doctor_comments || 'No comments added';
+            document.getElementById('view-medicines').textContent = apt.prescribed_medicines || 'No medicines prescribed';
+        }
         
         document.getElementById('appointment-modal').classList.remove('hidden');
     }

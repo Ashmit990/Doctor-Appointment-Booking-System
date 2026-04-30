@@ -37,9 +37,7 @@ try {
     if (!$apt) {
         throw new Exception('Appointment not found or unauthorized');
     }
-    if ($apt['status'] === 'Completed') {
-        throw new Exception('Appointment is already strictly completed and cannot be modified');
-    }
+    $isAlreadyCompleted = ($apt['status'] === 'Completed');
 
     $patient_id = $apt['patient_id'];
     $old_followup_date = $apt['next_followup_date'];
@@ -69,7 +67,7 @@ try {
     $dnItem->close();
 
     // Notification for Completion
-    if ($new_status === 'Completed') {
+    if ($new_status === 'Completed' && !$isAlreadyCompleted) {
         $msg = "Your appointment with {$doc_name} has been marked as Completed. Please provide feedback on your dashboard.";
         $n1 = $conn->prepare("INSERT INTO notifications (user_id, title, message, is_read, created_at) VALUES (?, 'Consultation Completed', ?, 0, NOW())");
         $n1->bind_param("ss", $patient_id, $msg);
@@ -78,7 +76,7 @@ try {
     }
 
     // Follow-up logic
-    if ($followup_date !== '' && $followup_time !== '') {
+    if (!$isAlreadyCompleted && $followup_date !== '' && $followup_time !== '') {
         // Check if followup dates have CHANGED
         $followup_changed = ($old_followup_date !== $followup_date || $old_followup_time !== $followup_time);
         
@@ -172,7 +170,10 @@ try {
     }
 
     $conn->commit();
-    echo json_encode(['status' => 'success', 'message' => 'Consultation completed successfully']);
+    $successMessage = $isAlreadyCompleted
+        ? 'Appointment details updated successfully'
+        : 'Consultation completed successfully';
+    echo json_encode(['status' => 'success', 'message' => $successMessage]);
 } catch (Exception $e) {
     $conn->rollback();
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
