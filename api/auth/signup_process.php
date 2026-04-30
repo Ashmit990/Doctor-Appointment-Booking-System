@@ -142,24 +142,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (isset($approvalCols['medical_id'])) {
                 $stmt = $conn->prepare(
                     "INSERT INTO doctor_approvals
-                        (full_name, email, password_hash, medical_id, specialization, consultation_fee, bio, status)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')"
+                        (full_name, email, password_hash, medical_id, specialization, bio, status)
+                     VALUES (?, ?, ?, ?, ?, ?, 'Pending')"
                 );
                 if (!$stmt) throw new Exception("Prepare failed: " . $conn->error);
-                $stmt->bind_param("sssssds",
+                $stmt->bind_param("ssssss",
                     $full_name, $email, $password,
-                    $medical_id, $specialization, $consultation_fee, $bio_data
+                    $medical_id, $specialization, $bio_data
                 );
             } else {
                 $stmt = $conn->prepare(
                     "INSERT INTO doctor_approvals
-                        (full_name, email, password_hash, specialization, consultation_fee, bio, status)
-                     VALUES (?, ?, ?, ?, ?, ?, 'Pending')"
+                        (full_name, email, password_hash, specialization, bio, status)
+                     VALUES (?, ?, ?, ?, ?, 'Pending')"
                 );
                 if (!$stmt) throw new Exception("Prepare failed: " . $conn->error);
-                $stmt->bind_param("ssssds",
+                $stmt->bind_param("sssss",
                     $full_name, $email, $password,
-                    $specialization, $consultation_fee, $bio_data
+                    $specialization, $bio_data
                 );
             }
 
