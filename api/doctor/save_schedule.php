@@ -49,14 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $conn->begin_transaction();
         
-        // Calculate 7 dates starting from the provided start_date (ONE WEEK ONLY)
-        // Schedule setup creates slots for THIS WEEK ONLY, not recurring
-        // Doctor must set schedule again for the next week if needed
         $base_date = strtotime($start_date);
-        $dates_to_create = [];
-        for ($i = 0; $i < 7; $i++) {
-            $dates_to_create[$i] = date('Y-m-d', strtotime("+$i days", $base_date));
-        }
         
         // Map day names to indices (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
         $day_to_index = [
@@ -84,34 +77,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 continue;
             }
             
-            // Get the date for this day of the week
-            $target_date = $dates_to_create[$day_index];
-            
-            // Track inserted times for this day to prevent duplicates
-            $inserted_times = [];
-            
-            // Insert each time slot for this day
-            foreach ($time_slots as $time_slot) {
-                if (empty($time_slot['start_time']) || empty($time_slot['end_time'])) {
-                    continue;
-                }
+            // Loop for 52 weeks (1 year)
+            for ($week = 0; $week < 52; $week++) {
+                $days_offset = $day_index + ($week * 7);
+                $target_date = date('Y-m-d', strtotime("+$days_offset days", $base_date));
                 
-                // Create a key for this time slot
-                $time_key = $time_slot['start_time'] . '-' . $time_slot['end_time'];
+                // Track inserted times for this day to prevent duplicates
+                $inserted_times = [];
                 
-                // Skip if this exact time slot already inserted for this day
-                if (in_array($time_key, $inserted_times)) {
-                    error_log("Skipped duplicate slot for $day_name at $time_key");
-                    continue;
-                }
-                
-                $inserted_times[] = $time_key;
-                
-                $stmt->bind_param("ssss", $user_id, $target_date, $time_slot['start_time'], $time_slot['end_time']);
-                if ($stmt->execute()) {
-                    $inserted_count++;
-                } else {
-                    throw new Exception("Failed to insert availability slot: " . $stmt->error);
+                // Insert each time slot for this day
+                foreach ($time_slots as $time_slot) {
+                    if (empty($time_slot['start_time']) || empty($time_slot['end_time'])) {
+                        continue;
+                    }
+                    
+                    // Create a key for this time slot
+                    $time_key = $time_slot['start_time'] . '-' . $time_slot['end_time'];
+                    
+                    // Skip if this exact time slot already inserted for this day
+                    if (in_array($time_key, $inserted_times)) {
+                        continue;
+                    }
+                    
+                    $inserted_times[] = $time_key;
+                    
+                    $stmt->bind_param("ssss", $user_id, $target_date, $time_slot['start_time'], $time_slot['end_time']);
+                    if ($stmt->execute()) {
+                        $inserted_count++;
+                    } else {
+                        throw new Exception("Failed to insert availability slot: " . $stmt->error);
+                    }
                 }
             }
         }

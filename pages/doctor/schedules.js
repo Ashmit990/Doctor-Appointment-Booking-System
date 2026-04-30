@@ -242,7 +242,7 @@ async function selectScheduleDate(date) {
   
   const weekDisplay = `${startOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${endOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
   
-  document.getElementById("schedule-date-display").textContent = `${dateDisplay} (Week: ${weekDisplay})`;
+  document.getElementById("schedule-date-display").textContent = `${dateDisplay}`;
 
   renderScheduleCalendar(); // re-render to update selected state style
   await loadScheduleForDate(date);
