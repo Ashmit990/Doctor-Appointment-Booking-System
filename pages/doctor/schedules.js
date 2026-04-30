@@ -1,9 +1,10 @@
 let scheduleMonth = new Date(2026, 3); // April 2026
 let selectedScheduleDate = null;
 let currentEditAvailId = null;
+let pendingDeleteAction = null;
 
 // Toast notification helper
-function showToast(message, type = 'info') {
+function showToast(message, type = 'info', duration = 2000) {
   const toastContainer = document.getElementById('toast-container') || (() => {
     const container = document.createElement('div');
     container.id = 'toast-container';
@@ -14,7 +15,8 @@ function showToast(message, type = 'info') {
 
   const toast = document.createElement('div');
   const bgColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6';
-  toast.style.cssText = `background-color: ${bgColor}; color: white; padding: 12px 16px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s forwards; min-width: 250px;`;
+  const slideOutDelay = (duration - 300) / 1000;
+  toast.style.cssText = `background-color: ${bgColor}; color: white; padding: 12px 16px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); animation: slideIn 0.3s ease, slideOut 0.3s ease ${slideOutDelay}s forwards; min-width: 250px;`;
   toast.textContent = message;
   
   toastContainer.appendChild(toast);
@@ -23,7 +25,7 @@ function showToast(message, type = 'info') {
     if (toastContainer.contains(toast)) {
       toastContainer.removeChild(toast);
     }
-  }, 3000);
+  }, duration);
 }
 
 function updateCurrentDate() {
@@ -284,6 +286,20 @@ async function loadScheduleForDate(date) {
     const currentMinute = today.getMinutes();
     const currentTimeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}:00`;
 
+    const manageBtn = document.getElementById("manage-day-btn");
+    if (manageBtn) {
+        manageBtn.classList.remove("hidden");
+        if (isPastDay || (isToday && currentHour >= 17)) {
+            manageBtn.disabled = true;
+            manageBtn.classList.add("opacity-50", "cursor-not-allowed");
+            manageBtn.title = "Cannot manage schedule for past dates or after 5 PM";
+        } else {
+            manageBtn.disabled = false;
+            manageBtn.classList.remove("opacity-50", "cursor-not-allowed");
+            manageBtn.title = "";
+        }
+    }
+
     gridContainer.style.opacity = "1";
     gridContainer.innerHTML = "";
 
@@ -341,8 +357,8 @@ async function loadScheduleForDate(date) {
                   <p class="text-xs text-green-600 font-medium mt-0.5">Available for booking</p>
                 </div>
               </div>
-              <button onclick="toggleSlot('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, ${slotIsPast})" class="bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 px-4 py-1.5 rounded-lg text-sm font-semibold transition ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}">
-                Block Slot
+              <button onclick="openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})" class="bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 px-4 py-1.5 rounded-lg text-sm font-semibold transition ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}">
+                Edit Slot
               </button>
             </div>`;
         } else if (slot.status === 'Blocked') {
@@ -356,8 +372,8 @@ async function loadScheduleForDate(date) {
                   <p class="text-xs text-yellow-600 mt-0.5">Blocked</p>
                 </div>
               </div>
-              <button onclick="toggleSlot('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, ${slotIsPast})" class="bg-white border border-yellow-300 text-yellow-600 hover:bg-yellow-50 px-4 py-1.5 rounded-lg text-sm font-semibold transition shadow-sm ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}">
-                Unblock Slot
+              <button onclick="openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})" class="bg-white border border-yellow-300 text-yellow-600 hover:bg-yellow-50 px-4 py-1.5 rounded-lg text-sm font-semibold transition shadow-sm ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}">
+                Edit Slot
               </button>
             </div>`;
         } else if (slot.status === 'Closed') {
@@ -401,7 +417,6 @@ async function toggleSlot(startTime, endTime, availId, isPast) {
   const date = selectedScheduleDate;
 
   if (availId) {
-    // Toggle block/unblock status
     const response = await fetch(
       `../../api/doctor/availability.php?avail_id=${availId}`,
       { 
@@ -416,6 +431,331 @@ async function toggleSlot(startTime, endTime, availId, isPast) {
       alert("Error toggling slot: " + result.message);
     }
   }
+}
+
+function openEditSlotModal(start, end, availId, status, isPast) {
+  if (isPast) {
+    alert("You cannot modify availability for past dates!");
+    return;
+  }
+  
+  document.getElementById("edit-slot-id").value = availId;
+  document.getElementById("edit-slot-start").value = start;
+  updateEndTimeOptions("edit-slot-start", "edit-slot-end");
+  // ensure end time is set correctly from the option
+  
+  const statusEl = document.getElementById("edit-slot-status");
+  const toggleBtn = document.getElementById("toggle-slot-status-btn");
+  
+  if (status === 'Available') {
+    statusEl.textContent = "Available";
+    statusEl.className = "inline-block px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800";
+    toggleBtn.textContent = "Block Slot";
+    toggleBtn.className = "bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 px-4 py-2 rounded-lg text-sm font-semibold transition";
+  } else {
+    statusEl.textContent = "Blocked";
+    statusEl.className = "inline-block px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800";
+    toggleBtn.textContent = "Unblock Slot";
+    toggleBtn.className = "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 px-4 py-2 rounded-lg text-sm font-semibold transition";
+  }
+  
+  document.getElementById("edit-slot-modal").classList.remove("hidden");
+}
+
+function closeEditSlotModal() {
+  document.getElementById("edit-slot-modal").classList.add("hidden");
+}
+
+async function toggleSlotStatusFromModal() {
+  const availId = document.getElementById("edit-slot-id").value;
+  if (!availId) return;
+  
+  const response = await fetch(
+    `../../api/doctor/availability.php?avail_id=${availId}`,
+    { 
+      method: "DELETE",
+      credentials: "include"
+    }
+  );
+  const result = await response.json();
+  if (result.status === "success") {
+    closeEditSlotModal();
+    loadScheduleForDate(selectedScheduleDate);
+    showToast(`Slot status changed to ${result.new_status}`, 'success');
+  } else {
+    showToast("Error toggling slot: " + result.message, 'error');
+  }
+}
+
+async function deleteSlotFromModal() {
+  const availId = document.getElementById("edit-slot-id").value;
+  if (!availId) return;
+  
+  openDeleteConfirmModal(async () => {
+      const response = await fetch(
+        `../../api/doctor/availability.php?avail_id=${availId}&action=remove`,
+        { 
+          method: "DELETE",
+          credentials: "include"
+        }
+      );
+      const result = await response.json();
+      if (result.status === "success") {
+        closeEditSlotModal();
+        loadScheduleForDate(selectedScheduleDate);
+        showToast('Slot removed successfully', 'success');
+      } else {
+        showToast("Error deleting slot: " + result.message, 'error');
+      }
+  });
+}
+
+async function saveSlotChanges() {
+  const availId = document.getElementById("edit-slot-id").value;
+  const start = document.getElementById("edit-slot-start").value;
+  const end = document.getElementById("edit-slot-end").value;
+  
+  if (!availId || !start || !end) {
+    showToast("Please provide both start and end times.", 'error');
+    return;
+  }
+  
+  if (start < "09:00:00" || end > "17:00:00" || start > "17:00:00" || end < "09:00:00") {
+    showToast("Time slots must be between 09:00 AM and 05:00 PM.", 'error');
+    return;
+  }
+  
+  if (start >= end) {
+    showToast("Start time must be before end time.", 'error');
+    return;
+  }
+  
+  for (const slot of fetchedAvailability) {
+    if (String(slot.avail_id) === String(availId)) continue;
+    
+    if (
+      (start >= slot.start_time && start < slot.end_time) ||
+      (end > slot.start_time && end <= slot.end_time) ||
+      (start <= slot.start_time && end >= slot.end_time)
+    ) {
+      showToast("This time overlaps with another existing slot.", 'error');
+      return;
+    }
+  }
+  
+  const payload = {
+    avail_id: availId,
+    start_time: start,
+    end_time: end
+  };
+  
+  const response = await fetch(
+    `../../api/doctor/availability.php`,
+    { 
+      method: "PUT",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }
+  );
+  
+  const result = await response.json();
+  if (result.status === "success") {
+    closeEditSlotModal();
+    loadScheduleForDate(selectedScheduleDate);
+    showToast('Slot updated successfully', 'success');
+  } else {
+    showToast("Error updating slot: " + result.message, 'error');
+  }
+}
+
+function openManageDayModal() {
+  if (!selectedScheduleDate) return;
+  
+  const dateObj = new Date(selectedScheduleDate + "T00:00:00");
+  const dateDisplay = dateObj.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
+  
+  document.getElementById("manage-day-date-display").textContent = `Slots for ${dateDisplay}`;
+  document.getElementById("new-slot-start").value = "";
+  document.getElementById("new-slot-end").value = "";
+  
+  renderManageDaySlots();
+  document.getElementById("manage-day-modal").classList.remove("hidden");
+}
+
+function closeManageDayModal() {
+  document.getElementById("manage-day-modal").classList.add("hidden");
+}
+
+function renderManageDaySlots() {
+  const listContainer = document.getElementById("manage-day-slots-list");
+  listContainer.innerHTML = "";
+  
+  if (!fetchedAvailability || fetchedAvailability.length === 0) {
+    listContainer.innerHTML = `<p class="text-xs text-gray-500 italic py-2">No slots added yet.</p>`;
+    return;
+  }
+  
+  fetchedAvailability.forEach(slot => {
+    let statusBadge = '';
+    if (slot.status === 'Available') {
+        statusBadge = `<span class="bg-green-100 text-green-800 text-[10px] px-2 py-0.5 rounded uppercase font-bold">Available</span>`;
+    } else if (slot.status === 'Blocked') {
+        statusBadge = `<span class="bg-yellow-100 text-yellow-800 text-[10px] px-2 py-0.5 rounded uppercase font-bold">Blocked</span>`;
+    } else if (slot.status === 'Booked' || slot.status === 'Completed') {
+        statusBadge = `<span class="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded uppercase font-bold">${slot.status}</span>`;
+    } else {
+        statusBadge = `<span class="bg-gray-100 text-gray-800 text-[10px] px-2 py-0.5 rounded uppercase font-bold">${slot.status}</span>`;
+    }
+
+    const disableDelete = slot.status === 'Booked' || slot.status === 'Completed';
+
+    listContainer.innerHTML += `
+      <div class="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
+          <div class="flex items-center gap-3">
+              <div>
+                  <span class="font-bold text-gray-900 text-sm">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
+                  <div class="mt-0.5">${statusBadge}</div>
+              </div>
+          </div>
+          <button onclick="removeSlotFromManageModal(${slot.avail_id})" ${disableDelete ? 'disabled class="text-gray-400 cursor-not-allowed p-2"' : 'class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition" title="Delete Slot"'}>
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+      </div>
+    `;
+  });
+  
+  lucide.createIcons();
+}
+
+async function removeSlotFromManageModal(availId) {
+  openDeleteConfirmModal(async () => {
+      const response = await fetch(
+        `../../api/doctor/availability.php?avail_id=${availId}&action=remove`,
+        { 
+          method: "DELETE",
+          credentials: "include"
+        }
+      );
+      const result = await response.json();
+      if (result.status === "success") {
+        await loadScheduleForDate(selectedScheduleDate);
+        renderManageDaySlots();
+        showToast('Slot removed', 'success');
+      } else {
+        showToast("Error deleting slot: " + result.message, 'error');
+      }
+  });
+}
+
+async function addNewSlotToDay() {
+  const start = document.getElementById("new-slot-start").value;
+  const end = document.getElementById("new-slot-end").value;
+  
+  if (!start || !end) {
+    showToast("Please provide both start and end times.", 'error');
+    return;
+  }
+  
+  if (start < "09:00:00" || end > "17:00:00" || start > "17:00:00" || end < "09:00:00") {
+    showToast("Time slots must be between 09:00 AM and 05:00 PM.", 'error');
+    return;
+  }
+  
+  if (start >= end) {
+    showToast("Start time must be before end time.", 'error');
+    return;
+  }
+  
+  for (const slot of fetchedAvailability) {
+    if (
+      (start >= slot.start_time && start < slot.end_time) ||
+      (end > slot.start_time && end <= slot.end_time) ||
+      (start <= slot.start_time && end >= slot.end_time)
+    ) {
+      showToast("This time overlaps with an existing slot.", 'error');
+      return;
+    }
+  }
+
+  const payload = {
+    avail_date: selectedScheduleDate,
+    start_time: start,
+    end_time: end
+  };
+  
+  const response = await fetch(
+    `../../api/doctor/availability.php`,
+    { 
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }
+  );
+  
+  const result = await response.json();
+  if (result.status === "success") {
+    document.getElementById("new-slot-start").value = "";
+    document.getElementById("new-slot-end").value = "";
+    await loadScheduleForDate(selectedScheduleDate);
+    renderManageDaySlots();
+    showToast('New slot added', 'success');
+  } else {
+    showToast("Error adding slot: " + result.message, 'error');
+  }
+}
+
+function updateEndTimeOptions(startId, endId) {
+    const startSelect = document.getElementById(startId);
+    const endSelect = document.getElementById(endId);
+    
+    if (!startSelect.value) return;
+    
+    const timeValues = [
+        "09:00:00", "09:30:00", "10:00:00", "10:30:00", "11:00:00", "11:30:00",
+        "12:00:00", "12:30:00", "13:00:00", "13:30:00", "14:00:00", "14:30:00",
+        "15:00:00", "15:30:00", "16:00:00", "16:30:00", "17:00:00"
+    ];
+    
+    const timeIndex = timeValues.indexOf(startSelect.value);
+    
+    if (timeIndex !== -1 && timeIndex < timeValues.length - 1) {
+        const expectedEndValue = timeValues[timeIndex + 1];
+        
+        Array.from(endSelect.options).forEach(opt => {
+            if (opt.value === "") return;
+            
+            if (opt.value === expectedEndValue) {
+                opt.disabled = false;
+                endSelect.value = expectedEndValue;
+            } else {
+                opt.disabled = true;
+            }
+        });
+    }
+}
+
+function openDeleteConfirmModal(actionCallback) {
+  pendingDeleteAction = actionCallback;
+  document.getElementById("delete-confirm-modal").classList.remove("hidden");
+}
+
+function closeDeleteConfirmModal() {
+  pendingDeleteAction = null;
+  document.getElementById("delete-confirm-modal").classList.add("hidden");
+}
+
+function executeDelete() {
+  if (pendingDeleteAction) {
+    pendingDeleteAction();
+  }
+  closeDeleteConfirmModal();
 }
 
 function toggleFollowUpVisibility() {

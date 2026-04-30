@@ -128,13 +128,15 @@ elseif ($method === 'PUT') {
     $stmt->close();
 }
 elseif ($method === 'DELETE') {
-    // Block/Unblock availability (toggle status between Available and Blocked)
+    // Block/Unblock availability (toggle status between Available and Blocked) OR Delete
     $avail_id = $_GET['avail_id'] ?? null;
+    $action = $_GET['action'] ?? null;
     
     if (!$avail_id) {
         // Try to get from request body if not in GET
         $data = json_decode(file_get_contents('php://input'), true);
         $avail_id = $data['avail_id'] ?? null;
+        $action = $data['action'] ?? $action;
     }
     
     if (!$avail_id) {
@@ -157,31 +159,46 @@ elseif ($method === 'DELETE') {
     $current_status = $row['status'];
     $verify->close();
     
-    // Only allow toggling between Available and Blocked
-    // Closed and Booked slots should not be toggled
-    if ($current_status === 'Available') {
-        $toggle_status = 'Blocked';
-    } elseif ($current_status === 'Blocked') {
-        $toggle_status = 'Available';
+    if ($action === 'remove') {
+        if ($current_status === 'Booked') {
+            echo json_encode(['status' => 'error', 'message' => 'Cannot delete a booked slot']);
+            exit;
+        }
+        $stmt = $conn->prepare("DELETE FROM doctor_availability WHERE avail_id = ?");
+        $stmt->bind_param("i", $avail_id);
+        if ($stmt->execute()) {
+            echo json_encode(['status' => 'success', 'message' => 'Slot removed successfully']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Failed to remove slot']);
+        }
+        $stmt->close();
     } else {
-        // Cannot toggle Closed, Booked, or other statuses
-        echo json_encode(['status' => 'error', 'message' => 'Cannot toggle slots with status: ' . $current_status]);
-        exit;
+        // Only allow toggling between Available and Blocked
+        // Closed and Booked slots should not be toggled
+        if ($current_status === 'Available') {
+            $toggle_status = 'Blocked';
+        } elseif ($current_status === 'Blocked') {
+            $toggle_status = 'Available';
+        } else {
+            // Cannot toggle Closed, Booked, or other statuses
+            echo json_encode(['status' => 'error', 'message' => 'Cannot toggle slots with status: ' . $current_status]);
+            exit;
+        }
+        
+        $stmt = $conn->prepare("UPDATE doctor_availability SET status = ? WHERE avail_id = ?");
+        $stmt->bind_param("si", $toggle_status, $avail_id);
+        
+        if ($stmt->execute()) {
+            echo json_encode([
+                'status' => 'success', 
+                'message' => 'Availability ' . strtolower($toggle_status),
+                'new_status' => $toggle_status
+            ]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Failed to update']);
+        }
+        $stmt->close();
     }
-    
-    $stmt = $conn->prepare("UPDATE doctor_availability SET status = ? WHERE avail_id = ?");
-    $stmt->bind_param("si", $toggle_status, $avail_id);
-    
-    if ($stmt->execute()) {
-        echo json_encode([
-            'status' => 'success', 
-            'message' => 'Availability ' . strtolower($toggle_status),
-            'new_status' => $toggle_status
-        ]);
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'Failed to update']);
-    }
-    $stmt->close();
 }
 
 $conn->close();
