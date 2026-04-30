@@ -2,6 +2,11 @@ let activeFilter = "all";
 let searchQuery = "";
 let cachedAppointments = [];
 
+let currentView = 'appointments';
+let treatCategories = [];
+let treatSelectedCategory = null;
+let treatCategoriesLoaded = false;
+
 const appointmentList = document.getElementById("appointmentList");
 const emptyState = document.getElementById("emptyState");
 const filterButtons = document.querySelectorAll(".filter-btn");
@@ -12,6 +17,26 @@ function goToHomePage() {
 
 function goToProfile() {
   window.location.href = "profile.html";
+}
+
+function showView(view) {
+  currentView = view;
+  const apptView  = document.getElementById('appointmentsView');
+  const treatView = document.getElementById('treatmentsView');
+  const sidebarAppt  = document.getElementById('sidebarAppointments');
+  const sidebarTreat = document.getElementById('sidebarTreatments');
+
+  if (apptView)  apptView.classList.toggle('hidden',  view !== 'appointments');
+  if (treatView) treatView.classList.toggle('hidden', view !== 'treatments');
+
+  const activeBtn   = 'flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl bg-white/20 text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left';
+  const inactiveBtn = 'flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left';
+
+  if (sidebarAppt)  sidebarAppt.className  = view === 'appointments' ? activeBtn : inactiveBtn;
+  if (sidebarTreat) sidebarTreat.className = view === 'treatments'   ? activeBtn : inactiveBtn;
+
+  if (view === 'treatments' && !treatCategoriesLoaded) treatLoadCategories();
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function setElementText(id, value) {
@@ -228,6 +253,9 @@ function renderAppointments(rows) {
           </button>`
               : ""
           }
+          <button type="button" data-view-ticket="${item.appointment_id}" class="view-ticket-btn w-full px-3 py-2 rounded-lg border border-[#007E85] text-[#007E85] hover:bg-teal-50 text-xs font-medium transition whitespace-nowrap text-center">
+            View Ticket
+          </button>
         </div>
       </div>
     `;
@@ -261,7 +289,121 @@ function renderAppointments(rows) {
     });
   });
 
+  document.querySelectorAll(".view-ticket-btn").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const apt = cachedAppointments.find(a => a.appointment_id == button.dataset.viewTicket);
+      if (!apt) return;
+      if (apt.ticket_number) {
+        openTicketModal(apt);
+        return;
+      }
+      button.textContent = '...';
+      button.disabled = true;
+      try {
+        const res = await fetch(`${API_BASE}/patient/generate_ticket.php`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ appointment_id: apt.appointment_id }),
+        });
+        const j = await res.json();
+        if (j.status === 'success') {
+          await reload();
+          const updated = cachedAppointments.find(a => a.appointment_id == apt.appointment_id);
+          if (updated) openTicketModal(updated);
+        } else {
+          button.textContent = 'View Ticket';
+          button.disabled = false;
+        }
+      } catch (e) {
+        console.error(e);
+        button.textContent = 'View Ticket';
+        button.disabled = false;
+      }
+    });
+  });
+
   if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function openTicketModal(apt) {
+  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setEl('tkt-number',   apt.ticket_number   || '—');
+  setEl('tkt-category', apt.ticket_category || apt.specialization || '—');
+  setEl('tkt-cost',     apt.ticket_cost     ? 'Rs. ' + Number(apt.ticket_cost).toFixed(2) : '—');
+  setEl('tkt-date',     apt.ticket_generated_at ? new Date(apt.ticket_generated_at.replace(' ','T')+'+05:45').toLocaleString('en-US', {timeZone:'Asia/Kathmandu',year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '—');
+  setEl('tkt-doctor',   apt.doctor_name     || '—');
+  const modal = document.getElementById('ticketModal');
+  if (!modal) return;
+  // Disable iframe pointer events to prevent iframe click-through bug in Chrome
+  ['bookingIframe', 'bookingModalIframe'].forEach(function(id) {
+    const f = document.getElementById(id); if (f) f.style.pointerEvents = 'none';
+  });
+  modal.style.display = 'flex';
+}
+
+function closeTicketModal() {
+  const modal = document.getElementById('ticketModal');
+  if (modal) modal.style.display = 'none';
+  // Re-enable iframe pointer events
+  ['bookingIframe', 'bookingModalIframe'].forEach(function(id) {
+    const f = document.getElementById(id); if (f) f.style.pointerEvents = '';
+  });
+}
+
+function printTicket() {
+  const num      = (document.getElementById('tkt-number')?.textContent   || '').trim();
+  const doctor   = (document.getElementById('tkt-doctor')?.textContent   || '').trim();
+  const category = (document.getElementById('tkt-category')?.textContent || '').trim();
+  const cost     = (document.getElementById('tkt-cost')?.textContent     || '').trim();
+  const date     = (document.getElementById('tkt-date')?.textContent     || '').trim();
+
+  const heights  = [22,16,28,14,24,18,30,12,20,26,14,22,28,16,24,18,12,26,20,14,28,16,22,18,26,12,24,20];
+  const barcode  = heights.map(function(h){ return '<span style="height:' + h + 'px"></span>'; }).join('');
+
+  const html =
+    '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    + '<title>Treatment Ticket</title><style>'
+    + '* { margin:0;padding:0;box-sizing:border-box; }'
+    + 'body { font-family:"Segoe UI",Arial,sans-serif;background:#f4f6f8;display:flex;align-items:center;justify-content:center;min-height:100vh; }'
+    + '.ticket { background:#fff;width:420px;border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.13); }'
+    + '.header { background:linear-gradient(135deg,#007E85 0%,#005f65 100%);padding:28px 28px 22px;color:#fff; }'
+    + '.header-top { display:flex;align-items:center;gap:14px;margin-bottom:6px; }'
+    + '.logo { width:44px;height:44px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px; }'
+    + '.header h1 { font-size:20px;font-weight:700; } .header p { font-size:11px;opacity:0.75;margin-top:1px; }'
+    + '.tid { margin-top:14px;background:rgba(255,255,255,0.15);border-radius:8px;padding:8px 14px;display:inline-block;font-size:13px;font-weight:600;letter-spacing:1px; }'
+    + '.divider { border:none;border-top:2px dashed #e2e8f0;margin:0 24px; }'
+    + '.body { padding:22px 28px; }'
+    + '.row { display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9; }'
+    + '.row:last-child { border-bottom:none; }'
+    + '.lbl { font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.6px; }'
+    + '.val { font-size:14px;font-weight:600;color:#1e293b;text-align:right; }'
+    + '.cost { color:#007E85;font-size:16px;font-weight:700; }'
+    + '.footer { padding:14px 28px 22px;text-align:center; }'
+    + '.footer p { font-size:10px;color:#94a3b8;margin-bottom:10px; }'
+    + '.barcode { display:flex;justify-content:center;gap:2px;margin:8px auto; }'
+    + '.barcode span { display:inline-block;background:#1e293b;width:3px;border-radius:1px; }'
+    + '@media print { body { background:none; } .ticket { box-shadow:none;width:100%; } }'
+    + '</style></head><body><div class="ticket">'
+    + '<div class="header"><div class="header-top"><div class="logo">🎫</div>'
+    + '<div><h1>Treatment Ticket</h1><p>Healthcare Management System</p></div></div>'
+    + '<div class="tid">' + num + '</div></div>'
+    + '<hr class="divider">'
+    + '<div class="body">'
+    + '<div class="row"><span class="lbl">Doctor</span><span class="val">' + doctor + '</span></div>'
+    + '<div class="row"><span class="lbl">Treatment Category</span><span class="val">' + category + '</span></div>'
+    + '<div class="row"><span class="lbl">Estimated Cost</span><span class="val cost">' + cost + '</span></div>'
+    + '<div class="row"><span class="lbl">Generated On</span><span class="val" style="font-size:12px;font-weight:500;color:#475569">' + date + '</span></div>'
+    + '</div><hr class="divider">'
+    + '<div class="footer"><p>Present this ticket at the reception counter. Prices are estimates and may vary.</p>'
+    + '<div class="barcode">' + barcode + '</div></div>'
+    + '</div><script>window.onload=function(){window.print();window.onafterprint=function(){window.close()};};<\/script>'
+    + '</body></html>';
+
+  const win = window.open('', '_blank', 'width=520,height=680');
+  if (!win) { alert('Please allow popups to print the ticket.'); return; }
+  win.document.write(html);
+  win.document.close();
 }
 
 async function reload() {
@@ -626,6 +768,246 @@ function checkForPendingFeedback(rows) {
   }
 }
 
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function formatDateTimeShort(dt) {
+  if (!dt) return '';
+  const d = new Date(dt.replace(' ', 'T') + '+05:45');
+  return d.toLocaleString('en-US', { timeZone: 'Asia/Kathmandu', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+// ── TREATMENTS ────────────────────────────────────────────────────────────────
+const TREAT_CATEGORY_ICONS = {
+  'General Consultation': 'stethoscope',
+  'Cardiology':           'heart-pulse',
+  'Orthopedics':          'bone',
+  'Dermatology':          'sun',
+  'Neurology':            'brain',
+  'Pediatrics':           'baby',
+  'Gynecology':           'venus',
+  'Ophthalmology':        'eye',
+  'Physiotherapy':        'activity',
+  'Dentistry':            'smile',
+};
+
+function treatIconFor(name) {
+  return TREAT_CATEGORY_ICONS[name] || 'circle-plus';
+}
+
+function treatSwitchTab(tab) {
+  const isGenerate = tab === 'generate';
+  document.getElementById('treatPanelGenerate').classList.toggle('hidden', !isGenerate);
+  document.getElementById('treatPanelHistory').classList.toggle('hidden', isGenerate);
+  document.getElementById('treatTabGenerate').className = isGenerate
+    ? 'px-5 py-2 rounded-xl text-sm font-semibold bg-[#007E85] text-white shadow-sm transition'
+    : 'px-5 py-2 rounded-xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition';
+  document.getElementById('treatTabHistory').className = !isGenerate
+    ? 'px-5 py-2 rounded-xl text-sm font-semibold bg-[#007E85] text-white shadow-sm transition'
+    : 'px-5 py-2 rounded-xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition';
+  if (!isGenerate) treatLoadTicketHistory();
+}
+
+async function treatLoadCategories() {
+  treatCategoriesLoaded = true;
+  const grid = document.getElementById('treatCategoryGrid');
+  if (!grid) return;
+  try {
+    const r = await fetch(`${API_BASE}/patient/treatment_categories.php`, { credentials: 'include' });
+    const j = await r.json();
+    if (j.status !== 'success' || !j.data.length) {
+      grid.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 text-sm">No treatment categories available.</div>';
+      return;
+    }
+    treatCategories = j.data;
+    grid.innerHTML = '';
+    treatCategories.forEach(cat => {
+      const card = document.createElement('div');
+      card.className = 'treat-category-card bg-white border-2 border-slate-100 rounded-2xl p-4 flex flex-col gap-3 cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lg';
+      card.dataset.id = cat.id;
+      card.innerHTML = `
+        <div class="w-11 h-11 rounded-xl bg-teal-50 flex items-center justify-center">
+          <i data-lucide="${treatIconFor(cat.name)}" class="w-5 h-5 text-[#007E85]"></i>
+        </div>
+        <div class="flex-1">
+          <p class="text-sm font-bold text-slate-800">${escHtml(cat.name)}</p>
+          <p class="text-xs text-slate-400 mt-0.5 leading-relaxed">${escHtml(cat.description || '')}</p>
+        </div>
+        <div class="flex justify-between items-center pt-2 border-t border-slate-100">
+          <span class="text-xs font-bold text-[#007E85]">Rs. ${Number(cat.estimated_cost).toFixed(2)}</span>
+          <span class="text-xs text-slate-400">${cat.duration_minutes} min</span>
+        </div>
+      `;
+      card.addEventListener('click', () => treatSelectCategory(cat));
+      grid.appendChild(card);
+    });
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  } catch (e) {
+    grid.innerHTML = '<div class="col-span-full text-center py-10 text-red-400 text-sm">Failed to load categories.</div>';
+  }
+}
+
+function treatSelectCategory(cat) {
+  treatSelectedCategory = cat;
+  document.querySelectorAll('.treat-category-card').forEach(c => {
+    c.style.borderColor = '';
+    c.style.background  = '';
+    c.style.boxShadow   = '';
+  });
+  const card = document.querySelector(`.treat-category-card[data-id="${cat.id}"]`);
+  if (card) {
+    card.style.borderColor = '#007e85';
+    card.style.background  = '#f0fdfc';
+    card.style.boxShadow   = '0 0 0 2px #007e8540';
+  }
+  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setEl('treatSummaryName',     cat.name);
+  setEl('treatSummaryCost',     `Rs. ${Number(cat.estimated_cost).toFixed(2)}`);
+  setEl('treatSummaryDuration', `${cat.duration_minutes} min`);
+  document.getElementById('treatSelectedSummary')?.classList.remove('hidden');
+  const btn = document.getElementById('treatGenerateBtn');
+  if (btn) btn.disabled = false;
+}
+
+async function treatGenerateTicket() {
+  if (!treatSelectedCategory) return;
+  const btn = document.getElementById('treatGenerateBtn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i data-lucide="loader-circle" class="w-4 h-4 animate-spin"></i> Generating…'; }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+  try {
+    const r = await fetch(`${API_BASE}/patient/generate_ticket.php`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ category_id: treatSelectedCategory.id }),
+    });
+    const j = await r.json();
+    if (j.status !== 'success') throw new Error(j.message || 'Failed to generate ticket');
+    treatShowTicketModal(j.data);
+  } catch (e) {
+    showTreatmentToast('error', 'Error', e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i data-lucide="ticket-plus" class="w-4 h-4"></i> Generate Ticket'; }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+}
+
+function treatShowTicketModal(ticket) {
+  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setEl('treatTktNumber',   ticket.ticket_number);
+  setEl('treatTktCategory', ticket.category);
+  setEl('treatTktCost',     `Rs. ${Number(ticket.cost).toFixed(2)}`);
+  setEl('treatTktDuration', `${ticket.duration_minutes} min`);
+  setEl('treatTktDate',     formatDateTimeShort(ticket.generated_at));
+  const modal = document.getElementById('treatTicketModal');
+  if (modal) modal.style.display = 'flex';
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function closeTreatTicketModal() {
+  const modal = document.getElementById('treatTicketModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function treatPrintTicket() {
+  const num      = (document.getElementById('treatTktNumber')?.textContent   || '').trim();
+  const category = (document.getElementById('treatTktCategory')?.textContent || '').trim();
+  const cost     = (document.getElementById('treatTktCost')?.textContent     || '').trim();
+  const duration = (document.getElementById('treatTktDuration')?.textContent || '').trim();
+  const date     = (document.getElementById('treatTktDate')?.textContent     || '').trim();
+  const heights  = [22,16,28,14,24,18,30,12,20,26,14,22,28,16,24,18,12,26,20,14,28,16,22,18,26,12,24,20];
+  const barcode  = heights.map(h => `<span style="height:${h}px"></span>`).join('');
+  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Treatment Ticket</title><style>'
+    + '* {margin:0;padding:0;box-sizing:border-box;} body{font-family:"Segoe UI",Arial,sans-serif;background:#f4f6f8;display:flex;align-items:center;justify-content:center;min-height:100vh;}'
+    + '.ticket{background:#fff;width:420px;border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.13);}'
+    + '.header{background:linear-gradient(135deg,#007E85 0%,#005f65 100%);padding:28px 28px 22px;color:#fff;}'
+    + '.header-top{display:flex;align-items:center;gap:14px;margin-bottom:6px;} .logo{width:44px;height:44px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;}'
+    + '.header h1{font-size:20px;font-weight:700;} .header p{font-size:11px;opacity:0.75;margin-top:1px;}'
+    + '.tid{margin-top:14px;background:rgba(255,255,255,0.15);border-radius:8px;padding:8px 14px;display:inline-block;font-size:13px;font-weight:600;letter-spacing:1px;}'
+    + '.divider{border:none;border-top:2px dashed #e2e8f0;margin:0 24px;} .body{padding:22px 28px;}'
+    + '.row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9;} .row:last-child{border-bottom:none;}'
+    + '.lbl{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.6px;} .val{font-size:14px;font-weight:600;color:#1e293b;text-align:right;}'
+    + '.cost{color:#007E85;font-size:16px;font-weight:700;} .footer{padding:14px 28px 22px;text-align:center;}'
+    + '.footer p{font-size:10px;color:#94a3b8;margin-bottom:10px;} .barcode{display:flex;justify-content:center;gap:2px;margin:8px auto;}'
+    + '.barcode span{display:inline-block;background:#1e293b;width:3px;border-radius:1px;}'
+    + '@media print{body{background:none;} .ticket{box-shadow:none;width:100%;}}'
+    + '</style></head><body><div class="ticket">'
+    + '<div class="header"><div class="header-top"><div class="logo">🎫</div><div><h1>Treatment Ticket</h1><p>Healthcare Management System</p></div></div>'
+    + '<div class="tid">' + num + '</div></div><hr class="divider">'
+    + '<div class="body">'
+    + '<div class="row"><span class="lbl">Category</span><span class="val">' + category + '</span></div>'
+    + '<div class="row"><span class="lbl">Estimated Cost</span><span class="val cost">' + cost + '</span></div>'
+    + '<div class="row"><span class="lbl">Duration</span><span class="val">' + duration + '</span></div>'
+    + '<div class="row"><span class="lbl">Generated On</span><span class="val" style="font-size:12px;font-weight:500;color:#475569">' + date + '</span></div>'
+    + '</div><hr class="divider">'
+    + '<div class="footer"><p>Present this ticket at the reception counter. Prices are estimates and may vary.</p>'
+    + '<div class="barcode">' + barcode + '</div></div>'
+    + '</div><script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>'
+    + '</body></html>';
+  const win = window.open('', '_blank', 'width=520,height=680');
+  if (!win) { alert('Please allow popups to print the ticket.'); return; }
+  win.document.write(html);
+  win.document.close();
+}
+
+async function treatLoadTicketHistory() {
+  const container = document.getElementById('treatTicketHistoryList');
+  if (!container) return;
+  container.innerHTML = '<div class="text-center py-10 text-slate-400 text-sm">Loading…</div>';
+  try {
+    const r = await fetch(`${API_BASE}/patient/my_tickets.php`, { credentials: 'include' });
+    const j = await r.json();
+    if (j.status !== 'success') throw new Error(j.message);
+    if (!j.data.length) {
+      container.innerHTML = '<div class="text-center py-10 text-slate-400 text-sm">No tickets generated yet.</div>';
+      return;
+    }
+    container.innerHTML = '';
+    j.data.forEach(t => {
+      const div = document.createElement('div');
+      div.className = 'bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mb-3 flex items-center justify-between gap-4';
+      div.innerHTML = `
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center shrink-0">
+            <i data-lucide="ticket" class="w-5 h-5 text-[#007E85]"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-bold text-slate-800 truncate">${escHtml(t.category)}</p>
+            <p class="text-xs text-slate-400 font-mono">${escHtml(t.ticket_number)}</p>
+          </div>
+        </div>
+        <div class="text-right shrink-0">
+          <p class="text-sm font-bold text-[#007E85]">Rs. ${Number(t.cost).toFixed(2)}</p>
+          <p class="text-xs text-slate-400">${t.duration_minutes} min · ${formatDateTimeShort(t.generated_at)}</p>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  } catch (e) {
+    container.innerHTML = `<div class="text-center py-10 text-red-400 text-sm">${escHtml(e.message)}</div>`;
+  }
+}
+
+function showTreatmentToast(type, title, msg) {
+  const toast   = document.getElementById('treatToast');
+  const iconEl  = document.getElementById('treatToastIcon');
+  const titleEl = document.getElementById('treatToastTitle');
+  const msgEl   = document.getElementById('treatToastMsg');
+  if (!toast) return;
+  const isSuccess = type === 'success';
+  iconEl.className = `w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isSuccess ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`;
+  iconEl.innerHTML = isSuccess
+    ? '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>'
+    : '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
+  titleEl.textContent = title;
+  msgEl.textContent   = msg;
+  toast.classList.remove('hidden');
+  setTimeout(() => toast.classList.add('hidden'), 3500);
+}
 
 (async function initDashboard() {
   const ok = await requirePatientSession();

@@ -32,7 +32,19 @@ try {
                     dp.contact_number,
                     dp.experience_years,
                     dp.qualifications,
-                    dp.consultation_fee,
+                    (SELECT estimated_cost FROM treatment_categories
+                     WHERE name = CASE
+                         WHEN LOWER(dp.specialization) LIKE '%cardio%'  THEN 'Cardiology'
+                         WHEN LOWER(dp.specialization) LIKE '%ortho%'   THEN 'Orthopedics'
+                         WHEN LOWER(dp.specialization) LIKE '%derma%'   THEN 'Dermatology'
+                         WHEN LOWER(dp.specialization) LIKE '%neuro%'   THEN 'Neurology'
+                         WHEN LOWER(dp.specialization) LIKE '%ediatri%' THEN 'Pediatrics'
+                         WHEN LOWER(dp.specialization) LIKE '%gynec%'   THEN 'Gynecology'
+                         WHEN LOWER(dp.specialization) LIKE '%ophthal%' THEN 'Ophthalmology'
+                         WHEN LOWER(dp.specialization) LIKE '%physio%'  THEN 'Physiotherapy'
+                         WHEN LOWER(dp.specialization) LIKE '%dent%'    THEN 'Dentistry'
+                         ELSE 'General Consultation'
+                     END LIMIT 1) AS consultation_fee,
                     dp.bio,
                     dp.age,
                     (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id) as total_appointments,
@@ -64,6 +76,19 @@ try {
                     u.full_name,
                     u.email,
                     COALESCE(dp.specialization, 'Not Specified') as specialization,
+                    (SELECT estimated_cost FROM treatment_categories
+                     WHERE name = CASE
+                         WHEN LOWER(dp.specialization) LIKE '%cardio%'  THEN 'Cardiology'
+                         WHEN LOWER(dp.specialization) LIKE '%ortho%'   THEN 'Orthopedics'
+                         WHEN LOWER(dp.specialization) LIKE '%derma%'   THEN 'Dermatology'
+                         WHEN LOWER(dp.specialization) LIKE '%neuro%'   THEN 'Neurology'
+                         WHEN LOWER(dp.specialization) LIKE '%ediatri%' THEN 'Pediatrics'
+                         WHEN LOWER(dp.specialization) LIKE '%gynec%'   THEN 'Gynecology'
+                         WHEN LOWER(dp.specialization) LIKE '%ophthal%' THEN 'Ophthalmology'
+                         WHEN LOWER(dp.specialization) LIKE '%physio%'  THEN 'Physiotherapy'
+                         WHEN LOWER(dp.specialization) LIKE '%dent%'    THEN 'Dentistry'
+                         ELSE 'General Consultation'
+                     END LIMIT 1) AS consultation_fee,
                     (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id) as total_appointments
                 FROM users u
                 LEFT JOIN doctor_profiles dp ON u.user_id = dp.user_id
@@ -91,6 +116,51 @@ try {
                 'pages' => ceil($total / $limit)
             ]);
         }
+
+    } elseif ($method === 'PUT') {
+        $input = json_decode(file_get_contents('php://input'), true);
+        $doctor_id      = $input['doctor_id']       ?? null;
+        $full_name      = $input['full_name']        ?? null;
+        $email          = $input['email']            ?? null;
+        $specialization = $input['specialization']   ?? null;
+        $contact_number = $input['contact_number']   ?? null;
+        $experience_years = $input['experience_years'] ?? null;
+        $qualifications = $input['qualifications']   ?? null;
+        $bio            = $input['bio']              ?? null;
+        $age            = $input['age']              ?? null;
+
+        if (!$doctor_id) throw new Exception('Doctor ID required');
+
+        $stmt = $conn->prepare('SELECT full_name, email FROM users WHERE user_id = ? AND role = \'Doctor\'');
+        $stmt->bind_param('s', $doctor_id);
+        $stmt->execute();
+        $before = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        if (!$before) throw new Exception('Doctor not found');
+
+        $stmt = $conn->prepare('UPDATE users SET full_name = ?, email = ? WHERE user_id = ? AND role = \'Doctor\'');
+        $stmt->bind_param('sss', $full_name, $email, $doctor_id);
+        if (!$stmt->execute()) throw new Exception($stmt->error);
+        $stmt->close();
+
+        $nameChanged  = trim((string)$before['full_name']) !== trim((string)$full_name);
+        $emailChanged = strcasecmp(trim((string)$before['email']), trim((string)$email)) !== 0;
+        if ($nameChanged || $emailChanged) {
+            $msg = 'An administrator updated your account. Your display name is now: ' . $full_name . '. Your email is now: ' . $email . '.';
+            $n = $conn->prepare("INSERT INTO notifications (user_id, title, message, is_read, created_at) VALUES (?, 'Account updated by admin', ?, 0, NOW())");
+            $n->bind_param('ss', $doctor_id, $msg);
+            $n->execute();
+            $n->close();
+        }
+
+        if ($specialization !== null || $contact_number !== null || $experience_years !== null || $qualifications !== null || $bio !== null || $age !== null) {
+            $stmt = $conn->prepare('UPDATE doctor_profiles SET specialization = COALESCE(?, specialization), contact_number = COALESCE(?, contact_number), experience_years = COALESCE(?, experience_years), qualifications = COALESCE(?, qualifications), bio = COALESCE(?, bio), age = COALESCE(?, age) WHERE user_id = ?');
+            $stmt->bind_param('ssissss', $specialization, $contact_number, $experience_years, $qualifications, $bio, $age, $doctor_id);
+            if (!$stmt->execute()) throw new Exception($stmt->error);
+            $stmt->close();
+        }
+
+        echo json_encode(['status' => 'success', 'message' => 'Doctor updated successfully']);
 
     } elseif ($method === 'DELETE') {
         $input = json_decode(file_get_contents("php://input"), true);

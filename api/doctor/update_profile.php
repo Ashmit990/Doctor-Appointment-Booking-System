@@ -147,7 +147,7 @@ try {
         $update_stmt->close();
     } else {
         // Insert new profile with individual columns
-        $insert_stmt = $conn->prepare("INSERT INTO doctor_profiles (user_id, medical_id, specialization, contact_number, experience_years, qualifications, age, consultation_fee, bio) VALUES (?, ?, ?, ?, ?, ?, ?, 500.00, ?)");
+        $insert_stmt = $conn->prepare("INSERT INTO doctor_profiles (user_id, medical_id, specialization, contact_number, experience_years, qualifications, age, bio) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         if (!$insert_stmt) {
             throw new Exception("Prepare failed: " . $conn->error);
         }

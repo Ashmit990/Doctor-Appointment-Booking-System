@@ -73,7 +73,6 @@ CREATE TABLE `doctor_approvals` (
   `email` varchar(100) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
   `specialization` varchar(100) NOT NULL,
-  `consultation_fee` decimal(10,2) NOT NULL,
   `bio` text DEFAULT NULL,
   `status` enum('Pending','Accepted','Rejected') DEFAULT 'Pending',
   `submitted_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -84,12 +83,12 @@ CREATE TABLE `doctor_approvals` (
 -- Dumping data for table `doctor_approvals`
 --
 
-INSERT INTO `doctor_approvals` (`approval_id`, `full_name`, `email`, `password_hash`, `specialization`, `consultation_fee`, `bio`, `status`, `submitted_at`, `reviewed_at`) VALUES
-(1, 'Dr. Subodh Regmi', 'subodh@email.com', 'hash123', 'General', 500.00, 'Senior Dentist', 'Accepted', '2026-04-09 14:15:40', '2026-04-09 14:16:30'),
-(2, 'Dr. Shiwen Mahaju', 'shiwen@email.com', 'hash123', 'General', 500.00, 'Senior Surgeon', 'Pending', '2026-04-10 05:56:46', NULL),
-(3, 'Dr. Abhinash Dawadi', 'abhinash@email.com', 'hash123', 'General', 500.00, 'Cardiologist', 'Accepted', '2026-04-10 06:00:04', '2026-04-28 09:38:50'),
-(4, 'Dr Cristiano Ronaldo', 'goat@spentra.com', 'Goat@123', 'Dentist', 500.00, '{\"phone\":\"9876109876\",\"age\":41,\"medical_id\":\"1234\",\"specialization\":\"Dentist\",\"bio\":\"Iam the best. Iam the GOAT. No one is better than me. Iam better than messi ok. Bye\"}', 'Accepted', '2026-04-26 14:02:05', '2026-04-26 14:02:21'),
-(5, 'Dr. John Smith', 'johny@email.com', 'Hash@123', 'Cardiology', 1500.00, 'Experienced Cardiologist with 10+ years of practice', 'Accepted', '2026-04-28 15:54:53', '2026-04-28 15:54:53');
+INSERT INTO `doctor_approvals` (`approval_id`, `full_name`, `email`, `password_hash`, `specialization`, `bio`, `status`, `submitted_at`, `reviewed_at`) VALUES
+(1, 'Dr. Subodh Regmi', 'subodh@email.com', 'hash123', 'General', 'Senior Dentist', 'Accepted', '2026-04-09 14:15:40', '2026-04-09 14:16:30'),
+(2, 'Dr. Shiwen Mahaju', 'shiwen@email.com', 'hash123', 'General', 'Senior Surgeon', 'Pending', '2026-04-10 05:56:46', NULL),
+(3, 'Dr. Abhinash Dawadi', 'abhinash@email.com', 'hash123', 'General', 'Cardiologist', 'Accepted', '2026-04-10 06:00:04', '2026-04-28 09:38:50'),
+(4, 'Dr Cristiano Ronaldo', 'goat@spentra.com', 'Goat@123', 'Dentist', '{"phone":"9876109876","age":41,"medical_id":"1234","specialization":"Dentist","bio":"Iam the best. Iam the GOAT. No one is better than me. Iam better than messi ok. Bye"}', 'Accepted', '2026-04-26 14:02:05', '2026-04-26 14:02:21'),
+(5, 'Dr. John Smith', 'johny@email.com', 'Hash@123', 'Cardiology', 'Experienced Cardiologist with 10+ years of practice', 'Accepted', '2026-04-28 15:54:53', '2026-04-28 15:54:53');
 
 -- --------------------------------------------------------
 
@@ -249,7 +248,6 @@ CREATE TABLE `doctor_profiles` (
   `contact_number` varchar(20) NOT NULL,
   `experience_years` int(2) DEFAULT NULL,
   `qualifications` varchar(255) DEFAULT NULL,
-  `consultation_fee` decimal(10,2) DEFAULT 500.00,
   `bio` text DEFAULT NULL,
   `age` int(3) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -258,14 +256,14 @@ CREATE TABLE `doctor_profiles` (
 -- Dumping data for table `doctor_profiles`
 --
 
-INSERT INTO `doctor_profiles` (`user_id`, `medical_id`, `specialization`, `contact_number`, `experience_years`, `qualifications`, `consultation_fee`, `bio`, `age`) VALUES
-('DOC_AC98CD', '', 'General', '', NULL, '', 500.00, 'Cardiologist', NULL),
-('DOC_ARJUN', '', 'Cardiology', '9876098765', 5, 'Masters in Health Science', 800.00, 'Myself Amit Mehta. Iam Cardiologist. I can literally do anything and everything so please hire me ok. bye.', 37),
-('DOC_D0BF60', '1234', 'Dentist', '9876109876', NULL, '', 500.00, 'Iam the best. Iam the GOAT. No one is better than me. Iam better than messi ok. Bye', 41),
-('DOC_EA8D58', '', 'General', '9876109876', 20, 'MD, FACC - Cardiology & Internal Medicine, Board Certified', 500.00, 'Senior Dentist. I can do anything and everything. I can even make dead people alive..so please hire me ok. bye', 54),
-('DOC_EMILY', '', 'Pediatrician', '', NULL, NULL, 600.00, 'Caring for children from birth to young adulthood.', NULL),
-('DOC_MIKE', '', 'Neurologist', '', NULL, NULL, 900.00, 'Specializes in brain and nervous system disorders.', NULL),
-('DOC_SARAH', '5678', 'Cardiology', '+1 (555) 123-4567', 15, 'MD, Board Certified Cardiologist', 740.00, 'Experienced cardiologist with 15 years of clinical practice. Specializes in interventional cardiology and heart disease prevention. Published numerous research papers in cardiac medicine.', 45);
+INSERT INTO `doctor_profiles` (`user_id`, `medical_id`, `specialization`, `contact_number`, `experience_years`, `qualifications`, `bio`, `age`) VALUES
+('DOC_AC98CD', '', 'General', '', NULL, '', 'Cardiologist', NULL),
+('DOC_ARJUN', '', 'Cardiology', '9876098765', 5, 'Masters in Health Science', 'Myself Amit Mehta. Iam Cardiologist. I can literally do anything and everything so please hire me ok. bye.', 37),
+('DOC_D0BF60', '1234', 'Dentist', '9876109876', NULL, '', 'Iam the best. Iam the GOAT. No one is better than me. Iam better than messi ok. Bye', 41),
+('DOC_EA8D58', '', 'General', '9876109876', 20, 'MD, FACC - Cardiology & Internal Medicine, Board Certified', 'Senior Dentist. I can do anything and everything. I can even make dead people alive..so please hire me ok. bye', 54),
+('DOC_EMILY', '', 'Pediatrician', '', NULL, NULL, 'Caring for children from birth to young adulthood.', NULL),
+('DOC_MIKE', '', 'Neurologist', '', NULL, NULL, 'Specializes in brain and nervous system disorders.', NULL),
+('DOC_SARAH', '5678', 'Cardiology', '+1 (555) 123-4567', 15, 'MD, Board Certified Cardiologist', 'Experienced cardiologist with 15 years of clinical practice. Specializes in interventional cardiology and heart disease prevention. Published numerous research papers in cardiac medicine.', 45);
 
 -- --------------------------------------------------------
 
@@ -551,6 +549,53 @@ ALTER TABLE `notifications`
 --
 ALTER TABLE `patient_profiles`
   ADD CONSTRAINT `patient_profiles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `treatment_categories`
+--
+
+CREATE TABLE IF NOT EXISTS `treatment_categories` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(100) NOT NULL,
+  `description` TEXT DEFAULT NULL,
+  `estimated_cost` DECIMAL(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `treatment_categories`
+--
+
+INSERT INTO `treatment_categories` (`name`, `description`, `estimated_cost`) VALUES
+('General Consultation', 'Basic consultation with a general physician', 500.00),
+('Cardiology', 'Heart-related examination and diagnosis', 1500.00),
+('Orthopedics', 'Bone and joint assessment and treatment', 1200.00),
+('Dermatology', 'Skin condition evaluation and treatment', 1200.00),
+('Neurology', 'Brain and nervous system assessment', 2000.00),
+('Pediatrics', 'Child health consultation and checkup', 1000.00),
+('Gynecology', 'Women''s health consultation', 1000.00),
+('Ophthalmology', 'Eye examination and diagnosis', 1200.00),
+('Physiotherapy', 'Physical rehabilitation and therapy session', 1100.00),
+('Dentistry', 'Dental checkup and treatment', 1500.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `treatment_tickets`
+--
+
+CREATE TABLE IF NOT EXISTS `treatment_tickets` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `ticket_number` VARCHAR(30) NOT NULL UNIQUE,
+  `patient_id` VARCHAR(20) NOT NULL,
+  `appointment_id` INT DEFAULT NULL UNIQUE,
+  `category_id` INT NOT NULL,
+  `cost` DECIMAL(10,2) NOT NULL,
+  `generated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`category_id`) REFERENCES `treatment_categories`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

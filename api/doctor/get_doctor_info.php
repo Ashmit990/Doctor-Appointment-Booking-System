@@ -13,7 +13,21 @@ $doctor_id = $_SESSION['user_id'];
 
 try {
     $stmt = $conn->prepare("
-        SELECT u.user_id, u.full_name, u.email, dp.medical_id, dp.specialization, dp.consultation_fee, dp.age, dp.contact_number, dp.experience_years, dp.qualifications, dp.bio 
+        SELECT u.user_id, u.full_name, u.email, dp.medical_id, dp.specialization,
+            (SELECT estimated_cost FROM treatment_categories
+             WHERE name = CASE
+                 WHEN LOWER(dp.specialization) LIKE '%cardio%'  THEN 'Cardiology'
+                 WHEN LOWER(dp.specialization) LIKE '%ortho%'   THEN 'Orthopedics'
+                 WHEN LOWER(dp.specialization) LIKE '%derma%'   THEN 'Dermatology'
+                 WHEN LOWER(dp.specialization) LIKE '%neuro%'   THEN 'Neurology'
+                 WHEN LOWER(dp.specialization) LIKE '%ediatri%' THEN 'Pediatrics'
+                 WHEN LOWER(dp.specialization) LIKE '%gynec%'   THEN 'Gynecology'
+                 WHEN LOWER(dp.specialization) LIKE '%ophthal%' THEN 'Ophthalmology'
+                 WHEN LOWER(dp.specialization) LIKE '%physio%'  THEN 'Physiotherapy'
+                 WHEN LOWER(dp.specialization) LIKE '%dent%'    THEN 'Dentistry'
+                 ELSE 'General Consultation'
+             END LIMIT 1) AS consultation_fee,
+            dp.age, dp.contact_number, dp.experience_years, dp.qualifications, dp.bio 
         FROM users u 
         LEFT JOIN doctor_profiles dp ON u.user_id = dp.user_id 
         WHERE u.user_id = ? AND u.role = 'Doctor'

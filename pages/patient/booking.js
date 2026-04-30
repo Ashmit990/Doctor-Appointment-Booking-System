@@ -242,6 +242,17 @@ bookingForm.addEventListener("submit", async (e) => {
         alert("Booking did not save correctly (no appointment id). Check the server log or try again.");
         return;
       }
+      // Auto-generate treatment ticket (silent — errors don't block booking)
+      try {
+        await fetch(`${API_BASE}/patient/generate_ticket.php`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ appointment_id: j.appointment_id }),
+        });
+      } catch (ticketErr) {
+        console.warn("Ticket generation failed:", ticketErr);
+      }
     }
 
     const patientName = document.getElementById("patientName").value;

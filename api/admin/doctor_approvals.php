@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
-    $stmt = $conn->prepare("SELECT approval_id, full_name, email, specialization, consultation_fee, bio, submitted_at FROM doctor_approvals WHERE status = 'Pending' ORDER BY submitted_at DESC");
+    $stmt = $conn->prepare("SELECT approval_id, full_name, email, specialization, bio, submitted_at FROM doctor_approvals WHERE status = 'Pending' ORDER BY submitted_at DESC");
     $stmt->execute();
     echo json_encode(['status' => 'success', 'data' => $stmt->get_result()->fetch_all(MYSQLI_ASSOC)]);
     $stmt->close();
@@ -63,8 +63,8 @@ elseif ($method === 'POST') {
             }
 
             // 5. Move to Doctor Profiles with individual columns
-            $stmt = $conn->prepare("INSERT INTO doctor_profiles (user_id, medical_id, specialization, contact_number, experience_years, qualifications, consultation_fee, bio, age) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("ssssisssi", $user_id, $medical_id, $data['specialization'], $contact_number, $experience_years, $qualifications, $data['consultation_fee'], $bio, $age);
+            $stmt = $conn->prepare("INSERT INTO doctor_profiles (user_id, medical_id, specialization, contact_number, experience_years, qualifications, bio, age) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("ssssissi", $user_id, $medical_id, $data['specialization'], $contact_number, $experience_years, $qualifications, $bio, $age);
             $stmt->execute();
 
             // 6. Update Staging Status
