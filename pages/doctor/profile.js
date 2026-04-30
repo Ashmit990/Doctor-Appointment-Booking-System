@@ -127,6 +127,61 @@ function updateViewMode() {
   document.getElementById("viewExperience").textContent = doctorProfile.experience || "-";
   document.getElementById("viewQualification").textContent = doctorProfile.qualification || "-";
   document.getElementById("viewDescription").textContent = doctorProfile.description || "-";
+  
+  // Calculate and update profile completion
+  updateProfileCompletion();
+}
+
+function updateProfileCompletion() {
+  // Define required fields for a complete profile
+  const requiredFields = [
+    'medical_id',
+    'full_name',
+    'email',
+    'phone',
+    'age',
+    'specialization',
+    'experience',
+    'qualification',
+    'description'
+  ];
+  
+  // Count how many fields are filled (not empty, not "-", not null, not undefined)
+  let filledCount = 0;
+  requiredFields.forEach(field => {
+    const value = doctorProfile[field];
+    if (value && value.trim && value.trim() !== "" && value.trim() !== "-") {
+      filledCount++;
+    } else if (value && !value.trim && value !== "") {
+      // For numeric values
+      filledCount++;
+    }
+  });
+  
+  // Calculate percentage
+  const totalFields = requiredFields.length;
+  const completionPercentage = Math.round((filledCount / totalFields) * 100);
+  
+  // Update UI elements
+  const completionElem = document.getElementById("profileCompletion");
+  const verifiedElem = document.getElementById("verifiedFields");
+  
+  if (completionElem) {
+    completionElem.textContent = `${completionPercentage}%`;
+  }
+  
+  if (verifiedElem) {
+    verifiedElem.textContent = `${filledCount}/${totalFields}`;
+  }
+  
+  const accountVerifiedElem = document.getElementById("accountVerifiedFields");
+  if (accountVerifiedElem) {
+    accountVerifiedElem.textContent = `${filledCount}/${totalFields}`;
+  }
+  
+  console.log(`Profile completion: ${filledCount}/${totalFields} = ${completionPercentage}%`);
+  
+  return completionPercentage;
 }
 
 function isValidEmail(email) {

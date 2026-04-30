@@ -176,11 +176,11 @@ class ScheduleSetupModal {
         slot.innerHTML = `
             <div>
                 <label for="start-${slotId}">Start Time</label>
-                <input type="time" id="start-${slotId}" class="start-time" value="${startTime}" required onchange="this.closest('.schedule-setup-modal').__scheduleSetupInstance?.validateTimeChange(this)">
+                <input type="time" id="start-${slotId}" class="start-time" value="${startTime}" required readonly onchange="this.closest('.schedule-setup-modal').__scheduleSetupInstance?.validateTimeChange(this)">
             </div>
             <div>
                 <label for="end-${slotId}">End Time</label>
-                <input type="time" id="end-${slotId}" class="end-time" value="${endTime}" required onchange="this.closest('.schedule-setup-modal').__scheduleSetupInstance?.validateTimeChange(this)">
+                <input type="time" id="end-${slotId}" class="end-time" value="${endTime}" required readonly onchange="this.closest('.schedule-setup-modal').__scheduleSetupInstance?.validateTimeChange(this)">
             </div>
             <button type="button" class="btn-remove-slot" data-slot-id="${slotId}">Remove</button>
         `;
@@ -363,16 +363,15 @@ class ScheduleSetupModal {
             console.log('Response:', result);
             
             if (result.status === 'success') {
-                // Show success message
-                const successMsg = document.getElementById('successMessage');
-                successMsg.classList.add('show');
+                // Show success toast notification for 2 seconds
+                this.showToast('Schedule Saved Successfully!');
                 
                 // Close modal and redirect
                 // Note: save_schedule.php already updated database, page reload will trigger fresh popup check
                 setTimeout(() => {
                     this.closeModal();
                     window.location.reload();
-                }, 1500);
+                }, 2000);
             } else {
                 this.showError(result.message || 'Failed to save schedule. Please try again.');
                 submitBtn.disabled = false;
@@ -396,6 +395,84 @@ class ScheduleSetupModal {
             document.body.classList.add('schedule-modal-open');
             lucide.createIcons();
         }
+    }
+    
+    showToast(message) {
+        // Create toast container if it doesn't exist
+        let toastContainer = document.getElementById('schedule-toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'schedule-toast-container';
+            toastContainer.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 10000;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                align-items: center;
+            `;
+            document.body.appendChild(toastContainer);
+        }
+
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            background-color: #10b981;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            font-size: 15px;
+            font-weight: 500;
+            animation: slideInDown 0.3s ease;
+            min-width: 300px;
+            text-align: center;
+        `;
+        toast.textContent = message;
+        
+        toastContainer.appendChild(toast);
+
+        // Add animation style if not already present
+        if (!document.getElementById('schedule-toast-styles')) {
+            const style = document.createElement('style');
+            style.id = 'schedule-toast-styles';
+            style.innerHTML = `
+                @keyframes slideInDown {
+                    from {
+                        opacity: 0;
+                        transform: translateX(-50%) translateY(-20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(-50%) translateY(0);
+                    }
+                }
+                @keyframes slideOutUp {
+                    from {
+                        opacity: 1;
+                        transform: translateX(-50%) translateY(0);
+                    }
+                    to {
+                        opacity: 0;
+                        transform: translateX(-50%) translateY(-20px);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Remove after 2 seconds with fade-out animation
+        setTimeout(() => {
+            toast.style.animation = 'slideOutUp 0.3s ease forwards';
+            setTimeout(() => {
+                if (toastContainer.contains(toast)) {
+                    toastContainer.removeChild(toast);
+                }
+            }, 300);
+        }, 2000);
     }
     
     closeModal() {

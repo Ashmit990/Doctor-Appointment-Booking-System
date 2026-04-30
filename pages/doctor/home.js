@@ -507,6 +507,151 @@ async function checkAndShowScheduleSetup() {
     }
 }
 
+/**
+ * Check if doctor profile is complete
+ * If not, show a notification to complete profile
+ */
+async function checkAndShowProfileNotification() {
+    try {
+        const response = await fetch(`${DOCTOR_API_BASE}/doctor/get_doctor_info.php`, {
+            credentials: 'include'
+        });
+        const result = await response.json();
+        
+        if (result.status !== 'success' || !result.data) {
+            return;
+        }
+        
+        // Define required fields
+        const requiredFields = {
+            'medical_id': result.data.medical_id,
+            'full_name': result.data.full_name,
+            'email': result.data.email,
+            'contact_number': result.data.contact_number,
+            'age': result.data.age,
+            'specialization': result.data.specialization,
+            'experience_years': result.data.experience_years,
+            'qualifications': result.data.qualifications,
+            'bio': result.data.bio
+        };
+        
+        // Count filled fields
+        let filledCount = 0;
+        Object.values(requiredFields).forEach(value => {
+            if (value && (typeof value === 'string' ? value.trim() : value)) {
+                filledCount++;
+            }
+        });
+        
+        const totalFields = Object.keys(requiredFields).length;
+        const completionPercentage = Math.round((filledCount / totalFields) * 100);
+        
+        // If profile is not 100% complete, show notification
+        if (completionPercentage < 100) {
+            showProfileIncompleteNotification(completionPercentage);
+        }
+    } catch (error) {
+        console.error('Error checking profile completion:', error);
+    }
+}
+
+/**
+ * Show notification that profile is incomplete
+ */
+function showProfileIncompleteNotification(completionPercentage) {
+    // Create notification container if it doesn't exist
+    let notificationContainer = document.getElementById('profile-notification-container');
+    if (!notificationContainer) {
+        notificationContainer = document.createElement('div');
+        notificationContainer.id = 'profile-notification-container';
+        notificationContainer.style.cssText = `
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 40;
+            max-width: 400px;
+            width: 90%;
+        `;
+        document.body.appendChild(notificationContainer);
+    }
+    
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4';
+    notification.style.cssText = `
+        animation: slideInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    `;
+    
+    notification.innerHTML = `
+        <div class="flex-shrink-0">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+            </svg>
+        </div>
+        <div class="flex-1">
+            <p class="font-bold text-sm">Complete Your Profile</p>
+            <p class="text-xs opacity-95">Your profile is ${completionPercentage}% complete. Click to update.</p>
+        </div>
+        <button onclick="this.closest('div').parentElement.removeChild(this.closest('div'))" class="text-white hover:opacity-80 transition flex-shrink-0">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+        </button>
+    `;
+    
+    // Make the notification clickable to go to profile
+    notification.style.cursor = 'pointer';
+    notification.addEventListener('click', (e) => {
+        if (e.target.closest('button')) return; // Don't navigate if close button is clicked
+        window.location.href = 'profile.html';
+    });
+    
+    notificationContainer.innerHTML = '';
+    notificationContainer.appendChild(notification);
+    
+    // Auto-remove after 8 seconds
+    setTimeout(() => {
+        if (notificationContainer.contains(notification)) {
+            notification.style.animation = 'slideOutDown 0.4s ease forwards';
+            setTimeout(() => {
+                if (notificationContainer.contains(notification)) {
+                    notificationContainer.removeChild(notification);
+                }
+            }, 400);
+        }
+    }, 8000);
+    
+    // Add animation styles if not already present
+    if (!document.getElementById('profile-notification-styles')) {
+        const style = document.createElement('style');
+        style.id = 'profile-notification-styles';
+        style.innerHTML = `
+            @keyframes slideInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            @keyframes slideOutDown {
+                from {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+                to {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById('doctorNotificationBtn');
     const panel = document.getElementById('doctorNotificationPanel');
@@ -548,6 +693,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadDoctorProfile();
     loadAllAppointmentsForSearch();
     checkAndShowScheduleSetup();
+    checkAndShowProfileNotification();
     loadHomePageData();
     loadDoctorNotifications().then((rows) => renderDoctorNotificationList(rows));
 

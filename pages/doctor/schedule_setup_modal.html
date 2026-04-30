@@ -14,7 +14,8 @@
             display: none;
             position: fixed;
             inset: 0;
-            background-color: rgba(0, 0, 0, 0.7);
+            background: radial-gradient(circle at 30% 50%, rgba(0, 126, 133, 0.15), rgba(0, 0, 0, 0.6));
+            backdrop-filter: blur(8px);
             z-index: 9999;
             align-items: center;
             justify-content: center;
@@ -26,24 +27,25 @@
         
         /* Modal container - cannot be closed */
         .modal-container {
-            background: white;
-            border-radius: 12px;
+            background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+            border-radius: 20px;
             width: 90%;
             max-width: 700px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 30px 80px rgba(0, 126, 133, 0.25), 0 8px 24px rgba(0, 0, 0, 0.12);
+            animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
         
         @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: scale(0.95);
+                transform: scale(0.92) translateY(20px);
             }
             to {
                 opacity: 1;
-                transform: scale(1);
+                transform: scale(1) translateY(0);
             }
         }
         
@@ -51,8 +53,15 @@
         .modal-header {
             background: linear-gradient(135deg, #007E85 0%, #005a61 100%);
             color: white;
-            padding: 24px;
-            border-radius: 12px 12px 0 0;
+            padding: 28px;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 10px 30px rgba(0, 126, 133, 0.2);
+        }
+        
+        .modal-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
         }
         
         /* Body */
@@ -65,7 +74,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 12px;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
         }
         
         .day-checkbox {
@@ -76,23 +85,30 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 12px 16px;
+            padding: 14px 16px;
             border: 2px solid #e5e7eb;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             background: white;
+            font-weight: 500;
+            text-align: center;
+            justify-content: center;
         }
         
         .day-label:hover {
             border-color: #007E85;
             background-color: rgba(0, 126, 133, 0.05);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 126, 133, 0.1);
         }
         
         .day-checkbox:checked + .day-label {
-            background-color: #007E85;
+            background: linear-gradient(135deg, #007E85, #005a61);
             color: white;
             border-color: #007E85;
+            box-shadow: 0 8px 20px rgba(0, 126, 133, 0.3);
+            transform: scale(1.02);
         }
         
         /* Time slots section */
@@ -118,41 +134,53 @@
         }
         
         .day-section-title .day-badge {
-            background: #007E85;
+            background: linear-gradient(135deg, #007E85, #005a61);
             color: white;
-            padding: 4px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0, 126, 133, 0.2);
         }
         
         /* Time slot inputs */
         .time-slot {
             display: grid;
             grid-template-columns: 1fr 1fr auto;
-            gap: 12px;
+            gap: 14px;
             align-items: end;
-            margin-bottom: 12px;
-            padding: 12px;
-            background: #f9fafb;
-            border-radius: 8px;
+            margin-bottom: 14px;
+            padding: 14px;
+            background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .time-slot:hover {
+            border-color: #007E85;
+            box-shadow: 0 4px 12px rgba(0, 126, 133, 0.1);
         }
         
         .time-slot label {
             display: block;
             font-size: 13px;
-            font-weight: 500;
+            font-weight: 600;
             color: #374151;
             margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .time-slot input[type="time"] {
-            padding: 10px;
+            padding: 10px 12px;
             border: 1px solid #d1d5db;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 14px;
             font-family: 'Inter', sans-serif;
-            transition: border-color 0.3s ease;
+            transition: all 0.3s ease;
+            background: white;
+            cursor: not-allowed;
         }
         
         .time-slot input[type="time"]:focus {
@@ -160,36 +188,52 @@
             border-color: #007E85;
             box-shadow: 0 0 0 3px rgba(0, 126, 133, 0.1);
         }
+
+        .time-slot input[type="time"]:read-only {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
         
         .btn-remove-slot {
-            padding: 8px 12px;
-            background: #ef4444;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 13px;
-            transition: background 0.3s ease;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
         }
         
         .btn-remove-slot:hover {
-            background: #dc2626;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
         }
         
         .btn-add-slot {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 8px 12px;
-            background: #007E85;
+            gap: 8px;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #007E85, #005a61);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 13px;
-            font-weight: 500;
-            margin-top: 8px;
-            transition: background 0.3s ease;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 126, 133, 0.2);
+        }
+        
+        .btn-add-slot:hover {
+            background: linear-gradient(135deg, #005a61, #004650);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 126, 133, 0.3);
         }
         
         .btn-add-slot:hover {
@@ -201,25 +245,39 @@
             background: #e0f2f1;
             border-left: 4px solid #007E85;
             padding: 12px 16px;
-            border-radius: 6px;
+            border-radius: 12px;
             margin-bottom: 24px;
             font-size: 14px;
             color: #004f54;
+            border-left: 4px solid #007E85;
         }
         
         .error-box {
-            background: #fee2e2;
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
             border-left: 4px solid #ef4444;
-            padding: 12px 16px;
-            border-radius: 6px;
+            padding: 14px 16px;
+            border-radius: 12px;
             margin-bottom: 24px;
             font-size: 14px;
             color: #7f1d1d;
             display: none;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
         }
         
         .error-box.show {
             display: block;
+            animation: slideInDown 0.3s ease;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         /* Footer / Buttons */
@@ -228,30 +286,31 @@
             gap: 12px;
             justify-content: flex-end;
             padding: 24px 32px;
-            background: #f9fafb;
+            background: linear-gradient(135deg, #f9fafb, #f3f4f6);
             border-top: 1px solid #e5e7eb;
-            border-radius: 0 0 12px 12px;
+            border-radius: 0 0 20px 20px;
         }
         
         .btn {
-            padding: 10px 24px;
+            padding: 12px 28px;
             border: none;
-            border-radius: 6px;
+            border-radius: 10px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .btn-primary {
-            background: #007E85;
+            background: linear-gradient(135deg, #007E85, #005a61);
             color: white;
+            box-shadow: 0 4px 15px rgba(0, 126, 133, 0.2);
         }
         
         .btn-primary:hover:not(:disabled) {
-            background: #005a61;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 126, 133, 0.3);
+            background: linear-gradient(135deg, #005a61, #004650);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 126, 133, 0.35);
         }
         
         .btn-primary:disabled {
@@ -282,17 +341,20 @@
         /* Success message */
         .success-message {
             display: none;
-            background: #d1fae5;
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
             border: 1px solid #10b981;
             color: #065f46;
             padding: 16px;
-            border-radius: 8px;
+            border-radius: 12px;
             margin-bottom: 24px;
             text-align: center;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
         }
         
         .success-message.show {
             display: block;
+            animation: slideInDown 0.3s ease;
         }
         
         /* Prevent scrolling when modal is open */
