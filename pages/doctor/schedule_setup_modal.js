@@ -286,6 +286,12 @@ class ScheduleSetupModal {
                             return false;
                         }
                         
+                        // Validate that start time doesn't reach or exceed 5 PM (17:00)
+                        if (slot.start_time >= MAX_END_TIME) {
+                            this.showError(`Invalid time slot on ${day}: Start time cannot be 5 PM (17:00) or later.`);
+                            return false;
+                        }
+                        
                         // Validate that end time doesn't exceed 5 PM (17:00)
                         if (slot.end_time > MAX_END_TIME) {
                             this.showError(`Invalid time slot on ${day}: End time cannot be after 5 PM (17:00).`);
