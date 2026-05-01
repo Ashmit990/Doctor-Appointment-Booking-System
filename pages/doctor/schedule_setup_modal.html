@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        * { font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif; }
         
         /* Unskippable modal backdrop - covers entire screen */
         .schedule-setup-modal {
@@ -51,7 +51,7 @@
         
         /* Header */
         .modal-header {
-            background: linear-gradient(135deg, #007E85 0%, #005a61 100%);
+            background: linear-gradient(135deg, #0d7377 0%, #0a5a5d 100%);
             color: white;
             padding: 28px;
             border-radius: 20px 20px 0 0;
@@ -97,17 +97,17 @@
         }
         
         .day-label:hover {
-            border-color: #007E85;
-            background-color: rgba(0, 126, 133, 0.05);
+            border-color: #0d7377;
+            background-color: rgba(13, 115, 119, 0.05);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 126, 133, 0.1);
+            box-shadow: 0 4px 12px rgba(13, 115, 119, 0.1);
         }
         
         .day-checkbox:checked + .day-label {
-            background: linear-gradient(135deg, #007E85, #005a61);
+            background: linear-gradient(135deg, #0d7377, #0a5a5d);
             color: white;
-            border-color: #007E85;
-            box-shadow: 0 8px 20px rgba(0, 126, 133, 0.3);
+            border-color: #0d7377;
+            box-shadow: 0 8px 20px rgba(13, 115, 119, 0.3);
             transform: scale(1.02);
         }
         
@@ -134,13 +134,13 @@
         }
         
         .day-section-title .day-badge {
-            background: linear-gradient(135deg, #007E85, #005a61);
+            background: linear-gradient(135deg, #0d7377, #0a5a5d);
             color: white;
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 700;
-            box-shadow: 0 4px 12px rgba(0, 126, 133, 0.2);
+            box-shadow: 0 4px 12px rgba(13, 115, 119, 0.2);
         }
         
         /* Time slot inputs */
@@ -158,8 +158,8 @@
         }
 
         .time-slot:hover {
-            border-color: #007E85;
-            box-shadow: 0 4px 12px rgba(0, 126, 133, 0.1);
+            border-color: #0d7377;
+            box-shadow: 0 4px 12px rgba(13, 115, 119, 0.1);
         }
         
         .time-slot label {
@@ -177,7 +177,7 @@
             border: 1px solid #d1d5db;
             border-radius: 8px;
             font-size: 14px;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Poppins', sans-serif;
             transition: all 0.3s ease;
             background: white;
             cursor: not-allowed;
@@ -185,8 +185,8 @@
         
         .time-slot input[type="time"]:focus {
             outline: none;
-            border-color: #007E85;
-            box-shadow: 0 0 0 3px rgba(0, 126, 133, 0.1);
+            border-color: #0d7377;
+            box-shadow: 0 0 0 3px rgba(13, 115, 119, 0.1);
         }
 
         .time-slot input[type="time"]:read-only {
@@ -218,7 +218,7 @@
             align-items: center;
             gap: 8px;
             padding: 10px 16px;
-            background: linear-gradient(135deg, #007E85, #005a61);
+            background: linear-gradient(135deg, #0d7377, #0a5a5d);
             color: white;
             border: none;
             border-radius: 8px;
@@ -227,29 +227,29 @@
             font-weight: 600;
             margin-top: 10px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0, 126, 133, 0.2);
+            box-shadow: 0 4px 12px rgba(13, 115, 119, 0.2);
         }
         
         .btn-add-slot:hover {
-            background: linear-gradient(135deg, #005a61, #004650);
+            background: linear-gradient(135deg, #0a5a5d, #084b4d);
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 126, 133, 0.3);
+            box-shadow: 0 6px 16px rgba(13, 115, 119, 0.3);
         }
         
         .btn-add-slot:hover {
-            background: #005a61;
+            background: #0a5a5d;
         }
         
         /* Info boxes */
         .info-box {
-            background: #e0f2f1;
-            border-left: 4px solid #007E85;
+            background: #e8f5f5;
+            border-left: 4px solid #0d7377;
             padding: 12px 16px;
             border-radius: 12px;
             margin-bottom: 24px;
             font-size: 14px;
-            color: #004f54;
-            border-left: 4px solid #007E85;
+            color: #0a5a5d;
+            border-left: 4px solid #0d7377;
         }
         
         .error-box {
@@ -302,15 +302,15 @@
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, #007E85, #005a61);
+            background: linear-gradient(135deg, #0d7377, #0a5a5d);
             color: white;
-            box-shadow: 0 4px 15px rgba(0, 126, 133, 0.2);
+            box-shadow: 0 4px 15px rgba(13, 115, 119, 0.2);
         }
         
         .btn-primary:hover:not(:disabled) {
-            background: linear-gradient(135deg, #005a61, #004650);
+            background: linear-gradient(135deg, #0a5a5d, #084b4d);
             transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 126, 133, 0.35);
+            box-shadow: 0 8px 25px rgba(13, 115, 119, 0.35);
         }
         
         .btn-primary:disabled {

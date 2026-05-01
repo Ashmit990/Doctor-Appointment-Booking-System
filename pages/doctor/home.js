@@ -1,4 +1,5 @@
-let currentMonth = new Date(2026, 3); // April 2026
+const _now = new Date();
+let currentMonth = new Date(_now.getFullYear(), _now.getMonth(), 1);
 let currentAppointmentID = null;
 
 const DOCTOR_API_BASE = '../../api';
@@ -174,7 +175,6 @@ async function fetchCompletedAppointments() {
 
 function renderCalendar() {
     const daysContainer = document.getElementById('calendar-days');
-    daysContainer.innerHTML = '';
     
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
@@ -187,6 +187,8 @@ function renderCalendar() {
     
     // Fetch both availability dates and completed appointments
     Promise.all([fetchAppointmentDates(), fetchCompletedAppointments()]).then(([appointmentDates, completedData]) => {
+        daysContainer.innerHTML = '';
+        
         // Create a Set of dates for this month only for faster lookup
         const targetYear = year;
         const targetMonth = month + 1;
@@ -251,16 +253,23 @@ function renderCalendar() {
                 dayDiv.classList.add('has-appointment');
             }
             
-            // Add click handler
+            // Define date string for current day
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
             
-            // Style past dates in gray
-            if (dateStr < todayStr) {
-                dayDiv.style.color = '#d1d5db';
-            } else if (dateStr === todayStr) {
-                // Highlight today's date
-                dayDiv.style.backgroundColor = '#007E85';
+            // Style dates based on selection and today
+            if (dateStr === todayStr) {
+                // Highlight today's date (Green)
+                dayDiv.style.backgroundColor = '#0d7377';
                 dayDiv.style.color = 'white';
+                dayDiv.style.fontWeight = 'bold';
+            } else if (dateStr === currentSelectedDateStr) {
+                // Highlight selected date (Light Blue)
+                dayDiv.style.backgroundColor = '#bfdbfe';
+                dayDiv.style.color = '#1e3a8a';
+                dayDiv.style.fontWeight = 'bold';
+            } else if (dateStr < todayStr) {
+                // Past dates in gray
+                dayDiv.style.color = '#d1d5db';
             }
             
             dayDiv.onclick = () => loadAppointmentsForDate(dateStr);
@@ -280,12 +289,17 @@ function renderCalendar() {
     });
 }
 
+let currentSelectedDateStr = new Date().toISOString().split('T')[0];
+
 async function loadAppointmentsForToday() {
     const today = new Date().toISOString().split('T')[0];
     await loadAppointmentsForDate(today, true);
 }
 
 async function loadAppointmentsForDate(date, isToday = false) {
+    currentSelectedDateStr = date;
+    renderCalendar(); // Re-render to update the selected date style
+
     const response = await fetch(`../../api/doctor/appointments_by_date.php?date=${date}`);
     const result = await response.json();
     
@@ -312,7 +326,16 @@ async function loadAppointmentsForDate(date, isToday = false) {
         const dateDisplay = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
         document.getElementById('selected-date-display').textContent = isToday ? 'Today' : dateDisplay;
     } else {
-        container.innerHTML = '<div class="text-center py-8 text-gray-400"><p>No appointments for this date</p></div>';
+        container.innerHTML = `
+            <div class="text-center py-12 text-gray-500 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100 shadow-sm">
+                    <i data-lucide="calendar-x" class="w-8 h-8 text-gray-400"></i>
+                </div>
+                <p class="text-sm font-semibold text-gray-700">No Appointments</p>
+                <p class="text-xs text-gray-500 mt-1">You have no appointments scheduled for this date.</p>
+            </div>
+        `;
+        lucide.createIcons();
         const dateObj = new Date(date);
         const dateDisplay = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
         document.getElementById('selected-date-display').textContent = isToday ? 'Today' : dateDisplay;
@@ -338,57 +361,16 @@ async function openAppointmentModal(appointmentID) {
         document.getElementById('modal-contact').textContent = apt.contact_number || '-';
         document.getElementById('modal-reason').textContent = apt.reason_for_visit;
         
-        const editSection = document.getElementById('edit-section');
         const viewSection = document.getElementById('view-section');
-        const modalStatus = document.getElementById('modal-status');
-        const modalComments = document.getElementById('modal-comments');
-        const modalMedicines = document.getElementById('modal-medicines');
 
-        if (isCompleted) {
-            editSection.classList.remove('hidden');
-            viewSection.classList.add('hidden');
-
-            modalStatus.value = apt.status || 'Completed';
-            modalComments.value = apt.doctor_comments || '';
-            modalMedicines.value = apt.prescribed_medicines || '';
-        } else {
-            editSection.classList.add('hidden');
-            viewSection.classList.remove('hidden');
-            const status = apt.status || 'Not set';
-            document.getElementById('view-status').textContent = status;
-            document.getElementById('view-status').className = `font-semibold mt-1 px-3 py-1 rounded-full text-sm inline-block ${getStatusBadgeClass(status)}`;
-            document.getElementById('view-comments').textContent = apt.doctor_comments || 'No comments added';
-            document.getElementById('view-medicines').textContent = apt.prescribed_medicines || 'No medicines prescribed';
-        }
+        viewSection.classList.remove('hidden');
+        const status = apt.status || 'Not set';
+        document.getElementById('view-status').textContent = status;
+        document.getElementById('view-status').className = `font-semibold mt-1 px-3 py-1 rounded-full text-sm inline-block ${getStatusBadgeClass(status)}`;
+        document.getElementById('view-comments').textContent = apt.doctor_comments || 'No comments added';
+        document.getElementById('view-medicines').textContent = apt.prescribed_medicines || 'No medicines prescribed';
         
         document.getElementById('appointment-modal').classList.remove('hidden');
-    }
-}
-
-async function updateAppointment() {
-    const status = document.getElementById('modal-status').value;
-    const comments = document.getElementById('modal-comments').value;
-    const medicines = document.getElementById('modal-medicines').value;
-    
-    const response = await fetch(`../../api/doctor/appointment_detail.php`, {
-        method: 'PUT',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            appointment_id: currentAppointmentID,
-            status: status,
-            doctor_comments: comments, 
-            prescribed_medicines: medicines 
-        })
-    });
-    
-    const result = await response.json();
-    if (result.status === 'success') {
-        alert('Appointment updated successfully');
-        closeAppointmentModal();
-        loadAppointmentsForToday();
-    } else {
-        alert('Error updating appointment: ' + (result.message || 'Unknown error'));
     }
 }
 
@@ -431,7 +413,15 @@ async function loadCompletedAppointmentsPanel() {
             </div>
         `).join('');
     } else {
-        container.innerHTML = '<div class="col-span-1 md:col-span-2 text-center py-8 text-gray-400"><p>No completed appointments</p></div>';
+        container.innerHTML = `
+            <div class="col-span-1 md:col-span-2 text-center py-12 text-gray-500 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100 shadow-sm">
+                    <i data-lucide="check-circle-2" class="w-8 h-8 text-gray-400"></i>
+                </div>
+                <p class="text-sm font-semibold text-gray-700">No Completed Appointments</p>
+                <p class="text-xs text-gray-500 mt-1">You haven't completed any appointments yet.</p>
+            </div>
+        `;
     }
     
     // Reinitialize lucide icons for newly added elements
@@ -475,7 +465,16 @@ async function performDoctorSearch() {
         `).join('');
         document.getElementById('selected-date-display').textContent = `Search Results (${filtered.length})`;
     } else {
-        container.innerHTML = '<div class="text-center py-8 text-gray-400"><p>No appointments match your search</p></div>';
+        container.innerHTML = `
+            <div class="text-center py-12 text-gray-500 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100 shadow-sm">
+                    <i data-lucide="search-x" class="w-8 h-8 text-gray-400"></i>
+                </div>
+                <p class="text-sm font-semibold text-gray-700">No Results Found</p>
+                <p class="text-xs text-gray-500 mt-1">No appointments match your search criteria.</p>
+            </div>
+        `;
+        lucide.createIcons();
         document.getElementById('selected-date-display').textContent = 'No Results';
     }
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,123 +10,272 @@
     <title>Doctor Dashboard - Home</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <style>
-        * { font-family: 'Inter', sans-serif; }
-        body { background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); }
-        .primary-color { color: #007E85; }
-        .bg-primary { background: linear-gradient(135deg, #007E85 0%, #005a61 100%); }
-        .bg-primary-light { background-color: rgba(0, 126, 133, 0.08); }
-        .card-shadow { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06); }
-        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .card-hover:hover { transform: translateY(-8px); box-shadow: 0 25px 60px rgba(0, 126, 133, 0.12); }
-        .sidebar { background: linear-gradient(180deg, #007E85 0%, #005a61 100%); box-shadow: 4px 0 30px rgba(0, 0, 0, 0.15); }
-        .nav-link { 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-            color: white; 
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        #appointment-modal .overflow-y-auto::-webkit-scrollbar {
+            width: 0px;
+            display: none;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        * {
+            font-family: 'Poppins', sans-serif;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
+
+        @keyframes pageFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        body {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        }
+
+        main {
+            animation: pageFadeIn 0.4s ease-out forwards;
+        }
+
+        .primary-color {
+            color: #0d7377;
+        }
+
+        .bg-primary {
+            background: linear-gradient(135deg, #0d7377 0%, #0a5a5d 100%);
+        }
+
+        .bg-primary-light {
+            background-color: rgba(13, 115, 119, 0.08);
+        }
+
+        .card-shadow {
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 60px rgba(13, 115, 119, 0.12);
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, #0d7377 0%, #0a5a5d 100%);
+            box-shadow: 4px 0 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-link {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: white;
             position: relative;
             overflow: hidden;
         }
-        .nav-link::before { 
-            content: ''; 
-            position: absolute; 
-            top: 0; 
-            left: -100%; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(255, 255, 255, 0.15); 
-            transition: left 0.3s ease; 
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.15);
+            transition: left 0.3s ease;
             z-index: -1;
         }
-        .nav-link:hover::before { left: 0; }
-        .nav-link:hover { background-color: rgba(255, 255, 255, 0.15); transform: translateX(4px); }
-        .nav-link.active { background: rgba(255, 255, 255, 0.25); box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1); }
-        .calendar-day { 
-            cursor: pointer; 
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
-            min-height: 40px; 
-            display: flex; 
-            align-items: center; 
+
+        .nav-link:hover::before {
+            left: 0;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(4px);
+        }
+
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .calendar-day {
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 40px;
+            display: flex;
+            align-items: center;
             justify-content: center;
             font-size: 14px;
             font-weight: 500;
             border-radius: 8px;
             position: relative;
         }
-        .calendar-day:hover { background: linear-gradient(135deg, rgba(0, 126, 133, 0.12), rgba(0, 126, 133, 0.08)); transform: scale(1.05); }
-        .calendar-day.has-appointment { position: relative; font-weight: bold; }
-        .calendar-day.has-appointment::after { 
-            content: ''; 
-            position: absolute; 
-            bottom: 2px; 
-            left: 50%; 
-            transform: translateX(-50%) scale(1.2); 
-            width: 6px; 
-            height: 6px; 
-            background: linear-gradient(135deg, #ef4444, #dc2626); 
+
+        .calendar-day:hover {
+            background: linear-gradient(135deg, rgba(13, 115, 119, 0.12), rgba(13, 115, 119, 0.08));
+            transform: scale(1.05);
+        }
+
+        .calendar-day.has-appointment {
+            position: relative;
+            font-weight: bold;
+        }
+
+        .calendar-day.has-appointment::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%) scale(1.2);
+            width: 6px;
+            height: 6px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
             border-radius: 50%;
             box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
         }
-        .calendar-day.has-completed { position: relative; font-weight: bold; color: #059669; }
-        .calendar-day.has-completed::after { 
-            content: '✓'; 
-            position: absolute; 
-            bottom: -4px; 
-            right: 2px; 
-            width: 18px; 
-            height: 18px; 
-            background: linear-gradient(135deg, #10b981, #059669); 
-            color: white; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 12px; 
-            font-weight: bold; 
+
+        .calendar-day.has-completed {
+            position: relative;
+            font-weight: bold;
+            color: #059669;
+        }
+
+        .calendar-day.has-completed::after {
+            content: '✓';
+            position: absolute;
+            bottom: -4px;
+            right: 2px;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
             line-height: 1;
             box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
         }
-        .badge { border-radius: 20px; padding: 8px 16px; font-size: 12px; font-weight: 600; display: inline-block; }
-        .badge-info { background: linear-gradient(135deg, #007E85, #005a61); color: white; box-shadow: 0 4px 12px rgba(0, 126, 133, 0.3); }
-        .badge-success { background: linear-gradient(135deg, #10b981, #059669); color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
-        .badge-warning { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
-        .badge-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .fade-in-up { animation: fadeInUp 0.5s ease forwards; }
+
+        .badge {
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-info {
+            background: linear-gradient(135deg, #0d7377, #0a5a5d);
+            color: white;
+            box-shadow: 0 4px 12px rgba(13, 115, 119, 0.3);
+        }
+
+        .badge-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .badge-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease forwards;
+        }
     </style>
 </head>
+
 <body class="bg-gray-50">
     <div class="flex h-screen overflow-hidden">
         <!-- SIDEBAR -->
-        <aside class="sidebar w-full md:w-64 text-white shadow-lg fixed bottom-0 md:top-0 h-auto md:h-full overflow-x-auto md:overflow-y-auto z-40">
+        <aside
+            class="sidebar w-full md:w-64 text-white shadow-lg fixed bottom-0 md:top-0 h-auto md:h-full overflow-x-auto md:overflow-y-auto z-40">
             <div class="hidden md:block p-8 border-b border-gray-700">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                       <img src="../../src/assets/Logo.svg" alt="">
+                        <img src="../../src/assets/Logo.svg" alt="">
                     </div>
                     <h1 class="text-xl font-bold">Healthcare</h1>
                 </div>
             </div>
 
-            <nav class="p-2 md:p-6 flex flex-row md:flex-col gap-2 md:gap-0 space-y-0 md:space-y-2 justify-around md:justify-start md:flex-1">
-                <a href="home.html" class="nav-link active flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
+            <nav
+                class="p-2 md:p-6 flex flex-row md:flex-col gap-2 md:gap-0 space-y-0 md:space-y-2 justify-around md:justify-start md:flex-1">
+                <a href="home.html"
+                    class="nav-link active flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
                     <i data-lucide="home" class="w-5 h-5"></i>
                     <span>Home</span>
                 </a>
-                <a href="schedules.html" class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
+                <a href="schedules.html"
+                    class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
                     <i data-lucide="calendar" class="w-5 h-5"></i>
                     <span>Schedules</span>
                 </a>
-                <a href="earnings.html" class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
+                <a href="earnings.html"
+                    class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
                     <i data-lucide="dollar-sign" class="w-5 h-5"></i>
                     <span>Earnings</span>
                 </a>
-                <a href="profile.html" class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
+                <a href="profile.html"
+                    class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
                     <i data-lucide="user" class="w-5 h-5"></i>
                     <span>Profile</span>
                 </a>
                 <div class="hidden md:block mt-auto border-t border-gray-600 pt-3"></div>
-                <a href="../../api/auth/logout.php" class="flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:bg-red-600 transition text-red-300 hover:text-white text-[10px] md:text-base">
+                <a href="../../api/auth/logout.php"
+                    class="flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:bg-red-600 transition text-red-300 hover:text-white text-[10px] md:text-base">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
                     <span>Logout</span>
                 </a>
@@ -138,23 +288,26 @@
             <div class="sticky top-0 z-30 bg-gradient-to-r from-white to-gray-50 border-b border-gray-100 shadow-sm">
                 <div class="px-4 md:px-5 py-4 flex justify-between items-center gap-4 overflow-visible flex-wrap">
                     <div class="min-w-0 flex-1">
-                        <h2 class="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Dashboard</h2>
+                        <h2
+                            class="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                            Dashboard</h2>
                         <p id="current-date" class="text-sm text-gray-500 mt-0.5"></p>
                     </div>
                     <div class="relative flex-1 sm:flex-none min-w-0 sm:min-w-[300px] group">
                         <input id="doctorSearchInput" type="text" placeholder="Search patient by name or contact"
-                            class="w-full sm:w-80 rounded-lg border border-gray-200 bg-white group-hover:border-gray-300 group-focus-within:border-[#007E85] pl-4 pr-12 py-2.5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-[#007E85] focus:ring-opacity-10 transition duration-300" />
+                            class="w-full sm:w-80 rounded-lg border border-gray-200 bg-white group-hover:border-gray-300 group-focus-within:border-[#0d7377] pl-4 pr-12 py-2.5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-[#0d7377] focus:ring-opacity-10 transition duration-300" />
                         <button id="doctorSearchBtn" type="button"
-                            class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#007E85] hover:bg-[#007E85] hover:bg-opacity-10 transition duration-300">
+                            class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#0d7377] hover:bg-[#0d7377] hover:bg-opacity-10 transition duration-300">
                             <i data-lucide="search" class="w-4 h-4"></i>
                         </button>
                     </div>
                     <div class="relative z-[200] flex shrink-0 items-center">
                         <button id="doctorNotificationBtn" type="button"
                             onclick="window.__doctorNotificationBarToggle && window.__doctorNotificationBarToggle(event)"
-                            class="relative isolate cursor-pointer w-12 h-12 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 rounded-xl flex items-center justify-center transition duration-300 hover:border-[#007E85] hover:shadow-lg"
+                            class="relative isolate cursor-pointer w-12 h-12 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 rounded-xl flex items-center justify-center transition duration-300 hover:border-[#0d7377] hover:shadow-lg"
                             title="Notifications">
-                            <span class="pointer-events-none flex items-center justify-center" aria-hidden="true"><i data-lucide="bell" class="w-5 h-5"></i></span>
+                            <span class="pointer-events-none flex items-center justify-center" aria-hidden="true"><i
+                                    data-lucide="bell" class="w-5 h-5"></i></span>
                             <span id="doctorNotificationCount"
                                 class="hidden absolute -top-1 -right-1 min-w-[22px] h-[22px] px-1 rounded-full bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold flex items-center justify-center pointer-events-none shadow-lg">0</span>
                         </button>
@@ -172,10 +325,15 @@
                     </div>
 
                     <!-- HERO SECTION WITH STATS -->
-                    <section class="bg-gradient-to-br from-[#007E85] via-[#005a61] to-[#004650] rounded-[20px] p-6 md:p-8 mb-6 text-white relative overflow-hidden shadow-[0_20px_50px_rgba(0,126,133,0.3)]">
+                    <section
+                        class="bg-gradient-to-br from-[#0d7377] via-[#0a5a5d] to-[#084b4d] rounded-[20px] p-6 md:p-8 mb-6 text-white relative overflow-hidden shadow-[0_20px_50px_rgba(13,115,119,0.3)]">
                         <div class="absolute inset-0 overflow-hidden rounded-[20px]">
-                            <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -mr-48 -mt-48 blur-3xl"></div>
-                            <div class="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full -ml-48 -mb-48 blur-3xl"></div>
+                            <div
+                                class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -mr-48 -mt-48 blur-3xl">
+                            </div>
+                            <div
+                                class="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full -ml-48 -mb-48 blur-3xl">
+                            </div>
                         </div>
                         <div class="relative z-10 max-w-2xl">
                             <p class="text-2xl font-bold mb-3">Welcome back, Doctor</p>
@@ -184,19 +342,31 @@
                             </p>
 
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <div class="bg-white/15 backdrop-blur-xl rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition duration-300 cursor-pointer group">
-                                    <p class="text-xs opacity-85 mb-2 font-semibold uppercase tracking-wide">Today's Visits</p>
-                                    <h3 id="stat-today-visits" class="text-3xl font-bold group-hover:scale-110 transition-transform duration-300">0</h3>
+                                <div
+                                    class="bg-white/15 backdrop-blur-xl rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition duration-300 cursor-pointer group">
+                                    <p class="text-xs opacity-85 mb-2 font-semibold uppercase tracking-wide">Today's
+                                        Visits</p>
+                                    <h3 id="stat-today-visits"
+                                        class="text-3xl font-bold group-hover:scale-110 transition-transform duration-300">
+                                        0</h3>
                                 </div>
 
-                                <div class="bg-white/15 backdrop-blur-xl rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition duration-300 cursor-pointer group">
-                                    <p class="text-xs opacity-85 mb-2 font-semibold uppercase tracking-wide">Total Patients</p>
-                                    <h3 id="stat-total-patients" class="text-3xl font-bold group-hover:scale-110 transition-transform duration-300">0</h3>
+                                <div
+                                    class="bg-white/15 backdrop-blur-xl rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition duration-300 cursor-pointer group">
+                                    <p class="text-xs opacity-85 mb-2 font-semibold uppercase tracking-wide">Total
+                                        Patients</p>
+                                    <h3 id="stat-total-patients"
+                                        class="text-3xl font-bold group-hover:scale-110 transition-transform duration-300">
+                                        0</h3>
                                 </div>
 
-                                <div class="bg-white/15 backdrop-blur-xl rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition duration-300 cursor-pointer group">
-                                    <p class="text-xs opacity-85 mb-2 font-semibold uppercase tracking-wide">Completed</p>
-                                    <h3 id="stat-completed" class="text-3xl font-bold group-hover:scale-110 transition-transform duration-300">0</h3>
+                                <div
+                                    class="bg-white/15 backdrop-blur-xl rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition duration-300 cursor-pointer group">
+                                    <p class="text-xs opacity-85 mb-2 font-semibold uppercase tracking-wide">Completed
+                                    </p>
+                                    <h3 id="stat-completed"
+                                        class="text-3xl font-bold group-hover:scale-110 transition-transform duration-300">
+                                        0</h3>
                                 </div>
                             </div>
                         </div>
@@ -208,34 +378,45 @@
 
                     <!-- CALENDAR AND APPOINTMENTS -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                        <div class="col-span-1 bg-white rounded-[16px] card-shadow p-5 overflow-x-auto w-full card-hover">
+                        <div
+                            class="col-span-1 bg-white rounded-[16px] card-shadow p-5 overflow-x-auto w-full card-hover">
                             <div class="flex items-center justify-between mb-4">
                                 <h3 id="calendar-month" class="font-bold text-gray-900 text-lg">April 2026</h3>
                                 <div class="flex gap-2">
-                                    <button onclick="prevMonth()" class="p-2 hover:bg-gradient-to-br hover:from-gray-100 hover:to-gray-50 rounded-lg transition duration-300 hover:shadow-md">
+                                    <button onclick="prevMonth()"
+                                        class="p-2 hover:bg-gradient-to-br hover:from-gray-100 hover:to-gray-50 rounded-lg transition duration-300 hover:shadow-md">
                                         <i data-lucide="chevron-left" class="w-5 h-5"></i>
                                     </button>
-                                    <button onclick="nextMonth()" class="p-2 hover:bg-gradient-to-br hover:from-gray-100 hover:to-gray-50 rounded-lg transition duration-300 hover:shadow-md">
+                                    <button onclick="nextMonth()"
+                                        class="p-2 hover:bg-gradient-to-br hover:from-gray-100 hover:to-gray-50 rounded-lg transition duration-300 hover:shadow-md">
                                         <i data-lucide="chevron-right" class="w-5 h-5"></i>
                                     </button>
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-7 gap-2 mb-4 text-center text-xs font-bold text-gray-500">
-                                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                                <div>Sun</div>
+                                <div>Mon</div>
+                                <div>Tue</div>
+                                <div>Wed</div>
+                                <div>Thu</div>
+                                <div>Fri</div>
+                                <div>Sat</div>
                             </div>
 
                             <div id="calendar-days" class="grid grid-cols-7 gap-1.5"></div>
                         </div>
 
-                        <div class="col-span-1 lg:col-span-2 bg-white rounded-[16px] card-shadow p-5 overflow-x-auto w-full card-hover">
+                        <div
+                            class="col-span-1 lg:col-span-2 bg-white rounded-[16px] card-shadow p-5 overflow-x-auto w-full card-hover">
                             <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <i data-lucide="calendar" class="w-5 h-5 text-[#007E85]"></i>
-                                Appointments for <span id="selected-date-display" class="text-[#007E85]">Today</span>
+                                <i data-lucide="calendar" class="w-5 h-5 text-[#0d7377]"></i>
+                                Appointments for <span id="selected-date-display" class="text-[#0d7377]">Today</span>
                             </h3>
                             <div id="appointments-container" class="space-y-3">
-                                <div class="text-center py-8 text-gray-400">
-                                    <p>Loading appointments...</p>
+                                <div class="animate-pulse flex flex-col gap-3">
+                                    <div class="border border-gray-100 rounded-lg p-4 bg-gray-50 h-24"></div>
+                                    <div class="border border-gray-100 rounded-lg p-4 bg-gray-50 h-24"></div>
                                 </div>
                             </div>
                         </div>
@@ -248,11 +429,12 @@
                                 <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
                                 Completed Appointments
                             </h3>
-                            <span id="completed-count" class="text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 px-3 py-1 rounded-full shadow-md">0</span>
+                            <span id="completed-count"
+                                class="text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 px-3 py-1 rounded-full shadow-md">0</span>
                         </div>
                         <div id="completed-appointments-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="text-center py-8 text-gray-400">
-                                <p>No completed appointments to display</p>
+                            <div class="animate-pulse col-span-1 md:col-span-2 flex flex-col gap-3">
+                                <div class="border border-gray-100 rounded-lg p-4 bg-gray-50 h-24"></div>
                             </div>
                         </div>
                     </div>
@@ -273,85 +455,86 @@
     </div>
 
     <!-- APPOINTMENT DETAIL MODAL -->
-    <div id="appointment-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[400]">
-        <div class="bg-white rounded-2xl card-shadow max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="sticky top-0 bg-primary text-white px-4 py-3 flex justify-between items-center">
-                <h3 class="text-lg font-bold" id="modal-patient-name">Patient Name</h3>
-                <button onclick="closeAppointmentModal()" class="text-white hover:text-gray-200">
-                    <i data-lucide="x" class="w-6 h-6"></i>
+    <div id="appointment-modal"
+        class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-[400] p-4 backdrop-blur-sm transition-opacity">
+        <div
+            class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-auto max-h-[90vh] overflow-y-auto border border-gray-100">
+            <div
+                class="sticky top-0 bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white px-6 py-4 flex justify-between items-center shadow-md z-10">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md border border-white/20">
+                        <i data-lucide="user" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold leading-tight" id="modal-patient-name">Patient Name</h3>
+                        <p class="text-xs text-teal-100 font-medium">Appointment Console</p>
+                    </div>
+                </div>
+                <button onclick="closeAppointmentModal()"
+                    class="text-white hover:bg-white/20 p-2 rounded-full transition duration-200">
+                    <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
-            <div class="p-4 space-y-4">
-                <div class="grid grid-cols-2 gap-3 text-xs">
-                    <div>
-                        <p class="text-gray-600">Patient ID</p>
-                        <p id="modal-patient-id" class="font-semibold text-gray-900 text-sm">-</p>
+            <div class="p-5 space-y-5">
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <p class="text-gray-500 mb-1 text-[10px] uppercase tracking-wider font-semibold">Patient ID</p>
+                        <p id="modal-patient-id" class="font-bold text-gray-900 text-sm truncate">-</p>
                     </div>
-                    <div>
-                        <p class="text-gray-600">Date</p>
-                        <p id="modal-apt-date" class="font-semibold text-gray-900 text-sm">-</p>
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <p class="text-gray-500 mb-1 text-[10px] uppercase tracking-wider font-semibold">Date</p>
+                        <p id="modal-apt-date" class="font-bold text-gray-900 text-sm truncate">-</p>
                     </div>
-                    <div>
-                        <p class="text-gray-600">Time</p>
-                        <p id="modal-apt-time" class="font-semibold text-gray-900 text-sm">-</p>
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <p class="text-gray-500 mb-1 text-[10px] uppercase tracking-wider font-semibold">Time</p>
+                        <p id="modal-apt-time" class="font-bold text-gray-900 text-sm truncate">-</p>
                     </div>
-                    <div>
-                        <p class="text-gray-600">Room</p>
-                        <p id="modal-room-num" class="font-semibold text-gray-900 text-sm">-</p>
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <p class="text-gray-500 mb-1 text-[10px] uppercase tracking-wider font-semibold">Room</p>
+                        <p id="modal-room-num" class="font-bold text-gray-900 text-sm truncate">-</p>
                     </div>
-                    <div>
-                        <p class="text-gray-600">Blood Group</p>
-                        <p id="modal-blood-group" class="font-semibold text-gray-900 text-sm">-</p>
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <p class="text-gray-500 mb-1 text-[10px] uppercase tracking-wider font-semibold">Blood Group</p>
+                        <p id="modal-blood-group" class="font-bold text-gray-900 text-sm truncate">-</p>
                     </div>
-                    <div>
-                        <p class="text-gray-600">Contact</p>
-                        <p id="modal-contact" class="font-semibold text-gray-900 text-sm">-</p>
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <p class="text-gray-500 mb-1 text-[10px] uppercase tracking-wider font-semibold">Contact</p>
+                        <p id="modal-contact" class="font-bold text-gray-900 text-sm truncate">-</p>
                     </div>
                 </div>
 
-                <div class="border-t pt-3">
-                    <p class="text-gray-600 text-xs mb-1">Reason for Visit</p>
-                    <p id="modal-reason" class="font-semibold text-gray-900 text-sm">-</p>
+                <div class="border-t border-gray-100 pt-4">
+                    <p class="text-gray-500 text-xs mb-1.5 font-semibold uppercase tracking-wider">Reason for Visit</p>
+                    <p id="modal-reason"
+                        class="font-medium text-gray-800 bg-gray-50 p-3.5 rounded-xl border border-gray-100 leading-relaxed text-sm">
+                        -</p>
                 </div>
 
-                <div id="edit-section" class="hidden border-t pt-3 space-y-4">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1.5">Appointment Status</label>
-                        <select id="modal-status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary text-sm">
-                            <option value="Upcoming">Upcoming</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Missed">Missed</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1.5">Doctor's Comments</label>
-                        <textarea id="modal-comments" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary text-sm resize-none"></textarea>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1.5">Prescribed Medicines</label>
-                        <textarea id="modal-medicines" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary text-sm resize-none"></textarea>
-                    </div>
-
-                    <button onclick="updateAppointment()" class="w-full bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 text-sm">
-                        Save Appointment Details
-                    </button>
-                </div>
-
-                <div id="view-section" class="hidden border-t pt-3 space-y-3">
-                    <div>
-                        <p class="text-xs text-gray-600">Status</p>
-                        <p id="view-status" class="font-semibold text-gray-900 mt-0.5 text-sm">-</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-600">Doctor's Comments</p>
-                        <p id="view-comments" class="font-semibold text-gray-900 mt-0.5 text-sm">-</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-600">Prescribed Medicines</p>
-                        <p id="view-medicines" class="font-semibold text-gray-900 mt-0.5 text-sm">-</p>
+                <!-- Consultation Summary (View Only) -->
+                <div id="view-section" class="hidden border-t border-gray-100 pt-5 space-y-4">
+                    <h4 class="font-bold text-gray-900 mb-4 flex items-center gap-2 text-sm">
+                        <i data-lucide="clipboard-check" class="w-4 h-4 text-green-600"></i>
+                        Consultation Summary
+                    </h4>
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                            <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Status</p>
+                            <div id="view-status-container">
+                                <p id="view-status" class="font-bold text-gray-900 text-sm inline-block">-</p>
+                            </div>
+                        </div>
+                        <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                            <p class="text-[10px] font-semibold text-blue-600 uppercase tracking-wider mb-1">Doctor's
+                                Comments</p>
+                            <p id="view-comments" class="font-medium text-gray-800 text-sm whitespace-pre-wrap">-</p>
+                        </div>
+                        <div class="bg-green-50/50 p-4 rounded-xl border border-green-100">
+                            <p class="text-[10px] font-semibold text-green-600 uppercase tracking-wider mb-1">Prescribed
+                                Medicines</p>
+                            <p id="view-medicines" class="font-medium text-gray-800 text-sm whitespace-pre-wrap">-</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -367,24 +550,27 @@
                     <i data-lucide="calendar-check" class="w-6 h-6"></i>
                     <h2 class="text-2xl font-bold">Set Your Weekly Schedule</h2>
                 </div>
-                <p class="text-sm text-gray-100 opacity-90">This is required before you can start accepting patient appointments.</p>
+                <p class="text-sm text-gray-100 opacity-90">This is required before you can start accepting patient
+                    appointments.</p>
             </div>
-            
+
             <!-- Body -->
             <div class="modal-body">
                 <!-- Info Message -->
                 <div class="info-box">
-                    <strong>📌 Important:</strong> This will be your scheduled slots for everyday. You must select at least one working day with time slots. You can still manage it yourself from the schedules section. Patients can only book appointments for your available slots.
+                    <strong>📌 Important:</strong> This will be your scheduled slots for everyday. You must select at
+                    least one working day with time slots. You can still manage it yourself from the schedules section.
+                    Patients can only book appointments for your available slots.
                 </div>
-                
+
                 <!-- Error Message -->
                 <div class="error-box" id="errorBox"></div>
-                
+
                 <!-- Success Message -->
                 <div class="success-message" id="successMessage">
                     ✓ Schedule saved successfully! Redirecting...
                 </div>
-                
+
                 <form id="scheduleForm">
                     <!-- Day Selection -->
                     <div class="mb-8">
@@ -393,14 +579,14 @@
                             <!-- Days will be generated by JavaScript -->
                         </div>
                     </div>
-                    
+
                     <!-- Time Slots per Day -->
                     <div id="timeSlotsContainer">
                         <!-- Dynamic day sections will be added here -->
                     </div>
                 </form>
             </div>
-            
+
             <!-- Footer -->
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" id="submitScheduleBtn">
@@ -422,11 +608,11 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         .schedule-setup-modal.active {
             display: flex;
         }
-        
+
         /* Modal container - cannot be closed */
         .modal-container {
             background: white;
@@ -438,31 +624,32 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             animation: slideIn 0.3s ease-out;
         }
-        
+
         @keyframes slideIn {
             from {
                 opacity: 0;
                 transform: scale(0.95);
             }
+
             to {
                 opacity: 1;
                 transform: scale(1);
             }
         }
-        
+
         /* Header */
         .modal-header {
-            background: linear-gradient(135deg, #007E85 0%, #005a61 100%);
+            background: linear-gradient(135deg, #0d7377 0%, #0a5a5d 100%);
             color: white;
             padding: 24px;
             border-radius: 12px 12px 0 0;
         }
-        
+
         /* Body */
         .modal-body {
             padding: 32px;
         }
-        
+
         /* Day selector grid */
         .days-grid {
             display: grid;
@@ -470,11 +657,11 @@
             gap: 12px;
             margin-bottom: 24px;
         }
-        
+
         .day-checkbox {
             display: none;
         }
-        
+
         .day-label {
             display: flex;
             align-items: center;
@@ -486,18 +673,18 @@
             transition: all 0.3s ease;
             background: white;
         }
-        
+
         .day-label:hover {
-            border-color: #007E85;
-            background-color: rgba(0, 126, 133, 0.05);
+            border-color: #0d7377;
+            background-color: rgba(13, 115, 119, 0.05);
         }
-        
-        .day-checkbox:checked + .day-label {
-            background-color: #007E85;
+
+        .day-checkbox:checked+.day-label {
+            background-color: #0d7377;
             color: white;
-            border-color: #007E85;
+            border-color: #0d7377;
         }
-        
+
         /* Time slots section */
         .day-section {
             display: none;
@@ -505,11 +692,11 @@
             padding-bottom: 24px;
             border-bottom: 1px solid #e5e7eb;
         }
-        
+
         .day-section.active {
             display: block;
         }
-        
+
         .day-section-title {
             font-weight: 600;
             font-size: 16px;
@@ -519,16 +706,16 @@
             align-items: center;
             gap: 8px;
         }
-        
+
         .day-section-title .day-badge {
-            background: #007E85;
+            background: #0d7377;
             color: white;
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 700;
         }
-        
+
         /* Time slot inputs */
         .time-slot {
             display: grid;
@@ -540,7 +727,7 @@
             background: #f9fafb;
             border-radius: 8px;
         }
-        
+
         .time-slot label {
             display: block;
             font-size: 13px;
@@ -548,22 +735,22 @@
             color: #374151;
             margin-bottom: 6px;
         }
-        
+
         .time-slot input[type="time"] {
             padding: 10px;
             border: 1px solid #d1d5db;
             border-radius: 6px;
             font-size: 14px;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Poppins', sans-serif;
             transition: border-color 0.3s ease;
         }
-        
+
         .time-slot input[type="time"]:focus {
             outline: none;
-            border-color: #007E85;
-            box-shadow: 0 0 0 3px rgba(0, 126, 133, 0.1);
+            border-color: #0d7377;
+            box-shadow: 0 0 0 3px rgba(13, 115, 119, 0.1);
         }
-        
+
         .btn-remove-slot {
             padding: 8px 12px;
             background: #ef4444;
@@ -574,17 +761,17 @@
             font-size: 13px;
             transition: background 0.3s ease;
         }
-        
+
         .btn-remove-slot:hover {
             background: #dc2626;
         }
-        
+
         .btn-add-slot {
             display: inline-flex;
             align-items: center;
             gap: 6px;
             padding: 8px 12px;
-            background: #007E85;
+            background: #0d7377;
             color: white;
             border: none;
             border-radius: 6px;
@@ -594,22 +781,22 @@
             margin-top: 8px;
             transition: background 0.3s ease;
         }
-        
+
         .btn-add-slot:hover {
-            background: #005a61;
+            background: #0a5a5d;
         }
-        
+
         /* Info boxes */
         .info-box {
-            background: #e0f2f1;
-            border-left: 4px solid #007E85;
+            background: #e8f5f5;
+            border-left: 4px solid #0d7377;
             padding: 12px 16px;
             border-radius: 6px;
             margin-bottom: 24px;
             font-size: 14px;
-            color: #004f54;
+            color: #0a5a5d;
         }
-        
+
         .error-box {
             background: #fee2e2;
             border-left: 4px solid #ef4444;
@@ -620,11 +807,11 @@
             color: #7f1d1d;
             display: none;
         }
-        
+
         .error-box.show {
             display: block;
         }
-        
+
         /* Footer / Buttons */
         .modal-footer {
             display: flex;
@@ -635,7 +822,7 @@
             border-top: 1px solid #e5e7eb;
             border-radius: 0 0 12px 12px;
         }
-        
+
         .btn {
             padding: 10px 24px;
             border: none;
@@ -645,29 +832,29 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
+
         .btn-primary {
-            background: #007E85;
+            background: #0d7377;
             color: white;
         }
-        
+
         .btn-primary:hover:not(:disabled) {
-            background: #005a61;
+            background: #0a5a5d;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 126, 133, 0.3);
+            box-shadow: 0 4px 12px rgba(13, 115, 119, 0.3);
         }
-        
+
         .btn-primary:disabled {
             background: #9ca3af;
             cursor: not-allowed;
         }
-        
+
         /* Loading state */
         .btn.loading {
             opacity: 0.7;
             cursor: not-allowed;
         }
-        
+
         .spinner {
             display: inline-block;
             width: 14px;
@@ -677,11 +864,13 @@
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
-        
+
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
-        
+
         /* Success message */
         .success-message {
             display: none;
@@ -693,11 +882,11 @@
             margin-bottom: 24px;
             text-align: center;
         }
-        
+
         .success-message.show {
             display: block;
         }
-        
+
         /* Prevent scrolling when modal is open */
         body.schedule-modal-open {
             overflow: hidden;
@@ -709,4 +898,5 @@
     <!-- Security: Cache Prevention & Session Verification -->
     <script src="../../src/js/cache-prevention.js"></script>
 </body>
+
 </html>

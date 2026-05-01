@@ -1,4 +1,5 @@
-let scheduleMonth = new Date(2026, 3); // April 2026
+const _now = new Date();
+let scheduleMonth = new Date(_now.getFullYear(), _now.getMonth(), 1);
 let selectedScheduleDate = null;
 let currentEditAvailId = null;
 let pendingDeleteAction = null;
@@ -176,19 +177,19 @@ function renderScheduleCalendar() {
 
       const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
       
-      // Mark selected date with special styling
-      if (dateStr === selectedScheduleDate) {
-        dayDiv.style.backgroundColor = "#10b981";
+      // Mark selected date and today's date
+      if (dateStr === todayStr) {
+        dayDiv.style.backgroundColor = "#0d7377";
         dayDiv.style.color = "white";
+        dayDiv.style.fontWeight = "bold";
+        dayDiv.style.borderRadius = "8px";
+      } else if (dateStr === selectedScheduleDate) {
+        dayDiv.style.backgroundColor = "#bfdbfe";
+        dayDiv.style.color = "#1e3a8a";
         dayDiv.style.fontWeight = "bold";
         dayDiv.style.borderRadius = "8px";
       } else if (dateStr < todayStr) {
         dayDiv.style.color = "#d1d5db";
-      } else if (dateStr === todayStr) {
-        dayDiv.style.backgroundColor = "#007E85";
-        dayDiv.style.color = "white";
-        dayDiv.style.fontWeight = "bold";
-        dayDiv.style.borderRadius = "8px";
       }
 
       dayDiv.onclick = () => selectScheduleDate(dateStr);
@@ -866,9 +867,13 @@ async function openAppointmentModal(aptId) {
   const statusSelect = document.getElementById("modal-edit-status");
   const notesInput = document.getElementById("modal-doctor-notes");
   const rxInput = document.getElementById("modal-prescriptions");
-  const followupInputs = document.getElementById("followup-section");
+  const notesEditWrapper = document.getElementById("notes-edit-wrapper");
+  const rxEditWrapper = document.getElementById("rx-edit-wrapper");
+  const notesReadonlyWrapper = document.getElementById("readonly-notes-wrapper");
+  const rxReadonlyWrapper = document.getElementById("readonly-rx-wrapper");
   const notesReadonly = document.getElementById("readonly-doctor-notes");
   const rxReadonly = document.getElementById("readonly-prescriptions");
+  const followupInputs = document.getElementById("followup-section");
   const feedbackSec = document.getElementById("feedback-section");
   const completeBtn = document.getElementById("complete-consultation-btn");
   const appointmentLockMsg = document.getElementById("appointment-lock-message") || createLockMessage();
@@ -884,13 +889,19 @@ async function openAppointmentModal(aptId) {
   if (apt.status === "Completed") {
     // Completed appointments can still be updated, but follow-up stays locked.
     statusSelectWrapper.classList.remove("hidden");
-    notesInput.classList.remove("hidden");
-    rxInput.classList.remove("hidden");
+    notesEditWrapper.classList.remove("hidden");
+    rxEditWrapper.classList.remove("hidden");
     completeBtn.classList.remove("hidden");
     appointmentLockMsg.classList.add("hidden");
+    
+    // Ensure inputs are enabled
+    statusSelect.disabled = false;
+    completeBtn.disabled = false;
+    completeBtn.classList.remove("opacity-50", "cursor-not-allowed");
+    statusSelect.classList.remove("opacity-50", "cursor-not-allowed");
 
-    notesReadonly.classList.add("hidden");
-    rxReadonly.classList.add("hidden");
+    notesReadonlyWrapper.classList.add("hidden");
+    rxReadonlyWrapper.classList.add("hidden");
 
     statusSelect.value = apt.status || "Completed";
     notesInput.value = apt.doctor_comments || apt.doctor_notes || "";
@@ -911,16 +922,22 @@ async function openAppointmentModal(aptId) {
     toggleFollowUpVisibility();
   } else if (!hasAppointmentStarted) {
     // Lock Mode - Appointment hasn't started yet
-    statusSelectWrapper.classList.add("hidden");
-    notesInput.classList.add("hidden");
-    rxInput.classList.add("hidden");
-    completeBtn.classList.add("hidden");
+    statusSelectWrapper.classList.remove("hidden");
+    notesEditWrapper.classList.add("hidden");
+    rxEditWrapper.classList.add("hidden");
+    completeBtn.classList.remove("hidden");
     
-    notesReadonly.classList.remove("hidden");
-    rxReadonly.classList.remove("hidden");
+    // Disable dropdown and button completely
+    statusSelect.disabled = true;
+    completeBtn.disabled = true;
+    completeBtn.classList.add("opacity-50", "cursor-not-allowed");
+    statusSelect.classList.add("opacity-50", "cursor-not-allowed");
+
+    notesReadonlyWrapper.classList.remove("hidden");
+    rxReadonlyWrapper.classList.remove("hidden");
     
     notesReadonly.textContent = "Appointment editing is locked until the appointment time starts.";
-    rxReadonly.textContent = "You can edit this appointment starting from " + new Date(appointmentDateTime).toLocaleString();
+    rxReadonly.textContent = "You can edit this appointment starting from " + new Date(appointmentDateTime).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' });
     
     appointmentLockMsg.classList.remove("hidden");
     appointmentLockMsg.innerHTML = `
@@ -941,13 +958,19 @@ async function openAppointmentModal(aptId) {
   } else {
     // Edit Mode (Upcoming or Missed) - Appointment has started
     statusSelectWrapper.classList.remove("hidden");
-    notesInput.classList.remove("hidden");
-    rxInput.classList.remove("hidden");
+    notesEditWrapper.classList.remove("hidden");
+    rxEditWrapper.classList.remove("hidden");
     completeBtn.classList.remove("hidden");
     appointmentLockMsg.classList.add("hidden");
+    
+    // Ensure inputs are enabled
+    statusSelect.disabled = false;
+    completeBtn.disabled = false;
+    completeBtn.classList.remove("opacity-50", "cursor-not-allowed");
+    statusSelect.classList.remove("opacity-50", "cursor-not-allowed");
 
-    notesReadonly.classList.add("hidden");
-    rxReadonly.classList.add("hidden");
+    notesReadonlyWrapper.classList.add("hidden");
+    rxReadonlyWrapper.classList.add("hidden");
     feedbackSec.classList.add("hidden");
 
     statusSelect.value = apt.status === "Upcoming" ? "Upcoming" : apt.status;
@@ -1091,14 +1114,17 @@ async function submitConsultation() {
     hasErrors = true;
   }
 
-  if (!notes) {
-    document.getElementById("notes-error").classList.remove("hidden");
-    hasErrors = true;
-  }
+  // Only require notes and prescriptions if the status is Completed
+  if (statusVal === 'Completed') {
+    if (!notes) {
+      document.getElementById("notes-error").classList.remove("hidden");
+      hasErrors = true;
+    }
 
-  if (!rx) {
-    document.getElementById("prescriptions-error").classList.remove("hidden");
-    hasErrors = true;
+    if (!rx) {
+      document.getElementById("prescriptions-error").classList.remove("hidden");
+      hasErrors = true;
+    }
   }
 
   // Validate follow-up date (if provided, must not be in the past)

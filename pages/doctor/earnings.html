@@ -1,333 +1,334 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      http-equiv="Cache-Control"
-      content="no-cache, no-store, must-revalidate"
-    />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    <title>Doctor Dashboard - Earnings</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      * {
-        font-family: "Inter", sans-serif;
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Doctor Dashboard - Earnings</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    * {
+      font-family: "Poppins", sans-serif;
+      scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;
+    }
+
+    @keyframes pageFadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    body {
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    }
+
+    main {
+      animation: pageFadeIn 0.4s ease-out forwards;
+    }
+
+    .primary-color {
+      color: #0d7377;
+    }
+
+    .bg-primary {
+      background: linear-gradient(135deg, #0d7377 0%, #0a5a5d 100%);
+    }
+
+    .bg-primary-light {
+      background-color: rgba(13, 115, 119, 0.08);
+    }
+
+    .card-shadow {
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, #0d7377 0%, #0a5a5d 100%);
+      box-shadow: 4px 0 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .nav-link {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-link::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.15);
+      transition: left 0.3s ease;
+      z-index: -1;
+    }
+
+    .nav-link:hover::before {
+      left: 0;
+    }
+
+    .nav-link:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+      transform: translateX(4px);
+    }
+
+    .nav-link.active {
+      background: rgba(255, 255, 255, 0.25);
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 25px 60px rgba(0, 126, 133, 0.12);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
       }
-      body {
-        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
-      .primary-color {
-        color: #007e85;
-      }
-      .bg-primary {
-        background: linear-gradient(135deg, #007e85 0%, #005a61 100%);
-      }
-      .bg-primary-light {
-        background-color: rgba(0, 126, 133, 0.08);
-      }
-      .card-shadow {
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
-      }
-      .sidebar {
-        background: linear-gradient(180deg, #007e85 0%, #005a61 100%);
-        box-shadow: 4px 0 30px rgba(0, 0, 0, 0.15);
-      }
-      .nav-link {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        color: white;
-        position: relative;
-        overflow: hidden;
-      }
-      .nav-link::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: rgba(255, 255, 255, 0.15);
-        transition: left 0.3s ease;
-        z-index: -1;
-      }
-      .nav-link:hover::before {
-        left: 0;
-      }
-      .nav-link:hover {
-        background-color: rgba(255, 255, 255, 0.15);
-        transform: translateX(4px);
-      }
-      .nav-link.active {
-        background: rgba(255, 255, 255, 0.25);
-        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
-      }
-      .stat-card {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-      .stat-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 25px 60px rgba(0, 126, 133, 0.12);
-      }
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      .fade-in-up {
-        animation: fadeInUp 0.5s ease forwards;
-      }
-    </style>
-  </head>
-  <body class="bg-gray-50">
-    <div class="flex h-screen overflow-hidden">
-      <!-- SIDEBAR -->
-      <aside
-        class="sidebar w-full md:w-64 text-white shadow-lg fixed bottom-0 md:top-0 h-auto md:h-full overflow-x-auto md:overflow-y-auto z-40"
-      >
-        <div class="hidden md:block p-8 border-b border-gray-700">
-          <div class="flex items-center gap-3">
-            <div
-              class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center"
-            >
-              <img src="../../src/assets/Logo.svg" alt="" />
-            </div>
-            <h1 class="text-xl font-bold">Healthcare</h1>
+    }
+
+    .fade-in-up {
+      animation: fadeInUp 0.5s ease forwards;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50">
+  <div class="flex h-screen overflow-hidden">
+    <!-- SIDEBAR -->
+    <aside
+      class="sidebar w-full md:w-64 text-white shadow-lg fixed bottom-0 md:top-0 h-auto md:h-full overflow-x-auto md:overflow-y-auto z-40">
+      <div class="hidden md:block p-8 border-b border-gray-700">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+            <img src="../../src/assets/Logo.svg" alt="" />
+          </div>
+          <h1 class="text-xl font-bold">Healthcare</h1>
+        </div>
+      </div>
+      <nav
+        class="p-2 md:p-6 flex flex-row md:flex-col gap-2 md:gap-0 space-y-0 md:space-y-2 justify-around md:justify-start md:flex-1">
+        <a href="home.html"
+          class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
+          <i data-lucide="home" class="w-5 h-5"></i><span>Home</span>
+        </a>
+        <a href="schedules.html"
+          class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
+          <i data-lucide="calendar" class="w-5 h-5"></i><span>Schedules</span>
+        </a>
+        <a href="earnings.html"
+          class="nav-link active flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
+          <i data-lucide="dollar-sign" class="w-5 h-5"></i><span>Earnings</span>
+        </a>
+        <a href="profile.html"
+          class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
+          <i data-lucide="user" class="w-5 h-5"></i><span>Profile</span>
+        </a>
+        <div class="hidden md:block mt-auto border-t border-gray-600 pt-3"></div>
+        <a href="../../api/auth/logout.php"
+          class="flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:bg-red-600 transition text-red-300 hover:text-white text-[10px] md:text-base">
+          <i data-lucide="log-out" class="w-5 h-5"></i><span>Logout</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="ml-0 md:ml-64 flex-1 overflow-y-auto pb-20 md:pb-0">
+      <div class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
+        <div class="px-8 py-4">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-800">
+              Earnings Dashboard
+            </h2>
+            <p id="current-date" class="text-sm text-gray-500"></p>
           </div>
         </div>
-        <nav
-          class="p-2 md:p-6 flex flex-row md:flex-col gap-2 md:gap-0 space-y-0 md:space-y-2 justify-around md:justify-start md:flex-1"
-        >
-          <a
-            href="home.html"
-            class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base"
-          >
-            <i data-lucide="home" class="w-5 h-5"></i><span>Home</span>
-          </a>
-          <a
-            href="schedules.html"
-            class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base"
-          >
-            <i data-lucide="calendar" class="w-5 h-5"></i><span>Schedules</span>
-          </a>
-          <a
-            href="earnings.html"
-            class="nav-link active flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base"
-          >
-            <i data-lucide="dollar-sign" class="w-5 h-5"></i
-            ><span>Earnings</span>
-          </a>
-          <a
-            href="profile.html"
-            class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base"
-          >
-            <i data-lucide="user" class="w-5 h-5"></i><span>Profile</span>
-          </a>
-          <div
-            class="hidden md:block mt-auto border-t border-gray-600 pt-3"
-          ></div>
-          <a
-            href="../../api/auth/logout.php"
-            class="flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:bg-red-600 transition text-red-300 hover:text-white text-[10px] md:text-base"
-          >
-            <i data-lucide="log-out" class="w-5 h-5"></i><span>Logout</span>
-          </a>
-        </nav>
-      </aside>
+      </div>
 
-      <!-- MAIN CONTENT -->
-      <main class="ml-0 md:ml-64 flex-1 overflow-y-auto pb-20 md:pb-0">
-        <div
-          class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm"
-        >
-          <div class="px-8 py-4">
-            <div>
-              <h2 class="text-2xl font-bold text-gray-800">
-                Earnings Dashboard
-              </h2>
-              <p id="current-date" class="text-sm text-gray-500"></p>
-            </div>
-          </div>
-        </div>
-
-        <div class="p-8">
-          <!-- Stats Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white rounded-xl card-shadow p-6 stat-card">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-gray-600 text-sm font-medium">
-                    Total Earnings
-                  </p>
-                  <p
-                    id="totalEarnings"
-                    class="text-4xl font-bold text-gray-900 mt-2"
-                  >
-                    $0
-                  </p>
-                </div>
-                <div
-                  class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center"
-                >
-                  <i data-lucide="wallet" class="w-7 h-7 primary-color"></i>
-                </div>
+      <div class="p-8">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="bg-white rounded-xl card-shadow p-6 stat-card">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-gray-600 text-sm font-medium">
+                  Total Earnings
+                </p>
+                <p id="totalEarnings" class="text-4xl font-bold text-gray-900 mt-2">
+                  $0
+                </p>
               </div>
-            </div>
-            <div class="bg-white rounded-xl card-shadow p-6 stat-card">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-gray-600 text-sm font-medium">
-                    Completed Appointments
-                  </p>
-                  <p
-                    id="totalCompleted"
-                    class="text-4xl font-bold text-gray-900 mt-2"
-                  >
-                    0
-                  </p>
-                </div>
-                <div
-                  class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center"
-                >
-                  <i
-                    data-lucide="check-circle"
-                    class="w-7 h-7 primary-color"
-                  ></i>
-                </div>
-              </div>
-            </div>
-            <div class="bg-white rounded-xl card-shadow p-6 stat-card">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-gray-600 text-sm font-medium">
-                    Average Per Visit
-                  </p>
-                  <p
-                    id="avgPerVisit"
-                    class="text-4xl font-bold text-gray-900 mt-2"
-                  >
-                    $0
-                  </p>
-                </div>
-                <div
-                  class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center"
-                >
-                  <i
-                    data-lucide="trending-up"
-                    class="w-7 h-7 primary-color"
-                  ></i>
-                </div>
+              <div class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center">
+                <i data-lucide="wallet" class="w-7 h-7 primary-color"></i>
               </div>
             </div>
           </div>
-
-          <!-- Transactions Table -->
-          <div class="bg-white rounded-xl card-shadow overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100">
-              <h3 class="text-lg font-bold text-gray-900">
-                Transaction History
-              </h3>
+          <div class="bg-white rounded-xl card-shadow p-6 stat-card">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-gray-600 text-sm font-medium">
+                  Completed Appointments
+                </p>
+                <p id="totalCompleted" class="text-4xl font-bold text-gray-900 mt-2">
+                  0
+                </p>
+              </div>
+              <div class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center">
+                <i data-lucide="check-circle" class="w-7 h-7 primary-color"></i>
+              </div>
             </div>
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead class="bg-gray-50">
-                  <tr class="text-left text-sm font-semibold text-gray-600">
-                    <th class="px-6 py-3">Appointment Date</th>
-                    <th class="px-6 py-3">Patient Name</th>
-                    <th class="px-6 py-3">Appointment ID</th>
-                    <th class="px-6 py-3">Amount</th>
-                    <th class="px-6 py-3">Payment Date</th>
-                    <th class="px-6 py-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody id="earningsTable" class="divide-y divide-gray-100">
-                  <!-- Empty table body - will be populated when data exists -->
-                </tbody>
-              </table>
+          </div>
+          <div class="bg-white rounded-xl card-shadow p-6 stat-card">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-gray-600 text-sm font-medium">
+                  Average Per Visit
+                </p>
+                <p id="avgPerVisit" class="text-4xl font-bold text-gray-900 mt-2">
+                  $0
+                </p>
+              </div>
+              <div class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center">
+                <i data-lucide="trending-up" class="w-7 h-7 primary-color"></i>
+              </div>
             </div>
           </div>
         </div>
-      </main>
-    </div>
 
-    <script>
-      let earningsData = [];
+        <!-- Transactions Table -->
+        <div class="bg-white rounded-xl card-shadow overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100">
+            <h3 class="text-lg font-bold text-gray-900">
+              Transaction History
+            </h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50">
+                <tr class="text-left text-sm font-semibold text-gray-600">
+                  <th class="px-6 py-3">Appointment Date</th>
+                  <th class="px-6 py-3">Patient Name</th>
+                  <th class="px-6 py-3">Appointment ID</th>
+                  <th class="px-6 py-3">Amount</th>
+                  <th class="px-6 py-3">Payment Date</th>
+                  <th class="px-6 py-3">Status</th>
+                </tr>
+              </thead>
+              <tbody id="earningsTable" class="divide-y divide-gray-100">
+                <!-- Empty table body - will be populated when data exists -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
 
-      function updateCurrentDate() {
-        const options = {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        };
-        document.getElementById("current-date").textContent =
-          new Date().toLocaleDateString("en-US", options);
-      }
+  <script>
+    let earningsData = [];
 
-      async function loadEarnings() {
-        try {
-          const response = await fetch(
-            "../../api/doctor/get_earnings.php?t=" + Date.now(),
-            {
-              credentials: "include",
-              headers: { "Cache-Control": "no-cache" },
-            },
-          );
-          const result = await response.json();
+    function updateCurrentDate() {
+      const options = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+      document.getElementById("current-date").textContent =
+        new Date().toLocaleDateString("en-US", options);
+    }
 
-          if (result.status === "success") {
-            earningsData = result.data || [];
-            renderDashboard();
-          } else {
-            earningsData = [];
-            renderDashboard();
-          }
-        } catch (error) {
-          console.error("Fetch error:", error);
+    async function loadEarnings() {
+      try {
+        const response = await fetch(
+          "../../api/doctor/get_earnings.php?t=" + Date.now(),
+          {
+            credentials: "include",
+            headers: { "Cache-Control": "no-cache" },
+          },
+        );
+        const result = await response.json();
+
+        if (result.status === "success") {
+          earningsData = result.data || [];
+          renderDashboard();
+        } else {
           earningsData = [];
           renderDashboard();
         }
+      } catch (error) {
+        console.error("Fetch error:", error);
+        earningsData = [];
+        renderDashboard();
       }
+    }
 
-      function renderDashboard() {
-        const total = earningsData.reduce(
-          (sum, item) => sum + (item.amount || 0),
-          0,
-        );
-        const count = earningsData.length;
-        const avg = count > 0 ? total / count : 0;
+    function renderDashboard() {
+      const total = earningsData.reduce(
+        (sum, item) => sum + (item.amount || 0),
+        0,
+      );
+      const count = earningsData.length;
+      const avg = count > 0 ? total / count : 0;
 
-        document.getElementById("totalEarnings").textContent =
-          `$${total.toFixed(2)}`;
-        document.getElementById("totalCompleted").textContent = count;
-        document.getElementById("avgPerVisit").textContent =
-          `$${avg.toFixed(2)}`;
+      document.getElementById("totalEarnings").textContent =
+        `$${total.toFixed(2)}`;
+      document.getElementById("totalCompleted").textContent = count;
+      document.getElementById("avgPerVisit").textContent =
+        `$${avg.toFixed(2)}`;
 
-        renderTable();
+      renderTable();
+      lucide.createIcons();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("earningsTable");
+
+      if (!earningsData || earningsData.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="px-6 py-16 text-center">
+              <div class="flex flex-col items-center justify-center">
+                <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-gray-100">
+                    <i data-lucide="receipt" class="w-8 h-8 text-gray-400"></i>
+                </div>
+                <p class="text-base font-semibold text-gray-700">No Transactions Yet</p>
+                <p class="text-sm text-gray-500 mt-1 max-w-sm">Your payment history will appear here once you successfully complete appointments.</p>
+              </div>
+            </td>
+          </tr>
+        `;
         lucide.createIcons();
+        return;
       }
 
-      function renderTable() {
-        const tbody = document.getElementById("earningsTable");
-
-        if (!earningsData || earningsData.length === 0) {
-          tbody.innerHTML = "";
-          return;
-        }
-
-        tbody.innerHTML = earningsData
-          .map(
-            (item) => `
+      tbody.innerHTML = earningsData
+        .map(
+          (item) => `
                 <tr class="hover:bg-gray-50 border-b border-gray-100">
                     <td class="px-6 py-3 text-sm text-gray-700">${item.app_date || "-"}</td>
                     <td class="px-6 py-3 text-sm font-medium text-gray-800">${escapeHtml(item.patient_name || "Unknown Patient")}</td>
@@ -337,25 +338,26 @@
                     <td class="px-6 py-3"><span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">${item.status || "Paid"}</span></td>
                 </tr>
             `,
-          )
-          .join("");
-      }
+        )
+        .join("");
+    }
 
-      function escapeHtml(str) {
-        if (!str) return "";
-        return str.replace(/[&<>]/g, function (m) {
-          if (m === "&") return "&amp;";
-          if (m === "<") return "&lt;";
-          if (m === ">") return "&gt;";
-          return m;
-        });
-      }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        updateCurrentDate();
-        loadEarnings();
-        lucide.createIcons();
+    function escapeHtml(str) {
+      if (!str) return "";
+      return str.replace(/[&<>]/g, function (m) {
+        if (m === "&") return "&amp;";
+        if (m === "<") return "&lt;";
+        if (m === ">") return "&gt;";
+        return m;
       });
-    </script>
-  </body>
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      updateCurrentDate();
+      loadEarnings();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+
 </html>
