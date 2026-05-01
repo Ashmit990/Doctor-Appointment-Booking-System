@@ -200,6 +200,9 @@ class ScheduleSetupModal {
         });
         
         wrapper.appendChild(slot);
+        
+        // Update data immediately when a new slot is added
+        this.updateScheduleData();
     }
     
     removeDaySection(day) {
@@ -325,6 +328,9 @@ class ScheduleSetupModal {
     
     async handleSubmit() {
         console.log('Submitting schedule...');
+        
+        // Ensure schedule data is perfectly in sync with DOM before validating and submitting
+        this.updateScheduleData();
         
         // Validate schedule
         if (!this.validateSchedule()) {
