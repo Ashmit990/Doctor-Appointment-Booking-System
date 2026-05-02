@@ -171,8 +171,8 @@
       }
       .modal-body {
         padding: 20px 24px;
-        max-height: 60vh;
-        overflow-y: auto;
+        max-height: none;
+        overflow-y: visible;
       }
       .modal-footer {
         padding: 16px 24px;
@@ -303,7 +303,7 @@
     </style>
   </head>
 
-  <body class="overflow-x-hidden tracking-[1.1px]">
+  <body class="overflow-hidden h-screen tracking-[1.1px]">
     <!-- BACK BUTTON -->
     <div class="back-button" onclick="goToLandingPage()">
       <svg
@@ -370,7 +370,7 @@
           </button>
         </div>
         <div class="modal-body">
-          <div class="grid grid-cols-1 gap-2" id="professionOptionsList"></div>
+          <div class="grid grid-cols-2 gap-3" id="professionOptionsList"></div>
         </div>
         <div class="modal-footer">
           <button
@@ -389,15 +389,15 @@
       </div>
     </div>
 
-    <div class="flex min-h-screen w-full relative animate-fade-in">
+    <div class="flex h-screen w-full relative animate-fade-in">
       <!-- ── Left Panel ── -->
       <div
-        class="w-full lg:w-[45%] flex flex-col justify-center px-8 sm:px-10 xl:px-20 2xl:px-24 z-20 relative bg-[#F8FAFB] min-h-screen"
+        class="w-full lg:w-[45%] flex flex-col justify-center px-8 sm:px-10 xl:px-20 2xl:px-24 z-20 relative bg-[#F8FAFB] h-screen"
       >
-        <div class="max-w-md w-full mx-auto lg:mx-0 py-8">
+        <div class="max-w-md w-full mx-auto lg:mx-0 py-4">
           <!-- Logo -->
           <div class="mb-8 flex flex-col items-start">
-            <div class="flex items-center gap-3 mb-6">
+            <div class="flex items-center gap-3 mb-4">
               <img
                 src="../../src/assets/logo.svg"
                 alt="Healthcare Logo"
@@ -418,7 +418,7 @@
           </div>
 
           <!-- Step Indicators -->
-          <div class="step-indicator">
+          <div class="step-indicator mb-6">
             <span class="step-badge active" id="step1Badge">1. Identity</span>
             <span class="step-badge" id="step2Badge"
               >2. Contact &amp; Security</span
@@ -427,7 +427,7 @@
 
           <form id="signupForm" novalidate>
             <!-- ── STEP 1 ── -->
-            <div id="step1" class="step-content space-y-5 xl:space-y-6">
+            <div id="step1" class="step-content space-y-4 xl:space-y-5">
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
@@ -618,7 +618,7 @@
             <!-- ── STEP 2 ── -->
             <div
               id="step2"
-              class="step-content step-hidden space-y-5 xl:space-y-6"
+              class="step-content step-hidden space-y-4 xl:space-y-5"
             >
               <div class="group">
                 <label
