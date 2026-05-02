@@ -151,7 +151,7 @@ function renderScheduleCalendar() {
     const prevMonthDays = new Date(year, month, 0).getDate();
     for (let i = prevMonthDays - firstDay + 1; i <= prevMonthDays; i++) {
       const dayDiv = document.createElement("div");
-      dayDiv.className = "calendar-day text-gray-300 rounded-lg";
+      dayDiv.className = "calendar-day text-gray-300 rounded-md";
       dayDiv.textContent = i;
       daysContainer.appendChild(dayDiv);
     }
@@ -162,8 +162,7 @@ function renderScheduleCalendar() {
     // Current month dates
     for (let i = 1; i <= daysInMonth; i++) {
       const dayDiv = document.createElement("div");
-      dayDiv.className =
-        "calendar-day cursor-pointer hover:bg-primary-light rounded-lg";
+      dayDiv.className = "calendar-day cursor-pointer rounded-md";
       dayDiv.textContent = i;
 
       // Add green checkmark if doctor has completed appointments for this date
@@ -179,15 +178,18 @@ function renderScheduleCalendar() {
       
       // Mark selected date and today's date
       if (dateStr === todayStr) {
+        dayDiv.classList.add('selected');
         dayDiv.style.backgroundColor = "#0d7377";
         dayDiv.style.color = "white";
         dayDiv.style.fontWeight = "bold";
-        dayDiv.style.borderRadius = "8px";
+        dayDiv.style.borderRadius = "10px";
       } else if (dateStr === selectedScheduleDate) {
-        dayDiv.style.backgroundColor = "#bfdbfe";
-        dayDiv.style.color = "#1e3a8a";
+        dayDiv.classList.add('selected');
+        dayDiv.style.backgroundColor = "#0a9db5";
+        dayDiv.style.color = "white";
         dayDiv.style.fontWeight = "bold";
-        dayDiv.style.borderRadius = "8px";
+        dayDiv.style.borderRadius = "10px";
+        dayDiv.style.boxShadow = "0 4px 12px rgba(13, 115, 119, 0.25)";
       } else if (dateStr < todayStr) {
         dayDiv.style.color = "#d1d5db";
       }
@@ -201,11 +203,53 @@ function renderScheduleCalendar() {
     const remainingDays = 42 - (firstDay + daysInMonth);
     for (let i = 1; i <= remainingDays; i++) {
       const dayDiv = document.createElement("div");
-      dayDiv.className = "calendar-day text-gray-300 rounded-lg";
+      dayDiv.className = "calendar-day text-gray-300 rounded-md";
       dayDiv.textContent = i;
       daysContainer.appendChild(dayDiv);
     }
+
+    updateScheduleInsights(selectedScheduleDate, [], []);
   });
+}
+
+function updateScheduleInsights(date, availability = [], appointments = []) {
+  const titleEl = document.getElementById("schedule-insight-title");
+  const copyEl = document.getElementById("schedule-insight-copy");
+  const openEl = document.getElementById("insight-open-slots");
+  const bookedEl = document.getElementById("insight-booked-slots");
+  const fillEl = document.getElementById("insight-fill-rate");
+
+  if (!titleEl || !copyEl || !openEl || !bookedEl || !fillEl) return;
+
+  if (!date) {
+    titleEl.textContent = "Select a date to see your flow";
+    copyEl.textContent = "Your daily schedule summary will appear here with slot usage, booking pressure, and a quick action cue.";
+    openEl.textContent = "--";
+    bookedEl.textContent = "--";
+    fillEl.textContent = "--%";
+    return;
+  }
+
+  const openCount = availability.filter((slot) => slot.status === "Available").length;
+  const bookedCount = appointments.filter((apt) => apt.status !== "Completed").length;
+  const completedCount = appointments.filter((apt) => apt.status === "Completed").length;
+  const totalCount = availability.length || (bookedCount + completedCount);
+  const fillRate = totalCount > 0 ? Math.round((bookedCount / totalCount) * 100) : 0;
+
+  titleEl.textContent = `${bookedCount} booked appointment${bookedCount === 1 ? "" : "s"} on this day`;
+  copyEl.textContent = totalCount > 0
+    ? `${openCount} open slot${openCount === 1 ? "" : "s"} remain, with ${completedCount} completed consultation${completedCount === 1 ? "" : "s"}.`
+    : "No schedule data was found for this date yet. Add a slot to start building the day.";
+  openEl.textContent = String(openCount);
+  bookedEl.textContent = String(bookedCount);
+  fillEl.textContent = `${fillRate}%`;
+}
+
+function jumpToTodaySchedule() {
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  scheduleMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  selectScheduleDate(dateStr);
 }
 
 
@@ -277,6 +321,7 @@ async function loadScheduleForDate(date) {
     const appointments = aptData.status === "success" ? aptData.data : [];
     storedAppointmentsForModal = appointments;
     fetchedAvailability = availData.status === "success" ? (availData.data || []) : [];
+    updateScheduleInsights(date, availability, appointments);
 
     // Compare date with today to disable past slots
     const today = new Date();
@@ -324,7 +369,7 @@ async function loadScheduleForDate(date) {
           // Slot has an appointment
           if (apt.status === "Completed") {
             gridContainer.innerHTML += `
-              <div onclick="openAppointmentModal(${apt.apt_id})" class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition shadow-sm">
+              <div onclick="openAppointmentModal(${apt.apt_id})" class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-100 transition shadow-sm">
                 <div class="flex items-center gap-3">
                   <i data-lucide="check-circle" class="text-gray-500 w-5 h-5"></i>
                   <div>
@@ -336,51 +381,57 @@ async function loadScheduleForDate(date) {
               </div>`;
           } else {
             gridContainer.innerHTML += `
-              <div onclick="openAppointmentModal(${apt.apt_id})" class="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-xl cursor-pointer hover:bg-blue-100 transition shadow-sm">
+              <div onclick="openAppointmentModal(${apt.apt_id})" class="flex items-center justify-between p-5 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-md cursor-pointer hover:border-blue-400 hover:shadow-md transition shadow-sm">
                 <div class="flex items-center gap-3">
-                  <i data-lucide="user" class="text-blue-600 w-5 h-5"></i>
+                  <div class="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center">
+                    <i data-lucide="user" class="text-blue-700 w-5 h-5"></i>
+                  </div>
                   <div>
-                    <span class="font-semibold text-blue-900">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
-                    <p class="text-sm font-medium text-blue-700 mt-0.5">${apt.patient_name} <span class="opacity-75 font-normal ml-1">(${apt.status})</span></p>
+                    <span class="font-bold text-blue-900">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
+                    <p class="text-sm font-semibold text-blue-800 mt-0.5">${apt.patient_name} <span class="opacity-80 font-normal ml-1 bg-blue-200 px-2 py-0.5 rounded-full text-xs">${apt.status}</span></p>
                   </div>
                 </div>
-                <button class="bg-white border border-blue-200 text-blue-600 px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-50 transition">View Details</button>
+                <button class="bg-white hover:bg-blue-50 border border-blue-300 hover:border-blue-400 text-blue-700 px-5 py-2 rounded-md text-sm font-bold transition-all shadow-sm">View Details</button>
               </div>`;
           }
         } else if (slot.status === 'Available') {
           // Available slot (no appointment)
           gridContainer.innerHTML += `
-            <div class="flex items-center justify-between p-4 bg-white border-2 border-green-400 rounded-xl shadow-sm hover:border-green-500 transition">
+            <div class="flex items-center justify-between p-5 bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-400 rounded-md shadow-sm hover:border-green-500 hover:shadow-md transition">
               <div class="flex items-center gap-3">
-                <i data-lucide="clock" class="text-green-500 w-5 h-5"></i>
+                <div class="w-10 h-10 bg-green-200 rounded-full flex items-center justify-center">
+                  <i data-lucide="clock" class="text-green-700 w-5 h-5"></i>
+                </div>
                 <div>
                   <span class="font-bold text-gray-900">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
-                  <p class="text-xs text-green-600 font-medium mt-0.5">Available for booking</p>
+                  <p class="text-xs text-green-700 font-semibold mt-0.5 flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i>Available for booking</p>
                 </div>
               </div>
-              <button onclick="openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})" class="bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 px-4 py-1.5 rounded-lg text-sm font-semibold transition ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}">
+              <button onclick="openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})" class="bg-green-500 hover:bg-green-600 text-white border border-green-600 px-5 py-2 rounded-md text-sm font-bold transition-all shadow-[0_2px_8px_rgba(34,197,94,0.3)] ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}">
                 Edit Slot
               </button>
             </div>`;
         } else if (slot.status === 'Blocked') {
           // Blocked slot
           gridContainer.innerHTML += `
-            <div class="flex items-center justify-between p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+            <div class="flex items-center justify-between p-5 bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-300 rounded-md hover:border-yellow-400 hover:shadow-md transition shadow-sm">
               <div class="flex items-center gap-3">
-                <i data-lucide="lock" class="text-yellow-500 w-5 h-5"></i>
+                <div class="w-10 h-10 bg-yellow-200 rounded-full flex items-center justify-center">
+                  <i data-lucide="lock" class="text-yellow-700 w-5 h-5"></i>
+                </div>
                 <div>
-                  <span class="font-medium text-yellow-700">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
-                  <p class="text-xs text-yellow-600 mt-0.5">Blocked</p>
+                  <span class="font-bold text-yellow-800">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
+                  <p class="text-xs text-yellow-700 font-semibold mt-0.5 flex items-center gap-1"><i data-lucide="alert-circle" class="w-3 h-3"></i>Blocked</p>
                 </div>
               </div>
-              <button onclick="openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})" class="bg-white border border-yellow-300 text-yellow-600 hover:bg-yellow-50 px-4 py-1.5 rounded-lg text-sm font-semibold transition shadow-sm ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}">
+              <button onclick="openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})" class="bg-yellow-500 hover:bg-yellow-600 text-white border border-yellow-600 px-5 py-2 rounded-md text-sm font-bold transition-all shadow-[0_2px_8px_rgba(202,138,4,0.3)] ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}">
                 Edit Slot
               </button>
             </div>`;
         } else if (slot.status === 'Closed') {
           // Closed slot (past time)
           gridContainer.innerHTML += `
-            <div class="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-xl opacity-60">
+            <div class="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-md opacity-60">
               <div class="flex items-center gap-3">
                 <i data-lucide="clock-off" class="text-red-400 w-5 h-5"></i>
                 <div>
@@ -400,37 +451,13 @@ async function loadScheduleForDate(date) {
           <p class="text-gray-400 text-sm mt-2">Please set your weekly schedule from the Home page first</p>
         </div>
       `;
+      updateScheduleInsights(date, [], appointments);
     }
     lucide.createIcons();
   } catch (e) {
     console.error('Error loading schedule:', e);
     gridContainer.style.opacity = "1";
-    gridContainer.innerHTML =
-      '<div class="text-center py-12 text-red-500"><p>Failed to load slots. Please try again.</p></div>';
-  }
-}
-
-async function toggleSlot(startTime, endTime, availId, isPast) {
-  if (isPast) {
-    alert("You cannot modify availability for past dates!");
-    return;
-  }
-  const date = selectedScheduleDate;
-
-  if (availId) {
-    const response = await fetch(
-      `../../api/doctor/availability.php?avail_id=${availId}`,
-      { 
-        method: "DELETE",
-        credentials: "include"
-      },
-    );
-    const result = await response.json();
-    if (result.status === "success") {
-      loadScheduleForDate(date);
-    } else {
-      alert("Error toggling slot: " + result.message);
-    }
+    updateScheduleInsights(selectedScheduleDate, [], []);
   }
 }
 
@@ -452,12 +479,12 @@ function openEditSlotModal(start, end, availId, status, isPast) {
     statusEl.textContent = "Available";
     statusEl.className = "inline-block px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800";
     toggleBtn.textContent = "Block Slot";
-    toggleBtn.className = "bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 px-4 py-2 rounded-lg text-sm font-semibold transition";
+    toggleBtn.className = "bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 px-4 py-2 rounded-md text-sm font-semibold transition";
   } else {
     statusEl.textContent = "Blocked";
     statusEl.className = "inline-block px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800";
     toggleBtn.textContent = "Unblock Slot";
-    toggleBtn.className = "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 px-4 py-2 rounded-lg text-sm font-semibold transition";
+    toggleBtn.className = "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 px-4 py-2 rounded-md text-sm font-semibold transition";
   }
   
   document.getElementById("edit-slot-modal").classList.remove("hidden");
@@ -581,9 +608,15 @@ function openManageDayModal() {
     year: "numeric"
   });
   
-  document.getElementById("manage-day-date-display").textContent = `Slots for ${dateDisplay}`;
-  document.getElementById("new-slot-start").value = "";
-  document.getElementById("new-slot-end").value = "";
+  const manageDayDateDisplay = document.getElementById("manage-day-date-display");
+  if (manageDayDateDisplay) {
+    manageDayDateDisplay.textContent = `Slots for ${dateDisplay}`;
+  }
+
+  const newSlotStart = document.getElementById("new-slot-start");
+  const newSlotEnd = document.getElementById("new-slot-end");
+  if (newSlotStart) newSlotStart.value = "";
+  if (newSlotEnd) newSlotEnd.value = "";
   
   renderManageDaySlots();
   document.getElementById("manage-day-modal").classList.remove("hidden");
@@ -602,31 +635,34 @@ function renderManageDaySlots() {
     return;
   }
   
-  fetchedAvailability.forEach(slot => {
+    fetchedAvailability.forEach(slot => {
     let statusBadge = '';
     if (slot.status === 'Available') {
-        statusBadge = `<span class="bg-green-100 text-green-800 text-[10px] px-2 py-0.5 rounded uppercase font-bold">Available</span>`;
+      statusBadge = `<span class="bg-gradient-to-r from-green-500 to-green-600 text-white text-[10px] px-3 py-1 rounded-full uppercase font-bold shadow-sm">Available</span>`;
     } else if (slot.status === 'Blocked') {
-        statusBadge = `<span class="bg-yellow-100 text-yellow-800 text-[10px] px-2 py-0.5 rounded uppercase font-bold">Blocked</span>`;
+      statusBadge = `<span class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white text-[10px] px-3 py-1 rounded-full uppercase font-bold shadow-sm">Blocked</span>`;
     } else if (slot.status === 'Booked' || slot.status === 'Completed') {
-        statusBadge = `<span class="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded uppercase font-bold">${slot.status}</span>`;
+      statusBadge = `<span class="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-[10px] px-3 py-1 rounded-full uppercase font-bold shadow-sm">${slot.status}</span>`;
     } else {
-        statusBadge = `<span class="bg-gray-100 text-gray-800 text-[10px] px-2 py-0.5 rounded uppercase font-bold">${slot.status}</span>`;
+      statusBadge = `<span class="bg-gradient-to-r from-gray-500 to-gray-600 text-white text-[10px] px-3 py-1 rounded-full uppercase font-bold shadow-sm">${slot.status}</span>`;
     }
 
     const disableDelete = slot.status === 'Booked' || slot.status === 'Completed';
 
     listContainer.innerHTML += `
-      <div class="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
-          <div class="flex items-center gap-3">
-              <div>
-                  <span class="font-bold text-gray-900 text-sm">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
-                  <div class="mt-0.5">${statusBadge}</div>
-              </div>
+      <div class="flex items-center justify-between p-4 bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-md hover:border-gray-400 transition shadow-sm">
+        <div class="flex items-center gap-4">
+          <div class="w-10 h-10 bg-white rounded-md flex items-center justify-center border border-gray-200 shadow-sm">
+          <i data-lucide="clock" class="w-5 h-5 text-gray-600"></i>
           </div>
-          <button onclick="removeSlotFromManageModal(${slot.avail_id})" ${disableDelete ? 'disabled class="text-gray-400 cursor-not-allowed p-2"' : 'class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition" title="Delete Slot"'}>
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-          </button>
+          <div>
+            <span class="font-bold text-gray-900 text-sm">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
+            <div class="mt-1.5">${statusBadge}</div>
+          </div>
+        </div>
+        <button onclick="removeSlotFromManageModal(${slot.avail_id})" ${disableDelete ? 'disabled class="text-gray-400 cursor-not-allowed p-2 hover:bg-gray-100 rounded-md transition"' : 'class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-md transition" title="Delete Slot"'}>
+          <i data-lucide="trash-2" class="w-5 h-5"></i>
+        </button>
       </div>
     `;
   });
@@ -941,7 +977,7 @@ async function openAppointmentModal(aptId) {
     
     appointmentLockMsg.classList.remove("hidden");
     appointmentLockMsg.innerHTML = `
-      <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
+      <div class="bg-amber-50 border border-amber-200 rounded-md p-3 mb-3">
         <div class="flex items-start gap-2">
           <i data-lucide="lock" class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0"></i>
           <div>
@@ -1215,7 +1251,7 @@ async function loadPatientHistory(patientId) {
       historyContent.innerHTML = data.data.map(apt => `
         <div class="relative pl-6 border-l-2 border-primary pb-4">
           <div class="absolute w-3 h-3 bg-primary rounded-full -left-1.5 top-1"></div>
-          <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
+          <div class="bg-gray-50 p-3 rounded-md border border-gray-100">
             <div class="flex justify-between items-start mb-2">
               <div>
                 <p class="font-semibold text-gray-900 text-xs">${apt.doctor_name || '-'}</p>

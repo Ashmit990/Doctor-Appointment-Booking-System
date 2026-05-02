@@ -24,6 +24,17 @@
             display: none;
         }
 
+        #appointment-modal .appointment-console-scroll {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        #appointment-modal .appointment-console-scroll::-webkit-scrollbar {
+            width: 0px;
+            height: 0px;
+            display: none;
+        }
+
         ::-webkit-scrollbar-track {
             background: transparent;
         }
@@ -84,8 +95,7 @@
         }
 
         .card-hover:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 25px 60px rgba(13, 115, 119, 0.12);
+            box-shadow: 0 20px 50px rgba(13, 115, 119, 0.12);
         }
 
         .sidebar {
@@ -231,9 +241,285 @@
             }
         }
 
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes floatIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
         .fade-in-up {
             animation: fadeInUp 0.5s ease forwards;
         }
+
+        /* Premium Card Enhancements */
+        .premium-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(13, 115, 119, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .premium-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(13, 115, 119, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Enhanced Hero Section */
+        .hero-premium {
+            background: linear-gradient(135deg, #0d7377 0%, #0a5a5d 50%, #073b3e 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-premium::before {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .hero-premium::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -30%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .stat-card-premium {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stat-card-premium:hover {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Enhanced Appointment Card */
+        .appointment-card-premium {
+            position: relative;
+            border-left: 4px solid transparent;
+            background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.92) 100%);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .appointment-card-premium::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, #0d7377, #0a5a5d);
+            border-radius: 4px 0 0 4px;
+        }
+
+        .appointment-card-premium:hover {
+            box-shadow: 0 20px 50px rgba(13, 115, 119, 0.15);
+            background: linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(250,252,253,0.98) 100%);
+        }
+
+        /* Premium Section Title */
+        .section-title-premium {
+            position: relative;
+            padding-bottom: 12px;
+        }
+
+        .section-title-premium::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #0d7377, #0a5a5d);
+            border-radius: 2px;
+            box-shadow: 0 2px 8px rgba(13, 115, 119, 0.2);
+        }
+
+        /* Glowing Elements */
+        .glow-accent {
+            position: relative;
+        }
+
+        .glow-accent::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(135deg, rgba(13, 115, 119, 0.1), rgba(10, 90, 93, 0.05));
+            border-radius: inherit;
+            pointer-events: none;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        /* Top Bar Premium */
+        .topbar-premium {
+            background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(250,252,253,0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(13, 115, 119, 0.06);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Enhanced Calendar */
+        .calendar-premium {
+            background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.92) 100%);
+        }
+
+        .calendar-day-premium {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(13, 115, 119, 0.03);
+            border-radius: 10px;
+        }
+
+        .calendar-day-premium:hover {
+            background: linear-gradient(135deg, rgba(13, 115, 119, 0.15), rgba(13, 115, 119, 0.08));
+            box-shadow: 0 8px 20px rgba(13, 115, 119, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .calendar-day-premium.selected {
+            background: linear-gradient(135deg, #0d7377, #0a5a5d);
+            color: white;
+            box-shadow: 0 10px 30px rgba(13, 115, 119, 0.3);
+        }
+
+        .calendar-day-premium.has-appointment {
+            position: relative;
+            font-weight: bold;
+        }
+
+        .calendar-day-premium.has-appointment::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%) scale(1.2);
+            width: 6px;
+            height: 6px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+        }
+
+        .calendar-day-premium.has-completed {
+            position: relative;
+            font-weight: bold;
+            color: #059669;
+        }
+
+        .calendar-day-premium.has-completed::after {
+            content: '✓';
+            position: absolute;
+            bottom: -4px;
+            right: 2px;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            line-height: 1;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Status Badge Premium */
+        .status-badge-premium {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.1));
+            color: #b45309;
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .status-confirmed {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(22, 163, 74, 0.1));
+            color: #15803d;
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .status-completed {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));
+            color: #1e40af;
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        /* Elevated Shadow Variations */
+        .shadow-elevated {
+            box-shadow: 
+                0 1px 3px rgba(0, 0, 0, 0.08),
+                0 4px 12px rgba(0, 0, 0, 0.08),
+                0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .shadow-soft {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Info sections with elegant styling */
+        .info-section-premium {
+            background: linear-gradient(135deg, rgba(13, 115, 119, 0.03) 0%, rgba(10, 90, 93, 0.02) 100%);
+            border: 1px solid rgba(13, 115, 119, 0.08);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        /* Animation delays */
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
     </style>
 </head>
 
@@ -285,7 +571,7 @@
         <!-- MAIN CONTENT -->
         <main class="ml-0 md:ml-64 flex-1 overflow-y-auto pb-20 md:pb-0">
             <!-- TOP BAR -->
-            <div class="sticky top-0 z-30 bg-gradient-to-r from-white to-gray-50 border-b border-gray-100 shadow-sm">
+            <div class="sticky top-0 z-30 topbar-premium">
                 <div class="px-4 md:px-5 py-4 flex justify-between items-center gap-4 overflow-visible flex-wrap">
                     <div class="min-w-0 flex-1">
                         <h2
@@ -297,14 +583,14 @@
                         <input id="doctorSearchInput" type="text" placeholder="Search patient by name or contact"
                             class="w-full sm:w-80 rounded-lg border border-gray-200 bg-white group-hover:border-gray-300 group-focus-within:border-[#0d7377] pl-4 pr-12 py-2.5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-[#0d7377] focus:ring-opacity-10 transition duration-300" />
                         <button id="doctorSearchBtn" type="button"
-                            class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#0d7377] hover:bg-[#0d7377] hover:bg-opacity-10 transition duration-300">
+                            class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-md flex items-center justify-center text-gray-400 hover:text-[#0d7377] hover:bg-[#0d7377] hover:bg-opacity-10 transition duration-300">
                             <i data-lucide="search" class="w-4 h-4"></i>
                         </button>
                     </div>
                     <div class="relative z-[200] flex shrink-0 items-center">
                         <button id="doctorNotificationBtn" type="button"
                             onclick="window.__doctorNotificationBarToggle && window.__doctorNotificationBarToggle(event)"
-                            class="relative isolate cursor-pointer w-12 h-12 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 rounded-xl flex items-center justify-center transition duration-300 hover:border-[#0d7377] hover:shadow-lg"
+                            class="relative isolate cursor-pointer w-12 h-12 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 rounded-md flex items-center justify-center transition duration-300 hover:border-[#0d7377] hover:shadow-lg"
                             title="Notifications">
                             <span class="pointer-events-none flex items-center justify-center" aria-hidden="true"><i
                                     data-lucide="bell" class="w-5 h-5"></i></span>
@@ -320,75 +606,72 @@
                 <div class="space-y-5">
                     <!-- GREETING -->
                     <div>
-                        <h1 id="greeting-message" class="text-3xl font-bold text-gray-900">Hello, Doctor</h1>
-                        <p class="text-gray-600 mt-2">Welcome to your dashboard</p>
+                        <h1 id="greeting-message" class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">Hello, Doctor</h1>
+                        <p class="text-gray-500 mt-3 text-lg font-medium">Welcome back to your professional dashboard</p>
                     </div>
 
                     <!-- HERO SECTION WITH STATS -->
                     <section
-                        class="bg-gradient-to-br from-[#0d7377] via-[#0a5a5d] to-[#084b4d] rounded-[20px] p-6 md:p-8 mb-6 text-white relative overflow-hidden shadow-[0_20px_50px_rgba(13,115,119,0.3)]">
-                        <div class="absolute inset-0 overflow-hidden rounded-[20px]">
+                        class="hero-premium rounded-md p-8 md:p-10 mb-8 text-white relative overflow-hidden shadow-elevated">
+                        <div class="absolute inset-0 overflow-hidden rounded-md">
                             <div
-                                class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -mr-48 -mt-48 blur-3xl">
+                                class="absolute top-0 right-0 w-96 h-96 bg-white/8 rounded-full -mr-48 -mt-48 blur-3xl">
                             </div>
                             <div
                                 class="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full -ml-48 -mb-48 blur-3xl">
                             </div>
+                            <div class="absolute top-1/3 right-1/4 w-64 h-64 bg-white/3 rounded-full blur-2xl"></div>
                         </div>
-                        <div class="relative z-10 max-w-2xl">
-                            <p class="text-2xl font-bold mb-3">Welcome back, Doctor</p>
-                            <p class="text-sm opacity-90 mb-6 leading-relaxed">
-                                View today's visits, patient statistics, and completed appointments at a glance.
-                            </p>
+                        <div class="relative z-10">
+                            <div class="flex items-start justify-between gap-8 mb-8">
+                                <div class="flex-1">
+                                    <p class="text-white/70 text-sm font-medium mb-3">Welcome back</p>
+                                    <p class="text-3xl md:text-4xl font-bold">Ready for your patients today?</p>
+                                </div>
+                                <div class="hidden lg:block text-5xl opacity-30 flex-shrink-0">👨‍⚕️</div>
+                            </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <div
-                                    class="bg-white/15 backdrop-blur-xl rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition duration-300 cursor-pointer group">
-                                    <p class="text-xs opacity-85 mb-2 font-semibold uppercase tracking-wide">Today's
-                                        Visits</p>
-                                    <h3 id="stat-today-visits"
-                                        class="text-3xl font-bold group-hover:scale-110 transition-transform duration-300">
-                                        0</h3>
+                                <div class="stat-card-premium backdrop-blur-xl rounded-md p-4 border border-white/25 hover:bg-white/20 transition duration-300 cursor-pointer">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <p class="text-xs opacity-75 font-semibold">TODAY'S VISITS</p>
+                                        <i data-lucide="calendar-clock" class="w-4 h-4 opacity-70"></i>
+                                    </div>
+                                    <h3 id="stat-today-visits" class="text-3xl font-bold">0</h3>
                                 </div>
 
-                                <div
-                                    class="bg-white/15 backdrop-blur-xl rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition duration-300 cursor-pointer group">
-                                    <p class="text-xs opacity-85 mb-2 font-semibold uppercase tracking-wide">Total
-                                        Patients</p>
-                                    <h3 id="stat-total-patients"
-                                        class="text-3xl font-bold group-hover:scale-110 transition-transform duration-300">
-                                        0</h3>
+                                <div class="stat-card-premium backdrop-blur-xl rounded-md p-4 border border-white/25 hover:bg-white/20 transition duration-300 cursor-pointer">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <p class="text-xs opacity-75 font-semibold">TOTAL PATIENTS</p>
+                                        <i data-lucide="users" class="w-4 h-4 opacity-70"></i>
+                                    </div>
+                                    <h3 id="stat-total-patients" class="text-3xl font-bold">0</h3>
                                 </div>
 
-                                <div
-                                    class="bg-white/15 backdrop-blur-xl rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition duration-300 cursor-pointer group">
-                                    <p class="text-xs opacity-85 mb-2 font-semibold uppercase tracking-wide">Completed
-                                    </p>
-                                    <h3 id="stat-completed"
-                                        class="text-3xl font-bold group-hover:scale-110 transition-transform duration-300">
-                                        0</h3>
+                                <div class="stat-card-premium backdrop-blur-xl rounded-md p-4 border border-white/25 hover:bg-white/20 transition duration-300 cursor-pointer">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <p class="text-xs opacity-75 font-semibold">COMPLETED</p>
+                                        <i data-lucide="check-circle" class="w-4 h-4 opacity-70"></i>
+                                    </div>
+                                    <h3 id="stat-completed" class="text-3xl font-bold">0</h3>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="hidden lg:block absolute right-10 bottom-2 text-9xl opacity-10">
-                            👨‍⚕️
                         </div>
                     </section>
 
                     <!-- CALENDAR AND APPOINTMENTS -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div
-                            class="col-span-1 bg-white rounded-[16px] card-shadow p-5 overflow-x-auto w-full card-hover">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 id="calendar-month" class="font-bold text-gray-900 text-lg">April 2026</h3>
+                            class="col-span-1 premium-card calendar-premium rounded-md shadow-elevated p-6 w-full">
+                            <div class="flex items-center justify-between mb-5 pb-4 border-b border-gray-100">
+                                <h3 id="calendar-month" class="font-bold text-gray-900 text-lg section-title-premium">April 2026</h3>
                                 <div class="flex gap-2">
                                     <button onclick="prevMonth()"
-                                        class="p-2 hover:bg-gradient-to-br hover:from-gray-100 hover:to-gray-50 rounded-lg transition duration-300 hover:shadow-md">
+                                        class="p-2.5 hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100 rounded-md transition duration-300 hover:shadow-soft text-gray-600 hover:text-[#0d7377]">
                                         <i data-lucide="chevron-left" class="w-5 h-5"></i>
                                     </button>
                                     <button onclick="nextMonth()"
-                                        class="p-2 hover:bg-gradient-to-br hover:from-gray-100 hover:to-gray-50 rounded-lg transition duration-300 hover:shadow-md">
+                                        class="p-2.5 hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100 rounded-md transition duration-300 hover:shadow-soft text-gray-600 hover:text-[#0d7377]">
                                         <i data-lucide="chevron-right" class="w-5 h-5"></i>
                                     </button>
                                 </div>
@@ -404,14 +687,16 @@
                                 <div>Sat</div>
                             </div>
 
-                            <div id="calendar-days" class="grid grid-cols-7 gap-1.5"></div>
+                            <div id="calendar-days" class="grid grid-cols-7 gap-2"></div>
                         </div>
 
                         <div
-                            class="col-span-1 lg:col-span-2 bg-white rounded-[16px] card-shadow p-5 overflow-x-auto w-full card-hover">
-                            <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <i data-lucide="calendar" class="w-5 h-5 text-[#0d7377]"></i>
-                                Appointments for <span id="selected-date-display" class="text-[#0d7377]">Today</span>
+                            class="col-span-1 lg:col-span-2 premium-card rounded-md shadow-elevated p-6 w-full">
+                            <h3 class="text-lg font-bold text-gray-900 mb-5 flex items-center gap-3 section-title-premium pb-4 border-b border-gray-100">
+                                    <div class="w-8 h-8 rounded-md bg-gradient-to-br from-[#0d7377] to-[#0a5a5d] flex items-center justify-center text-white">
+                                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                                </div>
+                                Appointments for <span id="selected-date-display" class="bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] bg-clip-text text-transparent font-bold">Today</span>
                             </h3>
                             <div id="appointments-container" class="space-y-3">
                                 <div class="animate-pulse flex flex-col gap-3">
@@ -423,14 +708,16 @@
                     </div>
 
                     <!-- COMPLETED APPOINTMENTS PANEL -->
-                    <div class="bg-white rounded-[16px] card-shadow p-5 card-hover">
+                    <div class="premium-card rounded-md shadow-elevated p-6">
                         <div class="flex items-center justify-between mb-5 pb-4 border-b border-gray-100">
-                            <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                            <h3 class="text-lg font-bold text-gray-900 flex items-center gap-3 section-title-premium">
+                                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white">
+                                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                </div>
                                 Completed Appointments
                             </h3>
                             <span id="completed-count"
-                                class="text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 px-3 py-1 rounded-full shadow-md">0</span>
+                                class="text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 px-4 py-2 rounded-full shadow-elevated">0</span>
                         </div>
                         <div id="completed-appointments-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="animate-pulse col-span-1 md:col-span-2 flex flex-col gap-3">
@@ -445,7 +732,7 @@
 
     <!-- Panel outside main/sidebar so nothing stacks over the hit target -->
     <div id="doctorNotificationPanel"
-        class="hidden fixed w-[min(calc(100vw-2rem),390px)] max-w-[calc(100vw-2rem)] bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden z-[300] pointer-events-auto">
+        class="hidden fixed w-[min(calc(100vw-2rem),390px)] max-w-[calc(100vw-2rem)] bg-white rounded-md border border-gray-200 shadow-xl overflow-hidden z-[300] pointer-events-auto">
         <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
             <h3 class="text-sm font-bold text-gray-800">Notifications</h3>
             <button id="doctorMarkAllReadBtn" type="button"
@@ -458,57 +745,60 @@
     <div id="appointment-modal"
         class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-[400] p-4 backdrop-blur-sm transition-opacity">
         <div
-            class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-auto max-h-[90vh] overflow-y-auto border border-gray-100">
+            class="appointment-console-scroll bg-white rounded-md shadow-elevated max-w-2xl w-full mx-auto max-h-[90vh] overflow-y-auto border border-gray-200">
             <div
-                class="sticky top-0 bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white px-6 py-4 flex justify-between items-center shadow-md z-10">
-                <div class="flex items-center gap-3">
+                class="sticky top-0 bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white px-6 py-5 flex justify-between items-center shadow-md z-10 rounded-t-2xl">
+                <div class="flex items-center gap-4">
                     <div
-                        class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md border border-white/20">
-                        <i data-lucide="user" class="w-5 h-5 text-white"></i>
+                        class="w-12 h-12 bg-white/15 rounded-full flex items-center justify-center backdrop-blur-md border border-white/30">
+                        <i data-lucide="user" class="w-6 h-6 text-white"></i>
                     </div>
                     <div>
                         <h3 class="text-lg font-bold leading-tight" id="modal-patient-name">Patient Name</h3>
-                        <p class="text-xs text-teal-100 font-medium">Appointment Console</p>
+                        <p class="text-xs text-teal-100 font-medium opacity-90">Appointment Console</p>
                     </div>
                 </div>
                 <button onclick="closeAppointmentModal()"
-                    class="text-white hover:bg-white/20 p-2 rounded-full transition duration-200">
+                    class="text-white hover:bg-white/20 p-2 rounded-full transition duration-200 hover:scale-110">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
-            <div class="p-5 space-y-5">
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                        <p class="text-gray-500 mb-1 text-[10px] uppercase tracking-wider font-semibold">Patient ID</p>
+            <div class="p-6 space-y-5">
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-md border border-gray-200 hover:border-[#0d7377] transition">
+                        <p class="text-gray-600 mb-2 text-[10px] uppercase tracking-wider font-semibold">Patient ID</p>
                         <p id="modal-patient-id" class="font-bold text-gray-900 text-sm truncate">-</p>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                        <p class="text-gray-500 mb-1 text-[10px] uppercase tracking-wider font-semibold">Date</p>
+                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-md border border-gray-200 hover:border-[#0d7377] transition">
+                        <p class="text-gray-600 mb-2 text-[10px] uppercase tracking-wider font-semibold">Date</p>
                         <p id="modal-apt-date" class="font-bold text-gray-900 text-sm truncate">-</p>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                        <p class="text-gray-500 mb-1 text-[10px] uppercase tracking-wider font-semibold">Time</p>
+                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-md border border-gray-200 hover:border-[#0d7377] transition">
+                        <p class="text-gray-600 mb-2 text-[10px] uppercase tracking-wider font-semibold">Time</p>
                         <p id="modal-apt-time" class="font-bold text-gray-900 text-sm truncate">-</p>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                        <p class="text-gray-500 mb-1 text-[10px] uppercase tracking-wider font-semibold">Room</p>
+                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-md border border-gray-200 hover:border-[#0d7377] transition">
+                        <p class="text-gray-600 mb-2 text-[10px] uppercase tracking-wider font-semibold">Room</p>
                         <p id="modal-room-num" class="font-bold text-gray-900 text-sm truncate">-</p>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                        <p class="text-gray-500 mb-1 text-[10px] uppercase tracking-wider font-semibold">Blood Group</p>
+                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-md border border-gray-200 hover:border-[#0d7377] transition">
+                        <p class="text-gray-600 mb-2 text-[10px] uppercase tracking-wider font-semibold">Blood Group</p>
                         <p id="modal-blood-group" class="font-bold text-gray-900 text-sm truncate">-</p>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                        <p class="text-gray-500 mb-1 text-[10px] uppercase tracking-wider font-semibold">Contact</p>
+                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-md border border-gray-200 hover:border-[#0d7377] transition">
+                        <p class="text-gray-600 mb-2 text-[10px] uppercase tracking-wider font-semibold">Contact</p>
                         <p id="modal-contact" class="font-bold text-gray-900 text-sm truncate">-</p>
                     </div>
                 </div>
 
-                <div class="border-t border-gray-100 pt-4">
-                    <p class="text-gray-500 text-xs mb-1.5 font-semibold uppercase tracking-wider">Reason for Visit</p>
+                <div class="border-t border-gray-200 pt-5">
+                    <p class="text-gray-600 text-xs mb-3 font-semibold uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="message-square" class="w-4 h-4 text-[#0d7377]"></i>
+                        Reason for Visit
+                    </p>
                     <p id="modal-reason"
-                        class="font-medium text-gray-800 bg-gray-50 p-3.5 rounded-xl border border-gray-100 leading-relaxed text-sm">
+                        class="font-medium text-gray-800 bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-md border border-blue-200 leading-relaxed text-sm">
                         -</p>
                 </div>
 
@@ -519,19 +809,19 @@
                         Consultation Summary
                     </h4>
                     <div class="space-y-4">
-                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                            <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Status</p>
+                        <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-md border border-gray-200">
+                            <p class="text-[10px] font-semibold text-gray-600 uppercase tracking-wider mb-2">Status</p>
                             <div id="view-status-container">
                                 <p id="view-status" class="font-bold text-gray-900 text-sm inline-block">-</p>
                             </div>
                         </div>
-                        <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                            <p class="text-[10px] font-semibold text-blue-600 uppercase tracking-wider mb-1">Doctor's
+                        <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-md border border-blue-200">
+                            <p class="text-[10px] font-semibold text-blue-700 uppercase tracking-wider mb-2">Doctor's
                                 Comments</p>
                             <p id="view-comments" class="font-medium text-gray-800 text-sm whitespace-pre-wrap">-</p>
                         </div>
-                        <div class="bg-green-50/50 p-4 rounded-xl border border-green-100">
-                            <p class="text-[10px] font-semibold text-green-600 uppercase tracking-wider mb-1">Prescribed
+                        <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-md border border-green-200">
+                            <p class="text-[10px] font-semibold text-green-700 uppercase tracking-wider mb-2">Prescribed
                                 Medicines</p>
                             <p id="view-medicines" class="font-medium text-gray-800 text-sm whitespace-pre-wrap">-</p>
                         </div>

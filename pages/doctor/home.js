@@ -228,7 +228,7 @@ function renderCalendar() {
         let prevMonthDayCounter = daysInPrevMonth - firstDay + 1;
         for (let i = 0; i < firstDay; i++) {
             const dayDiv = document.createElement('div');
-            dayDiv.className = 'calendar-day text-center p-2 rounded-lg text-gray-400';
+            dayDiv.className = 'calendar-day text-center p-2 rounded-md text-gray-400';
             dayDiv.textContent = prevMonthDayCounter;
             daysContainer.appendChild(dayDiv);
             prevMonthDayCounter++;
@@ -241,7 +241,7 @@ function renderCalendar() {
         // Current month's days
         for (let i = 1; i <= daysInMonth; i++) {
             const dayDiv = document.createElement('div');
-            dayDiv.className = 'calendar-day text-center p-2 rounded-lg cursor-pointer hover:bg-blue-100 transition text-gray-900 font-medium';
+            dayDiv.className = 'calendar-day-premium text-center p-2 rounded-md cursor-pointer transition text-gray-900 font-medium';
             dayDiv.textContent = i;
             
             // Mark dates with completed appointments with checkmark
@@ -258,15 +258,18 @@ function renderCalendar() {
             
             // Style dates based on selection and today
             if (dateStr === todayStr) {
-                // Highlight today's date (Green)
+                // Highlight today's date (Teal gradient)
+                dayDiv.classList.add('selected');
                 dayDiv.style.backgroundColor = '#0d7377';
                 dayDiv.style.color = 'white';
                 dayDiv.style.fontWeight = 'bold';
             } else if (dateStr === currentSelectedDateStr) {
-                // Highlight selected date (Light Blue)
-                dayDiv.style.backgroundColor = '#bfdbfe';
-                dayDiv.style.color = '#1e3a8a';
+                // Highlight selected date (Teal with white text)
+                dayDiv.classList.add('selected');
+                dayDiv.style.backgroundColor = '#0a9db5';
+                dayDiv.style.color = 'white';
                 dayDiv.style.fontWeight = 'bold';
+                dayDiv.style.boxShadow = '0 4px 12px rgba(13, 115, 119, 0.25)';
             } else if (dateStr < todayStr) {
                 // Past dates in gray
                 dayDiv.style.color = '#d1d5db';
@@ -282,7 +285,7 @@ function renderCalendar() {
         const remainingCells = 42 - totalCells;
         for (let i = 1; i <= remainingCells; i++) {
             const dayDiv = document.createElement('div');
-            dayDiv.className = 'calendar-day text-center p-2 rounded-lg text-gray-400';
+            dayDiv.className = 'calendar-day text-center p-2 rounded-md text-gray-400';
             dayDiv.textContent = i;
             daysContainer.appendChild(dayDiv);
         }
@@ -307,20 +310,30 @@ async function loadAppointmentsForDate(date, isToday = false) {
     
     if (result.status === 'success' && Array.isArray(result.data) && result.data.length > 0) {
         container.innerHTML = result.data.map(apt => `
-            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition cursor-pointer" onclick="openAppointmentModal(${apt.apt_id})">
-                <div class="flex justify-between items-start mb-2">
-                    <div>
-                        <p class="font-semibold text-gray-900">${apt.patient_name}</p>
-                        <p class="text-sm text-gray-600">${apt.appointment_time}</p>
+            <div class="appointment-card-premium border border-gray-100 rounded-[14px] p-5 hover:shadow-elevated transition cursor-pointer" onclick="openAppointmentModal(${apt.apt_id})">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex-1">
+                        <p class="font-bold text-gray-900 text-base">${apt.patient_name}</p>
+                        <div class="flex items-center gap-2 mt-2">
+                            <i data-lucide="clock" class="w-4 h-4 text-gray-400"></i>
+                            <p class="text-sm text-gray-500">${apt.appointment_time}</p>
+                        </div>
                     </div>
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${apt.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">
+                    <span class="status-badge-premium ${apt.status === 'Completed' ? 'status-completed' : apt.status === 'Confirmed' ? 'status-confirmed' : 'status-pending'}">
+                        <i data-lucide="${apt.status === 'Completed' ? 'check-circle' : 'clock'}" class="w-3.5 h-3.5"></i>
                         ${apt.status}
                     </span>
                 </div>
-                <p class="text-sm text-gray-600">Reason: ${apt.reason_for_visit}</p>
-                <p class="text-sm text-gray-600">Room: ${apt.room_number}</p>
+                <div class="space-y-2 text-sm">
+                    <p class="text-gray-700"><span class="font-semibold text-gray-600">Reason:</span> ${apt.reason_for_visit}</p>
+                    <div class="flex items-center gap-2 text-gray-600">
+                        <i data-lucide="door-open" class="w-4 h-4"></i>
+                        <p>Room ${apt.room_number}</p>
+                    </div>
+                </div>
             </div>
         `).join('');
+        lucide.createIcons();
         
         const dateObj = new Date(date);
         const dateDisplay = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
@@ -397,21 +410,30 @@ async function loadCompletedAppointmentsPanel() {
     
     if (completedData.appointments.length > 0) {
         container.innerHTML = completedData.appointments.map(apt => `
-            <div class="border-2 border-green-200 rounded-lg p-4 bg-green-50 hover:shadow-md transition cursor-pointer" onclick="openAppointmentModal(${apt.appointment_id})">
-                <div class="flex items-start justify-between mb-2">
-                    <div>
-                        <p class="font-semibold text-gray-900">${apt.patient_name}</p>
-                        <p class="text-xs text-gray-600">${new Date(apt.app_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at ${apt.app_time}</p>
+            <div class="appointment-card-premium border border-green-200 rounded-[14px] p-5 bg-gradient-to-br from-green-50 to-transparent hover:shadow-elevated transition cursor-pointer" onclick="openAppointmentModal(${apt.appointment_id})">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex-1">
+                        <p class="font-bold text-gray-900 text-base">${apt.patient_name}</p>
+                        <div class="flex items-center gap-2 mt-2">
+                            <i data-lucide="calendar" class="w-4 h-4 text-gray-400"></i>
+                            <p class="text-xs text-gray-600">${new Date(apt.app_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at ${apt.app_time}</p>
+                        </div>
                     </div>
-                    <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="check" class="w-4 h-4 text-white"></i>
+                    </div>
                 </div>
-                <p class="text-sm text-gray-700 mb-2">${apt.reason_for_visit}</p>
+                <p class="text-sm text-gray-700 font-medium mb-3">${apt.reason_for_visit}</p>
                 <div class="flex gap-2 flex-wrap">
-                    <span class="text-xs bg-green-600 text-white px-2 py-1 rounded">Completed</span>
-                    <span class="text-xs bg-gray-300 text-gray-700 px-2 py-1 rounded">Room ${apt.room_num}</span>
+                    <span class="status-badge-premium status-completed">
+                        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                        Completed
+                    </span>
+                    <span class="text-xs bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg font-medium">Room ${apt.room_num}</span>
                 </div>
             </div>
         `).join('');
+        lucide.createIcons();
     } else {
         container.innerHTML = `
             <div class="col-span-1 md:col-span-2 text-center py-12 text-gray-500 bg-gray-50 rounded-xl border border-dashed border-gray-200">
@@ -449,20 +471,30 @@ async function performDoctorSearch() {
     
     if (filtered.length > 0) {
         container.innerHTML = filtered.map(apt => `
-            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition cursor-pointer" onclick="openAppointmentModal(${apt.apt_id})">
-                <div class="flex justify-between items-start mb-2">
-                    <div>
-                        <p class="font-semibold text-gray-900">${apt.patient_name}</p>
-                        <p class="text-sm text-gray-600">${apt.appointment_time}</p>
+            <div class="appointment-card-premium border border-gray-100 rounded-[14px] p-5 hover:shadow-elevated transition cursor-pointer" onclick="openAppointmentModal(${apt.apt_id})">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex-1">
+                        <p class="font-bold text-gray-900 text-base">${apt.patient_name}</p>
+                        <div class="flex items-center gap-2 mt-2">
+                            <i data-lucide="clock" class="w-4 h-4 text-gray-400"></i>
+                            <p class="text-sm text-gray-500">${apt.appointment_time}</p>
+                        </div>
                     </div>
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${apt.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">
+                    <span class="status-badge-premium ${apt.status === 'Completed' ? 'status-completed' : apt.status === 'Confirmed' ? 'status-confirmed' : 'status-pending'}">
+                        <i data-lucide="${apt.status === 'Completed' ? 'check-circle' : 'clock'}" class="w-3.5 h-3.5"></i>
                         ${apt.status}
                     </span>
                 </div>
-                <p class="text-sm text-gray-600">Reason: ${apt.reason_for_visit}</p>
-                <p class="text-sm text-gray-600">Room: ${apt.room_number}</p>
+                <div class="space-y-2 text-sm">
+                    <p class="text-gray-700"><span class="font-semibold text-gray-600">Reason:</span> ${apt.reason_for_visit}</p>
+                    <div class="flex items-center gap-2 text-gray-600">
+                        <i data-lucide="door-open" class="w-4 h-4"></i>
+                        <p>Room ${apt.room_number}</p>
+                    </div>
+                </div>
             </div>
         `).join('');
+        lucide.createIcons();
         document.getElementById('selected-date-display').textContent = `Search Results (${filtered.length})`;
     } else {
         container.innerHTML = `

@@ -24,6 +24,28 @@
             display: none;
         }
 
+        #appointment-modal .appointment-console-scroll {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        #appointment-modal .appointment-console-scroll::-webkit-scrollbar {
+            width: 0px;
+            height: 0px;
+            display: none;
+        }
+
+        #manage-day-modal .manage-schedule-scroll {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        #manage-day-modal .manage-schedule-scroll::-webkit-scrollbar {
+            width: 0px;
+            height: 0px;
+            display: none;
+        }
+
         ::-webkit-scrollbar-track {
             background: transparent;
         }
@@ -221,6 +243,90 @@
         .fade-in-up {
             animation: fadeInUp 0.5s ease forwards;
         }
+
+        /* Premium Page Enhancements */
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes floatIn {
+            from { opacity: 0; transform: translateY(15px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .premium-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(13, 115, 119, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .premium-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(13, 115, 119, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .topbar-premium {
+            background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(250,252,253,0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(13, 115, 119, 0.06);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        .shadow-elevated {
+            box-shadow: 
+                0 1px 3px rgba(0, 0, 0, 0.08),
+                0 4px 12px rgba(0, 0, 0, 0.08),
+                0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .shadow-soft {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .section-title-premium {
+            position: relative;
+            padding-bottom: 12px;
+        }
+
+        .section-title-premium::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #0d7377, #0a5a5d);
+            border-radius: 2px;
+            box-shadow: 0 2px 8px rgba(13, 115, 119, 0.2);
+        }
+
+        /* Updated Calendar Styles to match home.html */
+        .calendar-day {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(13, 115, 119, 0.03);
+            border-radius: 10px;
+        }
+
+        .calendar-day:hover {
+            background: linear-gradient(135deg, rgba(13, 115, 119, 0.15), rgba(13, 115, 119, 0.08));
+            box-shadow: 0 8px 20px rgba(13, 115, 119, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .calendar-day.selected {
+            background: linear-gradient(135deg, #0d7377, #0a5a5d);
+            color: white;
+            box-shadow: 0 10px 30px rgba(13, 115, 119, 0.3);
+        }
     </style>
 </head>
 
@@ -272,10 +378,10 @@
         <!-- MAIN CONTENT -->
         <main class="ml-0 md:ml-64 flex-1 overflow-y-auto pb-20 md:pb-0">
             <!-- TOP BAR -->
-            <div class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
+            <div class="topbar-premium sticky top-0 z-30">
                 <div class="px-8 py-4 flex justify-between items-center">
                     <div>
-                        <h2 class="text-2xl font-bold text-gray-800">Manage Schedules</h2>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Manage Schedules</h2>
                         <p id="current-date" class="text-sm text-gray-500"></p>
                     </div>
                 </div>
@@ -285,22 +391,22 @@
             <div class="p-4 sm:p-5">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
                     <!-- Left Column: Calendar -->
-                    <div class="col-span-1 bg-white rounded-[16px] card-shadow p-4 h-fit">
-                        <div class="flex items-center justify-between mb-3">
-                            <h4 id="schedule-calendar-month" class="font-bold text-gray-900 text-sm">Loading...</h4>
+                    <div class="col-span-1 premium-card rounded-[18px] shadow-elevated p-4 h-fit">
+                        <div class="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
+                            <h4 id="schedule-calendar-month" class="font-bold text-gray-900 text-sm section-title-premium">Loading...</h4>
                             <div class="flex gap-2">
                                 <button onclick="prevMonthSchedule()"
-                                    class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                                    class="p-2.5 hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100 rounded-md transition duration-300 hover:shadow-soft text-gray-600 hover:text-[#0d7377]">
                                     <i data-lucide="chevron-left" class="w-5 h-5"></i>
                                 </button>
                                 <button onclick="nextMonthSchedule()"
-                                    class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                                    class="p-2.5 hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100 rounded-md transition duration-300 hover:shadow-soft text-gray-600 hover:text-[#0d7377]">
                                     <i data-lucide="chevron-right" class="w-5 h-5"></i>
                                 </button>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-7 gap-1 mb-2 text-center text-xs font-bold text-gray-500">
+                        <div class="grid grid-cols-7 gap-1 mb-3 text-center text-xs font-bold text-gray-500">
                             <div>Su</div>
                             <div>Mo</div>
                             <div>Tu</div>
@@ -310,36 +416,70 @@
                             <div>Sa</div>
                         </div>
 
-                        <div id="schedule-calendar-days" class="grid grid-cols-7 gap-0.5"></div>
+                        <div id="schedule-calendar-days" class="grid grid-cols-7 gap-1"></div>
                     </div>
 
                     <!-- Right Column: Daily Schedule fixed grid -->
-                    <div class="col-span-1 lg:col-span-2 bg-white rounded-[16px] card-shadow p-4 h-fit min-h-[500px]">
-                        <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+                    <div class="col-span-1 lg:col-span-2 premium-card rounded-md shadow-elevated p-6 h-fit min-h-[500px]">
+                        <div class="flex items-center justify-between mb-5 pb-4 border-b border-gray-200">
                             <div>
-                                <h3 class="text-base font-bold text-gray-900">Schedule for <span
-                                        id="schedule-date-display" class="text-primary-color">Selected Date</span></h3>
-                                <p class="text-xs text-gray-500 mt-0.5">📌 This will be your scheduled slots for
-                                    everyday.</p>
+                                <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                                    <div class="w-5 h-5 rounded-full bg-gradient-to-br from-teal-500 to-teal-600"></div>
+                                    Schedule for <span id="schedule-date-display" class="text-primary-color ml-1">Selected Date</span>
+                                </h3>
+                                <p class="text-xs text-gray-600 mt-1.5 flex items-center gap-1.5">
+                                    <i data-lucide="info" class="w-3.5 h-3.5 text-gray-400"></i>
+                                    This will be your scheduled slots for everyday.
+                                </p>
                             </div>
                             <button id="manage-day-btn" onclick="openManageDayModal()"
-                                class="bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white hover:from-[#0a5a5d] hover:to-[#084b4d] px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 shadow-[0_4px_12px_rgba(13,115,119,0.3)] hover:shadow-[0_6px_16px_rgba(13,115,119,0.4)] hover:-translate-y-0.5 flex items-center gap-2.5 hidden border border-[#0d7377]/50 group">
+                                class="bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white hover:from-[#0a5a5d] hover:to-[#084b4d] px-6 py-2.5 rounded-md text-sm font-semibold transition-all duration-300 shadow-[0_4px_12px_rgba(13,115,119,0.3)] hover:shadow-[0_6px_16px_rgba(13,115,119,0.4)] hover:-translate-y-0.5 flex items-center gap-2.5 hidden border border-[#0d7377]/50 group">
                                 <i data-lucide="settings"
                                     class="w-4 h-4 group-hover:rotate-90 transition-transform duration-500"></i> Manage
                                 Schedule
                             </button>
                         </div>
 
-                        <div id="daily-schedule-grid" class="flex flex-col gap-2">
+                        <div id="daily-schedule-grid" class="flex flex-col gap-3">
                             <div
-                                class="text-center py-16 text-gray-500 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                                class="text-center py-16 text-gray-500 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-dashed border-gray-300">
                                 <div
-                                    class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100 shadow-sm">
+                                    class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-200 shadow-sm">
                                     <i data-lucide="calendar-clock" class="w-8 h-8 text-gray-400"></i>
                                 </div>
                                 <p class="text-sm font-semibold text-gray-700">No Date Selected</p>
-                                <p class="text-xs text-gray-500 mt-1">Select a date from the calendar to view or manage
+                                <p class="text-xs text-gray-600 mt-1">Select a date from the calendar to view or manage
                                     its time slots.</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 pt-5 border-t border-gray-200 grid grid-cols-1 gap-4">
+                            <div class="rounded-md border border-gray-200 bg-gradient-to-br from-[#0d7377] to-[#0a5a5d] text-white p-5 shadow-[0_12px_30px_rgba(13,115,119,0.2)] relative overflow-hidden">
+                                <div class="absolute inset-0 opacity-15 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.8),_transparent_40%)]"></div>
+                                <div class="relative flex items-start justify-between gap-4">
+                                    <div>
+                                        <p class="text-[11px] uppercase tracking-[0.28em] text-teal-100 font-semibold">Schedule Snapshot</p>
+                                        <h4 id="schedule-insight-title" class="text-xl font-bold mt-1">Select a date to see your flow</h4>
+                                        <p id="schedule-insight-copy" class="text-sm text-teal-50/90 mt-2 max-w-md">Your daily schedule summary will appear here with slot usage, booking pressure, and a quick action cue.</p>
+                                    </div>
+                                    <div class="w-14 h-14 rounded-md bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0">
+                                        <i data-lucide="sparkles" class="w-7 h-7 text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="relative mt-5 grid grid-cols-3 gap-3">
+                                    <div class="rounded-xl bg-white/10 border border-white/15 p-3">
+                                        <p class="text-[10px] uppercase tracking-wider text-teal-100 font-semibold">Open Slots</p>
+                                        <p id="insight-open-slots" class="text-2xl font-bold mt-1">--</p>
+                                    </div>
+                                    <div class="rounded-xl bg-white/10 border border-white/15 p-3">
+                                        <p class="text-[10px] uppercase tracking-wider text-teal-100 font-semibold">Booked</p>
+                                        <p id="insight-booked-slots" class="text-2xl font-bold mt-1">--</p>
+                                    </div>
+                                    <div class="rounded-xl bg-white/10 border border-white/15 p-3">
+                                        <p class="text-[10px] uppercase tracking-wider text-teal-100 font-semibold">Filled</p>
+                                        <p id="insight-fill-rate" class="text-2xl font-bold mt-1">--%</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -352,62 +492,66 @@
     <div id="appointment-modal"
         class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-[400] p-4 backdrop-blur-sm transition-opacity">
         <div
-            class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-auto max-h-[90vh] overflow-y-auto border border-gray-100">
+            class="appointment-console-scroll bg-white rounded-md shadow-elevated max-w-2xl w-full mx-auto max-h-[90vh] overflow-y-auto border border-gray-200">
             <div
-                class="sticky top-0 bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white px-6 py-4 flex justify-between items-center shadow-md z-10">
-                <div class="flex items-center gap-3">
+                class="sticky top-0 bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white px-6 py-5 flex justify-between items-center shadow-md z-10 rounded-t-2xl">
+                <div class="flex items-center gap-4">
                     <div
-                        class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md border border-white/20">
-                        <i data-lucide="user" class="w-5 h-5 text-white"></i>
+                        class="w-12 h-12 bg-white/15 rounded-full flex items-center justify-center backdrop-blur-md border border-white/30">
+                        <i data-lucide="user" class="w-6 h-6 text-white"></i>
                     </div>
                     <div>
                         <h3 class="text-lg font-bold leading-tight" id="modal-patient-name">Patient Details</h3>
-                        <p class="text-xs text-teal-100 font-medium">Appointment Console</p>
+                        <p class="text-xs text-teal-100 font-medium opacity-90">Appointment Console</p>
                     </div>
                 </div>
                 <button onclick="closeAppointmentModal()"
-                    class="text-white hover:bg-white/20 p-2 rounded-full transition duration-200">
+                    class="text-white hover:bg-white/20 p-2 rounded-full transition duration-200 hover:scale-110">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
-            <div class="p-5 space-y-5">
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                        <p class="text-gray-500 mb-1 text-[10px] uppercase tracking-wider font-semibold">Patient ID</p>
+            <div class="p-6 space-y-5">
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-200 hover:border-[#0d7377] transition">
+                        <p class="text-gray-600 mb-2 text-[10px] uppercase tracking-wider font-semibold">Patient ID</p>
                         <p id="modal-patient-id" class="font-bold text-gray-900 text-sm truncate" title="Patient ID">-
                         </p>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                        <p class="text-gray-500 mb-1 text-[10px] uppercase tracking-wider font-semibold">Contact</p>
+                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-200 hover:border-[#0d7377] transition">
+                        <p class="text-gray-600 mb-2 text-[10px] uppercase tracking-wider font-semibold">Contact</p>
                         <p id="modal-contact" class="font-bold text-gray-900 text-sm">-</p>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                        <p class="text-gray-500 mb-1 text-[10px] uppercase tracking-wider font-semibold">Time Segment
+                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-200 hover:border-[#0d7377] transition">
+                        <p class="text-gray-600 mb-2 text-[10px] uppercase tracking-wider font-semibold">Time Segment
                         </p>
                         <p id="modal-apt-time" class="font-bold text-gray-900 text-sm">-</p>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                        <p class="text-gray-500 mb-1 text-[10px] uppercase tracking-wider font-semibold">Blood Group</p>
+                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-200 hover:border-[#0d7377] transition">
+                        <p class="text-gray-600 mb-2 text-[10px] uppercase tracking-wider font-semibold">Blood Group</p>
                         <p id="modal-blood-group" class="font-bold text-gray-900 text-sm">-</p>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                        <p class="text-gray-500 mb-1 text-[10px] uppercase tracking-wider font-semibold">Status</p>
+                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-200 hover:border-[#0d7377] transition">
+                        <p class="text-gray-600 mb-2 text-[10px] uppercase tracking-wider font-semibold">Status</p>
                         <p id="modal-status-text" class="font-bold text-gray-900 text-sm">-</p>
                     </div>
                 </div>
 
-                <div class="border-t border-gray-100 pt-4">
-                    <p class="text-gray-500 text-xs mb-1.5 font-semibold uppercase tracking-wider">Reason for Visit</p>
+                <div class="border-t border-gray-200 pt-5">
+                    <p class="text-gray-600 text-xs mb-3 font-semibold uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="message-square" class="w-4 h-4 text-[#0d7377]"></i>
+                        Reason for Visit</p>
                     <p id="modal-reason"
-                        class="font-medium text-gray-800 bg-gray-50 p-3.5 rounded-xl border border-gray-100 leading-relaxed text-sm">
+                        class="font-medium text-gray-800 bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200 leading-relaxed text-sm">
                         -</p>
                 </div>
 
                 <!-- Consultation Workspace -->
-                <div id="consultation-workspace" class="border-t border-gray-100 pt-5 hidden space-y-4">
+                <div id="consultation-workspace" class="border-t border-gray-200 pt-5 hidden space-y-4">
                     <h4 class="font-bold text-gray-900 mb-4 flex items-center gap-2 text-sm">
-                        <i data-lucide="stethoscope" class="w-4 h-4 text-[#0d7377]"></i>
+                        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                            <i data-lucide="stethoscope" class="w-4 h-4 text-white"></i>
+                        </div>
                         Consultation Workspace
                     </h4>
 
@@ -432,14 +576,14 @@
                                 class="block text-[10px] font-semibold text-blue-600 mb-1.5 uppercase tracking-wider">Doctor's
                                 Notes <span class="text-red-500">*</span></label>
                             <textarea id="modal-doctor-notes"
-                                class="w-full px-4 py-3 border border-blue-200 bg-blue-50/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 text-sm transition-all shadow-sm resize-none text-gray-800"
+                                class="w-full px-4 py-3 border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 text-sm transition-all shadow-sm resize-none text-gray-800"
                                 rows="3" placeholder="Enter clinical findings and notes..." required></textarea>
                             <p id="notes-error" class="text-red-500 text-[10px] mt-1 hidden">Doctor's notes are required
                             </p>
                         </div>
                         <div id="readonly-notes-wrapper"
-                            class="hidden bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                            <p class="text-[10px] font-semibold text-blue-600 uppercase tracking-wider mb-1">Doctor's
+                            class="hidden bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
+                            <p class="text-[10px] font-semibold text-blue-700 uppercase tracking-wider mb-2">Doctor's
                                 Notes</p>
                             <p id="readonly-doctor-notes" class="font-medium text-gray-800 text-sm whitespace-pre-wrap">
                             </p>
@@ -451,14 +595,14 @@
                                 class="block text-[10px] font-semibold text-green-600 mb-1.5 uppercase tracking-wider">Prescriptions
                                 <span class="text-red-500">*</span></label>
                             <textarea id="modal-prescriptions"
-                                class="w-full px-4 py-3 border border-green-200 bg-green-50/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 text-sm transition-all shadow-sm resize-none text-gray-800"
+                                class="w-full px-4 py-3 border border-green-200 bg-gradient-to-br from-green-50 to-green-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 text-sm transition-all shadow-sm resize-none text-gray-800"
                                 rows="3" placeholder="e.g. Paracetamol 500mg - 1x/day" required></textarea>
                             <p id="prescriptions-error" class="text-red-500 text-[10px] mt-1 hidden">Prescriptions are
                                 required</p>
                         </div>
                         <div id="readonly-rx-wrapper"
-                            class="hidden bg-green-50/50 p-4 rounded-xl border border-green-100">
-                            <p class="text-[10px] font-semibold text-green-600 uppercase tracking-wider mb-1">
+                            class="hidden bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200">
+                            <p class="text-[10px] font-semibold text-green-700 uppercase tracking-wider mb-2">
                                 Prescriptions</p>
                             <p id="readonly-prescriptions"
                                 class="font-medium text-gray-800 text-sm whitespace-pre-wrap"></p>
@@ -526,31 +670,33 @@
     <!-- EDIT/DELETE SLOT MODAL -->
     <div id="edit-slot-modal"
         class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[400] p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-2xl card-shadow max-w-md w-full mx-auto">
-            <div
-                class="sticky top-0 bg-primary text-white px-4 py-3 flex justify-between items-center z-10 shadow-sm rounded-t-2xl">
-                <h3 class="text-base font-bold">Manage Time Slot</h3>
-                <button onclick="closeEditSlotModal()" class="text-white hover:text-gray-200 transition-colors">
+        <div class="bg-white rounded-md shadow-elevated max-w-md w-full mx-auto border border-gray-200">
+            <div class="sticky top-0 bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white px-6 py-5 flex justify-between items-center z-10 shadow-md rounded-t-2xl">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-md border border-white/30">
+                        <i data-lucide="clock" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <h3 class="text-lg font-bold">Manage Time Slot</h3>
+                </div>
+                <button onclick="closeEditSlotModal()" class="text-white hover:bg-white/20 p-2 rounded-md transition-colors">
                     <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
             </div>
 
-            <div class="p-4 space-y-4">
+            <div class="p-6 space-y-5">
                 <input type="hidden" id="edit-slot-id">
 
-                <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Status</label>
-                    <div id="edit-slot-status" class="inline-block px-3 py-1 rounded-full text-xs font-semibold">
-                    </div>
+                <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-200">
+                    <p class="block text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wider">Slot Status</p>
+                    <div id="edit-slot-status" class="inline-block px-4 py-2 rounded-full text-xs font-bold"></div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Start Time</label>
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wider">Start Time</label>
                         <div class="relative">
-                            <select id="edit-slot-start"
-                                onchange="updateEndTimeOptions('edit-slot-start', 'edit-slot-end')"
-                                class="w-full text-sm border border-gray-200 bg-gray-50 rounded-lg p-2.5 pr-8 focus:ring-2 focus:ring-[#0d7377] focus:border-[#0d7377] focus:bg-white appearance-none cursor-pointer hover:border-[#0d7377] transition-all font-semibold text-gray-800 outline-none shadow-sm">
+                            <select id="edit-slot-start" onchange="updateEndTimeOptions('edit-slot-start', 'edit-slot-end')"
+                                class="w-full text-sm border border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 pr-10 focus:ring-2 focus:ring-[#0d7377]/30 focus:border-[#0d7377] focus:bg-white appearance-none cursor-pointer hover:border-[#0d7377] transition-all font-semibold text-gray-800 outline-none shadow-sm">
                                 <option value="09:00:00">09:00 AM</option>
                                 <option value="09:30:00">09:30 AM</option>
                                 <option value="10:00:00">10:00 AM</option>
@@ -568,17 +714,14 @@
                                 <option value="16:00:00">04:00 PM</option>
                                 <option value="16:30:00">04:30 PM</option>
                             </select>
-                            <div
-                                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#0d7377]">
-                                <i data-lucide="clock" class="w-4 h-4"></i>
-                            </div>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#0d7377]"><i data-lucide="clock" class="w-4 h-4"></i></div>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">End Time</label>
+                        <label class="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wider">End Time</label>
                         <div class="relative">
                             <select id="edit-slot-end"
-                                class="w-full text-sm border border-gray-200 bg-gray-50 rounded-lg p-2.5 pr-8 focus:ring-2 focus:ring-[#0d7377] focus:border-[#0d7377] focus:bg-white appearance-none cursor-pointer hover:border-[#0d7377] transition-all font-semibold text-gray-800 outline-none shadow-sm">
+                                class="w-full text-sm border border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 pr-10 focus:ring-2 focus:ring-[#0d7377]/30 focus:border-[#0d7377] focus:bg-white appearance-none cursor-pointer hover:border-[#0d7377] transition-all font-semibold text-gray-800 outline-none shadow-sm">
                                 <option value="09:00:00">09:00 AM</option>
                                 <option value="09:30:00">09:30 AM</option>
                                 <option value="10:00:00">10:00 AM</option>
@@ -597,27 +740,24 @@
                                 <option value="16:30:00">04:30 PM</option>
                                 <option value="17:00:00">05:00 PM</option>
                             </select>
-                            <div
-                                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#0d7377]">
-                                <i data-lucide="clock" class="w-4 h-4"></i>
-                            </div>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#0d7377]"><i data-lucide="clock" class="w-4 h-4"></i></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-between rounded-b-2xl">
-                <button id="toggle-slot-status-btn" onclick="toggleSlotStatusFromModal()"
-                    class="bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 px-4 py-2 rounded-lg text-sm font-semibold transition">
+            <div class="px-6 py-5 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 flex justify-between rounded-b-2xl gap-3">
+                <button id="toggle-slot-status-btn" onclick="toggleSlotStatusFromModal()" class="bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border border-yellow-300 hover:border-yellow-400 px-4 py-2.5 rounded-md text-sm font-semibold transition-all shadow-sm">
+                    <i data-lucide="lock" class="w-4 h-4 inline mr-1.5"></i>
                     Block Slot
                 </button>
                 <div class="flex gap-2">
-                    <button onclick="deleteSlotFromModal()"
-                        class="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 px-4 py-2 rounded-lg text-sm font-semibold transition">
+                    <button onclick="deleteSlotFromModal()" class="bg-red-50 hover:bg-red-100 text-red-700 border border-red-300 hover:border-red-400 px-4 py-2.5 rounded-md text-sm font-semibold transition-all shadow-sm">
+                        <i data-lucide="trash-2" class="w-4 h-4 inline mr-1.5"></i>
                         Delete
                     </button>
-                    <button onclick="saveSlotChanges()"
-                        class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-opacity-90 transition shadow-sm">
+                    <button onclick="saveSlotChanges()" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-5 py-2.5 rounded-md text-sm font-semibold transition-all shadow-[0_4px_12px_rgba(34,197,94,0.3)] hover:shadow-[0_6px_16px_rgba(34,197,94,0.4)] border border-green-600/50">
+                        <i data-lucide="save" class="w-4 h-4 inline mr-1.5"></i>
                         Save
                     </button>
                 </div>
@@ -628,32 +768,46 @@
     <!-- MANAGE DAY MODAL -->
     <div id="manage-day-modal"
         class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[400] p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-2xl card-shadow max-w-lg w-full mx-auto max-h-[90vh] overflow-y-auto">
-            <div class="sticky top-0 bg-primary text-white px-4 py-3 flex justify-between items-center z-10 shadow-sm">
-                <h3 class="text-base font-bold">Manage Schedule</h3>
-                <button onclick="closeManageDayModal()" class="text-white hover:text-gray-200 transition-colors">
+        <div class="manage-schedule-scroll bg-white rounded-md shadow-elevated max-w-lg w-full mx-auto max-h-[90vh] overflow-y-auto border border-gray-200">
+            <div class="sticky top-0 bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white px-6 py-5 flex justify-between items-center z-10 shadow-md rounded-t-2xl">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-md border border-white/30">
+                        <i data-lucide="settings" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <h3 class="text-lg font-bold">Manage Schedule</h3>
+                </div>
+                <button onclick="closeManageDayModal()" class="text-white hover:bg-white/20 p-2 rounded-md transition-colors">
                     <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
             </div>
 
-            <div class="p-4 space-y-4">
-                <p class="text-sm font-medium text-gray-700" id="manage-day-date-display">Slots for Date</p>
-
-                <!-- Existing Slots List -->
-                <div id="manage-day-slots-list" class="space-y-2 max-h-[40vh] overflow-y-auto pr-2">
-                    <!-- Populated by JS -->
+            <div class="p-6 space-y-5">
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
+                    <p class="text-sm font-semibold text-blue-900 flex items-center gap-2" id="manage-day-date-display">
+                        <i data-lucide="calendar" class="w-4 h-4 text-blue-700"></i>
+                        Slots for Date
+                    </p>
                 </div>
 
-                <!-- Add New Slot Form -->
-                <div class="mt-4 pt-4 border-t border-gray-200">
-                    <h4 class="text-sm font-bold text-gray-900 mb-3">Add New Slot</h4>
+                <div class="space-y-3">
+                    <h4 class="text-sm font-bold text-gray-900 flex items-center gap-2">
+                        <i data-lucide="list" class="w-4 h-4 text-gray-600"></i>
+                        Existing Slots
+                    </h4>
+                    <div id="manage-day-slots-list" class="manage-schedule-scroll space-y-2 max-h-[40vh] overflow-y-auto pr-2"></div>
+                </div>
+
+                <div class="pt-5 border-t border-gray-200">
+                    <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="plus-circle" class="w-4 h-4 text-green-600"></i>
+                        Add New Slot
+                    </h4>
                     <div class="flex items-end gap-3">
                         <div class="flex-1">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Start Time</label>
+                            <label class="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wider">Start Time</label>
                             <div class="relative">
-                                <select id="new-slot-start"
-                                    onchange="updateEndTimeOptions('new-slot-start', 'new-slot-end')"
-                                    class="w-full text-sm border border-gray-200 bg-gray-50 rounded-lg p-2.5 pr-8 focus:ring-2 focus:ring-[#0d7377] focus:border-[#0d7377] focus:bg-white appearance-none cursor-pointer hover:border-[#0d7377] transition-all font-semibold text-gray-800 outline-none shadow-sm">
+                                <select id="new-slot-start" onchange="updateEndTimeOptions('new-slot-start', 'new-slot-end')"
+                                    class="w-full text-sm border border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 pr-10 focus:ring-2 focus:ring-[#0d7377]/30 focus:border-[#0d7377] focus:bg-white appearance-none cursor-pointer hover:border-[#0d7377] transition-all font-semibold text-gray-800 outline-none shadow-sm">
                                     <option value="" disabled selected>-- Select Time --</option>
                                     <option value="09:00:00">09:00 AM</option>
                                     <option value="09:30:00">09:30 AM</option>
@@ -672,17 +826,14 @@
                                     <option value="16:00:00">04:00 PM</option>
                                     <option value="16:30:00">04:30 PM</option>
                                 </select>
-                                <div
-                                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#0d7377]">
-                                    <i data-lucide="clock" class="w-4 h-4"></i>
-                                </div>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#0d7377]"><i data-lucide="clock" class="w-4 h-4"></i></div>
                             </div>
                         </div>
                         <div class="flex-1">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">End Time</label>
+                            <label class="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wider">End Time</label>
                             <div class="relative">
                                 <select id="new-slot-end"
-                                    class="w-full text-sm border border-gray-200 bg-gray-50 rounded-lg p-2.5 pr-8 focus:ring-2 focus:ring-[#0d7377] focus:border-[#0d7377] focus:bg-white appearance-none cursor-pointer hover:border-[#0d7377] transition-all font-semibold text-gray-800 outline-none shadow-sm">
+                                    class="w-full text-sm border border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 pr-10 focus:ring-2 focus:ring-[#0d7377]/30 focus:border-[#0d7377] focus:bg-white appearance-none cursor-pointer hover:border-[#0d7377] transition-all font-semibold text-gray-800 outline-none shadow-sm">
                                     <option value="" disabled selected>-- Select Time --</option>
                                     <option value="09:00:00">09:00 AM</option>
                                     <option value="09:30:00">09:30 AM</option>
@@ -702,23 +853,19 @@
                                     <option value="16:30:00">04:30 PM</option>
                                     <option value="17:00:00">05:00 PM</option>
                                 </select>
-                                <div
-                                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#0d7377]">
-                                    <i data-lucide="clock" class="w-4 h-4"></i>
-                                </div>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#0d7377]"><i data-lucide="clock" class="w-4 h-4"></i></div>
                             </div>
                         </div>
-                        <button onclick="addNewSlotToDay()"
-                            class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-opacity-90 transition shadow-sm h-[38px]">
+                        <button onclick="addNewSlotToDay()" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-5 py-3 rounded-md text-sm font-semibold transition-all shadow-[0_4px_12px_rgba(34,197,94,0.3)] hover:shadow-[0_6px_16px_rgba(34,197,94,0.4)] h-[44px] flex items-center gap-2 border border-green-600/50">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
                             Add Slot
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end rounded-b-2xl">
-                <button onclick="closeManageDayModal()"
-                    class="bg-white border border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-sm">
+            <div class="px-6 py-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 flex justify-end rounded-b-2xl gap-3">
+                <button onclick="closeManageDayModal()" class="bg-white border border-gray-300 text-gray-700 px-6 py-2 rounded-md font-semibold hover:bg-gray-50 transition-all shadow-sm">
                     Done
                 </button>
             </div>
