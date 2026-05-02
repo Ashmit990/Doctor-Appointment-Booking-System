@@ -13,10 +13,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <style>
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+        /* Custom Scrollbar - Hide Global */
+        html {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        html::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none;
+        }
+
+        body {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none;
         }
 
         #appointment-modal .overflow-y-auto::-webkit-scrollbar {
@@ -61,8 +78,14 @@
 
         * {
             font-family: 'Poppins', sans-serif;
-            scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 transparent;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none;
         }
 
         @keyframes pageFadeIn {
@@ -79,10 +102,22 @@
 
         body {
             background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
         }
 
         main {
             animation: pageFadeIn 0.4s ease-out forwards;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            overflow: hidden;
+        }
+
+        main::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none;
         }
 
         .primary-color {
@@ -327,6 +362,83 @@
             color: white;
             box-shadow: 0 10px 30px rgba(13, 115, 119, 0.3);
         }
+
+        .calendar-panel {
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 140px);
+            overflow: hidden;
+        }
+
+        .calendar-panel #schedule-calendar-days {
+            overflow-y: auto;
+            max-height: calc(100vh - 340px);
+        }
+
+        .schedule-panel {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 140px);
+            overflow: hidden;
+        }
+
+        .schedule-panel .schedule-scroll {
+            flex: 1;
+            min-height: 0;
+            overflow: visible;
+            padding-right: 0rem;
+            display: flex;
+            flex-direction: column;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .schedule-panel .schedule-scroll::-webkit-scrollbar {
+            width: 0;
+            display: none;
+        }
+
+        .slots-list {
+            flex: 1;
+            min-height: 0;
+            max-height: calc(100vh - 280px);
+            overflow-y: scroll !important;
+            overflow-x: hidden !important;
+            padding-right: 8px;
+            scrollbar-width: thin !important;
+            scrollbar-color: #0d7377 rgba(13, 115, 119, 0.08) !important;
+        }
+
+        .slots-list::-webkit-scrollbar {
+            width: 8px !important;
+            display: block !important;
+        }
+
+        .slots-list::-webkit-scrollbar-track {
+            background: rgba(13, 115, 119, 0.08);
+            border-radius: 10px;
+            margin: 5px 0;
+        }
+
+        .slots-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #0d7377 0%, #0a5a5d 100%) !important;
+            border-radius: 10px;
+            border: 2px solid rgba(13, 115, 119, 0.1);
+            min-height: 40px;
+        }
+
+        .slots-list::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #0a5a5d 0%, #084b4d 100%) !important;
+            border: 2px solid rgba(13, 115, 119, 0.2);
+        }
+
+        .schedule-sticky-footer {
+            position: sticky;
+            bottom: 0;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+        }
     </style>
 </head>
 
@@ -376,10 +488,10 @@
         </aside>
 
         <!-- MAIN CONTENT -->
-        <main class="ml-0 md:ml-64 flex-1 overflow-y-auto pb-20 md:pb-0">
+        <main class="ml-0 md:ml-64 flex-1 pb-20 md:pb-0">
             <!-- TOP BAR -->
             <div class="topbar-premium sticky top-0 z-30">
-                <div class="px-8 py-4 flex justify-between items-center">
+                <div class="px-8 py-7 h-[100px] flex justify-between items-center">
                     <div>
                         <h2 class="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Manage Schedules</h2>
                         <p id="current-date" class="text-sm text-gray-500"></p>
@@ -389,11 +501,11 @@
 
             <!-- PAGE CONTENT -->
             <div class="p-4 sm:p-5">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <div class="grid grid-cols-1 lg:grid-cols-[1.1fr_1.9fr] gap-5">
                     <!-- Left Column: Calendar -->
-                    <div class="col-span-1 premium-card rounded-[18px] shadow-elevated p-4 h-fit">
-                        <div class="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
-                            <h4 id="schedule-calendar-month" class="font-bold text-gray-900 text-sm section-title-premium">Loading...</h4>
+                    <div class="col-span-1 premium-card calendar-panel rounded-[18px] shadow-elevated p-3 h-fit">
+                        <div class="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
+                            <h4 id="schedule-calendar-month" class="font-bold text-gray-900 text-xs section-title-premium">Loading...</h4>
                             <div class="flex gap-2">
                                 <button onclick="prevMonthSchedule()"
                                     class="p-2.5 hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100 rounded-md transition duration-300 hover:shadow-soft text-gray-600 hover:text-[#0d7377]">
@@ -406,7 +518,7 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-7 gap-1 mb-3 text-center text-xs font-bold text-gray-500">
+                        <div class="grid grid-cols-7 gap-1 mb-2 text-center text-[10px] font-bold text-gray-500">
                             <div>Su</div>
                             <div>Mo</div>
                             <div>Tu</div>
@@ -417,71 +529,73 @@
                         </div>
 
                         <div id="schedule-calendar-days" class="grid grid-cols-7 gap-1"></div>
+
+                        <!-- Schedule Snapshot -->
+                        <div class="rounded-md border border-gray-200 bg-gradient-to-br from-[#0d7377] to-[#0a5a5d] text-white p-3 shadow-[0_12px_30px_rgba(13,115,119,0.2)] relative overflow-hidden mt-3">
+                            <div class="absolute inset-0 opacity-15 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.8),_transparent_40%)]"></div>
+                            <div class="relative flex items-start justify-between gap-2">
+                                <div>
+                                    <p class="text-[9px] uppercase tracking-[0.2em] text-teal-100 font-semibold">Schedule Snapshot</p>
+                                    <h4 id="schedule-insight-title" class="text-sm font-bold mt-0.5">Select a date to see your flow</h4>
+                                    <p id="schedule-insight-copy" class="text-xs text-teal-50/90 mt-1 max-w-md">Your daily schedule summary will appear here with slot usage and booking pressure.</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-md bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0">
+                                    <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+                                </div>
+                            </div>
+                            <div class="relative mt-3 grid grid-cols-3 gap-2">
+                                <div class="rounded-lg bg-white/10 border border-white/15 p-2">
+                                    <p class="text-[8px] uppercase tracking-wider text-teal-100 font-semibold">Open Slots</p>
+                                    <p id="insight-open-slots" class="text-lg font-bold mt-0.5">--</p>
+                                </div>
+                                <div class="rounded-lg bg-white/10 border border-white/15 p-2">
+                                    <p class="text-[8px] uppercase tracking-wider text-teal-100 font-semibold">Booked</p>
+                                    <p id="insight-booked-slots" class="text-lg font-bold mt-0.5">--</p>
+                                </div>
+                                <div class="rounded-lg bg-white/10 border border-white/15 p-2">
+                                    <p class="text-[8px] uppercase tracking-wider text-teal-100 font-semibold">Filled</p>
+                                    <p id="insight-fill-rate" class="text-lg font-bold mt-0.5">--%</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Right Column: Daily Schedule fixed grid -->
-                    <div class="col-span-1 lg:col-span-2 premium-card rounded-md shadow-elevated p-6 h-fit min-h-[500px]">
-                        <div class="flex items-center justify-between mb-5 pb-4 border-b border-gray-200">
-                            <div>
-                                <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
-                                    <div class="w-5 h-5 rounded-full bg-gradient-to-br from-teal-500 to-teal-600"></div>
-                                    Schedule for <span id="schedule-date-display" class="text-primary-color ml-1">Selected Date</span>
-                                </h3>
-                                <p class="text-xs text-gray-600 mt-1.5 flex items-center gap-1.5">
-                                    <i data-lucide="info" class="w-3.5 h-3.5 text-gray-400"></i>
-                                    This will be your scheduled slots for everyday.
-                                </p>
+                    <div class="col-span-1 premium-card schedule-panel rounded-md shadow-elevated p-4 h-full min-h-[500px]">
+                        <div class="schedule-scroll">
+                            <div class="flex items-center justify-between mb-5 pb-4 border-b border-gray-200">
+                                <div>
+                                    <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                                        <div class="w-5 h-5 rounded-full bg-gradient-to-br from-teal-500 to-teal-600"></div>
+                                        Schedule for <span id="schedule-date-display" class="text-primary-color ml-1">Selected Date</span>
+                                    </h3>
+                                    <p class="text-xs text-gray-600 mt-1.5 flex items-center gap-1.5">
+                                        <i data-lucide="info" class="w-3.5 h-3.5 text-gray-400"></i>
+                                        This will be your scheduled slots for everyday.
+                                    </p>
+                                </div>
+                                <button id="manage-day-btn" onclick="openManageDayModal()"
+                                    class="bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white hover:from-[#0a5a5d] hover:to-[#084b4d] px-6 py-3 rounded-md text-sm font-semibold transition-all duration-300 shadow-[0_4px_12px_rgba(13,115,119,0.3)] hover:shadow-[0_6px_16px_rgba(13,115,119,0.4)] hover:-translate-y-0.5 flex items-center gap-2 hidden border border-[#0d7377]/50 group">
+                                    <i data-lucide="settings"
+                                        class="w-5 h-5 group-hover:rotate-90 transition-transform duration-500"></i> Manage
+                                    Schedule
+                                </button>
                             </div>
-                            <button id="manage-day-btn" onclick="openManageDayModal()"
-                                class="bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white hover:from-[#0a5a5d] hover:to-[#084b4d] px-6 py-2.5 rounded-md text-sm font-semibold transition-all duration-300 shadow-[0_4px_12px_rgba(13,115,119,0.3)] hover:shadow-[0_6px_16px_rgba(13,115,119,0.4)] hover:-translate-y-0.5 flex items-center gap-2.5 hidden border border-[#0d7377]/50 group">
-                                <i data-lucide="settings"
-                                    class="w-4 h-4 group-hover:rotate-90 transition-transform duration-500"></i> Manage
-                                Schedule
-                            </button>
-                        </div>
 
-                        <div id="daily-schedule-grid" class="flex flex-col gap-3">
-                            <div
-                                class="text-center py-16 text-gray-500 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-dashed border-gray-300">
+                            <div id="daily-schedule-grid" class="slots-list flex flex-col gap-3">
                                 <div
-                                    class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-200 shadow-sm">
-                                    <i data-lucide="calendar-clock" class="w-8 h-8 text-gray-400"></i>
-                                </div>
-                                <p class="text-sm font-semibold text-gray-700">No Date Selected</p>
-                                <p class="text-xs text-gray-600 mt-1">Select a date from the calendar to view or manage
-                                    its time slots.</p>
-                            </div>
-                        </div>
-
-                        <div class="mt-5 pt-5 border-t border-gray-200 grid grid-cols-1 gap-4">
-                            <div class="rounded-md border border-gray-200 bg-gradient-to-br from-[#0d7377] to-[#0a5a5d] text-white p-5 shadow-[0_12px_30px_rgba(13,115,119,0.2)] relative overflow-hidden">
-                                <div class="absolute inset-0 opacity-15 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.8),_transparent_40%)]"></div>
-                                <div class="relative flex items-start justify-between gap-4">
-                                    <div>
-                                        <p class="text-[11px] uppercase tracking-[0.28em] text-teal-100 font-semibold">Schedule Snapshot</p>
-                                        <h4 id="schedule-insight-title" class="text-xl font-bold mt-1">Select a date to see your flow</h4>
-                                        <p id="schedule-insight-copy" class="text-sm text-teal-50/90 mt-2 max-w-md">Your daily schedule summary will appear here with slot usage, booking pressure, and a quick action cue.</p>
+                                    class="text-center py-16 text-gray-500 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-dashed border-gray-300">
+                                    <div
+                                        class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-200 shadow-sm">
+                                        <i data-lucide="calendar-clock" class="w-8 h-8 text-gray-400"></i>
                                     </div>
-                                    <div class="w-14 h-14 rounded-md bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0">
-                                        <i data-lucide="sparkles" class="w-7 h-7 text-white"></i>
-                                    </div>
-                                </div>
-                                <div class="relative mt-5 grid grid-cols-3 gap-3">
-                                    <div class="rounded-xl bg-white/10 border border-white/15 p-3">
-                                        <p class="text-[10px] uppercase tracking-wider text-teal-100 font-semibold">Open Slots</p>
-                                        <p id="insight-open-slots" class="text-2xl font-bold mt-1">--</p>
-                                    </div>
-                                    <div class="rounded-xl bg-white/10 border border-white/15 p-3">
-                                        <p class="text-[10px] uppercase tracking-wider text-teal-100 font-semibold">Booked</p>
-                                        <p id="insight-booked-slots" class="text-2xl font-bold mt-1">--</p>
-                                    </div>
-                                    <div class="rounded-xl bg-white/10 border border-white/15 p-3">
-                                        <p class="text-[10px] uppercase tracking-wider text-teal-100 font-semibold">Filled</p>
-                                        <p id="insight-fill-rate" class="text-2xl font-bold mt-1">--%</p>
-                                    </div>
+                                    <p class="text-sm font-semibold text-gray-700">No Date Selected</p>
+                                    <p class="text-xs text-gray-600 mt-1">Select a date from the calendar to view or manage
+                                        its time slots.</p>
                                 </div>
                             </div>
                         </div>
+                        
                     </div>
                 </div>
             </div>

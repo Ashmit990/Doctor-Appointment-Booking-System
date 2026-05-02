@@ -15,6 +15,19 @@
         pointer-events: none !important;
       }
 
+      /* Accent color palette */
+      :root {
+        --color-rose: #FEC5D9;
+        --color-rose-dark: #FB7BBB;
+        --color-rose-light: #FFE5EE;
+        --color-periwinkle: #D5D9F5;
+        --color-periwinkle-dark: #6B7FD8;
+        --color-periwinkle-light: #EEF0FB;
+        --color-teal: #BCDDD9;
+        --color-teal-dark: #4AB8AD;
+        --color-teal-light: #DFF3F0;
+      }
+
       /* Mini calendar cell styles */
       .mini-cal-cell {
         display: flex;
@@ -33,19 +46,19 @@
           color 0.15s;
       }
       .mini-cal-cell:hover:not(.cal-selected) {
-        background: #e0f2f2;
-        color: #007e85;
+        background: #DFF3F0;
+        color: #4AB8AD;
       }
       .mini-cal-cell.cal-today {
-        background: #e0f2f2;
-        color: #007e85;
+        background: linear-gradient(135deg, #DFF3F0 0%, #BCDDD9 100%);
+        color: #4AB8AD;
         font-weight: 700;
       }
       .mini-cal-cell.cal-selected {
-        background: #007e85 !important;
+        background: #4AB8AD !important;
         color: #fff !important;
         font-weight: 700;
-        box-shadow: 0 2px 8px rgba(0, 126, 133, 0.4);
+        box-shadow: 0 2px 8px rgba(74, 184, 173, 0.4);
       }
 
       /* Full calendar popup cell styles */
@@ -66,20 +79,20 @@
           color 0.15s;
       }
       .full-cal-cell:hover:not(.cal-selected) {
-        background: #e0f2f2;
-        color: #007e85;
+        background: #DFF3F0;
+        color: #4AB8AD;
       }
       .full-cal-cell.cal-today {
-        background: #e0f2f2;
-        color: #007e85;
+        background: linear-gradient(135deg, #DFF3F0 0%, #BCDDD9 100%);
+        color: #4AB8AD;
         font-weight: 700;
-        box-shadow: 0 0 0 2px #007e8566;
+        box-shadow: 0 0 0 2px #4AB8AD66;
       }
       .full-cal-cell.cal-selected {
-        background: #007e85 !important;
+        background: #4AB8AD !important;
         color: #fff !important;
         font-weight: 700;
-        box-shadow: 0 2px 10px rgba(0, 126, 133, 0.45);
+        box-shadow: 0 2px 10px rgba(74, 184, 173, 0.45);
       }
 
       /* Hide scrollbar on calendar modal outer container */
@@ -94,7 +107,7 @@
       /* Styled thin scrollbar for appointments list */
       .apt-list-scroll {
         scrollbar-width: thin;
-        scrollbar-color: #007E85 #f1f5f9;
+        scrollbar-color: #4AB8AD #f1f5f9;
       }
       .apt-list-scroll::-webkit-scrollbar {
         width: 4px;
@@ -104,7 +117,7 @@
         border-radius: 99px;
       }
       .apt-list-scroll::-webkit-scrollbar-thumb {
-        background: #007E85;
+        background: #4AB8AD;
         border-radius: 99px;
       }
 
@@ -147,7 +160,7 @@
   <body class="bg-slate-100 min-h-screen font-sans">
     <div class="flex flex-col md:flex-row min-h-screen relative">
       <aside
-        class="w-full md:w-60 bg-[#007E85] text-white flex flex-row md:flex-col items-center justify-around md:justify-start py-2 md:py-0 px-2 md:px-0 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] md:shadow-xl fixed bottom-0 md:sticky md:top-0 left-0 h-auto md:h-screen z-[100] overflow-x-auto md:overflow-y-auto"
+        class="w-full md:w-60 bg-gradient-to-br from-[#007E85] to-[#005f6b] text-white flex flex-row md:flex-col items-center justify-around md:justify-start py-2 md:py-0 px-2 md:px-0 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] md:shadow-xl fixed bottom-0 md:sticky md:top-0 left-0 h-auto md:h-screen z-[100] overflow-x-auto md:overflow-y-auto"
       >
         <div
           class="hidden md:flex w-full px-6 py-7 items-center gap-3 border-b border-white/10 shrink-0 mb-2"
@@ -217,7 +230,7 @@
         class="flex-1 overflow-x-hidden overflow-y-visible p-4 md:p-8 pb-24 md:pb-8 w-full"
       >
         <div
-          class="relative max-w-7xl mx-auto bg-white rounded-[32px] shadow-[0_20px_60px_rgba(15,23,42,0.08)] p-5 md:p-8"
+          class="relative max-w-7xl mx-auto bg-gradient-to-br from-white via-slate-50/50 to-slate-100/30 rounded-[32px] shadow-[0_20px_60px_rgba(15,23,42,0.08)] p-5 md:p-8"
         >
           <div
             class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8"
@@ -237,7 +250,7 @@
               <button
                 id="notificationBtn"
                 type="button"
-                class="relative w-12 h-12 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-2xl font-medium transition flex items-center justify-center shrink-0"
+                class="relative w-12 h-12 border border-slate-200/80 bg-gradient-to-br from-slate-50 to-blue-50/40 hover:bg-slate-100 text-slate-700 rounded-2xl font-medium transition-all shadow-sm hover:shadow-md flex items-center justify-center shrink-0"
                 title="Notifications"
               >
                 <i data-lucide="bell" class="w-5 h-5"></i>
@@ -249,7 +262,7 @@
               </button>
               <button
                 onclick="openBookingModal()"
-                class="bg-[#007E85] hover:bg-[#006570] flex-1 sm:flex-none text-center text-white px-5 py-3 rounded-2xl font-medium shadow-sm transition"
+                class="bg-gradient-to-r from-[#007E85] to-[#009096] hover:from-[#006570] hover:to-[#007f87] flex-1 sm:flex-none text-center text-white px-5 py-3 rounded-2xl font-medium shadow-sm hover:shadow-md transition-all"
               >
                 Book Appointment
               </button>
@@ -257,7 +270,7 @@
           </div>
 
           <section
-            class="bg-[#007E85] rounded-[30px] p-7 mb-7 text-white relative overflow-hidden shadow-[0_15px_40px_rgba(0,126,133,0.25)] hero-panel"
+            class="bg-gradient-to-br from-[#007E85] via-[#009096] to-[#006878] rounded-[30px] p-7 mb-7 text-white relative overflow-hidden shadow-[0_15px_40px_rgba(0,126,133,0.25)] hero-panel"
           >
             <div class="max-w-2xl">
               <p class="text-3xl font-bold mb-2">Welcome back</p>
@@ -269,25 +282,25 @@
 
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div
-                  class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
+                  class="bg-white/15 backdrop-blur-md rounded-3xl p-5 border border-white/25 hover:bg-white/20 transition-colors"
                 >
-                  <p class="text-sm opacity-90 mb-2">Today Bookings</p>
+                  <p class="text-sm opacity-85 mb-2">Today Bookings</p>
                   <h3 id="todayBookingsCount" class="text-4xl font-bold">
                     ...
                   </h3>
                 </div>
 
                 <div
-                  class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
+                  class="bg-white/15 backdrop-blur-md rounded-3xl p-5 border border-white/25 hover:bg-white/20 transition-colors"
                 >
-                  <p class="text-sm opacity-90 mb-2">Upcoming</p>
+                  <p class="text-sm opacity-85 mb-2">Upcoming</p>
                   <h3 id="upcomingCount" class="text-4xl font-bold">...</h3>
                 </div>
 
                 <div
-                  class="bg-white/20 backdrop-blur-md rounded-3xl p-5 border border-white/20"
+                  class="bg-white/15 backdrop-blur-md rounded-3xl p-5 border border-white/25 hover:bg-white/20 transition-colors"
                 >
-                  <p class="text-sm opacity-90 mb-2">Completed</p>
+                  <p class="text-sm opacity-85 mb-2">Completed</p>
                   <h3 id="completedCount" class="text-4xl font-bold">...</h3>
                 </div>
               </div>
@@ -303,7 +316,7 @@
           <section class="grid grid-cols-1 xl:grid-cols-4 gap-6">
             <div
               id="todayStatusSection"
-              class="xl:col-span-3 bg-slate-50 rounded-[28px] p-6 border border-slate-100 min-h-[720px] transition-all duration-300"
+              class="xl:col-span-3 bg-gradient-to-br from-slate-50 to-slate-50/50 rounded-[28px] p-6 border border-slate-100/60 min-h-[720px] transition-all duration-300 shadow-sm"
             >
               <div
                 class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6"
@@ -330,7 +343,7 @@
                 <div>
                   <div
                     id="todayBookingMessage"
-                    class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                    class="rounded-2xl border border-slate-200/70 bg-gradient-to-br from-white to-slate-50/30 p-5 shadow-sm hover:shadow-md transition-shadow"
                   >
                     <h4 class="text-lg font-semibold text-slate-800 mb-2">
                       No booking for today
@@ -342,25 +355,31 @@
 
                   <div
                     id="todayBookingCard"
-                    class="hidden bg-white rounded-[24px] border border-emerald-100 p-5 shadow-sm"
+                    class="hidden bg-gradient-to-br from-white to-emerald-50/20 rounded-[24px] border border-emerald-100/70 p-5 shadow-sm hover:shadow-md transition-shadow"
                   >
                     <div class="flex items-center justify-between mb-3">
-                      <h4
-                        class="text-xl font-semibold text-slate-800"
-                        id="todayDoctorName"
-                      >
-                        Dr. Kim
-                      </h4>
+                      <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#FEC5D9] to-[#FFE5EE] flex items-center justify-center text-sm font-bold text-[#FB7BBB]">
+                          <span id="todayDoctorInitials">DK</span>
+                        </div>
+                        <div>
+                          <h4
+                            class="text-lg font-semibold text-slate-800"
+                            id="todayDoctorName"
+                          >
+                            Dr. Kim
+                          </h4>
+                          <p class="text-xs text-slate-400" id="todayDoctorMeta">
+                            Cardiologist • Heart Care
+                          </p>
+                        </div>
+                      </div>
                       <span
-                        class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700"
+                        class="px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-[#FEC5D9] to-[#FFE5EE] text-[#FB7BBB]"
                       >
                         Today
                       </span>
                     </div>
-
-                    <p class="text-sm text-slate-400 mb-4" id="todayDoctorMeta">
-                      Cardiologist • Heart Care
-                    </p>
 
                     <div
                       class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-slate-500 mt-4"
@@ -404,22 +423,27 @@
 
                 <div
                   id="nextAppointmentCard"
-                  class="bg-white rounded-[24px] border border-cyan-100 p-5 shadow-sm"
+                  class="bg-gradient-to-br from-white to-cyan-50/20 rounded-[24px] border border-cyan-100/70 p-5 shadow-sm hover:shadow-md transition-shadow"
                 >
                   <div class="flex items-center justify-between mb-3">
-                    <div>
-                      <h4
-                        class="text-xl font-semibold text-slate-800"
-                        id="nextDoctorName"
-                      >
-                        Dr. Sarah Lee
-                      </h4>
-                      <p class="text-sm text-slate-400" id="nextDoctorMeta">
-                        Dermatologist • Skin Care
-                      </p>
+                    <div class="flex items-center gap-3">
+                      <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#D5D9F5] to-[#EEF0FB] flex items-center justify-center text-sm font-bold text-[#6B7FD8]">
+                        <span id="nextDoctorInitials">SL</span>
+                      </div>
+                      <div>
+                        <h4
+                          class="text-lg font-semibold text-slate-800"
+                          id="nextDoctorName"
+                        >
+                          Dr. Sarah Lee
+                        </h4>
+                        <p class="text-xs text-slate-400" id="nextDoctorMeta">
+                          Dermatologist • Skin Care
+                        </p>
+                      </div>
                     </div>
                     <span
-                      class="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-100 text-cyan-700"
+                      class="px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-[#D5D9F5] to-[#EEF0FB] text-[#6B7FD8]"
                     >
                       Next
                     </span>
@@ -469,7 +493,7 @@
             <div class="space-y-6">
               <div
                 id="calendarCardBtn"
-                class="bg-white rounded-[28px] p-6 border border-slate-100 shadow-sm transition"
+                class="bg-gradient-to-br from-white to-[#DFF3F0] rounded-[28px] p-6 border border-slate-100/60 shadow-sm hover:shadow-md transition-all"
               >
                 <div class="flex items-center justify-between mb-4">
                   <h3 class="text-lg font-semibold text-slate-800">Calendar</h3>
@@ -477,7 +501,7 @@
                     id="expandCalBtn"
                     type="button"
                     title="Expand calendar"
-                    class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 transition text-slate-400 hover:text-slate-600"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 transition text-slate-400 hover:text-[#4AB8AD]"
                   >
                     <i data-lucide="expand" class="w-5 h-5"></i>
                   </button>
@@ -494,14 +518,14 @@
                   <a
                     href="dashboard.html"
                     id="calViewAllBtn"
-                    class="text-[#007E85] text-sm font-medium hover:underline"
+                    class="text-[#4AB8AD] text-sm font-medium hover:underline font-semibold"
                     >View All</a
                   >
                 </div>
               </div>
 
               <div
-                class="bg-white rounded-[28px] p-6 border border-slate-100 shadow-sm"
+                class="bg-gradient-to-br from-white to-blue-50/20 rounded-[28px] p-6 border border-slate-100/60 shadow-sm hover:shadow-md transition-shadow"
               >
                 <h3 class="text-lg font-semibold text-slate-800 mb-4">
                   Quick Summary
@@ -545,7 +569,7 @@
 
     <div
       id="notificationPanel"
-      class="hidden fixed w-[min(calc(100vw-2rem),390px)] bg-white rounded-[24px] border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.18)] overflow-hidden z-[200]"
+      class="hidden fixed w-[min(calc(100vw-2rem),390px)] bg-gradient-to-br from-white to-slate-50/50 rounded-[24px] border border-slate-200/70 shadow-[0_20px_60px_rgba(15,23,42,0.18)] overflow-hidden z-[200]"
     >
       <div
         class="flex items-center justify-between px-5 py-4 border-b border-slate-100"
@@ -567,7 +591,7 @@
       class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[100] p-4"
     >
       <div
-        class="bg-white w-full max-w-5xl max-h-[92vh] rounded-3xl shadow-2xl relative overflow-hidden transition-all duration-200"
+        class="bg-gradient-to-br from-white to-slate-50/30 w-full max-w-5xl max-h-[92vh] rounded-3xl shadow-2xl relative overflow-hidden transition-all duration-200"
       >
         <button
           onclick="closeBookingModal()"
@@ -592,7 +616,7 @@
       class="fixed inset-0 hidden items-center justify-center z-[70] bg-black/30 backdrop-blur-sm p-4"
     >
       <div
-        class="cal-modal-scroll w-full max-w-3xl bg-white rounded-[32px] shadow-[0_20px_60px_rgba(15,23,42,0.18)] border border-slate-100 overflow-hidden flex flex-col max-h-[92vh]"
+        class="cal-modal-scroll w-full max-w-3xl bg-gradient-to-br from-white to-slate-50/30 rounded-[32px] shadow-[0_20px_60px_rgba(15,23,42,0.18)] border border-slate-100/60 overflow-hidden flex flex-col max-h-[92vh]"
       >
         <div
           class="flex items-center justify-between px-6 py-5 border-b border-slate-100"
@@ -654,7 +678,7 @@
             class="calendar-popup-grid grid grid-cols-7 text-sm text-slate-400 gap-y-5 text-center mb-8"
           ></div>
 
-          <div class="rounded-[24px] bg-slate-50 border border-slate-100 p-5">
+          <div class="rounded-[24px] bg-gradient-to-br from-slate-50 to-slate-50/50 border border-slate-100/60 p-5">
             <h4 class="text-base font-semibold text-slate-800 mb-3">
               Appointments on selected day
             </h4>
@@ -681,7 +705,7 @@
       class="fixed inset-0 hidden items-center justify-center z-[300] bg-black/25 backdrop-blur-sm"
     >
       <div
-        class="bg-white rounded-[28px] shadow-[0_20px_60px_rgba(15,23,42,0.18)] px-8 py-7 w-[90%] max-w-md text-center border border-emerald-100"
+        class="bg-gradient-to-br from-white to-emerald-50/30 rounded-[28px] shadow-[0_20px_60px_rgba(15,23,42,0.18)] px-8 py-7 w-[90%] max-w-md text-center border border-emerald-100/70"
       >
         <div
           class="mx-auto mb-4 w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center"

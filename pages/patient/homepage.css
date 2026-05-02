@@ -5,6 +5,7 @@
 
 .hero-panel {
   box-shadow: 0 18px 40px rgba(20, 184, 166, 0.18);
+  background-clip: padding-box;
 }
 
 .calendar-dot {
@@ -41,20 +42,23 @@
 }
 
 .notification-panel-list::-webkit-scrollbar-thumb {
-  background: rgba(13, 148, 136, 0.35);
+  background: rgba(74, 184, 173, 0.35);
   border-radius: 9999px;
 }
 
 .notification-panel-list::-webkit-scrollbar-thumb:hover {
-  background: rgba(13, 148, 136, 0.55);
+  background: rgba(74, 184, 173, 0.55);
 }
 
 .notification-card {
   transition: all 0.25s ease;
+  border-left: 4px solid transparent;
 }
 
 .notification-card:hover {
-  background-color: #f8fafc;
+  background-color: #DFF3F0;
+  border-color: #4AB8AD;
+  border-left-color: #4AB8AD;
 }
 
 .calendar-day {
@@ -70,14 +74,15 @@
 }
 
 .calendar-day:hover:not(.cal-selected) {
-  background: #f8fafc;
+  background: #DFF3F0;
+  color: #4AB8AD;
 }
 
 .calendar-day.cal-selected {
-  background: #007e85 !important;
+  background: #4AB8AD !important;
   color: #fff !important;
   font-weight: 700;
-  box-shadow: 0 2px 10px rgba(0, 126, 133, 0.45);
+  box-shadow: 0 2px 10px rgba(74, 184, 173, 0.45);
 }
 
 .active-day {
@@ -94,4 +99,94 @@
 
 .calendar-popup-grid {
   user-select: none;
+}
+
+/* Subtle color blending for better visual depth */
+.notification-card:hover {
+  background-color: #f8fafc;
+  border-color: rgba(0, 126, 133, 0.05);
+}
+
+/* Enhanced card shadows for depth */
+@supports (backdrop-filter: blur(1px)) {
+  .rounded-\[28px\] {
+    background-clip: padding-box;
+  }
+}
+
+/* Accent color styling for appointments */
+.appointment-rose {
+  background: linear-gradient(135deg, #FEC5D9 0%, #FFE5EE 100%);
+  color: #FB7BBB;
+}
+
+.appointment-periwinkle {
+  background: linear-gradient(135deg, #D5D9F5 0%, #EEF0FB 100%);
+  color: #6B7FD8;
+}
+
+.appointment-teal {
+  background: linear-gradient(135deg, #BCDDD9 0%, #DFF3F0 100%);
+  color: #4AB8AD;
+}
+
+/* Time badge styling */
+.time-badge-rose {
+  background: linear-gradient(to right, #FEC5D9, #FFE5EE);
+  color: #FB7BBB;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+}
+
+.time-badge-periwinkle {
+  background: linear-gradient(to right, #D5D9F5, #EEF0FB);
+  color: #6B7FD8;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+}
+
+.time-badge-teal {
+  background: linear-gradient(to right, #BCDDD9, #DFF3F0);
+  color: #4AB8AD;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+}
+
+/* Status badge colors for appointments */
+.status-badge {
+  border-radius: 9999px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.status-upcoming {
+  background: linear-gradient(135deg, #D5D9F5 0%, #EEF0FB 100%);
+  color: #6B7FD8;
+}
+
+.status-today {
+  background: linear-gradient(135deg, #FEC5D9 0%, #FFE5EE 100%);
+  color: #FB7BBB;
+}
+
+.status-completed {
+  background: linear-gradient(135deg, #BCDDD9 0%, #DFF3F0 100%);
+  color: #4AB8AD;
+}
+
+/* Accent text colors */
+.text-accent-rose {
+  color: #FB7BBB;
+}
+
+.text-accent-periwinkle {
+  color: #6B7FD8;
+}
+
+.text-accent-teal {
+  color: #4AB8AD;
 }
