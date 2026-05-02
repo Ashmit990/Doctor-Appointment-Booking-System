@@ -1136,6 +1136,22 @@ ALTER TABLE `patient_profiles`
 --
 ALTER TABLE `treatment_tickets`
   ADD CONSTRAINT `treatment_tickets_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `treatment_categories` (`id`);
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `otp_tokens`
+--
+
+CREATE TABLE `otp_tokens` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(100) NOT NULL,
+  `otp` varchar(6) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `used` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

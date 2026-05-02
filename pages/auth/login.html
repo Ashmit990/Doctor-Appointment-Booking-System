@@ -137,51 +137,127 @@
       </svg>
     </div>
 
-    <!-- Forgot Password Modal -->
+    <!-- Forgot Password Modal – Multi-Step OTP Flow -->
     <div
       id="forgotModal"
       class="fixed inset-0 z-50 items-center justify-center bg-black/40 backdrop-blur-sm"
     >
-      <div
-        class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center"
-      >
-        <div class="flex justify-center mb-4">
-          <div class="bg-[#007E85]/10 rounded-full p-4">
-            <svg
-              class="w-10 h-10 text-[#007E85]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.5"
-                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-              />
-            </svg>
+      <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center">
+
+        <!-- Step 1 – Email Input -->
+        <div id="fp-step1">
+          <div class="flex justify-center mb-4">
+            <div class="bg-[#007E85]/10 rounded-full p-4">
+              <svg class="w-10 h-10 text-[#007E85]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+            </div>
           </div>
+          <h2 class="text-[#007E85] font-black text-2xl mb-2">Forgot Password?</h2>
+          <p class="text-gray-500 text-sm mb-6 leading-relaxed">Enter your registered email and we'll send you a verification code.</p>
+          <input id="fp-email" type="email" placeholder="Enter your email"
+            class="w-full border-b-2 border-[#007E85] bg-transparent focus:outline-none pb-2 text-gray-800 text-base mb-4 text-left tracking-normal"
+          />
+          <p id="fp-step1-error" class="hidden text-red-500 text-xs mb-3 text-left"></p>
+          <button onclick="fpSendOtp()"
+            class="w-full bg-[#007E85] hover:bg-[#00666c] text-white font-black py-3 rounded-xl text-base shadow transition-all active:scale-[0.98] mb-3" id="fp-send-btn">
+            Send OTP
+          </button>
+          <button onclick="fpClose()" class="w-full text-gray-500 text-sm hover:text-[#007E85] transition">Cancel</button>
         </div>
-        <h2 class="text-[#007E85] font-black text-2xl mb-3">
-          Forgot Password?
-        </h2>
-        <p class="text-gray-600 text-sm mb-4 leading-relaxed">
-          Please contact admin through email requesting for password change.
-        </p>
-        <a
-          href="mailto:admin@healthcare.com"
-          class="inline-block bg-[#007E85]/10 text-[#007E85] font-bold text-base px-4 py-2 rounded-xl hover:bg-[#007E85]/20 transition mb-6"
-        >
-          admin@healthcare.com
-        </a>
-        <button
-          onclick="
-            document.getElementById('forgotModal').classList.remove('show')
-          "
-          class="w-full bg-[#007E85] hover:bg-[#00666c] text-white font-black py-3 rounded-xl text-lg shadow transition-all active:scale-[0.98]"
-        >
-          Back to Login
-        </button>
+
+        <!-- Step 2 – OTP Verification -->
+        <div id="fp-step2" class="hidden">
+          <div class="flex justify-center mb-4">
+            <div class="bg-[#007E85]/10 rounded-full p-4">
+              <svg class="w-10 h-10 text-[#007E85]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+              </svg>
+            </div>
+          </div>
+          <h2 class="text-[#007E85] font-black text-2xl mb-2">Enter OTP</h2>
+          <p class="text-gray-500 text-sm mb-6 leading-relaxed">A 6-digit code was sent to<br><span id="fp-email-display" class="font-bold text-[#007E85]"></span></p>
+          <div class="flex justify-center gap-2 mb-4" id="otp-boxes">
+            <input type="text" maxlength="1" class="otp-input w-11 h-12 border-2 border-gray-300 rounded-lg text-center text-xl font-bold text-[#007E85] focus:border-[#007E85] focus:outline-none transition" />
+            <input type="text" maxlength="1" class="otp-input w-11 h-12 border-2 border-gray-300 rounded-lg text-center text-xl font-bold text-[#007E85] focus:border-[#007E85] focus:outline-none transition" />
+            <input type="text" maxlength="1" class="otp-input w-11 h-12 border-2 border-gray-300 rounded-lg text-center text-xl font-bold text-[#007E85] focus:border-[#007E85] focus:outline-none transition" />
+            <input type="text" maxlength="1" class="otp-input w-11 h-12 border-2 border-gray-300 rounded-lg text-center text-xl font-bold text-[#007E85] focus:border-[#007E85] focus:outline-none transition" />
+            <input type="text" maxlength="1" class="otp-input w-11 h-12 border-2 border-gray-300 rounded-lg text-center text-xl font-bold text-[#007E85] focus:border-[#007E85] focus:outline-none transition" />
+            <input type="text" maxlength="1" class="otp-input w-11 h-12 border-2 border-gray-300 rounded-lg text-center text-xl font-bold text-[#007E85] focus:border-[#007E85] focus:outline-none transition" />
+          </div>
+          <p id="fp-step2-error" class="hidden text-red-500 text-xs mb-3"></p>
+          <button onclick="fpVerifyOtp()"
+            class="w-full bg-[#007E85] hover:bg-[#00666c] text-white font-black py-3 rounded-xl text-base shadow transition-all active:scale-[0.98] mb-3" id="fp-verify-btn">
+            Verify OTP
+          </button>
+          <p class="text-xs text-gray-400">
+            Didn't receive it?
+            <button id="fp-resend-btn" onclick="fpResendOtp()" class="text-[#007E85] font-bold hover:underline disabled:opacity-40" disabled>
+              Resend OTP <span id="fp-resend-timer" class="font-normal">(60s)</span>
+            </button>
+          </p>
+          <button onclick="fpGoStep(1)" class="mt-3 text-gray-400 text-xs hover:text-[#007E85] transition">← Back</button>
+        </div>
+
+        <!-- Step 3 – New Password -->
+        <div id="fp-step3" class="hidden">
+          <div class="flex justify-center mb-4">
+            <div class="bg-[#007E85]/10 rounded-full p-4">
+              <svg class="w-10 h-10 text-[#007E85]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+            </div>
+          </div>
+          <h2 class="text-[#007E85] font-black text-2xl mb-2">Set New Password</h2>
+          <p class="text-gray-500 text-sm mb-6 leading-relaxed">Choose a strong new password for your account.</p>
+          <div class="relative mb-4">
+            <input id="fp-newpass" type="password" placeholder="New password (min. 6 chars)"
+              class="w-full border-b-2 border-[#007E85] bg-transparent focus:outline-none pb-2 text-gray-800 text-base text-left tracking-normal pr-8"
+            />
+            <button type="button" onclick="fpTogglePass('fp-newpass','fp-eye1')" tabindex="-1"
+              class="absolute right-0 bottom-2 text-[#007E85]">
+              <svg id="fp-eye1" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+            </button>
+          </div>
+          <div class="relative mb-4">
+            <input id="fp-confirm" type="password" placeholder="Confirm new password"
+              class="w-full border-b-2 border-[#007E85] bg-transparent focus:outline-none pb-2 text-gray-800 text-base text-left tracking-normal pr-8"
+            />
+            <button type="button" onclick="fpTogglePass('fp-confirm','fp-eye2')" tabindex="-1"
+              class="absolute right-0 bottom-2 text-[#007E85]">
+              <svg id="fp-eye2" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+            </button>
+          </div>
+          <p id="fp-step3-error" class="hidden text-red-500 text-xs mb-3 text-left"></p>
+          <button onclick="fpResetPassword()"
+            class="w-full bg-[#007E85] hover:bg-[#00666c] text-white font-black py-3 rounded-xl text-base shadow transition-all active:scale-[0.98]" id="fp-reset-btn">
+            Reset Password
+          </button>
+        </div>
+
+        <!-- Step 4 – Success -->
+        <div id="fp-step4" class="hidden">
+          <div class="flex justify-center mb-4">
+            <div class="bg-green-100 rounded-full p-4">
+              <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+          </div>
+          <h2 class="text-green-600 font-black text-2xl mb-2">Password Reset!</h2>
+          <p class="text-gray-500 text-sm mb-6 leading-relaxed">Your password has been changed successfully. You can now log in.</p>
+          <button onclick="fpClose()"
+            class="w-full bg-[#007E85] hover:bg-[#00666c] text-white font-black py-3 rounded-xl text-base shadow transition-all active:scale-[0.98]">
+            Back to Login
+          </button>
+        </div>
+
       </div>
     </div>
 
@@ -381,6 +457,203 @@
             errorEl.classList.remove("hidden");
           });
       }
+
+      // ── Forgot Password – OTP Flow ──────────────────────────────────────────
+      let fpResendInterval = null;
+
+      function fpClose() {
+        document.getElementById('forgotModal').classList.remove('show');
+        fpGoStep(1);
+        document.getElementById('fp-email').value = '';
+        document.querySelectorAll('.otp-input').forEach(i => i.value = '');
+        document.getElementById('fp-newpass').value = '';
+        document.getElementById('fp-confirm').value = '';
+        ['fp-step1-error','fp-step2-error','fp-step3-error'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) { el.classList.add('hidden'); el.textContent = ''; }
+        });
+      }
+
+      function fpGoStep(n) {
+        [1,2,3,4].forEach(s => {
+          const el = document.getElementById('fp-step' + s);
+          if (el) el.classList.toggle('hidden', s !== n);
+        });
+      }
+
+      function fpShowError(id, msg) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = msg;
+        el.classList.remove('hidden');
+      }
+
+      function fpSetLoading(btnId, loading, label) {
+        const btn = document.getElementById(btnId);
+        if (!btn) return;
+        btn.disabled = loading;
+        btn.textContent = loading ? 'Please wait...' : label;
+      }
+
+      function fpSendOtp() {
+        const email = document.getElementById('fp-email').value.trim();
+        const errEl = document.getElementById('fp-step1-error');
+        errEl.classList.add('hidden');
+
+        if (!email) { fpShowError('fp-step1-error', 'Please enter your email address.'); return; }
+        const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRe.test(email)) { fpShowError('fp-step1-error', 'Please enter a valid email address.'); return; }
+
+        fpSetLoading('fp-send-btn', true, 'Send OTP');
+        const fd = new FormData();
+        fd.append('email', email);
+
+        fetch('../../api/auth/send_otp.php', { method: 'POST', body: fd })
+          .then(r => r.json())
+          .then(data => {
+            fpSetLoading('fp-send-btn', false, 'Send OTP');
+            if (data.success) {
+              document.getElementById('fp-email-display').textContent = email;
+              fpGoStep(2);
+              fpStartResendTimer();
+              setTimeout(() => document.querySelectorAll('.otp-input')[0].focus(), 100);
+            } else {
+              fpShowError('fp-step1-error', data.message || 'Failed to send OTP.');
+            }
+          })
+          .catch(() => {
+            fpSetLoading('fp-send-btn', false, 'Send OTP');
+            fpShowError('fp-step1-error', 'Network error. Please try again.');
+          });
+      }
+
+      function fpStartResendTimer() {
+        clearInterval(fpResendInterval);
+        let secs = 60;
+        const btn   = document.getElementById('fp-resend-btn');
+        const timer = document.getElementById('fp-resend-timer');
+        btn.disabled = true;
+        timer.textContent = '(' + secs + 's)';
+        fpResendInterval = setInterval(() => {
+          secs--;
+          timer.textContent = secs > 0 ? '(' + secs + 's)' : '';
+          if (secs <= 0) {
+            clearInterval(fpResendInterval);
+            btn.disabled = false;
+          }
+        }, 1000);
+      }
+
+      function fpResendOtp() {
+        document.querySelectorAll('.otp-input').forEach(i => i.value = '');
+        document.getElementById('fp-step2-error').classList.add('hidden');
+        document.querySelectorAll('.otp-input')[0].focus();
+        const email = document.getElementById('fp-email').value.trim();
+        const fd = new FormData();
+        fd.append('email', email);
+        fetch('../../api/auth/send_otp.php', { method: 'POST', body: fd })
+          .then(r => r.json())
+          .then(data => {
+            if (data.success) fpStartResendTimer();
+            else fpShowError('fp-step2-error', data.message || 'Failed to resend OTP.');
+          });
+      }
+
+      function fpVerifyOtp() {
+        const inputs = document.querySelectorAll('.otp-input');
+        const otp = Array.from(inputs).map(i => i.value).join('');
+        document.getElementById('fp-step2-error').classList.add('hidden');
+
+        if (otp.length < 6) { fpShowError('fp-step2-error', 'Please enter all 6 digits.'); return; }
+
+        fpSetLoading('fp-verify-btn', true, 'Verify OTP');
+        const fd = new FormData();
+        fd.append('otp', otp);
+
+        fetch('../../api/auth/verify_otp.php', { method: 'POST', body: fd })
+          .then(r => r.json())
+          .then(data => {
+            fpSetLoading('fp-verify-btn', false, 'Verify OTP');
+            if (data.success) {
+              fpGoStep(3);
+              setTimeout(() => document.getElementById('fp-newpass').focus(), 100);
+            } else {
+              fpShowError('fp-step2-error', data.message || 'Invalid OTP.');
+              inputs.forEach(i => { i.value = ''; i.classList.add('border-red-400'); });
+              setTimeout(() => inputs.forEach(i => i.classList.remove('border-red-400')), 1500);
+              inputs[0].focus();
+            }
+          })
+          .catch(() => {
+            fpSetLoading('fp-verify-btn', false, 'Verify OTP');
+            fpShowError('fp-step2-error', 'Network error. Please try again.');
+          });
+      }
+
+      function fpResetPassword() {
+        const password = document.getElementById('fp-newpass').value;
+        const confirm  = document.getElementById('fp-confirm').value;
+        document.getElementById('fp-step3-error').classList.add('hidden');
+
+        if (!password || password.length < 6) { fpShowError('fp-step3-error', 'Password must be at least 6 characters.'); return; }
+        if (password !== confirm) { fpShowError('fp-step3-error', 'Passwords do not match.'); return; }
+
+        fpSetLoading('fp-reset-btn', true, 'Reset Password');
+        const fd = new FormData();
+        fd.append('password', password);
+        fd.append('confirm_password', confirm);
+
+        fetch('../../api/auth/reset_password.php', { method: 'POST', body: fd })
+          .then(r => r.json())
+          .then(data => {
+            fpSetLoading('fp-reset-btn', false, 'Reset Password');
+            if (data.success) fpGoStep(4);
+            else fpShowError('fp-step3-error', data.message || 'Failed to reset password.');
+          })
+          .catch(() => {
+            fpSetLoading('fp-reset-btn', false, 'Reset Password');
+            fpShowError('fp-step3-error', 'Network error. Please try again.');
+          });
+      }
+
+      function fpTogglePass(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon  = document.getElementById(iconId);
+        const show  = input.type === 'password';
+        input.type  = show ? 'text' : 'password';
+        icon.style.opacity = show ? '0.45' : '1';
+      }
+
+      // OTP box keyboard handling
+      document.addEventListener('DOMContentLoaded', function () {
+        const boxes = document.querySelectorAll('.otp-input');
+        boxes.forEach((box, idx) => {
+          box.addEventListener('input', function () {
+            this.value = this.value.replace(/[^0-9]/g, '').slice(-1);
+            if (this.value && idx < boxes.length - 1) boxes[idx + 1].focus();
+          });
+          box.addEventListener('keydown', function (e) {
+            if (e.key === 'Backspace' && !this.value && idx > 0) boxes[idx - 1].focus();
+          });
+          box.addEventListener('paste', function (e) {
+            e.preventDefault();
+            const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+            boxes.forEach((b, i) => { b.value = pasted[i] || ''; });
+            const next = Math.min(pasted.length, boxes.length - 1);
+            boxes[next].focus();
+          });
+        });
+
+        // Allow Enter on OTP step
+        document.addEventListener('keydown', function (e) {
+          if (e.key !== 'Enter') return;
+          const step2 = document.getElementById('fp-step2');
+          const step3 = document.getElementById('fp-step3');
+          if (step2 && !step2.classList.contains('hidden')) fpVerifyOtp();
+          if (step3 && !step3.classList.contains('hidden')) fpResetPassword();
+        });
+      });
+      // ─────────────────────────────────────────────────────────────────────────
 
       function togglePass() {
         const input = document.getElementById("loginPassword");
