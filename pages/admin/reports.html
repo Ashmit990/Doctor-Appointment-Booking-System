@@ -1,25 +1,71 @@
 <!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /><meta http-equiv="Pragma" content="no-cache" /><meta http-equiv="Expires" content="0" /><title>Reports – Healthcare</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
+    />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Reports – Healthcare</title>
     <!-- Version: 1.0.1 -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" /><script src="https://cdn.tailwindcss.com"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script>
-        tailwind.config = { theme: { extend: { colors: { teal: { DEFAULT: "#0d7377", dark: "#0a5a5d", light: "#14a3a8", bg: "#e8f5f5" } }, fontFamily: { poppins: ["Poppins", "sans-serif"] } } } };
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              teal: {
+                DEFAULT: "#0d7377",
+                dark: "#0a5a5d",
+                light: "#14a3a8",
+                bg: "#e8f5f5",
+              },
+            },
+            fontFamily: { poppins: ["Poppins", "sans-serif"] },
+          },
+        },
+      };
     </script>
     <style>
-        body { font-family: "Poppins", sans-serif; }
-        .toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; background: #0d7377; color: white; border-radius: 8px; z-index: 1000; }
+      body {
+        font-family: "Poppins", sans-serif;
+      }
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        background: #0d7377;
+        color: white;
+        border-radius: 8px;
+        z-index: 1000;
+      }
     </style>
-</head>
-<body class="bg-gray-100 text-gray-800 flex min-h-screen">
-    <div id="overlay" class="fixed inset-0 bg-black/40 z-40 hidden lg:hidden" onclick="closeSidebar()"></div>
+  </head>
+  <body class="bg-gray-100 text-gray-800 flex min-h-screen">
+    <div
+      id="overlay"
+      class="fixed inset-0 bg-black/40 z-40 hidden lg:hidden"
+      onclick="closeSidebar()"
+    ></div>
     <aside
       id="sidebar"
       class="fixed top-0 left-0 bottom-0 w-60 bg-teal-dark flex flex-col z-50 -translate-x-full lg:translate-x-0 transition-transform duration-300"
     >
       <div class="px-6 py-7 flex items-center gap-3 border-b border-white/10">
-        <img src="../../src/assets/Logo.svg" alt="Healthcare Logo" class="w-8 h-8" />
+        <img
+          src="../../src/assets/Logo.svg"
+          alt="Healthcare Logo"
+          class="w-8 h-8"
+        />
         <span class="text-white font-bold text-lg">Healthcare</span>
       </div>
       <nav class="p-3 flex-1">
@@ -139,225 +185,305 @@
       </div>
     </aside>
     <main class="flex-1 flex flex-col lg:ml-60">
-        <header class="bg-white px-4 md:px-8 py-4 flex items-center justify-between shadow-sm sticky top-0 z-30">
-            <div class="flex items-center gap-3">
-                <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg hover:bg-gray-100"><svg class="w-5 h-5 text-teal-dark" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" /></svg></button>
-                <h1 class="text-base font-semibold text-teal-dark">Reports and Analytics</h1>
-            </div>
-            <div class="flex items-center gap-4">
-                <span id="current-date" class="text-xs text-gray-500 hidden sm:block"></span>
-                <div class="w-9 h-9 bg-teal rounded-full flex items-center justify-center text-white font-bold text-sm">A</div>
-            </div>
-        </header>
-        <div class="p-4 md:p-8 flex-1 overflow-y-auto">
-            <h2 class="text-2xl font-bold text-teal-dark mb-6">Dashboard Analytics</h2>
-            
-            <!-- Summary Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div class="bg-white rounded-2xl shadow-md p-6">
-                    <p class="text-gray-600 text-sm mb-2">Total Patients</p>
-                    <p class="text-3xl font-bold text-teal-dark" id="stat-patients">-</p>
-                </div>
-                <div class="bg-white rounded-2xl shadow-md p-6">
-                    <p class="text-gray-600 text-sm mb-2">Total Doctors</p>
-                    <p class="text-3xl font-bold text-teal-dark" id="stat-doctors">-</p>
-                </div>
-                <div class="bg-white rounded-2xl shadow-md p-6">
-                    <p class="text-gray-600 text-sm mb-2">Total Appointments</p>
-                    <p class="text-3xl font-bold text-teal-dark" id="stat-appointments">-</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white rounded-2xl shadow-md p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Appointment Status Distribution</h3>
-                    <canvas id="statusChart"></canvas>
-                </div>
-                <div class="bg-white rounded-2xl shadow-md p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Top Doctors by Appointments</h3>
-                    <canvas id="doctorsChart"></canvas>
-                </div>
-                <div class="bg-white rounded-2xl shadow-md p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">30-Day Appointment Trend</h3>
-                    <canvas id="trendChart"></canvas>
-                </div>
-                <div class="bg-white rounded-2xl shadow-md p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Specializations</h3>
-                    <canvas id="specializationChart"></canvas>
-                </div>
-            </div>
+      <header
+        class="bg-white px-4 md:px-8 py-4 flex items-center justify-between shadow-sm sticky top-0 z-30"
+      >
+        <div class="flex items-center gap-3">
+          <button
+            onclick="toggleSidebar()"
+            class="lg:hidden p-2 rounded-lg hover:bg-gray-100"
+          >
+            <svg
+              class="w-5 h-5 text-teal-dark"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+            </svg>
+          </button>
+          <h1 class="text-base font-semibold text-teal-dark">
+            Reports and Analytics
+          </h1>
         </div>
+        <div class="flex items-center gap-4">
+          <span
+            id="current-date"
+            class="text-xs text-gray-500 hidden sm:block"
+          ></span>
+          <div
+            class="w-9 h-9 bg-teal rounded-full flex items-center justify-center text-white font-bold text-sm"
+          >
+            A
+          </div>
+        </div>
+      </header>
+      <div class="p-4 md:p-8 flex-1 overflow-y-auto">
+        <h2 class="text-2xl font-bold text-teal-dark mb-6">
+          Dashboard Analytics
+        </h2>
+
+        <!-- Summary Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div class="bg-white rounded-2xl shadow-md p-6">
+            <p class="text-gray-600 text-sm mb-2">Total Patients</p>
+            <p class="text-3xl font-bold text-teal-dark" id="stat-patients">
+              -
+            </p>
+          </div>
+          <div class="bg-white rounded-2xl shadow-md p-6">
+            <p class="text-gray-600 text-sm mb-2">Total Doctors</p>
+            <p class="text-3xl font-bold text-teal-dark" id="stat-doctors">-</p>
+          </div>
+          <div class="bg-white rounded-2xl shadow-md p-6">
+            <p class="text-gray-600 text-sm mb-2">Total Appointments</p>
+            <p class="text-3xl font-bold text-teal-dark" id="stat-appointments">
+              -
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-white rounded-2xl shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              Appointment Status Distribution
+            </h3>
+            <canvas id="statusChart"></canvas>
+          </div>
+          <div class="bg-white rounded-2xl shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              Top Doctors by Appointments
+            </h3>
+            <canvas id="doctorsChart"></canvas>
+          </div>
+          <div class="bg-white rounded-2xl shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              30-Day Appointment Trend
+            </h3>
+            <canvas id="trendChart"></canvas>
+          </div>
+          <div class="bg-white rounded-2xl shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              Specializations
+            </h3>
+            <canvas id="specializationChart"></canvas>
+          </div>
+        </div>
+      </div>
     </main>
     <script>
-        let statusChart, doctorsChart, trendChart, specializationChart;
+      let statusChart, doctorsChart, trendChart, specializationChart;
 
-        function updateCurrentDate() {
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', options);
+      function updateCurrentDate() {
+        const options = {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        };
+        document.getElementById("current-date").textContent =
+          new Date().toLocaleDateString("en-US", options);
+      }
+
+      async function loadReports() {
+        try {
+          const response = await fetch("../../api/admin/reports.php");
+          const result = await response.json();
+          if (result.status === "success") {
+            renderCharts(result.data);
+          } else {
+            console.error("Error:", result.message);
+          }
+        } catch (error) {
+          console.error("Error loading reports:", error);
         }
+      }
 
-        async function loadReports() {
-            try {
-                const response = await fetch('../../api/admin/reports.php');
-                const result = await response.json();
-                if (result.status === 'success') {
-                    renderCharts(result.data);
-                } else {
-                    console.error('Error:', result.message);
-                }
-            } catch (error) {
-                console.error('Error loading reports:', error);
-            }
-        }
+      function renderCharts(data) {
+        // Color palettes for different chart types
+        const statusColors = {
+          Upcoming: "#3b82f6", // Blue
+          Completed: "#10b981", // Green
+          Missed: "#f59e0b", // Amber
+          Cancelled: "#ef4444", // Red
+        };
 
-        function renderCharts(data) {
-            // Color palettes for different chart types
-            const statusColors = {
-                'Upcoming': '#3b82f6',      // Blue
-                'Completed': '#10b981',    // Green
-                'Missed': '#f59e0b',       // Amber
-                'Cancelled': '#ef4444'     // Red
-            };
-            
-            const doctorColors = ['#0d7377', '#14a3a8', '#06b6d4', '#06b6d4', '#0891b2'];
-            const trendColors = {
-                borderColor: '#0d7377',
-                backgroundColor: 'rgba(13, 115, 119, 0.1)',
-                fill: true
-            };
-            const specializationColors = ['#14a3a8', '#0d7377', '#06b6d4', '#0891b2', '#0e7490', '#155e75'];
-            
-            // Update summary stats
-            document.getElementById('stat-patients').textContent = data.summary.total_patients;
-            document.getElementById('stat-doctors').textContent = data.summary.total_doctors;
-            document.getElementById('stat-appointments').textContent = data.summary.total_appointments;
-            
-            // Status Distribution - Pie Chart with status-based colors
-            if (statusChart) statusChart.destroy();
-            const statusLabels = data.status_distribution.map(s => s.status);
-            const statusCounts = data.status_distribution.map(s => s.count);
-            const statusBgColors = statusLabels.map(label => statusColors[label] || '#9ca3af');
-            
-            statusChart = new Chart(document.getElementById('statusChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: statusLabels,
-                    datasets: [{
-                        data: statusCounts,
-                        backgroundColor: statusBgColors,
-                        borderColor: '#ffffff',
-                        borderWidth: 2
-                    }]
-                },
-                options: { 
-                    responsive: true, 
-                    plugins: { 
-                        legend: { position: 'bottom', labels: { font: { size: 12 }, padding: 15 } } 
-                    } 
-                }
-            });
+        const doctorColors = [
+          "#0d7377",
+          "#14a3a8",
+          "#06b6d4",
+          "#06b6d4",
+          "#0891b2",
+        ];
+        const trendColors = {
+          borderColor: "#0d7377",
+          backgroundColor: "rgba(13, 115, 119, 0.1)",
+          fill: true,
+        };
+        const specializationColors = [
+          "#14a3a8",
+          "#0d7377",
+          "#06b6d4",
+          "#0891b2",
+          "#0e7490",
+          "#155e75",
+        ];
 
-            // Top Doctors - Bar Chart with gradient blues
-            if (doctorsChart) doctorsChart.destroy();
-            const topDocs = data.doctor_stats.slice(0, 5);
-            doctorsChart = new Chart(document.getElementById('doctorsChart'), {
-                type: 'bar',
-                data: {
-                    labels: topDocs.map(d => d.full_name),
-                    datasets: [{
-                        label: 'Appointments',
-                        data: topDocs.map(d => d.appointment_count || 0),
-                        backgroundColor: doctorColors.slice(0, topDocs.length),
-                        borderRadius: 8,
-                        borderSkipped: false
-                    }]
-                },
-                options: { 
-                    indexAxis: 'y',
-                    responsive: true, 
-                    plugins: { legend: { display: false } },
-                    scales: { x: { beginAtZero: true, grid: { display: false } } }
-                }
-            });
+        // Update summary stats
+        document.getElementById("stat-patients").textContent =
+          data.summary.total_patients;
+        document.getElementById("stat-doctors").textContent =
+          data.summary.total_doctors;
+        document.getElementById("stat-appointments").textContent =
+          data.summary.total_appointments;
 
-            // 30-Day Trend - Line Chart
-            if (trendChart) trendChart.destroy();
-            const trendLabels = data.trend_data.map(t => {
-                const date = new Date(t.date);
-                return (date.getMonth() + 1) + '/' + date.getDate();
-            }).reverse();
-            const trendCounts = data.trend_data.map(t => t.count).reverse();
-            
-            trendChart = new Chart(document.getElementById('trendChart'), {
-                type: 'line',
-                data: {
-                    labels: trendLabels,
-                    datasets: [{
-                        label: 'Appointments',
-                        data: trendCounts,
-                        borderColor: '#0d7377',
-                        backgroundColor: 'rgba(13, 115, 119, 0.1)',
-                        tension: 0.4,
-                        fill: true,
-                        borderWidth: 3,
-                        pointBackgroundColor: '#0d7377',
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2,
-                        pointRadius: 5
-                    }]
-                },
-                options: { 
-                    responsive: true, 
-                    plugins: { legend: { display: true, labels: { font: { size: 12 } } } },
-                    scales: { 
-                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.1)' } },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
+        // Status Distribution - Pie Chart with status-based colors
+        if (statusChart) statusChart.destroy();
+        const statusLabels = data.status_distribution.map((s) => s.status);
+        const statusCounts = data.status_distribution.map((s) => s.count);
+        const statusBgColors = statusLabels.map(
+          (label) => statusColors[label] || "#9ca3af",
+        );
 
-            // Specializations - Bar Chart with teal shades
-            if (specializationChart) specializationChart.destroy();
-            const specData = data.specialization_data.slice(0, 6);
-            
-            specializationChart = new Chart(document.getElementById('specializationChart'), {
-                type: 'bar',
-                data: {
-                    labels: specData.map(s => s.specialization || 'N/A'),
-                    datasets: [{
-                        label: 'Appointments',
-                        data: specData.map(s => s.appointment_count || 0),
-                        backgroundColor: specializationColors,
-                        borderRadius: 8,
-                        borderSkipped: false
-                    }]
-                },
-                options: { 
-                    indexAxis: 'x',
-                    responsive: true, 
-                    plugins: { legend: { display: false } },
-                    scales: { 
-                        y: { beginAtZero: true, grid: { display: false } },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-        }
-
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('-translate-x-full');
-            document.getElementById('overlay').classList.toggle('hidden');
-        }
-
-        function closeSidebar() {
-            document.getElementById('sidebar').classList.add('-translate-x-full');
-            document.getElementById('overlay').classList.add('hidden');
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            updateCurrentDate();
-            loadReports();
+        statusChart = new Chart(document.getElementById("statusChart"), {
+          type: "doughnut",
+          data: {
+            labels: statusLabels,
+            datasets: [
+              {
+                data: statusCounts,
+                backgroundColor: statusBgColors,
+                borderColor: "#ffffff",
+                borderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: { font: { size: 12 }, padding: 15 },
+              },
+            },
+          },
         });
+
+        // Top Doctors - Bar Chart with gradient blues
+        if (doctorsChart) doctorsChart.destroy();
+        const topDocs = data.doctor_stats.slice(0, 5);
+        doctorsChart = new Chart(document.getElementById("doctorsChart"), {
+          type: "bar",
+          data: {
+            labels: topDocs.map((d) => d.full_name),
+            datasets: [
+              {
+                label: "Appointments",
+                data: topDocs.map((d) => d.appointment_count || 0),
+                backgroundColor: doctorColors.slice(0, topDocs.length),
+                borderRadius: 8,
+                borderSkipped: false,
+              },
+            ],
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true, grid: { display: false } } },
+          },
+        });
+
+        // 30-Day Trend - Line Chart
+        if (trendChart) trendChart.destroy();
+        const trendLabels = data.trend_data
+          .map((t) => {
+            const date = new Date(t.date);
+            return date.getMonth() + 1 + "/" + date.getDate();
+          })
+          .reverse();
+        const trendCounts = data.trend_data.map((t) => t.count).reverse();
+
+        trendChart = new Chart(document.getElementById("trendChart"), {
+          type: "line",
+          data: {
+            labels: trendLabels,
+            datasets: [
+              {
+                label: "Appointments",
+                data: trendCounts,
+                borderColor: "#0d7377",
+                backgroundColor: "rgba(13, 115, 119, 0.1)",
+                tension: 0.4,
+                fill: true,
+                borderWidth: 3,
+                pointBackgroundColor: "#0d7377",
+                pointBorderColor: "#ffffff",
+                pointBorderWidth: 2,
+                pointRadius: 5,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: true, labels: { font: { size: 12 } } },
+            },
+            scales: {
+              y: { beginAtZero: true, grid: { color: "rgba(0,0,0,0.1)" } },
+              x: { grid: { display: false } },
+            },
+          },
+        });
+
+        // Specializations - Bar Chart with teal shades
+        if (specializationChart) specializationChart.destroy();
+        const specData = data.specialization_data.slice(0, 6);
+
+        specializationChart = new Chart(
+          document.getElementById("specializationChart"),
+          {
+            type: "bar",
+            data: {
+              labels: specData.map((s) => s.specialization || "N/A"),
+              datasets: [
+                {
+                  label: "Appointments",
+                  data: specData.map((s) => s.appointment_count || 0),
+                  backgroundColor: specializationColors,
+                  borderRadius: 8,
+                  borderSkipped: false,
+                },
+              ],
+            },
+            options: {
+              indexAxis: "x",
+              responsive: true,
+              plugins: { legend: { display: false } },
+              scales: {
+                y: { beginAtZero: true, grid: { display: false } },
+                x: { grid: { display: false } },
+              },
+            },
+          },
+        );
+      }
+
+      function toggleSidebar() {
+        document
+          .getElementById("sidebar")
+          .classList.toggle("-translate-x-full");
+        document.getElementById("overlay").classList.toggle("hidden");
+      }
+
+      function closeSidebar() {
+        document.getElementById("sidebar").classList.add("-translate-x-full");
+        document.getElementById("overlay").classList.add("hidden");
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        updateCurrentDate();
+        loadReports();
+      });
     </script>
-</body>
+  </body>
 </html>

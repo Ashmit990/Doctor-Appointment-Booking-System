@@ -10,16 +10,17 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
 
 /**
  * Parse the bio field — either plain text or a JSON string.
- * Returns an array with keys: phone, age, medical_id, experience, qualification, bio_text
+ * Returns an array with keys: phone, age, medical_id, experience, qualification, bio_text, consultation_fee
  */
 function parseBio($bioRaw) {
     $result = [
-        'phone'         => '',
-        'age'           => '',
-        'medical_id'    => '',
-        'experience'    => '',
-        'qualification' => '',
-        'bio_text'      => '',
+        'phone'            => 'N/A',
+        'age'              => 'N/A',
+        'medical_id'       => 'N/A',
+        'experience'       => '0',
+        'qualification'    => 'N/A',
+        'bio_text'         => '',
+        'consultation_fee' => '0.00'
     ];
 
     if (empty($bioRaw)) return $result;
@@ -27,15 +28,16 @@ function parseBio($bioRaw) {
     $trimmed = trim($bioRaw);
 
     // Try to parse as JSON
-    if ($trimmed[0] === '{' || $trimmed[0] === '[') {
+    if (isset($trimmed[0]) && ($trimmed[0] === '{' || $trimmed[0] === '[')) {
         $decoded = json_decode($trimmed, true);
         if (is_array($decoded)) {
-            $result['phone']         = $decoded['phone']         ?? $decoded['contact']      ?? '';
-            $result['age']           = $decoded['age']           ?? '';
-            $result['medical_id']    = $decoded['medical_id']    ?? $decoded['medicalId']    ?? '';
-            $result['experience']    = $decoded['experience']    ?? $decoded['exp']           ?? '';
-            $result['qualification'] = $decoded['qualification'] ?? $decoded['qualifications'] ?? '';
-            $result['bio_text']      = $decoded['bio']           ?? $decoded['description']  ?? '';
+            $result['phone']            = $decoded['phone']            ?? $decoded['contact']      ?? 'N/A';
+            $result['age']              = $decoded['age']              ?? 'N/A';
+            $result['medical_id']       = $decoded['medical_id']       ?? $decoded['medicalId']    ?? 'N/A';
+            $result['experience']       = $decoded['experience']       ?? $decoded['exp']           ?? '0';
+            $result['qualification']    = $decoded['qualification']    ?? $decoded['qualifications'] ?? 'N/A';
+            $result['bio_text']         = $decoded['bio']              ?? $decoded['description']  ?? '';
+            $result['consultation_fee'] = $decoded['consultation_fee'] ?? $decoded['fee']          ?? '0.00';
             return $result;
         }
     }
@@ -62,12 +64,13 @@ if ($method === 'GET') {
     // Enrich each row with parsed bio fields
     foreach ($rows as &$row) {
         $parsed = parseBio($row['bio']);
-        $row['phone']         = $parsed['phone'];
-        $row['age']           = $parsed['age'];
-        $row['medical_id']    = $parsed['medical_id'];
-        $row['experience']    = $parsed['experience'];
-        $row['qualification'] = $parsed['qualification'];
-        $row['bio_text']      = $parsed['bio_text'];
+        $row['parsed_phone']         = $parsed['phone'];
+        $row['parsed_age']           = $parsed['age'];
+        $row['parsed_medical_id']    = $parsed['medical_id'];
+        $row['parsed_experience']    = $parsed['experience'];
+        $row['parsed_qualification'] = $parsed['qualification'];
+        $row['parsed_bio_text']      = $parsed['bio_text'];
+        $row['consultation_fee']     = $parsed['consultation_fee'];
         unset($row['bio']); // don't send raw JSON blob to frontend
     }
     unset($row);

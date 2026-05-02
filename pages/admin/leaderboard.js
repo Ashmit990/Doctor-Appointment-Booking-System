@@ -101,10 +101,6 @@ function getRankDisplay(rank) {
   return `<span class="text-sm font-semibold text-gray-500">#${rank}</span>`;
 }
 
-
-
-
-
 async function loadLeaderboard() {
   console.log("🔄 loadLeaderboard() called");
   const tbody = document.getElementById("leaderboard-table-body");
@@ -168,11 +164,7 @@ function filterLeaderboard() {
     document.getElementById("searchInput")?.value || ""
   ).toLowerCase();
   const tier = document.getElementById("tierFilter")?.value || "";
-  const sort = document.getElementById("sortFilter")?.value || "completed";
-
-  console.log(
-    `Filters - Search: "${search}", Tier: "${tier}", Sort: "${sort}"`,
-  );
+  console.log(`Filters - Search: "${search}", Tier: "${tier}"`);
 
   filteredDoctors = allDoctors.filter((d) => {
     const matchSearch =
@@ -182,9 +174,7 @@ function filterLeaderboard() {
     return matchSearch && matchTier;
   });
 
-  filteredDoctors.sort((a, b) => {
-    return b.completed - a.completed;
-  });
+
 
   console.log(`Filtered to ${filteredDoctors.length} doctors`);
   renderTable();

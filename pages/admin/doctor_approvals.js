@@ -98,7 +98,7 @@ function renderApprovals() {
   const tbody = document.getElementById("approvals-table-body");
 
   if (currentRequests.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-gray-500 font-medium">No pending approval requests.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-gray-500 font-medium">No pending approval requests.</td></tr>`;
     return;
   }
 
@@ -108,31 +108,9 @@ function renderApprovals() {
         ? req.full_name.charAt(0).toUpperCase()
         : "?";
       const submittedDate = new Date(req.submitted_at).toLocaleDateString();
-      const fee = parseFloat(req.consultation_fee).toFixed(2);
+      const fee = parseFloat(req.consultation_fee || 0).toFixed(2);
 
-      // Helper to format bio text only
-      const formatBio = (doctor) => {
-        let bio = (doctor.parsed_bio_text || doctor.bio_clean || "").trim();
-
-        // If the bio text looks like JSON, try to extract just the bio/description field
-        if (bio.startsWith("{") || bio.startsWith("[")) {
-          try {
-            const data = JSON.parse(bio);
-            if (data && typeof data === "object") {
-              return data.bio || data.description || "No bio text provided";
-            }
-          } catch (e) {}
-        }
-
-        // Final fallback: return the raw string only if it doesn't look like JSON
-        if (typeof bio === "string" && !bio.trim().startsWith("{")) {
-          return bio || "No bio provided";
-        }
-
-        return "No bio provided";
-      };
-
-      const bioText = formatBio(req);
+      const bioText = req.parsed_bio_text || "No bio provided";
       const bioPreview =
         bioText.length > 80 ? bioText.substring(0, 80) + "..." : bioText;
 
