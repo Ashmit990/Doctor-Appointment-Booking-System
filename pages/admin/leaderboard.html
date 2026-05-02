@@ -317,7 +317,7 @@
       <div class="p-4 md:p-8 flex-1 overflow-y-auto">
         <h2 class="text-2xl font-bold text-teal-dark mb-2">Doctor Leaderboard</h2>
         <p class="text-sm text-gray-500 mb-6">
-          Rankings based on completed appointments, ratings, and overall performance.
+          Rankings based on completed appointments and overall performance.
         </p>
 
         <!-- Summary Cards -->
@@ -364,9 +364,7 @@
             <option value="Bronze">🥉 Bronze</option>
           </select>
           <select id="sortFilter" onchange="filterLeaderboard()" class="bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium shadow-sm">
-            <option value="points">Sort by Points</option>
             <option value="completed">Sort by Completed</option>
-            <option value="rating">Sort by Rating</option>
           </select>
           <button onclick="loadLeaderboard()" class="bg-teal text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-teal-dark transition-colors shadow-sm flex items-center gap-2 shrink-0">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -385,13 +383,12 @@
                   <th class="text-left text-xs text-gray-400 font-semibold px-5 py-4 uppercase">Doctor</th>
                   <th class="text-left text-xs text-gray-400 font-semibold px-5 py-4 uppercase hidden sm:table-cell">Specialization</th>
                   <th class="text-left text-xs text-gray-400 font-semibold px-5 py-4 uppercase">Tier</th>
-                  <th class="text-left text-xs text-gray-400 font-semibold px-5 py-4 uppercase">Points</th>
                   <th class="text-left text-xs text-gray-400 font-semibold px-5 py-4 uppercase hidden md:table-cell">Performance</th>
                   <th class="text-left text-xs text-gray-400 font-semibold px-5 py-4 uppercase">Action</th>
                 </tr>
               </thead>
               <tbody id="leaderboard-table-body">
-                <tr><td colspan="7" class="text-center py-10 text-gray-500">Loading leaderboard...</td</tr>
+                <tr><td colspan="6" class="text-center py-10 text-gray-500">Loading leaderboard...</td></tr>
               </tbody>
             </table>
           </div>

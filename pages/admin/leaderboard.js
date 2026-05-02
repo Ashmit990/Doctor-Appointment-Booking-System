@@ -101,49 +101,9 @@ function getRankDisplay(rank) {
   return `<span class="text-sm font-semibold text-gray-500">#${rank}</span>`;
 }
 
-function renderStars(rating) {
-  const full = Math.floor(rating);
-  const half = rating % 1 >= 0.5;
-  let html = "";
-  for (let i = 0; i < 5; i++) {
-    if (i < full) html += '<span class="text-yellow-400">★</span>';
-    else if (i === full && half)
-      html += '<span class="text-yellow-300">★</span>';
-    else html += '<span class="text-gray-200">★</span>';
-  }
-  return html;
-}
 
-function renderTierProgress(points) {
-  const tiers = [
-    { name: "Bronze", min: 0, max: 399, color: "#bf8040" },
-    { name: "Silver", min: 400, max: 899, color: "#546e7a" },
-    { name: "Gold", min: 900, max: 1499, color: "#f57f17" },
-    { name: "Platinum", min: 1500, max: 2000, color: "#1565c0" },
-  ];
 
-  return tiers
-    .map((t) => {
-      const capped = Math.min(points, t.max);
-      const pct =
-        points >= t.min
-          ? Math.min(
-              Math.round(((capped - t.min) / (t.max - t.min)) * 100),
-              100,
-            )
-          : 0;
-      const active = points >= t.min;
-      return `
-      <div class="flex items-center gap-3 mb-2">
-        <span class="text-xs w-16 text-right font-medium" style="color:${t.color}">${t.name}</span>
-        <div class="flex-1 perf-bar-bg">
-          <div class="perf-bar-fill" style="width:${pct}%; background:${t.color}; opacity:${active ? 1 : 0.3}"></div>
-        </div>
-        <span class="text-xs text-gray-400 w-8">${pct}%</span>
-      </div>`;
-    })
-    .join("");
-}
+
 
 async function loadLeaderboard() {
   console.log("🔄 loadLeaderboard() called");
@@ -156,7 +116,7 @@ async function loadLeaderboard() {
 
   console.log("✅ Found tbody element");
   tbody.innerHTML =
-    '<tr><td colspan="7" class="text-center py-10 text-gray-500">Loading...</td</tr>';
+    '<tr><td colspan="6" class="text-center py-10 text-gray-500">Loading...</td></tr>';
 
   await new Promise((r) => setTimeout(r, 600));
   allDoctors = generateMockData();
@@ -208,7 +168,7 @@ function filterLeaderboard() {
     document.getElementById("searchInput")?.value || ""
   ).toLowerCase();
   const tier = document.getElementById("tierFilter")?.value || "";
-  const sort = document.getElementById("sortFilter")?.value || "points";
+  const sort = document.getElementById("sortFilter")?.value || "completed";
 
   console.log(
     `Filters - Search: "${search}", Tier: "${tier}", Sort: "${sort}"`,
@@ -223,9 +183,7 @@ function filterLeaderboard() {
   });
 
   filteredDoctors.sort((a, b) => {
-    if (sort === "completed") return b.completed - a.completed;
-    if (sort === "rating") return b.rating - a.rating;
-    return b.points - a.points;
+    return b.completed - a.completed;
   });
 
   console.log(`Filtered to ${filteredDoctors.length} doctors`);
@@ -244,7 +202,7 @@ function renderTable() {
   if (!filteredDoctors.length) {
     console.warn("⚠️ No doctors found to display");
     tbody.innerHTML =
-      '<tr><td colspan="7" class="text-center py-10 text-gray-500">No doctors found</td>\n</tr>';
+      '<tr><td colspan="6" class="text-center py-10 text-gray-500">No doctors found</td>\n</tr>';
     return;
   }
 
@@ -268,7 +226,6 @@ function renderTable() {
             <div class="w-9 h-9 rounded-full bg-teal/10 text-teal flex items-center justify-center font-bold text-sm shrink-0">${initial}</div>
             <div>
               <p class="text-sm font-semibold text-gray-800">${doc.name}</p>
-              <p class="text-xs text-gray-400">${renderStars(doc.rating)} ${doc.rating}</p>
             </div>
           </div>
         </td>
@@ -278,10 +235,7 @@ function renderTable() {
             ${getTierEmoji(tier)} ${tier}
           </span>
         </td>
-        <td class="px-5 py-4">
-          <span class="text-sm font-bold text-teal-dark">${doc.points.toLocaleString()}</span>
-          <span class="text-xs text-gray-400 ml-1">pts</span>
-        </td>
+
         <td class="px-5 py-4 hidden md:table-cell w-36">
           <div class="perf-bar-bg">
             <div class="perf-bar-fill" style="width:${perfPct}%"></div>
@@ -310,7 +264,6 @@ function openDoctorModal(id) {
         <span class="px-3 py-1.5 rounded-full text-sm font-semibold ${getTierClass(doc.tier)}">
           ${getTierEmoji(doc.tier)} ${doc.tier} Tier
         </span>
-        <span class="text-2xl font-bold text-teal-dark">${doc.points.toLocaleString()} pts</span>
       </div>
       
       <div class="grid grid-cols-2 gap-3">
@@ -338,10 +291,6 @@ function openDoctorModal(id) {
           <span class="text-sm font-semibold text-gray-800">${doc.specialization}</span>
         </div>
         <div class="flex justify-between items-center py-2 border-b border-gray-100">
-          <span class="text-sm text-gray-500">Rating</span>
-          <span class="text-sm font-semibold text-gray-800">${renderStars(doc.rating)} ${doc.rating} / 5</span>
-        </div>
-        <div class="flex justify-between items-center py-2 border-b border-gray-100">
           <span class="text-sm text-gray-500">Total Appointments</span>
           <span class="text-sm font-semibold text-gray-800">${doc.total}</span>
         </div>
@@ -355,28 +304,7 @@ function openDoctorModal(id) {
         </div>
       </div>
       
-      <div class="bg-gray-50 rounded-xl p-4">
-        <p class="text-xs font-semibold text-gray-500 uppercase mb-3">Points Breakdown</p>
-        <div class="space-y-2">
-          <div class="flex justify-between text-sm">
-            <span class="text-gray-600">Completed × 10 pts</span>
-            <span class="font-semibold">${doc.completed * 10}</span>
-          </div>
-          <div class="flex justify-between text-sm">
-            <span class="text-gray-600">Rating bonus</span>
-            <span class="font-semibold">${Math.round(doc.rating * 50)}</span>
-          </div>
-          <div class="flex justify-between text-sm border-t pt-2 mt-2">
-            <span class="font-semibold text-gray-800">Total Points</span>
-            <span class="font-bold text-teal-dark">${doc.points}</span>
-          </div>
-        </div>
-      </div>
-      
-      <div>
-        <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Tier Progress</p>
-        ${renderTierProgress(doc.points)}
-      </div>
+
     </div>
   `;
   document.getElementById("doctorModal").classList.add("active");
