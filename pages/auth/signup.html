@@ -10,11 +10,56 @@
       rel="stylesheet"
     />
     <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
       body {
-        font-family: "Plus Jakarta Sans", sans-serif;
-        background-color: #f8fafb;
+        height: 100%;
         margin: 0;
         padding: 0;
+        overflow: hidden;
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background-color: #f8fafb;
+      }
+
+      /* The full-page flex wrapper fills the viewport exactly */
+      .page-wrapper {
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+      }
+
+      /* Left panel scrolls internally so nothing is ever clipped */
+      .left-panel {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        background: #f8fafb;
+        overflow-y: auto;
+        overflow-x: hidden;
+        z-index: 20;
+        position: relative;
+      }
+
+      /* Right panel is purely decorative — no scroll needed */
+      .right-panel {
+        display: none;
+        position: relative;
+        overflow: hidden;
+        background: #f8fafb;
+      }
+
+      @media (min-width: 1024px) {
+        .left-panel {
+          width: 45%;
+        }
+        .right-panel {
+          display: block;
+          width: 55%;
+        }
       }
 
       .organic-bg {
@@ -50,7 +95,7 @@
         opacity: 0;
       }
       #doctorFieldsContainer.show {
-        max-height: 600px;
+        max-height: 900px;
         opacity: 1;
         margin-top: 1.25rem;
       }
@@ -264,9 +309,7 @@
         box-shadow: 0 10px 25px -5px rgba(0, 126, 133, 0.3);
       }
 
-      /* ══════════════════════════════════════════════════
-         SUCCESS / ERROR MODAL  — centered overlay
-      ══════════════════════════════════════════════════ */
+      /* ── Feedback modal ── */
       #feedbackModal {
         display: none;
         position: fixed;
@@ -300,10 +343,25 @@
         justify-content: center;
         margin: 0 auto 20px;
       }
+
+      /* ── Left panel scrollbar styling (subtle) ── */
+      .left-panel::-webkit-scrollbar {
+        width: 4px;
+      }
+      .left-panel::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .left-panel::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+      .left-panel::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
     </style>
   </head>
 
-  <body class="overflow-x-hidden tracking-[1.1px]">
+  <body class="overflow-hidden tracking-[1.1px]">
     <!-- BACK BUTTON -->
     <div class="back-button" onclick="goToLandingPage()">
       <svg
@@ -321,9 +379,7 @@
       </svg>
     </div>
 
-    <!-- ══════════════════════════════════════════
-         CENTERED FEEDBACK MODAL (success + error)
-    ══════════════════════════════════════════ -->
+    <!-- FEEDBACK MODAL -->
     <div id="feedbackModal">
       <div class="feedback-modal-box">
         <div id="feedbackIconRing" class="feedback-icon-ring"></div>
@@ -389,11 +445,10 @@
       </div>
     </div>
 
-    <div class="flex min-h-screen w-full relative animate-fade-in">
-      <!-- ── Left Panel ── -->
-      <div
-        class="w-full lg:w-[45%] flex flex-col justify-center px-8 sm:px-10 xl:px-20 2xl:px-24 z-20 relative bg-[#F8FAFB] min-h-screen"
-      >
+    <!-- PAGE WRAPPER -->
+    <div class="page-wrapper animate-fade-in">
+      <!-- ── LEFT PANEL ── -->
+      <div class="left-panel px-8 sm:px-10 xl:px-20 2xl:px-24">
         <div class="max-w-md w-full mx-auto lg:mx-0 py-8">
           <!-- Logo -->
           <div class="mb-8 flex flex-col items-start">
@@ -431,9 +486,8 @@
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Full Name</label
                 >
-                  Full Name
-                </label>
                 <input
                   id="signupFullName"
                   type="text"
@@ -450,9 +504,8 @@
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Email Address</label
                 >
-                  Email Address
-                </label>
                 <input
                   id="signupEmail"
                   type="email"
@@ -469,9 +522,8 @@
               <div class="relative group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Register as</label
                 >
-                  Register as
-                </label>
                 <button
                   type="button"
                   id="customSelectBtn"
@@ -577,17 +629,57 @@
                   ></p>
                 </div>
 
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                  <div class="group">
+                    <label
+                      class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                    >
+                      Experience (Years) <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="signupExperience"
+                      type="number"
+                      min="0"
+                      class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
+                      placeholder="Years"
+                      oninput="clearErr('signupExperience')"
+                    />
+                    <p
+                      id="signupExperience_err"
+                      class="hidden text-red-600 text-xs font-semibold mt-1"
+                    ></p>
+                  </div>
+                  <div class="group">
+                    <label
+                      class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                    >
+                      Qualifications <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="signupQualifications"
+                      type="text"
+                      class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
+                      placeholder="e.g. MBBS, MD"
+                      oninput="clearErr('signupQualifications')"
+                    />
+                    <p
+                      id="signupQualifications_err"
+                      class="hidden text-red-600 text-xs font-semibold mt-1"
+                    ></p>
+                  </div>
+                </div>
+
                 <div class="group mt-4">
                   <label
                     class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
                   >
-                    Professional Bio <span class="text-red-500">*</span>
+                    Short Bio <span class="text-red-500">*</span>
                   </label>
                   <textarea
                     id="signupBio"
-                    rows="3"
+                    rows="2"
                     class="w-full p-3 rounded-xl border-2 border-slate-100 bg-slate-50 focus:border-[#007E85] focus:bg-white outline-none text-slate-800 text-sm transition-all resize-none shadow-inner"
-                    placeholder="Describe your experience, qualifications, and specialties (minimum 15 words)..."
+                    placeholder="Tell us about yourself (min. 10 words)..."
                     oninput="
                       updateBioWordCount();
                       clearErr('signupBio');
@@ -598,12 +690,12 @@
                     class="hidden text-red-600 text-xs font-semibold mt-1"
                   ></p>
                   <p class="text-xs text-gray-400 mt-1" id="bioWordCount">
-                    0 words (minimum 15 required)
+                    0 words (min 10 required)
                   </p>
                 </div>
               </div>
 
-              <div class="pt-4">
+              <div class="pt-4 pb-8">
                 <button
                   type="button"
                   id="nextStepBtn"
@@ -623,9 +715,8 @@
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Phone Number</label
                 >
-                  Phone Number
-                </label>
                 <input
                   id="signupPhone"
                   type="tel"
@@ -642,9 +733,8 @@
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Age</label
                 >
-                  Age
-                </label>
                 <input
                   id="signupAge"
                   type="number"
@@ -661,9 +751,8 @@
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Create Password</label
                 >
-                  Create Password
-                </label>
                 <div class="relative">
                   <input
                     id="signupPassword"
@@ -698,8 +787,7 @@
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7
-                               -1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                       />
                     </svg>
                   </button>
@@ -725,9 +813,8 @@
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Confirm Password</label
                 >
-                  Confirm Password
-                </label>
                 <div class="relative">
                   <input
                     id="signupConfirmPassword"
@@ -759,8 +846,7 @@
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7
-                               -1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                       />
                     </svg>
                   </button>
@@ -771,7 +857,7 @@
                 ></p>
               </div>
 
-              <div class="flex gap-3 pt-4">
+              <div class="flex gap-3 pt-4 pb-8">
                 <button
                   type="button"
                   id="prevStepBtn"
@@ -788,7 +874,7 @@
                 </button>
               </div>
 
-              <p class="text-center pt-2 text-slate-500 text-sm font-medium">
+              <p class="text-center pb-6 text-slate-500 text-sm font-medium">
                 Already have an account?
                 <a
                   href="login.html"
@@ -802,10 +888,8 @@
         </div>
       </div>
 
-      <!-- ── Right Panel ── -->
-      <div
-        class="hidden lg:block w-[55%] relative overflow-hidden bg-[#F8FAFB]"
-      >
+      <!-- ── RIGHT PANEL ── -->
+      <div class="right-panel">
         <div class="absolute inset-0 organic-bg z-0 shadow-2xl"></div>
         <div
           class="relative h-full w-full flex items-center justify-center z-10 p-12"
@@ -813,21 +897,19 @@
           <img
             src="../../src/assets/photo.png"
             alt="Healthcare Professional"
-            class="h-[300%] object-contain transform scale-110 mt-10"
+            class="h-[102%] object-contain transform scale-110 mt-10"
             onerror="this.style.display = 'none'"
           />
         </div>
       </div>
     </div>
-    <!-- /flex wrapper -->
+    <!-- /page-wrapper -->
 
     <script>
       // ═══════════════════════════════════════════════════════════════
-      //  CENTERED FEEDBACK MODAL
-      //  — used for SUCCESS (patient & doctor) and ERROR messages
-      //  — no inline error divs anywhere in this file
+      //  FEEDBACK MODAL
       // ═══════════════════════════════════════════════════════════════
-      let _redirectOnClose = false; // true only for patient success
+      let _redirectOnClose = false;
 
       function _openFeedbackModal(
         iconHtml,
@@ -838,15 +920,12 @@
         redirect,
       ) {
         _redirectOnClose = !!redirect;
-
         const ring = document.getElementById("feedbackIconRing");
         ring.style.background = iconBg;
         ring.innerHTML = iconHtml;
-
         document.getElementById("feedbackTitle").textContent = title;
         document.getElementById("feedbackMessage").innerHTML = message;
         document.getElementById("feedbackBtn").textContent = btnLabel;
-
         document.getElementById("feedbackModal").classList.add("show");
         document.body.style.overflow = "hidden";
       }
@@ -854,61 +933,34 @@
       function handleFeedbackClose() {
         document.getElementById("feedbackModal").classList.remove("show");
         document.body.style.overflow = "";
-        if (_redirectOnClose) {
-          window.location.href = "login.html"; // ← patient redirect
-        }
+        if (_redirectOnClose) window.location.href = "login.html";
       }
 
-      // ── Patient success ─────────────────────────────────────────────
       function showPatientSuccess(fullName) {
         _openFeedbackModal(
-          `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-green-500"
-              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-           <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-         </svg>`,
+          `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`,
           "linear-gradient(135deg,#d1fae5,#a7f3d0)",
           "Welcome to Healthcare!",
-          `Thank you for registering, <strong>${fullName}</strong>! 🎉<br><br>
-         Your account has been created successfully. You can now
-         <strong>sign in</strong> and start booking appointments with our
-         world-class medical professionals.`,
+          `Thank you for registering, <strong>${fullName}</strong>! 🎉<br><br>Your account has been created successfully. You can now <strong>sign in</strong> and start booking appointments with our world-class medical professionals.`,
           "Go to Login →",
-          true, // ← redirect = true
+          true,
         );
       }
 
-      // ── Doctor success ──────────────────────────────────────────────
       function showDoctorSuccess(fullName) {
         _openFeedbackModal(
-          `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-teal-500"
-              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-           <path stroke-linecap="round" stroke-linejoin="round"
-                 d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944
-                    a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9
-                    c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03
-                    9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-         </svg>`,
+          `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>`,
           "linear-gradient(135deg,#ccfbf1,#99f6e4)",
           "Application Submitted!",
-          `Thank you, <strong>${fullName}</strong>! 🎉<br><br>
-         Your registration as a <strong>Medical Professional</strong> has been received.
-         Our admin team will review your credentials and
-         <strong>contact you once you are approved</strong>.<br><br>
-         You'll receive an email notification with further instructions.`,
+          `Thank you, <strong>${fullName}</strong>! 🎉<br><br>Your registration as a <strong>Medical Professional</strong> has been received. Our admin team will review your credentials and <strong>contact you once you are approved</strong>.<br><br>You'll receive an email notification with further instructions.`,
           "Got it, I'll wait!",
-          false, // ← no redirect
+          false,
         );
       }
 
-      // ── Error (any failure) ─────────────────────────────────────────
       function showErrorModal(msg) {
         _openFeedbackModal(
-          `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-red-500"
-              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-           <path stroke-linecap="round" stroke-linejoin="round"
-                 d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94
-                    a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-         </svg>`,
+          `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>`,
           "linear-gradient(135deg,#fee2e2,#fecaca)",
           "Registration Failed",
           msg,
@@ -926,6 +978,7 @@
       const step2Badge = document.getElementById("step2Badge");
       const nextBtn = document.getElementById("nextStepBtn");
       const prevBtn = document.getElementById("prevStepBtn");
+      const leftPanel = document.querySelector(".left-panel");
 
       function showStep(n) {
         if (n === 1) {
@@ -941,6 +994,8 @@
           step2Badge.classList.add("active");
           step1Badge.classList.remove("active");
         }
+        // Always scroll left panel back to top when switching steps
+        leftPanel.scrollTop = 0;
       }
 
       function validateStep1() {
@@ -987,12 +1042,29 @@
             ok = false;
           } else clearErr("signupProfession");
 
+          const exp = document.getElementById("signupExperience").value.trim();
+          if (!exp) {
+            showErr("signupExperience", "Experience is required.");
+            ok = false;
+          } else if (parseInt(exp) < 0) {
+            showErr("signupExperience", "Experience cannot be negative.");
+            ok = false;
+          } else clearErr("signupExperience");
+
+          const qual = document
+            .getElementById("signupQualifications")
+            .value.trim();
+          if (!qual) {
+            showErr("signupQualifications", "Qualifications are required.");
+            ok = false;
+          } else clearErr("signupQualifications");
+
           const bio = document.getElementById("signupBio").value.trim();
           if (!bio) {
-            showErr("signupBio", "Professional bio is required.");
+            showErr("signupBio", "Short bio is required.");
             ok = false;
-          } else if (bio.split(/\s+/).length < 15) {
-            showErr("signupBio", "Bio must contain at least 15 words.");
+          } else if (bio.split(/\s+/).length < 10) {
+            showErr("signupBio", "Bio must contain at least 10 words.");
             ok = false;
           } else clearErr("signupBio");
         }
@@ -1061,12 +1133,10 @@
             });
         }
         document.getElementById("professionModal").classList.add("show");
-        document.body.style.overflow = "hidden";
       }
 
       function closeProfessionModal() {
         document.getElementById("professionModal").classList.remove("show");
-        document.body.style.overflow = "";
       }
 
       function confirmProfessionSelection() {
@@ -1148,9 +1218,9 @@
         const text = document.getElementById("signupBio").value.trim();
         const wordCount = text === "" ? 0 : text.split(/\s+/).length;
         const span = document.getElementById("bioWordCount");
-        span.textContent = `${wordCount} words (minimum 15 required)`;
-        span.classList.toggle("text-green-600", wordCount >= 15);
-        span.classList.toggle("text-red-500", wordCount < 15);
+        span.textContent = `${wordCount} words (minimum 10 required)`;
+        span.classList.toggle("text-green-600", wordCount >= 10);
+        span.classList.toggle("text-red-500", wordCount < 10);
       }
 
       function togglePass() {
@@ -1305,13 +1375,9 @@
 
           if (hasError) return;
 
-          // Loading state
           const btn = document.getElementById("submitBtn");
           const origText = btn.innerText;
-          btn.innerHTML = `<svg class="animate-spin inline w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-      </svg> Registering...`;
+          btn.innerHTML = `<svg class="animate-spin inline w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg> Registering...`;
           btn.disabled = true;
 
           const formData = new FormData();
@@ -1324,6 +1390,14 @@
           if (isDoctor) {
             formData.append("medical_id", medicalId);
             formData.append("bio", bio);
+            formData.append(
+              "experience",
+              document.getElementById("signupExperience").value.trim(),
+            );
+            formData.append(
+              "qualifications",
+              document.getElementById("signupQualifications").value.trim(),
+            );
             formData.append("profession", finalSelectedProfession);
             formData.append("specialization", finalSelectedProfession);
           }
@@ -1333,40 +1407,31 @@
               method: "POST",
               body: formData,
             });
-
             const text = await response.text();
             let data;
             try {
               data = JSON.parse(text);
             } catch {
               console.error("Non-JSON response:", text);
-              // ✅ Centered error modal — no inline div
               showErrorModal("Server error. Please try again.");
               return;
             }
 
             if (data.success) {
-              // ✅ Correct modal per role
-              if (isDoctor) {
-                showDoctorSuccess(fullName);
-              } else {
-                showPatientSuccess(fullName); // closes → redirects to login.html
-              }
+              if (isDoctor) showDoctorSuccess(fullName);
+              else showPatientSuccess(fullName);
             } else {
               const errMsg =
                 data.message || "Registration failed. Please try again.";
               if (errMsg.toLowerCase().includes("email")) {
-                // Go back to step 1 and highlight the email field inline
                 showStep(1);
                 showErr("signupEmail", errMsg);
               } else {
-                // ✅ All other errors → centered modal
                 showErrorModal(errMsg);
               }
             }
           } catch (err) {
             console.error("Fetch error:", err);
-            // ✅ Network errors → centered modal
             showErrorModal(
               "Network error. Please check your connection and try again.",
             );
