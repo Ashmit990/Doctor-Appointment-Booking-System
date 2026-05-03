@@ -83,6 +83,11 @@
             -ms-overflow-style: none;
         }
 
+        :root {
+            --calendar-selected: #0d7377; /* primary selected background */
+            --calendar-selected-foreground: #ffffff; /* selected text color */
+        }
+
         *::-webkit-scrollbar {
             width: 0;
             height: 0;
@@ -360,9 +365,10 @@
         }
 
         .calendar-day.selected {
-            background: linear-gradient(135deg, #0d7377, #0a5a5d);
-            color: white;
-            box-shadow: 0 10px 30px rgba(13, 115, 119, 0.3);
+            background: var(--calendar-selected);
+            color: var(--calendar-selected-foreground);
+            box-shadow: 0 10px 30px rgba(13, 115, 119, 0.28);
+            border: 1px solid rgba(255,255,255,0.06);
         }
 
         .calendar-panel {

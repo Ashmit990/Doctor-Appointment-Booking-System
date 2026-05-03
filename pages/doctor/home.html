@@ -54,6 +54,11 @@
             scrollbar-color: #cbd5e1 transparent;
         }
 
+        :root {
+            --calendar-selected: #0d7377; /* primary selected background */
+            --calendar-selected-foreground: #ffffff; /* selected text color */
+        }
+
         @keyframes pageFadeIn {
             from {
                 opacity: 0;
@@ -417,9 +422,10 @@
         }
 
         .calendar-day-premium.selected {
-            background: linear-gradient(135deg, #0d7377, #0a5a5d);
-            color: white;
-            box-shadow: 0 10px 30px rgba(13, 115, 119, 0.3);
+            background: var(--calendar-selected);
+            color: var(--calendar-selected-foreground);
+            box-shadow: 0 10px 30px rgba(13, 115, 119, 0.28);
+            border: 1px solid rgba(255,255,255,0.06);
         }
 
         .calendar-day-premium.has-appointment {
@@ -608,13 +614,13 @@
                 <div class="space-y-5">
                     <!-- GREETING -->
                     <div>
-                        <h1 id="greeting-message" class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">Hello, Doctor</h1>
-                        <p class="text-gray-500 mt-3 text-lg font-medium">Welcome back to your professional dashboard</p>
+                        <h1 id="greeting-message" class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">Hello, Doctor</h1>
+                        <p class="text-gray-500 mt-3 text-base font-medium">Welcome back to your professional dashboard</p>
                     </div>
 
                     <!-- HERO SECTION WITH STATS -->
                     <section
-                        class="hero-premium rounded-md p-8 md:p-10 mb-8 text-white relative overflow-hidden shadow-elevated">
+                        class="hero-premium rounded-md p-6 md:p-8 mb-6 text-white relative overflow-hidden shadow-elevated">
                         <div class="absolute inset-0 overflow-hidden rounded-md">
                             <div
                                 class="absolute top-0 right-0 w-96 h-96 bg-white/8 rounded-full -mr-48 -mt-48 blur-3xl">
@@ -628,7 +634,7 @@
                             <div class="flex items-start justify-between gap-8 mb-8">
                                 <div class="flex-1">
                                     <p class="text-white/70 text-sm font-medium mb-3">Welcome back</p>
-                                    <p class="text-3xl md:text-4xl font-bold">Ready for your patients today?</p>
+                                    <p class="text-2xl md:text-3xl font-bold">Ready for your patients today?</p>
                                 </div>
                                 <div class="hidden lg:block text-5xl opacity-30 flex-shrink-0">👨‍⚕️</div>
                             </div>
@@ -639,7 +645,7 @@
                                         <p class="text-xs opacity-75 font-semibold">TODAY'S VISITS</p>
                                         <i data-lucide="calendar-clock" class="w-4 h-4 opacity-70"></i>
                                     </div>
-                                    <h3 id="stat-today-visits" class="text-3xl font-bold">0</h3>
+                                    <h3 id="stat-today-visits" class="text-2xl font-bold">0</h3>
                                 </div>
 
                                 <div class="stat-card-premium backdrop-blur-xl rounded-md p-4 border border-white/25 hover:bg-white/20 transition duration-300 cursor-pointer">
@@ -647,7 +653,7 @@
                                         <p class="text-xs opacity-75 font-semibold">TOTAL PATIENTS</p>
                                         <i data-lucide="users" class="w-4 h-4 opacity-70"></i>
                                     </div>
-                                    <h3 id="stat-total-patients" class="text-3xl font-bold">0</h3>
+                                    <h3 id="stat-total-patients" class="text-2xl font-bold">0</h3>
                                 </div>
 
                                 <div class="stat-card-premium backdrop-blur-xl rounded-md p-4 border border-white/25 hover:bg-white/20 transition duration-300 cursor-pointer">
@@ -655,7 +661,7 @@
                                         <p class="text-xs opacity-75 font-semibold">COMPLETED</p>
                                         <i data-lucide="check-circle" class="w-4 h-4 opacity-70"></i>
                                     </div>
-                                    <h3 id="stat-completed" class="text-3xl font-bold">0</h3>
+                                    <h3 id="stat-completed" class="text-2xl font-bold">0</h3>
                                 </div>
                             </div>
                         </div>
