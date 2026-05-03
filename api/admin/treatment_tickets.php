@@ -54,8 +54,10 @@ try {
         }
         
         $tickets = [];
+        $total_revenue = 0;
         while ($row = $result->fetch_assoc()) {
             $tickets[] = $row;
+            $total_revenue += $row['cost'];
         }
 
         // Get Categories for filter dropdown
@@ -65,10 +67,25 @@ try {
             $categories[] = $cat['name'];
         }
 
+        // Calculate Stats
+        $stats = [
+            'total_tickets' => count($tickets),
+            'total_revenue' => $total_revenue,
+            'today_tickets' => 0,
+            'avg_cost' => count($tickets) > 0 ? round($total_revenue / count($tickets), 2) : 0
+        ];
+
+        // Get Today's Tickets count specifically
+        $todayResult = $conn->query("SELECT COUNT(*) as count FROM treatment_tickets WHERE DATE(generated_at) = CURDATE()");
+        if ($todayResult) {
+            $stats['today_tickets'] = $todayResult->fetch_assoc()['count'];
+        }
+
         echo json_encode([
             'status' => 'success',
             'data' => $tickets,
-            'categories' => $categories
+            'categories' => $categories,
+            'stats' => $stats
         ]);
 
     } else {
