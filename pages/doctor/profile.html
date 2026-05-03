@@ -130,6 +130,8 @@
       .fade-in-up {
         animation: fadeInUp 0.5s ease forwards;
       }
+    html { font-size: clamp(15px, 1vw, 17px); }
+    main { overflow-y: auto; overflow-x: hidden; }
     </style>
   </head>
   <body class="bg-gray-50">
@@ -195,7 +197,7 @@
         <div
           class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm"
         >
-          <div class="px-4 md:px-8 py-4">
+          <div class="px-6 py-3 h-[70px]">
             <h2 class="text-xl md:text-2xl font-bold text-gray-800">
               Profile Management
             </h2>
@@ -204,8 +206,8 @@
         </div>
 
         <!-- PAGE CONTENT -->
-        <div class="p-4 md:p-5">
-          <div class="max-w-7xl mx-auto">
+        <div class="p-6 md:p-7">
+          <div class="w-full mx-auto">
             <!-- HERO SECTION WITH STATS -->
             <div class="bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] rounded-md p-4 md:p-5 mb-5 text-white shadow-lg">
               <div class="flex items-start justify-between flex-col md:flex-row gap-4 mb-4">

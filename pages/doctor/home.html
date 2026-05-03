@@ -520,13 +520,15 @@
         .delay-1 { animation-delay: 0.1s; }
         .delay-2 { animation-delay: 0.2s; }
         .delay-3 { animation-delay: 0.3s; }
+        html { font-size: clamp(15px, 1vw, 17px); }
+        main { overflow-y: auto; overflow-x: hidden; }
     </style>
 </head>
 
 <body class="bg-gray-50">
     <div class="flex h-screen overflow-hidden">
         <!-- SIDEBAR -->
-        <aside
+       <aside
             class="sidebar w-full md:w-64 text-white shadow-lg fixed bottom-0 md:top-0 h-auto md:h-full overflow-x-auto md:overflow-y-auto z-40">
             <div class="hidden md:block p-8 border-b border-gray-700">
                 <div class="flex items-center gap-3">
@@ -572,7 +574,7 @@
         <main class="ml-0 md:ml-64 flex-1 overflow-y-auto pb-20 md:pb-0">
             <!-- TOP BAR -->
             <div class="sticky top-0 z-30 topbar-premium">
-                <div class="px-4 md:px-5 py-4 flex justify-between items-center gap-4 overflow-visible flex-wrap">
+                <div class="px-6 py-3 h-[70px] flex justify-between items-center gap-4 overflow-visible flex-wrap">
                     <div class="min-w-0 flex-1">
                         <h2
                             class="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
@@ -602,7 +604,7 @@
             </div>
 
             <!-- PAGE CONTENT -->
-            <div class="p-4 md:p-5">
+            <div class="p-6 md:p-7">
                 <div class="space-y-5">
                     <!-- GREETING -->
                     <div>

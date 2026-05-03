@@ -223,7 +223,7 @@ function updateScheduleInsights(date, availability = [], appointments = []) {
 
   if (!date) {
     titleEl.textContent = "Select a date to see your flow";
-    copyEl.textContent = "Your daily schedule summary will appear here with slot usage, booking pressure, and a quick action cue.";
+    copyEl.textContent = "Your daily schedule summary will appear here.";
     openEl.textContent = "--";
     bookedEl.textContent = "--";
     fillEl.textContent = "--%";
@@ -239,7 +239,7 @@ function updateScheduleInsights(date, availability = [], appointments = []) {
   titleEl.textContent = `${bookedCount} booked appointment${bookedCount === 1 ? "" : "s"} on this day`;
   copyEl.textContent = totalCount > 0
     ? `${openCount} open slot${openCount === 1 ? "" : "s"} remain, with ${completedCount} completed consultation${completedCount === 1 ? "" : "s"}.`
-    : "No schedule data was found for this date yet. Add a slot to start building the day.";
+    : "No schedule data was found for this date yet.";
   openEl.textContent = String(openCount);
   bookedEl.textContent = String(bookedCount);
   fillEl.textContent = `${fillRate}%`;
@@ -369,74 +369,74 @@ async function loadScheduleForDate(date) {
           // Slot has an appointment
           if (apt.status === "Completed") {
             gridContainer.innerHTML += `
-              <div onclick="openAppointmentModal(${apt.apt_id})" class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-100 transition shadow-sm">
-                <div class="flex items-center gap-3">
-                  <i data-lucide="check-circle" class="text-gray-500 w-5 h-5"></i>
+              <div onclick="openAppointmentModal(${apt.apt_id})" class="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-100 transition shadow-sm text-sm">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="check-circle" class="text-gray-500 w-4 h-4"></i>
                   <div>
-                    <span class="font-semibold text-gray-500 line-through">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
-                    <p class="text-xs text-gray-400 mt-0.5">Patient: ${apt.patient_name}</p>
+                    <span class="font-semibold text-gray-500 line-through text-sm">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
+                    <p class="text-[10px] text-gray-400 mt-0.5">Patient: ${apt.patient_name}</p>
                   </div>
                 </div>
-                <span class="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">Completed</span>
+                <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider">Completed</span>
               </div>`;
           } else {
             gridContainer.innerHTML += `
-              <div onclick="openAppointmentModal(${apt.apt_id})" class="flex items-center justify-between p-5 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-md cursor-pointer hover:border-blue-400 hover:shadow-md transition shadow-sm">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center">
-                    <i data-lucide="user" class="text-blue-700 w-5 h-5"></i>
+              <div onclick="openAppointmentModal(${apt.apt_id})" class="flex items-center justify-between p-3 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-md cursor-pointer hover:border-blue-400 hover:shadow-md transition shadow-sm text-sm">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="user" class="text-blue-700 w-4 h-4"></i>
                   </div>
                   <div>
-                    <span class="font-bold text-blue-900">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
-                    <p class="text-sm font-semibold text-blue-800 mt-0.5">${apt.patient_name} <span class="opacity-80 font-normal ml-1 bg-blue-200 px-2 py-0.5 rounded-full text-xs">${apt.status}</span></p>
+                    <span class="font-bold text-blue-900 text-sm">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
+                    <p class="text-xs font-semibold text-blue-800 mt-0.5">${apt.patient_name} <span class="opacity-80 font-normal ml-1 bg-blue-200 px-1.5 py-0.5 rounded-full text-[9px]">${apt.status}</span></p>
                   </div>
                 </div>
-                <button class="bg-white hover:bg-blue-50 border border-blue-300 hover:border-blue-400 text-blue-700 px-5 py-2 rounded-md text-sm font-bold transition-all shadow-sm">View Details</button>
+                <button class="bg-white hover:bg-blue-50 border border-blue-300 hover:border-blue-400 text-blue-700 px-3 py-1.5 rounded-md text-xs font-bold transition-all shadow-sm whitespace-nowrap ml-2\">View Details</button>
               </div>`;
           }
         } else if (slot.status === 'Available') {
           // Available slot (no appointment)
           gridContainer.innerHTML += `
-            <div class="flex items-center justify-between p-5 bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-400 rounded-md shadow-sm hover:border-green-500 hover:shadow-md transition">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-green-200 rounded-full flex items-center justify-center">
-                  <i data-lucide="clock" class="text-green-700 w-5 h-5"></i>
+            <div class="flex items-center justify-between p-3 bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-400 rounded-md shadow-sm hover:border-green-500 hover:shadow-md transition text-sm\">
+              <div class="flex items-center gap-2\">
+                <div class=\"w-8 h-8 bg-green-200 rounded-full flex items-center justify-center flex-shrink-0\">
+                  <i data-lucide=\"clock\" class=\"text-green-700 w-4 h-4\"></i>
                 </div>
                 <div>
-                  <span class="font-bold text-gray-900">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
-                  <p class="text-xs text-green-700 font-semibold mt-0.5 flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i>Available for booking</p>
+                  <span class=\"font-bold text-gray-900 text-sm\">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
+                  <p class=\"text-[10px] text-green-700 font-semibold mt-0.5 flex items-center gap-1\"><i data-lucide=\"check\" class=\"w-3 h-3\"></i>Available for booking</p>
                 </div>
               </div>
-              <button onclick="openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})" class="bg-green-500 hover:bg-green-600 text-white border border-green-600 px-5 py-2 rounded-md text-sm font-bold transition-all shadow-[0_2px_8px_rgba(34,197,94,0.3)] ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}">
+              <button onclick=\"openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})\" class=\"bg-green-500 hover:bg-green-600 text-white border border-green-600 px-3 py-1.5 rounded-md text-xs font-bold transition-all shadow-[0_2px_8px_rgba(34,197,94,0.3)] whitespace-nowrap ml-2 ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}\">
                 Edit Slot
               </button>
             </div>`;
         } else if (slot.status === 'Blocked') {
           // Blocked slot
           gridContainer.innerHTML += `
-            <div class="flex items-center justify-between p-5 bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-300 rounded-md hover:border-yellow-400 hover:shadow-md transition shadow-sm">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-yellow-200 rounded-full flex items-center justify-center">
-                  <i data-lucide="lock" class="text-yellow-700 w-5 h-5"></i>
+            <div class="flex items-center justify-between p-3 bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-300 rounded-md hover:border-yellow-400 hover:shadow-md transition shadow-sm text-sm\">
+              <div class=\"flex items-center gap-2\">
+                <div class=\"w-8 h-8 bg-yellow-200 rounded-full flex items-center justify-center flex-shrink-0\">
+                  <i data-lucide=\"lock\" class=\"text-yellow-700 w-4 h-4\"></i>
                 </div>
                 <div>
-                  <span class="font-bold text-yellow-800">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
-                  <p class="text-xs text-yellow-700 font-semibold mt-0.5 flex items-center gap-1"><i data-lucide="alert-circle" class="w-3 h-3"></i>Blocked</p>
+                  <span class=\"font-bold text-yellow-800 text-sm\">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
+                  <p class=\"text-[10px] text-yellow-700 font-semibold mt-0.5 flex items-center gap-1\"><i data-lucide=\"alert-circle\" class=\"w-3 h-3\"></i>Blocked</p>
                 </div>
               </div>
-              <button onclick="openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})" class="bg-yellow-500 hover:bg-yellow-600 text-white border border-yellow-600 px-5 py-2 rounded-md text-sm font-bold transition-all shadow-[0_2px_8px_rgba(202,138,4,0.3)] ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}">
+              <button onclick=\"openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})\" class=\"bg-yellow-500 hover:bg-yellow-600 text-white border border-yellow-600 px-3 py-1.5 rounded-md text-xs font-bold transition-all shadow-[0_2px_8px_rgba(202,138,4,0.3)] whitespace-nowrap ml-2 ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}\">
                 Edit Slot
               </button>
             </div>`;
         } else if (slot.status === 'Closed') {
           // Closed slot (past time)
           gridContainer.innerHTML += `
-            <div class="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-md opacity-60">
-              <div class="flex items-center gap-3">
-                <i data-lucide="clock-off" class="text-red-400 w-5 h-5"></i>
+            <div class="flex items-center justify-between p-2.5 bg-red-50 border border-red-200 rounded-md opacity-60 text-sm\">
+              <div class=\"flex items-center gap-2\">
+                <i data-lucide=\"clock-off\" class=\"text-red-400 w-4 h-4\"></i>
                 <div>
-                  <span class="font-medium text-red-600">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
-                  <p class="text-xs text-red-500 mt-0.5">Slot closed (past time)</p>
+                  <span class=\"font-medium text-red-600 text-sm\">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
+                  <p class=\"text-[10px] text-red-500 mt-0.5\">Slot closed (past time)</p>
                 </div>
               </div>
             </div>`;
@@ -445,10 +445,10 @@ async function loadScheduleForDate(date) {
     } else {
       // No custom slots set - show empty state message
       gridContainer.innerHTML = `
-        <div class="flex flex-col items-center justify-center py-12 text-center">
-          <i data-lucide="calendar-x" class="text-gray-400 w-12 h-12 mb-4"></i>
-          <p class="text-gray-600 text-lg font-medium">No schedule set for this date</p>
-          <p class="text-gray-400 text-sm mt-2">Please set your weekly schedule from the Home page first</p>
+        <div class="flex flex-col items-center justify-center py-6 text-center">
+          <i data-lucide="calendar-x" class="text-gray-400 w-10 h-10 mb-3"></i>
+          <p class="text-gray-600 text-base font-medium">No schedule set for this date</p>
+          <p class="text-gray-400 text-xs mt-1.5">Please set your weekly schedule from the Home page first</p>
         </div>
       `;
       updateScheduleInsights(date, [], appointments);
@@ -638,30 +638,30 @@ function renderManageDaySlots() {
     fetchedAvailability.forEach(slot => {
     let statusBadge = '';
     if (slot.status === 'Available') {
-      statusBadge = `<span class="bg-gradient-to-r from-green-500 to-green-600 text-white text-[10px] px-3 py-1 rounded-full uppercase font-bold shadow-sm">Available</span>`;
+      statusBadge = `<span class="bg-gradient-to-r from-green-500 to-green-600 text-white text-[8px] px-2 py-0.5 rounded-full uppercase font-bold shadow-sm">Available</span>`;
     } else if (slot.status === 'Blocked') {
-      statusBadge = `<span class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white text-[10px] px-3 py-1 rounded-full uppercase font-bold shadow-sm">Blocked</span>`;
+      statusBadge = `<span class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white text-[8px] px-2 py-0.5 rounded-full uppercase font-bold shadow-sm">Blocked</span>`;
     } else if (slot.status === 'Booked' || slot.status === 'Completed') {
-      statusBadge = `<span class="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-[10px] px-3 py-1 rounded-full uppercase font-bold shadow-sm">${slot.status}</span>`;
+      statusBadge = `<span class="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-[8px] px-2 py-0.5 rounded-full uppercase font-bold shadow-sm">${slot.status}</span>`;
     } else {
-      statusBadge = `<span class="bg-gradient-to-r from-gray-500 to-gray-600 text-white text-[10px] px-3 py-1 rounded-full uppercase font-bold shadow-sm">${slot.status}</span>`;
+      statusBadge = `<span class="bg-gradient-to-r from-gray-500 to-gray-600 text-white text-[8px] px-2 py-0.5 rounded-full uppercase font-bold shadow-sm">${slot.status}</span>`;
     }
 
     const disableDelete = slot.status === 'Booked' || slot.status === 'Completed';
 
     listContainer.innerHTML += `
-      <div class="flex items-center justify-between p-4 bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-md hover:border-gray-400 transition shadow-sm">
-        <div class="flex items-center gap-4">
-          <div class="w-10 h-10 bg-white rounded-md flex items-center justify-center border border-gray-200 shadow-sm">
-          <i data-lucide="clock" class="w-5 h-5 text-gray-600"></i>
+      <div class="flex items-center justify-between p-3 bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-md hover:border-gray-400 transition shadow-sm">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 bg-white rounded-md flex items-center justify-center border border-gray-200 shadow-sm flex-shrink-0">
+          <i data-lucide="clock" class="w-4 h-4 text-gray-600"></i>
           </div>
           <div>
             <span class="font-bold text-gray-900 text-sm">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
-            <div class="mt-1.5">${statusBadge}</div>
+            <div class="mt-1">${statusBadge}</div>
           </div>
         </div>
-        <button onclick="removeSlotFromManageModal(${slot.avail_id})" ${disableDelete ? 'disabled class="text-gray-400 cursor-not-allowed p-2 hover:bg-gray-100 rounded-md transition"' : 'class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-md transition" title="Delete Slot"'}>
-          <i data-lucide="trash-2" class="w-5 h-5"></i>
+        <button onclick="removeSlotFromManageModal(${slot.avail_id})" ${disableDelete ? 'disabled class="text-gray-400 cursor-not-allowed p-1.5 hover:bg-gray-100 rounded-md transition"' : 'class="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-md transition" title="Delete Slot"'}>
+          <i data-lucide="trash-2" class="w-4 h-4"></i>
         </button>
       </div>
     `;
