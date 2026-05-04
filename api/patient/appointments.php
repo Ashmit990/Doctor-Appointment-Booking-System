@@ -1,5 +1,9 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/payment_helpers.php';
+
+ensure_appointment_payments_table($conn);
+release_expired_payment_holds($conn);
 
 $filter = strtolower($_GET['status'] ?? 'all');
 $q = trim($_GET['q'] ?? '');
@@ -50,12 +54,20 @@ $sql = "
         tt.ticket_number,
         tc.name AS ticket_category,
         tt.cost AS ticket_cost,
-        tt.generated_at AS ticket_generated_at
+        tt.generated_at AS ticket_generated_at,
+        ap.payment_id,
+        ap.payment_method,
+        ap.pidx AS payment_pidx,
+        ap.transaction_id AS payment_transaction_id,
+        ap.amount_rupees AS payment_amount,
+        ap.payment_status,
+        ap.verified_at AS payment_verified_at
     FROM appointments a
     INNER JOIN users u ON a.doctor_id = u.user_id
     LEFT JOIN doctor_profiles dp ON a.doctor_id = dp.user_id
     LEFT JOIN treatment_tickets tt ON a.appointment_id = tt.appointment_id
     LEFT JOIN treatment_categories tc ON tt.category_id = tc.id
+    LEFT JOIN appointment_payments ap ON a.appointment_id = ap.appointment_id
     WHERE a.patient_id = ?
 ";
 $params = [$patient_id];
@@ -85,6 +97,8 @@ $stmt->close();
 
 foreach ($rows as &$row) {
     $row['status_key'] = strtolower($row['status']);
+    $row['payment_status_key'] = strtolower($row['payment_status'] ?? 'unpaid');
+    $row['payment_status_label'] = $row['payment_status'] ? ucfirst(strtolower($row['payment_status'])) : 'Unpaid';
 }
 unset($row);
 

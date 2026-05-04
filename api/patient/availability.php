@@ -1,5 +1,8 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/payment_helpers.php';
+
+release_expired_payment_holds($conn);
 
 $action = $_GET['action'] ?? '';
 $doctor_id = $_GET['doctor_id'] ?? '';
