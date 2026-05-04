@@ -762,6 +762,40 @@ CREATE TABLE `earnings` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `appointment_payments`
+--
+
+CREATE TABLE `appointment_payments` (
+  `payment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `appointment_id` int(11) DEFAULT NULL,
+  `patient_id` varchar(20) NOT NULL,
+  `doctor_id` varchar(20) NOT NULL,
+  `avail_id` int(11) NOT NULL,
+  `payment_method` varchar(30) NOT NULL DEFAULT 'Khalti',
+  `pidx` varchar(100) DEFAULT NULL,
+  `transaction_id` varchar(100) DEFAULT NULL,
+  `amount_paisa` int(11) NOT NULL,
+  `amount_rupees` decimal(10,2) NOT NULL,
+  `payment_status` enum('Initiated','Pending','Completed','Failed','Expired','Cancelled','Refunded') NOT NULL DEFAULT 'Initiated',
+  `booking_payload` longtext NOT NULL,
+  `gateway_response` longtext DEFAULT NULL,
+  `callback_status` varchar(40) DEFAULT NULL,
+  `expires_at` timestamp NOT NULL,
+  `verified_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE `appointment_payments`
+  ADD PRIMARY KEY (`payment_id`),
+  ADD UNIQUE KEY `uq_appointment_payments_pidx` (`pidx`),
+  ADD KEY `idx_appointment_payments_appointment_id` (`appointment_id`),
+  ADD KEY `idx_appointment_payments_patient_id` (`patient_id`),
+  ADD KEY `idx_appointment_payments_avail_id` (`avail_id`);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `notifications`
 --
 

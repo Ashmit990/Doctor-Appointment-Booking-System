@@ -132,6 +132,14 @@ function getStatusClasses(status) {
   return "bg-red-100 text-red-700";
 }
 
+function getPaymentStatusClasses(status) {
+  const s = String(status || "unpaid").toLowerCase();
+  if (s === "completed") return "bg-emerald-100 text-emerald-700";
+  if (s === "pending" || s === "initiated") return "bg-amber-100 text-amber-700";
+  if (s === "failed" || s === "expired" || s === "cancelled") return "bg-rose-100 text-rose-700";
+  return "bg-slate-100 text-slate-600";
+}
+
 function formatStatus(status) {
   return String(status).charAt(0).toUpperCase() + String(status).slice(1);
 }
@@ -211,6 +219,7 @@ function renderAppointments(rows) {
             <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${getStatusClasses(item.status)}">
               ${formatStatus(item.status)}
             </span>
+            ${item.payment_status_label ? `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${getPaymentStatusClasses(item.payment_status_key)}">${item.payment_status_label}${item.payment_status_key === 'completed' ? ' via Khalti' : ''}</span>` : ''}
           </div>
 
           <p class="text-xs text-slate-500 mb-3">${item.specialization || ""} • Consultation</p>
@@ -421,6 +430,31 @@ async function reload() {
   }
 }
 
+// Iframe resizing functions
+function fitBookingIframe(iframe) {
+  if (!iframe) return;
+  try {
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc) return;
+    const height = doc.documentElement.scrollHeight || doc.body.scrollHeight;
+    iframe.style.height = (height + 20) + 'px';
+  } catch (err) {
+    console.warn('Could not resize booking iframe:', err);
+  }
+}
+
+function fitModalIframe(iframe) {
+  if (!iframe) return;
+  try {
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc) return;
+    const height = doc.documentElement.scrollHeight || doc.body.scrollHeight;
+    iframe.style.height = (height + 20) + 'px';
+  } catch (err) {
+    console.warn('Could not resize modal iframe:', err);
+  }
+}
+
 async function openBookingModal() {
   try {
     const r = await fetch(`${API_BASE}/patient/profile.php`, { credentials: "include" });
@@ -528,6 +562,8 @@ async function openDetailModal(id) {
       <p><span class="text-slate-400">Doctor</span><br/><strong class="text-slate-800">${a.doctor_name}</strong> — ${a.specialization || ""}</p>
       <p><span class="text-slate-400">When</span><br/>${a.app_date} at ${formatTime12h(a.app_time)} · ${a.room_num || ""}</p>
       <p><span class="text-slate-400">Status</span><br/>${formatStatus(a.status)}</p>
+      <p><span class="text-slate-400">Payment</span><br/><strong class="${getPaymentStatusClasses(a.payment_status_key)} inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold">${a.payment_status_label || 'Unpaid'}${a.payment_status_key === 'completed' ? ' via Khalti' : ''}</strong></p>
+      <p><span class="text-slate-400">Payment details</span><br/>Method: ${a.payment_method || '—'}<br/>Reference: ${a.payment_transaction_id || a.payment_pidx || '—'}<br/>Amount: ${a.payment_amount ? 'Rs. ' + Number(a.payment_amount).toFixed(2) : '—'}</p>
       <p class="break-words whitespace-pre-wrap"><span class="text-slate-400">Reason</span><br/>${a.reason_for_visit || "—"}</p>
       <p class="break-words whitespace-pre-wrap"><span class="text-slate-400">Doctor comments</span><br/>${a.doctor_comments || "—"}</p>
       <p class="break-words whitespace-pre-wrap"><span class="text-slate-400">Prescribed medicines</span><br/>${a.prescribed_medicines || "—"}</p>
@@ -583,10 +619,57 @@ filterButtons.forEach((button) => {
 
 window.addEventListener("message", function (event) {
   if (!event.data) return;
+  const bookingIframe = document.getElementById("bookingIframe");
+  const bookingModalIframe = document.getElementById("bookingModalIframe");
+  const sourceIsInline = bookingIframe && event.source === bookingIframe.contentWindow;
+  const sourceIsModal = bookingModalIframe && event.source === bookingModalIframe.contentWindow;
+
   if (event.data.type === "patient-booking-done") {
     closeBookingModal();
     reload();
     showSuccessToast("Success", "Your appointment was saved.");
+  }
+  if (event.data.type === "payment-result") {
+    const status = String(event.data.status || '').toLowerCase().trim();
+    console.log("Payment result received in dashboard:", { status, data: event.data });
+    
+    if (status === 'completed') {
+      // Close booking modal
+      const bookingModalIframe = document.getElementById("bookingModalIframe");
+      if (bookingModalIframe && event.source === bookingModalIframe.contentWindow) {
+        closeBookingModal();
+      }
+      // Show success popup
+      showSuccessToast("Payment successful ✓", event.data.message || "Your appointment has been booked successfully via Khalti.");
+      // Reload page after a short delay to show the toast
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } else if (status === 'failed' || status === 'cancelled') {
+      showSuccessToast("Payment " + status, event.data.message || "The payment did not complete. Please try again.");
+    } else if (status === 'checking') {
+      // Window was closed, reload to verify payment status
+      console.log("Payment window closed, reloading to verify status...");
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
+  }
+  if (event.data.type === "booking:resize") {
+    if (bookingIframe && event.source === bookingIframe.contentWindow && typeof fitBookingIframe === "function") {
+      fitBookingIframe(bookingIframe);
+    }
+    if (bookingModalIframe && event.source === bookingModalIframe.contentWindow && typeof fitModalIframe === "function") {
+      fitModalIframe(bookingModalIframe);
+    }
+  }
+  if (event.data.type === "payment-retry") {
+    if (sourceIsInline && bookingIframe) {
+      bookingIframe.src = `booking.html?t=${Date.now()}`;
+    }
+    if (sourceIsModal && bookingModalIframe) {
+      bookingModalIframe.src = `booking.html?t=${Date.now()}`;
+    }
   }
   if (event.data.type === "booking:close") {
     closeBookingModal();
