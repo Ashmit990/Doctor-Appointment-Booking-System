@@ -310,13 +310,15 @@ async function loadAppointmentsForDate(date, isToday = false) {
     
     if (result.status === 'success' && Array.isArray(result.data) && result.data.length > 0) {
         container.innerHTML = result.data.map(apt => `
-            <div class="appointment-card-premium border border-gray-100 rounded-[14px] p-5 hover:shadow-elevated transition cursor-pointer" onclick="openAppointmentModal(${apt.apt_id})">
-                <div class="flex justify-between items-start mb-3">
+            <div class="appointment-card-premium border border-gray-100/50 rounded-lg p-5 hover:shadow-elevated transition-all duration-300 cursor-pointer group hover:border-[#0d7377]/20" onclick="openAppointmentModal(${apt.apt_id})">
+                <div class="flex justify-between items-start mb-4">
                     <div class="flex-1">
-                        <p class="font-bold text-gray-900 text-base">${apt.patient_name}</p>
+                        <p class="font-bold text-gray-900 text-base leading-tight">${apt.patient_name}</p>
                         <div class="flex items-center gap-2 mt-2">
-                            <i data-lucide="clock" class="w-4 h-4 text-gray-400"></i>
-                            <p class="text-sm text-gray-500">${apt.appointment_time}</p>
+                            <div class="p-1.5 bg-[#0d7377]/10 rounded-md">
+                                <i data-lucide="clock" class="w-4 h-4 text-[#0d7377]"></i>
+                            </div>
+                            <p class="text-sm text-gray-600 font-medium">${apt.appointment_time}</p>
                         </div>
                     </div>
                     <span class="status-badge-premium ${apt.status === 'Completed' ? 'status-completed' : apt.status === 'Confirmed' ? 'status-confirmed' : 'status-pending'}">
@@ -324,11 +326,14 @@ async function loadAppointmentsForDate(date, isToday = false) {
                         ${apt.status}
                     </span>
                 </div>
-                <div class="space-y-2 text-sm">
-                    <p class="text-gray-700"><span class="font-semibold text-gray-600">Reason:</span> ${apt.reason_for_visit}</p>
-                    <div class="flex items-center gap-2 text-gray-600">
-                        <i data-lucide="door-open" class="w-4 h-4"></i>
-                        <p>Room ${apt.room_number}</p>
+                <div class="space-y-2 text-sm border-t border-gray-100 pt-4">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="stethoscope" class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0"></i>
+                        <p class="text-gray-700"><span class="font-semibold text-gray-600">Visit:</span> ${apt.reason_for_visit}</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="door-open" class="w-4 h-4 text-gray-400 flex-shrink-0"></i>
+                        <p class="text-gray-600">Room <span class="font-semibold">${apt.room_number}</span></p>
                     </div>
                 </div>
             </div>
@@ -410,26 +415,22 @@ async function loadCompletedAppointmentsPanel() {
     
     if (completedData.appointments.length > 0) {
         container.innerHTML = completedData.appointments.map(apt => `
-            <div class="appointment-card-premium border border-green-200 rounded-[14px] p-5 bg-gradient-to-br from-green-50 to-transparent hover:shadow-elevated transition cursor-pointer" onclick="openAppointmentModal(${apt.appointment_id})">
-                <div class="flex items-start justify-between mb-3">
+            <div class="appointment-card-premium border border-emerald-100/50 rounded-lg p-5 bg-gradient-to-br from-emerald-50/50 to-transparent hover:shadow-elevated transition-all duration-300 cursor-pointer group hover:border-emerald-200" onclick="openAppointmentModal(${apt.appointment_id})">
+                <div class="flex items-start justify-between mb-4">
                     <div class="flex-1">
                         <p class="font-bold text-gray-900 text-base">${apt.patient_name}</p>
                         <div class="flex items-center gap-2 mt-2">
-                            <i data-lucide="calendar" class="w-4 h-4 text-gray-400"></i>
-                            <p class="text-xs text-gray-600">${new Date(apt.app_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at ${apt.app_time}</p>
+                            <div class="p-1.5 bg-emerald-100/50 rounded-md">
+                                <i data-lucide="calendar" class="w-4 h-4 text-emerald-600\"></i>
+                            </div>\n                            <p class="text-xs text-gray-600 font-medium">${new Date(apt.app_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at ${apt.app_time}</p>
                         </div>
                     </div>
-                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center flex-shrink-0">
-                        <i data-lucide="check" class="w-4 h-4 text-white"></i>
+                    <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-md">
+                        <i data-lucide="check" class="w-5 h-5 text-white\"></i>
                     </div>
                 </div>
-                <p class="text-sm text-gray-700 font-medium mb-3">${apt.reason_for_visit}</p>
-                <div class="flex gap-2 flex-wrap">
-                    <span class="status-badge-premium status-completed">
-                        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
-                        Completed
-                    </span>
-                    <span class="text-xs bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg font-medium">Room ${apt.room_num}</span>
+                <p class="text-sm text-gray-700 font-medium mb-4 border-t border-gray-100 pt-4">${apt.reason_for_visit}</p>
+                <div class="flex gap-2 flex-wrap\">\n                    <span class="status-badge-premium status-completed\">\n                        <i data-lucide="check-circle" class="w-3.5 h-3.5\"></i>\n                        Completed\n                    </span>\n                    <span class="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg font-medium\">Room ${apt.room_num}</span>
                 </div>
             </div>
         `).join('');

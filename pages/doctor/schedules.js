@@ -381,7 +381,7 @@ async function loadScheduleForDate(date) {
               </div>`;
           } else {
             gridContainer.innerHTML += `
-              <div onclick="openAppointmentModal(${apt.apt_id})" class="flex items-center justify-between p-3 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-md cursor-pointer hover:border-blue-400 hover:shadow-md transition shadow-sm text-sm">
+              <div onclick="openAppointmentModal(${apt.apt_id})" class="flex items-center justify-between p-3 bg-blue-50 border border-blue-100 rounded-md cursor-pointer hover:border-blue-200 hover:shadow-md transition shadow-sm text-sm">
                 <div class="flex items-center gap-2">
                   <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0">
                     <i data-lucide="user" class="text-blue-700 w-4 h-4"></i>
@@ -391,13 +391,13 @@ async function loadScheduleForDate(date) {
                     <p class="text-xs font-semibold text-blue-800 mt-0.5">${apt.patient_name} <span class="opacity-80 font-normal ml-1 bg-blue-200 px-1.5 py-0.5 rounded-full text-[9px]">${apt.status}</span></p>
                   </div>
                 </div>
-                <button class="bg-white hover:bg-blue-50 border border-blue-300 hover:border-blue-400 text-blue-700 px-3 py-1.5 rounded-md text-xs font-bold transition-all shadow-sm whitespace-nowrap ml-2\">View Details</button>
+                <button class="bg-blue-50 hover:bg-blue-100 border border-blue-200 hover:border-blue-300 text-blue-700 px-3 py-1.5 rounded-md text-xs font-semibold transition-all shadow-none whitespace-nowrap ml-2">View Details</button>
               </div>`;
           }
         } else if (slot.status === 'Available') {
           // Available slot (no appointment)
           gridContainer.innerHTML += `
-            <div class="flex items-center justify-between p-3 bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-400 rounded-md shadow-sm hover:border-green-500 hover:shadow-md transition text-sm\">
+            <div class="flex items-center justify-between p-3 bg-green-50 border border-green-100 rounded-md shadow-sm hover:border-green-200 hover:shadow-md transition text-sm\">
               <div class="flex items-center gap-2\">
                 <div class=\"w-8 h-8 bg-green-200 rounded-full flex items-center justify-center flex-shrink-0\">
                   <i data-lucide=\"clock\" class=\"text-green-700 w-4 h-4\"></i>
@@ -407,14 +407,14 @@ async function loadScheduleForDate(date) {
                   <p class=\"text-[10px] text-green-700 font-semibold mt-0.5 flex items-center gap-1\"><i data-lucide=\"check\" class=\"w-3 h-3\"></i>Available for booking</p>
                 </div>
               </div>
-              <button onclick=\"openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})\" class=\"bg-green-500 hover:bg-green-600 text-white border border-green-600 px-3 py-1.5 rounded-md text-xs font-bold transition-all shadow-[0_2px_8px_rgba(34,197,94,0.3)] whitespace-nowrap ml-2 ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}\">
+              <button onclick=\"openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})\" class=\"bg-green-100 hover:bg-green-200 text-green-700 border border-green-200 px-3 py-1.5 rounded-md text-xs font-semibold transition-all shadow-none whitespace-nowrap ml-2 ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}\">
                 Edit Slot
               </button>
             </div>`;
         } else if (slot.status === 'Blocked') {
           // Blocked slot
           gridContainer.innerHTML += `
-            <div class="flex items-center justify-between p-3 bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-300 rounded-md hover:border-yellow-400 hover:shadow-md transition shadow-sm text-sm\">
+            <div class="flex items-center justify-between p-3 bg-amber-50 border border-amber-100 rounded-md hover:border-amber-200 hover:shadow-md transition shadow-sm text-sm\">
               <div class=\"flex items-center gap-2\">
                 <div class=\"w-8 h-8 bg-yellow-200 rounded-full flex items-center justify-center flex-shrink-0\">
                   <i data-lucide=\"lock\" class=\"text-yellow-700 w-4 h-4\"></i>
@@ -424,7 +424,7 @@ async function loadScheduleForDate(date) {
                   <p class=\"text-[10px] text-yellow-700 font-semibold mt-0.5 flex items-center gap-1\"><i data-lucide=\"alert-circle\" class=\"w-3 h-3\"></i>Blocked</p>
                 </div>
               </div>
-              <button onclick=\"openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})\" class=\"bg-yellow-500 hover:bg-yellow-600 text-white border border-yellow-600 px-3 py-1.5 rounded-md text-xs font-bold transition-all shadow-[0_2px_8px_rgba(202,138,4,0.3)] whitespace-nowrap ml-2 ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}\">
+              <button onclick=\"openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})\" class=\"bg-amber-100 hover:bg-amber-200 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-md text-xs font-semibold transition-all shadow-none whitespace-nowrap ml-2 ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}\">
                 Edit Slot
               </button>
             </div>`;
@@ -479,10 +479,10 @@ function openEditSlotModal(start, end, availId, status, isPast) {
     statusEl.textContent = "Available";
     statusEl.className = "inline-block px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800";
     toggleBtn.textContent = "Block Slot";
-    toggleBtn.className = "bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 px-4 py-2 rounded-md text-sm font-semibold transition";
+    toggleBtn.className = "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 px-4 py-2 rounded-md text-sm font-semibold transition";
   } else {
     statusEl.textContent = "Blocked";
-    statusEl.className = "inline-block px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800";
+    statusEl.className = "inline-block px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800";
     toggleBtn.textContent = "Unblock Slot";
     toggleBtn.className = "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 px-4 py-2 rounded-md text-sm font-semibold transition";
   }
@@ -638,11 +638,11 @@ function renderManageDaySlots() {
     fetchedAvailability.forEach(slot => {
     let statusBadge = '';
     if (slot.status === 'Available') {
-      statusBadge = `<span class="bg-gradient-to-r from-green-500 to-green-600 text-white text-[8px] px-2 py-0.5 rounded-full uppercase font-bold shadow-sm">Available</span>`;
+      statusBadge = `<span class="bg-green-500 text-white text-[8px] px-2 py-0.5 rounded-full uppercase font-bold shadow-sm">Available</span>`;
     } else if (slot.status === 'Blocked') {
-      statusBadge = `<span class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white text-[8px] px-2 py-0.5 rounded-full uppercase font-bold shadow-sm">Blocked</span>`;
+      statusBadge = `<span class="bg-amber-500 text-white text-[8px] px-2 py-0.5 rounded-full uppercase font-bold shadow-sm">Blocked</span>`;
     } else if (slot.status === 'Booked' || slot.status === 'Completed') {
-      statusBadge = `<span class="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-[8px] px-2 py-0.5 rounded-full uppercase font-bold shadow-sm">${slot.status}</span>`;
+      statusBadge = `<span class="bg-cyan-500 text-white text-[8px] px-2 py-0.5 rounded-full uppercase font-bold shadow-sm">${slot.status}</span>`;
     } else {
       statusBadge = `<span class="bg-gradient-to-r from-gray-500 to-gray-600 text-white text-[8px] px-2 py-0.5 rounded-full uppercase font-bold shadow-sm">${slot.status}</span>`;
     }
@@ -650,7 +650,7 @@ function renderManageDaySlots() {
     const disableDelete = slot.status === 'Booked' || slot.status === 'Completed';
 
     listContainer.innerHTML += `
-      <div class="flex items-center justify-between p-3 bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-md hover:border-gray-400 transition shadow-sm">
+      <div class="flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-md hover:border-gray-200 transition shadow-sm">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 bg-white rounded-md flex items-center justify-center border border-gray-200 shadow-sm flex-shrink-0">
           <i data-lucide="clock" class="w-4 h-4 text-gray-600"></i>
