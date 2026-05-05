@@ -294,7 +294,7 @@ window.addEventListener("message", (event) => {
   }
 });
 
-cancelBooking.addEventListener("click", () => {
+cancelBooking?.addEventListener("click", () => {
   const patientName = document.getElementById("patientName").value;
   bookingForm.reset();
   document.getElementById("patientName").value = patientName;

@@ -174,6 +174,9 @@ function renderCounts(rows) {
   setElementText("completedCount", completed);
   setElementText("missedCount", missed);
   setElementText("totalCount", rows.length);
+  setElementText("dashTotalCount", rows.length);
+  setElementText("dashUpcomingCount", upcoming);
+  setElementText("dashCompletedCount", completed);
 
   const next = rows.find((a) => a.status_key === "upcoming");
   setElementText(

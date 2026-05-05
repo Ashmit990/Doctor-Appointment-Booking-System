@@ -8,9 +8,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    * {
-      font-family: "Inter", sans-serif;
-    }
     body {
       background: #f9fafb;
     }
@@ -70,7 +67,7 @@
   </style>
 </head>
 
-<body class="bg-gray-50">
+<body class="bg-gray-50 font-sans">
   <div class="flex flex-col md:flex-row h-screen overflow-hidden">
     <!-- SIDEBAR -->
     <aside
@@ -130,26 +127,26 @@
       <div class="p-3 md:p-6">
         <div class="w-full">
           <!-- HERO SECTION WITH STATS -->
-          <div class="bg-gradient-to-r from-[#007E85] to-[#005f65] rounded-2xl p-4 md:p-6 mb-5 text-white shadow-lg">
+          <div class="bg-gradient-to-r from-[#007E85] to-[#005f65] rounded-2xl p-5 md:p-8 mb-5 text-white shadow-lg">
             <div class="flex items-start justify-between flex-col md:flex-row gap-3 mb-4">
               <div>
-                <p class="text-xs font-medium opacity-90 mb-0.5">Manage your details</p>
-                <h2 class="text-lg md:text-xl font-bold">Keep your profile updated</h2>
-                <p class="text-xs opacity-85 mt-1">Edit your personal details to keep information accurate.</p>
+                <p class="text-xs font-medium opacity-90 mb-1">Manage your details</p>
+                <h2 class="text-xl md:text-2xl font-bold">Keep your profile updated</h2>
+                <p class="text-sm opacity-85 mt-1.5">Edit your personal details to keep information accurate.</p>
               </div>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div class="bg-white/20 backdrop-blur-md rounded-lg p-3 border border-white/20">
-                <p class="text-[10px] opacity-90 mb-0.5">Profile Completion</p>
-                <p class="text-2xl font-bold" id="profileCompletion">—</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="bg-white/20 backdrop-blur-md rounded-xl p-4 border border-white/20">
+                <p class="text-xs opacity-90 mb-1">Profile Completion</p>
+                <p class="text-3xl font-bold" id="profileCompletion">—</p>
               </div>
-              <div class="bg-white/20 backdrop-blur-md rounded-lg p-3 border border-white/20">
-                <p class="text-[10px] opacity-90 mb-0.5">Verified Fields</p>
-                <p class="text-2xl font-bold" id="verifiedFields">—</p>
+              <div class="bg-white/20 backdrop-blur-md rounded-xl p-4 border border-white/20">
+                <p class="text-xs opacity-90 mb-1">Verified Fields</p>
+                <p class="text-3xl font-bold" id="verifiedFields">—</p>
               </div>
-              <div class="bg-white/20 backdrop-blur-md rounded-lg p-3 border border-white/20">
+              <div class="bg-white/20 backdrop-blur-md rounded-xl p-4 border border-white/20">
                 <p class="text-xs opacity-90 mb-1">Last Updated</p>
-                <p class="text-lg font-bold" id="lastUpdated">—</p>
+                <p class="text-xl font-bold" id="lastUpdated">—</p>
               </div>
             </div>
           </div>
