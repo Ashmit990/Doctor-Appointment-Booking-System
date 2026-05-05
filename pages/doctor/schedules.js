@@ -487,11 +487,19 @@ function openEditSlotModal(start, end, availId, status, isPast) {
     toggleBtn.className = "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 px-4 py-2 rounded-md text-sm font-semibold transition";
   }
   
-  document.getElementById("edit-slot-modal").classList.remove("hidden");
+  const modal = document.getElementById("edit-slot-modal");
+  modal.classList.remove("hidden");
+  // Force reflow to trigger animation
+  void modal.offsetWidth;
 }
 
 function closeEditSlotModal() {
-  document.getElementById("edit-slot-modal").classList.add("hidden");
+  const modal = document.getElementById("edit-slot-modal");
+  modal.classList.add("modal-closing");
+  setTimeout(() => {
+    modal.classList.add("hidden");
+    modal.classList.remove("modal-closing");
+  }, 300);
 }
 
 async function toggleSlotStatusFromModal() {
@@ -619,11 +627,19 @@ function openManageDayModal() {
   if (newSlotEnd) newSlotEnd.value = "";
   
   renderManageDaySlots();
-  document.getElementById("manage-day-modal").classList.remove("hidden");
+  const modal = document.getElementById("manage-day-modal");
+  modal.classList.remove("hidden");
+  // Force reflow to trigger animation
+  void modal.offsetWidth;
 }
 
 function closeManageDayModal() {
-  document.getElementById("manage-day-modal").classList.add("hidden");
+  const modal = document.getElementById("manage-day-modal");
+  modal.classList.add("modal-closing");
+  setTimeout(() => {
+    modal.classList.add("hidden");
+    modal.classList.remove("modal-closing");
+  }, 300);
 }
 
 function renderManageDaySlots() {
@@ -780,12 +796,20 @@ function updateEndTimeOptions(startId, endId) {
 
 function openDeleteConfirmModal(actionCallback) {
   pendingDeleteAction = actionCallback;
-  document.getElementById("delete-confirm-modal").classList.remove("hidden");
+  const modal = document.getElementById("delete-confirm-modal");
+  modal.classList.remove("hidden");
+  // Force reflow to trigger animation
+  void modal.offsetWidth;
 }
 
 function closeDeleteConfirmModal() {
-  pendingDeleteAction = null;
-  document.getElementById("delete-confirm-modal").classList.add("hidden");
+  const modal = document.getElementById("delete-confirm-modal");
+  modal.classList.add("modal-closing");
+  setTimeout(() => {
+    modal.classList.add("hidden");
+    modal.classList.remove("modal-closing");
+    pendingDeleteAction = null;
+  }, 300);
 }
 
 function executeDelete() {
@@ -1098,7 +1122,10 @@ async function openAppointmentModal(aptId) {
     toggleFollowUpVisibility();
   }
 
-  document.getElementById("appointment-modal").classList.remove("hidden");
+  const modal = document.getElementById("appointment-modal");
+  modal.classList.remove("hidden");
+  // Force reflow to trigger animation
+  void modal.offsetWidth;
   
   // Load patient history
   loadPatientHistory(apt.patient_id);
@@ -1235,7 +1262,12 @@ async function submitConsultation() {
 }
 
 function closeAppointmentModal() {
-  document.getElementById("appointment-modal").classList.add("hidden");
+  const modal = document.getElementById("appointment-modal");
+  modal.classList.add("modal-closing");
+  setTimeout(() => {
+    modal.classList.add("hidden");
+    modal.classList.remove("modal-closing");
+  }, 300);
 }
 
 // Load patient medical history
@@ -1303,11 +1335,30 @@ function nextMonthSchedule() {
   renderScheduleCalendar();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   updateCurrentDate();
-  loadDoctorProfile();
+  await loadDoctorProfile();
   renderScheduleCalendar();
   lucide.createIcons();
+  
+  // Check if a date parameter was passed from the pending appointments popup
+  const urlParams = new URLSearchParams(window.location.search);
+  const dateParam = urlParams.get('date');
+  
+  if (dateParam) {
+    // Validate date format (YYYY-MM-DD)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+      // Set the calendar to show the month of the date
+      const [year, month, day] = dateParam.split('-');
+      scheduleMonth = new Date(parseInt(year), parseInt(month) - 1, 1);
+      
+      // Load and select the specific date
+      await selectScheduleDate(dateParam);
+      
+      // Clear the URL parameter to avoid reloading the same date on refresh
+      window.history.replaceState({}, document.title, 'schedules.html');
+    }
+  }
 });
 
 // Check session when page becomes visible (e.g., on back button)

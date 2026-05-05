@@ -388,13 +388,21 @@ async function openAppointmentModal(appointmentID) {
         document.getElementById('view-comments').textContent = apt.doctor_comments || 'No comments added';
         document.getElementById('view-medicines').textContent = apt.prescribed_medicines || 'No medicines prescribed';
         
-        document.getElementById('appointment-modal').classList.remove('hidden');
+        const modal = document.getElementById('appointment-modal');
+        modal.classList.remove('hidden');
+        // Force reflow to trigger animation
+        void modal.offsetWidth;
     }
 }
 
 function closeAppointmentModal() {
-    document.getElementById('appointment-modal').classList.add('hidden');
-    currentAppointmentID = null;
+    const modal = document.getElementById('appointment-modal');
+    modal.classList.add('modal-closing');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('modal-closing');
+        currentAppointmentID = null;
+    }, 300);
 }
 
 function prevMonth() {
@@ -697,6 +705,189 @@ function showProfileIncompleteNotification(completionPercentage) {
     }
 }
 
+/**
+ * Fetch pending status appointments where time has passed but status not updated
+ */
+async function loadPendingStatusAppointments() {
+    try {
+        console.log('DEBUG: Fetching pending status appointments...');
+        const response = await fetch(`${DOCTOR_API_BASE}/doctor/pending_status_appointments.php`, {
+            credentials: 'include'
+        });
+        const result = await response.json();
+        
+        console.log('DEBUG: Pending appointments response:', result);
+        
+        if (result.status === 'success') {
+            const appointmentCount = result.data ? result.data.length : 0;
+            console.log('DEBUG: Found ' + appointmentCount + ' pending appointments');
+            console.log('DEBUG: Response debug info:', result.debug);
+            
+            if (appointmentCount > 0) {
+                console.log('DEBUG: Showing modal with pending appointments');
+                renderPendingStatusModal(result.groupedByDate);
+                showPendingStatusModal();
+            } else {
+                console.log('DEBUG: No pending appointments found - not showing modal');
+            }
+        } else {
+            console.error('DEBUG: Error in response:', result.message);
+        }
+    } catch (error) {
+        console.error('Error loading pending status appointments:', error);
+    }
+}
+
+/**
+ * Render the pending status appointments modal with grouped dates
+ */
+function renderPendingStatusModal(appointmentsByDate) {
+    const listEl = document.getElementById('pendingStatusList');
+    const noAppointmentsMsg = document.getElementById('noAppointmentsMsg');
+    
+    console.log('DEBUG: renderPendingStatusModal called with:', appointmentsByDate);
+    
+    if (!listEl) {
+        console.error('ERROR: pendingStatusList element not found!');
+        return;
+    }
+    
+    const dateCount = Object.keys(appointmentsByDate).length;
+    
+    console.log('DEBUG: Found ' + dateCount + ' dates with pending appointments');
+    
+    if (dateCount === 0) {
+        noAppointmentsMsg.classList.remove('hidden');
+        listEl.innerHTML = '';
+        return;
+    }
+    
+    noAppointmentsMsg.classList.add('hidden');
+    listEl.innerHTML = '';
+    
+    // Create a date item for each date with pending appointments
+    Object.keys(appointmentsByDate).sort().forEach(dateStr => {
+        const appointments = appointmentsByDate[dateStr];
+        const dateObj = new Date(dateStr + 'T00:00:00');
+        const dateDisplay = dateObj.toLocaleDateString('en-US', { 
+            weekday: 'short', 
+            month: 'short', 
+            day: 'numeric',
+            year: 'numeric'
+        });
+        
+        const appointmentCount = appointments.length;
+        
+        const dateItem = document.createElement('div');
+        dateItem.style.cssText = `
+            border: 2px solid #e0f2f1;
+            background: linear-gradient(135deg, rgba(13, 115, 119, 0.05) 0%, rgba(13, 115, 119, 0.02) 100%);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        `;
+        dateItem.onmouseover = function() {
+            this.style.borderColor = '#0d7377';
+            this.style.background = 'linear-gradient(135deg, rgba(13, 115, 119, 0.1) 0%, rgba(13, 115, 119, 0.05) 100%)';
+            this.style.transform = 'translateY(-2px)';
+            this.style.boxShadow = '0 8px 20px rgba(13, 115, 119, 0.15)';
+        };
+        dateItem.onmouseout = function() {
+            this.style.borderColor = '#e0f2f1';
+            this.style.background = 'linear-gradient(135deg, rgba(13, 115, 119, 0.05) 0%, rgba(13, 115, 119, 0.02) 100%)';
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = 'none';
+        };
+        dateItem.onclick = () => {
+            // Redirect to schedules page with this date
+            redirectToSchedulesWithDate(dateStr);
+        };
+        
+        dateItem.innerHTML = `
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #0d7377 0%, #0a5a5d 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; box-shadow: 0 4px 12px rgba(13, 115, 119, 0.2);">
+                        <i data-lucide="calendar" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <p style="font-weight: 600; color: #111827; margin: 0; font-size: 15px;">${dateDisplay}</p>
+                        <p style="font-size: 13px; color: #6b7280; margin: 4px 0 0 0;">${appointmentCount} appointment${appointmentCount !== 1 ? 's' : ''} pending</p>
+                    </div>
+                </div>
+                <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #0d7377 0%, #0a5a5d 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 13px; box-shadow: 0 4px 12px rgba(13, 115, 119, 0.2);">
+                    ${appointmentCount}
+                </div>
+            </div>
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0f2f1; font-size: 13px; color: #6b7280;">
+                ${appointments.slice(0, 2).map(apt => `<div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">• ${apt.patient_name} at ${apt.appointment_time}</div>`).join('')}
+                ${appointmentCount > 2 ? `<div style="color: #0d7377; font-weight: 600; margin-top: 4px;">+${appointmentCount - 2} more</div>` : ''}
+            </div>
+        `;
+        
+        listEl.appendChild(dateItem);
+    });
+    
+    // Reinitialize lucide icons
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+/**
+ * Show the pending status modal with smooth animation
+ */
+function showPendingStatusModal() {
+    const modal = document.getElementById('pendingStatusModal');
+    if (modal) {
+        modal.classList.remove('hidden', 'modal-closing');
+        // Force reflow to trigger animation
+        void modal.offsetWidth;
+    }
+}
+
+/**
+ * Close the pending status modal with smooth animation
+ */
+function closePendingStatusModal() {
+    const modal = document.getElementById('pendingStatusModal');
+    if (modal) {
+        modal.classList.add('modal-closing');
+        // Wait for animation to complete before hiding
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('modal-closing');
+        }, 300);
+    }
+}
+
+/**
+ * Scroll the calendar to show a specific date
+ */
+function scrollCalendarToDate(dateStr) {
+    const parts = dateStr.split('-');
+    const year = parseInt(parts[0]);
+    const month = parseInt(parts[1]);
+    const day = parseInt(parts[2]);
+    
+    // Set the current month to the date's month
+    currentMonth = new Date(year, month - 1, 1);
+    renderCalendar();
+}
+
+/**
+ * Redirect to schedules page with a specific date
+ */
+function redirectToSchedulesWithDate(dateStr) {
+    // Pass the date as a URL parameter
+    window.location.href = `schedules.html?date=${dateStr}`;
+}
+
+/**
+ * Redirect to schedules page
+ */
+function redirectToSchedules() {
+    window.location.href = 'schedules.html';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById('doctorNotificationBtn');
     const panel = document.getElementById('doctorNotificationPanel');
@@ -739,6 +930,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAllAppointmentsForSearch();
     checkAndShowScheduleSetup();
     checkAndShowProfileNotification();
+    loadPendingStatusAppointments();
     loadHomePageData();
     loadDoctorNotifications().then((rows) => renderDoctorNotificationList(rows));
 
