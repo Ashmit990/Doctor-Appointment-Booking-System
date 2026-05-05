@@ -23,8 +23,23 @@ if (empty($password)) {
     exit;
 }
 
-if (strlen($password) < 6) {
-    echo json_encode(['success' => false, 'message' => 'Password must be at least 6 characters.']);
+if (strlen($password) < 8) {
+    echo json_encode(['success' => false, 'message' => 'Password must be at least 8 characters.']);
+    exit;
+}
+
+if (!preg_match('/[A-Z]/', $password)) {
+    echo json_encode(['success' => false, 'message' => 'Password must include an uppercase letter.']);
+    exit;
+}
+
+if (!preg_match('/[0-9]/', $password)) {
+    echo json_encode(['success' => false, 'message' => 'Password must include a number.']);
+    exit;
+}
+
+if (!preg_match('/[!@#$%^&*()\-_=+\[\]{};\':"\\\\|,.<>\/? ]/', $password)) {
+    echo json_encode(['success' => false, 'message' => 'Password must include a special character.']);
     exit;
 }
 

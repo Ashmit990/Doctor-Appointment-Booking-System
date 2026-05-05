@@ -10,8 +10,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 define('SMTP_HOST',      'smtp.gmail.com');
-define('SMTP_PORT',      587);
-define('SMTP_USER',      'np03cs4a240048@heraldcollege.edu.np');
-define('SMTP_PASS',      'qgwj fjfy trms bncr');
-define('SMTP_FROM',      'np03cs4a240048@heraldcollege.edu.np');
+define('SMTP_PORT',      465);
+define('SMTP_USER',      'healthcare2061@gmail.com');
+define('SMTP_PASS',      'dddp hwvs psir cytl');
+define('SMTP_FROM',      'healthcare2061@gmail.com');
 define('SMTP_FROM_NAME', 'Health Care System');

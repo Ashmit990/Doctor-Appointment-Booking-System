@@ -49,7 +49,24 @@ $stmt->bind_param("ss", $email, $otp);
 $stmt->execute();
 $stmt->close();
 
-// Send OTP email via PHPMailer
+// ── Set session and respond to browser IMMEDIATELY ───────────────────────────
+$_SESSION['otp_email'] = $email;
+unset($_SESSION['otp_verified']);
+session_write_close(); // commit session before flushing
+
+$successJson = json_encode(['success' => true, 'message' => 'OTP sent to your email address.']);
+header('Content-Type: application/json');
+header('Connection: close');
+header('Content-Length: ' . strlen($successJson));
+ob_end_clean();
+echo $successJson;
+ob_flush();
+flush();
+
+// ── Send email in background AFTER response is already sent ──────────────────
+ignore_user_abort(true);
+set_time_limit(60);
+
 $mail = new PHPMailer(true);
 try {
     $mail->isSMTP();
@@ -57,8 +74,16 @@ try {
     $mail->SMTPAuth   = true;
     $mail->Username   = SMTP_USER;
     $mail->Password   = SMTP_PASS;
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->Port       = SMTP_PORT;
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+    $mail->Port       = 465;
+    $mail->Timeout    = 15;
+    $mail->SMTPOptions = [
+        'ssl' => [
+            'verify_peer'       => false,
+            'verify_peer_name'  => false,
+            'allow_self_signed' => true,
+        ],
+    ];
 
     $mail->setFrom(SMTP_FROM, SMTP_FROM_NAME);
     $mail->addAddress($email, $user['full_name']);
@@ -81,13 +106,7 @@ try {
         </div>
     </div>";
     $mail->AltBody = "Your OTP for password reset is: {$otp}. It expires in 10 minutes.";
-
     $mail->send();
-
-    $_SESSION['otp_email'] = $email;
-    unset($_SESSION['otp_verified']);
-
-    echo json_encode(['success' => true, 'message' => 'OTP sent to your email address.']);
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Failed to send email. Please check mail configuration.']);
+    // Email failed silently — OTP is still in DB, user can use Resend
 }

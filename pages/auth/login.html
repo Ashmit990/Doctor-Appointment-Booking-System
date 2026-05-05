@@ -211,7 +211,7 @@
           <h2 class="text-[#007E85] font-black text-2xl mb-2">Set New Password</h2>
           <p class="text-gray-500 text-sm mb-6 leading-relaxed">Choose a strong new password for your account.</p>
           <div class="relative mb-4">
-            <input id="fp-newpass" type="password" placeholder="New password (min. 6 chars)"
+            <input id="fp-newpass" type="password" placeholder="Min 8 chars, uppercase, number, symbol"
               class="w-full border-b-2 border-[#007E85] bg-transparent focus:outline-none pb-2 text-gray-800 text-base text-left tracking-normal pr-8"
             />
             <button type="button" onclick="fpTogglePass('fp-newpass','fp-eye1')" tabindex="-1"
@@ -508,9 +508,11 @@
         const fd = new FormData();
         fd.append('email', email);
 
-        fetch('../../api/auth/send_otp.php', { method: 'POST', body: fd })
-          .then(r => r.json())
-          .then(data => {
+        const minDelay = new Promise(resolve => setTimeout(resolve, 2000));
+        const request  = fetch('../../api/auth/send_otp.php', { method: 'POST', body: fd }).then(r => r.json());
+
+        Promise.all([request, minDelay])
+          .then(([data]) => {
             fpSetLoading('fp-send-btn', false, 'Send OTP');
             if (data.success) {
               document.getElementById('fp-email-display').textContent = email;
@@ -595,7 +597,12 @@
         const confirm  = document.getElementById('fp-confirm').value;
         document.getElementById('fp-step3-error').classList.add('hidden');
 
-        if (!password || password.length < 6) { fpShowError('fp-step3-error', 'Password must be at least 6 characters.'); return; }
+        if (!password) { fpShowError('fp-step3-error', 'Password is required.'); return; }
+        if (password.length < 8) { fpShowError('fp-step3-error', 'Password must be at least 8 characters.'); return; }
+        if (!/[A-Z]/.test(password)) { fpShowError('fp-step3-error', 'Password must include an uppercase letter.'); return; }
+        if (!/[0-9]/.test(password)) { fpShowError('fp-step3-error', 'Password must include a number.'); return; }
+        if (!/[!@#$%^&*()\-_=+\[\]{};':"\\|,.<>\/?]/.test(password)) { fpShowError('fp-step3-error', 'Password must include a special character.'); return; }
+        if (!confirm) { fpShowError('fp-step3-error', 'Please confirm your password.'); return; }
         if (password !== confirm) { fpShowError('fp-step3-error', 'Passwords do not match.'); return; }
 
         fpSetLoading('fp-reset-btn', true, 'Reset Password');
