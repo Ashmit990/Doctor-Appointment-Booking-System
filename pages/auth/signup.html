@@ -171,8 +171,17 @@
       }
       .modal-body {
         padding: 20px 24px;
-        max-height: none;
-        overflow-y: visible;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+      /* Hide default browser password toggle */
+      input::-ms-reveal,
+      input::-ms-clear {
+        display: none;
+      }
+      input[type="password"]::-webkit-contacts-auto-fill-button,
+      input[type="password"]::-webkit-credentials-auto-fill-button {
+        display: none !important;
       }
       .modal-footer {
         padding: 16px 24px;
@@ -303,7 +312,7 @@
     </style>
   </head>
 
-  <body class="overflow-hidden h-screen tracking-[1.1px]">
+  <body class="overflow-hidden h-screen tracking-[1.1px] bg-[#F8FAFB]">
     <!-- BACK BUTTON -->
     <div class="back-button" onclick="goToLandingPage()">
       <svg
@@ -337,6 +346,7 @@
         ></p>
         <button
           id="feedbackBtn"
+          type="button"
           onclick="handleFeedbackClose()"
           class="w-full bg-[#007E85] text-white font-bold py-3.5 rounded-xl text-base hover:bg-[#00666c] transition-all hover:-translate-y-0.5 active:scale-[0.98]"
         ></button>
@@ -371,6 +381,24 @@
         </div>
         <div class="modal-body">
           <div class="grid grid-cols-2 gap-3" id="professionOptionsList"></div>
+
+          <!-- Other Profession Input (Hidden by default) -->
+          <div
+            id="otherProfessionContainer"
+            class="hidden mt-6 pt-4 border-t border-gray-100"
+          >
+            <label
+              class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+            >
+              Enter your specialization
+            </label>
+            <input
+              id="otherProfessionInput"
+              type="text"
+              class="custom-input w-full bg-transparent py-2 text-base text-slate-800 outline-none border-b-2 border-gray-200 focus:border-[#007E85]"
+              placeholder="e.g. Neurosurgeon"
+            />
+          </div>
         </div>
         <div class="modal-footer">
           <button
@@ -425,7 +453,7 @@
             >
           </div>
 
-          <form id="signupForm" novalidate>
+          <div id="signupForm" class="space-y-4">
             <!-- ── STEP 1 ── -->
             <div id="step1" class="step-content space-y-4 xl:space-y-5">
               <div class="group">
@@ -780,8 +808,9 @@
                   ← Back
                 </button>
                 <button
-                  type="submit"
+                  type="button"
                   id="submitBtn"
+                  onclick="handleSignupSubmit()"
                   class="btn-primary w-2/3 bg-[#007E85] text-white font-bold py-4 rounded-xl text-base xl:text-lg shadow-lg hover:bg-[#00666c] transition-all hover:-translate-y-0.5 active:scale-[0.98]"
                 >
                   Register Now
@@ -798,7 +827,7 @@
               </p>
             </div>
             <!-- /step2 -->
-          </form>
+          </div>
         </div>
       </div>
 
@@ -822,6 +851,12 @@
     <!-- /flex wrapper -->
 
     <script>
+      // ── Reload Blocker for Debugging ────────────────────────────────
+      window.onbeforeunload = function () {
+        console.log("Page is attempting to reload or redirect!");
+        return "The page is trying to reload or redirect. Click 'Stay' to see what happened.";
+      };
+
       // ═══════════════════════════════════════════════════════════════
       //  CENTERED FEEDBACK MODAL
       //  — used for SUCCESS (patient & doctor) and ERROR messages
@@ -837,6 +872,7 @@
         btnLabel,
         redirect,
       ) {
+        console.log("Opening modal with redirect setting:", redirect);
         _redirectOnClose = !!redirect;
 
         const ring = document.getElementById("feedbackIconRing");
@@ -852,10 +888,14 @@
       }
 
       function handleFeedbackClose() {
+        console.log("Closing modal. Redirect on close is:", _redirectOnClose);
         document.getElementById("feedbackModal").classList.remove("show");
         document.body.style.overflow = "";
         if (_redirectOnClose) {
-          window.location.href = "login.html"; // ← patient redirect
+          console.log("Redirecting to login.html now...");
+          // Disable blocker before intentional redirect
+          window.onbeforeunload = null;
+          window.location.href = "login.html";
         }
       }
 
@@ -896,7 +936,7 @@
          <strong>contact you once you are approved</strong>.<br><br>
          You'll receive an email notification with further instructions.`,
           "Got it, I'll wait!",
-          false, // ← no redirect
+          true, // ← redirect to login to clear information
         );
       }
 
@@ -928,6 +968,7 @@
       const prevBtn = document.getElementById("prevStepBtn");
 
       function showStep(n) {
+        console.log("Switching to step:", n);
         if (n === 1) {
           step1.style.animation = "stepFadeIn 0.3s ease-out";
           step1.classList.remove("step-hidden");
@@ -1047,18 +1088,49 @@
           .forEach((e) => e.classList.remove("selected"));
         el.classList.add("selected");
         tempSelectedProfession = profession;
+
+        // Show/hide "Other" input field
+        const otherContainer = document.getElementById(
+          "otherProfessionContainer",
+        );
+        if (profession === "Other") {
+          otherContainer.classList.remove("hidden");
+          document.getElementById("otherProfessionInput").focus();
+        } else {
+          otherContainer.classList.add("hidden");
+        }
       }
 
       function openProfessionModal() {
         tempSelectedProfession = finalSelectedProfession;
         populateProfessionModal();
         if (tempSelectedProfession) {
+          let found = false;
           document
             .querySelectorAll(".profession-option-modal")
             .forEach((el) => {
-              if (el.getAttribute("data-profession") === tempSelectedProfession)
+              const profName = el.getAttribute("data-profession");
+              if (profName === tempSelectedProfession) {
                 el.classList.add("selected");
+                found = true;
+              }
             });
+
+          // If not found in standard list, it must be an "Other" value
+          if (!found && tempSelectedProfession !== "") {
+            const otherBtn = Array.from(
+              document.querySelectorAll(".profession-option-modal"),
+            ).find((el) => el.getAttribute("data-profession") === "Other");
+            if (otherBtn) {
+              otherBtn.classList.add("selected");
+              document
+                .getElementById("otherProfessionContainer")
+                .classList.remove("hidden");
+              document.getElementById("otherProfessionInput").value =
+                tempSelectedProfession;
+              tempSelectedProfession = "Other";
+            }
+          }
         }
         document.getElementById("professionModal").classList.add("show");
         document.body.style.overflow = "hidden";
@@ -1071,9 +1143,28 @@
 
       function confirmProfessionSelection() {
         if (tempSelectedProfession) {
-          finalSelectedProfession = tempSelectedProfession;
+          let displayValue = tempSelectedProfession;
+
+          if (tempSelectedProfession === "Other") {
+            const otherVal = document
+              .getElementById("otherProfessionInput")
+              .value.trim();
+            if (!otherVal) {
+              // Highlight the other input if empty
+              document.getElementById("otherProfessionInput").focus();
+              document
+                .getElementById("otherProfessionInput")
+                .classList.add("border-red-500");
+              return;
+            }
+            displayValue = otherVal;
+            finalSelectedProfession = otherVal;
+          } else {
+            finalSelectedProfession = tempSelectedProfession;
+          }
+
           document.getElementById("selectedProfessionText").innerHTML =
-            `<span class="chip">${finalSelectedProfession}</span>`;
+            `<span class="chip">${displayValue}</span>`;
           document.getElementById("selectedProfessionValue").value =
             finalSelectedProfession;
           clearErr("signupProfession");
@@ -1248,133 +1339,142 @@
       // ═══════════════════════════════════════════════════════════════
       //  FORM SUBMIT
       // ═══════════════════════════════════════════════════════════════
+      // Handle Enter key for the entire signup container
       document
         .getElementById("signupForm")
-        .addEventListener("submit", async function (e) {
-          e.preventDefault();
+        .addEventListener("keydown", function (e) {
+          if (e.key === "Enter" && !e.shiftKey) {
+            // If in a textarea, allow Enter
+            if (e.target.tagName === "TEXTAREA") return;
 
-          const phone = document.getElementById("signupPhone").value.trim();
-          const age = document.getElementById("signupAge").value.trim();
-          const password = document.getElementById("signupPassword").value;
-          const confirmPassword = document.getElementById(
-            "signupConfirmPassword",
-          ).value;
-          const fullName = document
-            .getElementById("signupFullName")
-            .value.trim();
-          const email = document.getElementById("signupEmail").value.trim();
-          const medicalId = document
-            .getElementById("signupMedicalId")
-            .value.trim();
-          const bio = document.getElementById("signupBio").value.trim();
-          const isDoctor = selectedRole === "Medical Professional";
-
-          [
-            "signupPhone",
-            "signupAge",
-            "signupPassword",
-            "signupConfirmPassword",
-          ].forEach(clearErr);
-          let hasError = false;
-
-          const phoneErr = Validators.phone(phone);
-          if (phoneErr) {
-            showErr("signupPhone", phoneErr);
-            hasError = true;
+            e.preventDefault();
+            handleSignupSubmit();
           }
+        });
 
-          const ageErr = Validators.age(age);
-          if (ageErr) {
-            showErr("signupAge", ageErr);
-            hasError = true;
-          }
+      async function handleSignupSubmit() {
+        console.log("Signup action triggered via button or Enter");
 
-          const passErr = Validators.password(password);
-          if (passErr) {
-            showErr("signupPassword", passErr);
-            hasError = true;
-          }
+        const phone = document.getElementById("signupPhone").value.trim();
+        const age = document.getElementById("signupAge").value.trim();
+        const password = document.getElementById("signupPassword").value;
+        const confirmPassword = document.getElementById(
+          "signupConfirmPassword",
+        ).value;
+        const fullName = document.getElementById("signupFullName").value.trim();
+        const email = document.getElementById("signupEmail").value.trim();
+        const medicalId = document
+          .getElementById("signupMedicalId")
+          .value.trim();
+        const bio = document.getElementById("signupBio").value.trim();
+        const isDoctor = selectedRole === "Medical Professional";
 
-          if (!confirmPassword) {
-            showErr("signupConfirmPassword", "Please confirm your password.");
-            hasError = true;
-          } else if (password !== confirmPassword) {
-            showErr("signupConfirmPassword", "Passwords do not match.");
-            hasError = true;
-          }
+        [
+          "signupPhone",
+          "signupAge",
+          "signupPassword",
+          "signupConfirmPassword",
+        ].forEach(clearErr);
+        let hasError = false;
 
-          if (hasError) return;
+        const phoneErr = Validators.phone(phone);
+        if (phoneErr) {
+          showErr("signupPhone", phoneErr);
+          hasError = true;
+        }
 
-          // Loading state
-          const btn = document.getElementById("submitBtn");
-          const origText = btn.innerText;
-          btn.innerHTML = `<svg class="animate-spin inline w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24">
+        const ageErr = Validators.age(age);
+        if (ageErr) {
+          showErr("signupAge", ageErr);
+          hasError = true;
+        }
+
+        const passErr = Validators.password(password);
+        if (passErr) {
+          showErr("signupPassword", passErr);
+          hasError = true;
+        }
+
+        if (!confirmPassword) {
+          showErr("signupConfirmPassword", "Please confirm your password.");
+          hasError = true;
+        } else if (password !== confirmPassword) {
+          showErr("signupConfirmPassword", "Passwords do not match.");
+          hasError = true;
+        }
+
+        if (hasError) return;
+
+        // Loading state
+        const btn = document.getElementById("submitBtn");
+        const origText = btn.innerText;
+        btn.innerHTML = `<svg class="animate-spin inline w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
       </svg> Registering...`;
-          btn.disabled = true;
+        btn.disabled = true;
 
-          const formData = new FormData();
-          formData.append("full_name", fullName);
-          formData.append("email", email);
-          formData.append("phone", phone);
-          formData.append("age", age);
-          formData.append("role", selectedRole);
-          formData.append("password", password);
-          if (isDoctor) {
-            formData.append("medical_id", medicalId);
-            formData.append("bio", bio);
-            formData.append("profession", finalSelectedProfession);
-            formData.append("specialization", finalSelectedProfession);
-          }
+        const formData = new FormData();
+        formData.append("full_name", fullName);
+        formData.append("email", email);
+        formData.append("phone", phone);
+        formData.append("age", age);
+        formData.append("role", selectedRole);
+        formData.append("password", password);
+        if (isDoctor) {
+          formData.append("medical_id", medicalId);
+          formData.append("bio", bio);
+          formData.append("profession", finalSelectedProfession);
+          formData.append("specialization", finalSelectedProfession);
+        }
 
+        try {
+          const response = await fetch("../../api/auth/signup_process.php", {
+            method: "POST",
+            body: formData,
+          });
+
+          const text = await response.text();
+          let data;
           try {
-            const response = await fetch("../../api/auth/signup_process.php", {
-              method: "POST",
-              body: formData,
-            });
-
-            const text = await response.text();
-            let data;
-            try {
-              data = JSON.parse(text);
-            } catch {
-              console.error("Non-JSON response:", text);
-              // ✅ Centered error modal — no inline div
-              showErrorModal("Server error. Please try again.");
-              return;
-            }
-
-            if (data.success) {
-              // ✅ Correct modal per role
-              if (isDoctor) {
-                showDoctorSuccess(fullName);
-              } else {
-                showPatientSuccess(fullName); // closes → redirects to login.html
-              }
-            } else {
-              const errMsg =
-                data.message || "Registration failed. Please try again.";
-              if (errMsg.toLowerCase().includes("email")) {
-                // Go back to step 1 and highlight the email field inline
-                showStep(1);
-                showErr("signupEmail", errMsg);
-              } else {
-                // ✅ All other errors → centered modal
-                showErrorModal(errMsg);
-              }
-            }
-          } catch (err) {
-            console.error("Fetch error:", err);
-            // ✅ Network errors → centered modal
-            showErrorModal(
-              "Network error. Please check your connection and try again.",
-            );
-          } finally {
-            btn.innerHTML = origText;
-            btn.disabled = false;
+            data = JSON.parse(text);
+          } catch {
+            console.error("Non-JSON response:", text);
+            // ✅ Centered error modal — no inline div
+            showErrorModal("Server error. Please try again.");
+            return;
           }
-        });
+
+          if (data.success) {
+            // Clear all form data so it's not visible anymore
+            document
+              .querySelectorAll("input, textarea")
+              .forEach((el) => (el.value = ""));
+
+            // ✅ Correct modal per role
+            if (isDoctor) {
+              showDoctorSuccess(fullName);
+            } else {
+              showPatientSuccess(fullName); // closes → redirects to login.html
+            }
+          } else {
+            const errMsg =
+              data.message || "Registration failed. Please try again.";
+
+            // Show all errors in the modal so the user stays on Step 2 and clearly sees the issue
+            showErrorModal(errMsg);
+          }
+        } catch (err) {
+          console.error("Fetch error:", err);
+          // ✅ Network errors → centered modal
+          showErrorModal(
+            "Network error. Please check your connection and try again.",
+          );
+        } finally {
+          btn.innerHTML = origText;
+          btn.disabled = false;
+        }
+      }
     </script>
   </body>
 </html>
