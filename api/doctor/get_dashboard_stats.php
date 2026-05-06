@@ -115,7 +115,7 @@ try {
     $close_stmt = $conn->prepare("
         UPDATE doctor_availability
         SET status = 'Closed'
-        WHERE doctor_id = ? AND available_date = ? AND status = 'Available' AND start_time <= ?
+        WHERE doctor_id = ? AND available_date = ? AND status = 'Available' AND start_time < ?
     ");
     $close_stmt->bind_param("sss", $doctor_id, $today, $current_time);
     $close_stmt->execute();

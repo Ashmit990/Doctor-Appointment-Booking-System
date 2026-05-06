@@ -34,7 +34,7 @@ try {
         SET status = 'Closed'
         WHERE available_date = ?
           AND status = 'Available'
-          AND start_time <= ?
+          AND start_time < ?
     ");
     $close_stmt->bind_param("ss", $today, $current_time);
     $close_stmt->execute();

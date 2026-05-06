@@ -357,7 +357,7 @@ async function loadScheduleForDate(date) {
       availability.forEach((slot) => {
         let slotIsPast = isPastDay;
         if (isToday) {
-          if (slot.start_time <= currentTimeStr) {
+          if (slot.start_time < currentTimeStr) {
             slotIsPast = true;
           }
         }
@@ -862,7 +862,7 @@ window.updateFollowupTimes = function() {
     // Filter available slots for this date
     const slotsForDate = fetchedAvailability.filter(slot => {
         if (slot.available_date !== selectedDate) return false;
-        if (selectedDate === todayStr && slot.start_time <= currentTimeStr) return false;
+        if (selectedDate === todayStr && slot.start_time < currentTimeStr) return false;
         return true;
     }).sort((a, b) => a.start_time.localeCompare(b.start_time));
     
