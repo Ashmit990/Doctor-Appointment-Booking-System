@@ -897,6 +897,9 @@ async function openAppointmentModal(aptId) {
   const apt = storedAppointmentsForModal.find((a) => a.apt_id == aptId);
   if (!apt) return;
 
+  // Set current appointment for medical report generation
+  currentAppointmentForReport = apt;
+
   console.log("=== OPENING APPOINTMENT MODAL ===");
   console.log("Appointment data:", apt);
   console.log("Next Followup Date:", apt.next_followup_date);
@@ -954,6 +957,12 @@ async function openAppointmentModal(aptId) {
     completeBtn.classList.remove("hidden");
     appointmentLockMsg.classList.add("hidden");
     
+    // Show medical report button for completed appointments
+    const medicalReportBtn = document.getElementById("medical-report-btn");
+    if (medicalReportBtn) {
+      medicalReportBtn.classList.remove("hidden");
+    }
+    
     // Ensure inputs are enabled
     statusSelect.disabled = false;
     completeBtn.disabled = false;
@@ -986,6 +995,15 @@ async function openAppointmentModal(aptId) {
     notesEditWrapper.classList.add("hidden");
     rxEditWrapper.classList.add("hidden");
     completeBtn.classList.remove("hidden");
+    
+    // Disable medical report button for upcoming appointments (cannot generate report before appointment starts)
+    const medicalReportBtn = document.getElementById("medical-report-btn");
+    if (medicalReportBtn) {
+      medicalReportBtn.classList.remove("hidden");
+      medicalReportBtn.disabled = true;
+      medicalReportBtn.classList.add("opacity-50", "cursor-not-allowed");
+      medicalReportBtn.title = "Report generation is disabled until the appointment time starts";
+    }
     
     // Disable dropdown and button completely
     statusSelect.disabled = true;
@@ -1022,6 +1040,12 @@ async function openAppointmentModal(aptId) {
     rxEditWrapper.classList.remove("hidden");
     completeBtn.classList.remove("hidden");
     appointmentLockMsg.classList.add("hidden");
+    
+    // Show medical report button for all appointments in edit mode
+    const medicalReportBtn = document.getElementById("medical-report-btn");
+    if (medicalReportBtn) {
+      medicalReportBtn.classList.remove("hidden");
+    }
     
     // Ensure inputs are enabled
     statusSelect.disabled = false;
@@ -1126,6 +1150,9 @@ async function openAppointmentModal(aptId) {
   modal.classList.remove("hidden");
   // Force reflow to trigger animation
   void modal.offsetWidth;
+  
+  // Check if report exists and show/hide buttons
+  checkAndShowReportButtons(apt.apt_id);
   
   // Load patient history
   loadPatientHistory(apt.patient_id);
@@ -1344,6 +1371,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Check if a date parameter was passed from the pending appointments popup
   const urlParams = new URLSearchParams(window.location.search);
   const dateParam = urlParams.get('date');
+  const aptIdParam = urlParams.get('apt_id');
   
   if (dateParam) {
     // Validate date format (YYYY-MM-DD)
@@ -1355,9 +1383,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Load and select the specific date
       await selectScheduleDate(dateParam);
       
+      // If apt_id parameter is present, automatically open that appointment
+      if (aptIdParam) {
+        setTimeout(() => {
+          // Directly call openAppointmentModal with the appointment ID
+          openAppointmentModal(parseInt(aptIdParam));
+        }, 800);
+      }
+      
       // Clear the URL parameter to avoid reloading the same date on refresh
       window.history.replaceState({}, document.title, 'schedules.html');
     }
+  } else {
+    // Load today's appointments by default if no date specified
+    selectToday();
   }
 });
 
@@ -1372,3 +1411,699 @@ document.addEventListener('visibilitychange', async () => {
     }
   }
 });
+
+// ===== MEDICAL REPORT FUNCTIONS =====
+let medicineFieldCount = 0;
+let currentAppointmentForReport = null;
+
+function generateReportForCurrentAppointment() {
+  if (!currentAppointmentForReport) {
+    alert('No appointment selected');
+    return;
+  }
+  
+  // Check if appointment time has started
+  const appointmentDateTime = new Date(currentAppointmentForReport.app_date + ' ' + currentAppointmentForReport.appointment_time);
+  const now = new Date();
+  
+  if (now < appointmentDateTime) {
+    alert('Report generation is disabled until the appointment time starts. Appointment is scheduled for ' + appointmentDateTime.toLocaleString());
+    return;
+  }
+  
+  // Close appointment modal
+  closeAppointmentModal();
+  
+  // Open medical report modal
+  openMedicalReportModal(currentAppointmentForReport);
+}
+
+function openMedicalReportModal(appointmentData) {
+  currentAppointmentForReport = appointmentData;
+  
+  // Populate patient info
+  document.getElementById('report-apt-id').value = appointmentData.apt_id;
+  document.getElementById('report-patient-name').textContent = appointmentData.patient_name;
+  document.getElementById('report-apt-datetime').textContent = 
+    new Date(appointmentData.app_date + ' ' + appointmentData.appointment_time).toLocaleString();
+  document.getElementById('report-chief-complaint').textContent = appointmentData.reason_for_visit;
+
+  // Clear form
+  document.getElementById('medical-report-form').reset();
+  document.getElementById('medicines-list').innerHTML = '';
+  medicineFieldCount = 0;
+
+  // Check if report already exists
+  loadExistingReport(appointmentData.apt_id);
+
+  // Show modal
+  const modal = document.getElementById('medical-report-modal');
+  modal.classList.remove('hidden');
+  
+  // Trigger animation
+  setTimeout(() => {
+    const backdrop = document.querySelector('.medical-report-modal-backdrop');
+    const content = document.querySelector('.medical-report-modal-content');
+    if (backdrop && content) {
+      backdrop.style.opacity = '1';
+      backdrop.style.pointerEvents = 'auto';
+      content.style.transform = 'scale(1)';
+    }
+  }, 10);
+  
+  lucide.createIcons();
+}
+
+function closeMedicalReportModal() {
+  const modal = document.getElementById('medical-report-modal');
+  const backdrop = document.querySelector('.medical-report-modal-backdrop');
+  const content = document.querySelector('.medical-report-modal-content');
+  if (backdrop && content) {
+    backdrop.style.opacity = '0';
+    content.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      modal.classList.add('hidden');
+    }, 300);
+  } else {
+    modal.classList.add('hidden');
+  }
+}
+
+// Check if report exists and show/hide view/edit buttons
+async function checkAndShowReportButtons(appointmentId) {
+  const viewBtn = document.getElementById('view-report-btn');
+  const editBtn = document.getElementById('edit-report-btn');
+  const generateBtn = document.getElementById('medical-report-btn');
+  
+  try {
+    const response = await fetch(
+      `../../api/doctor/medical_report.php?appointment_id=${appointmentId}`,
+      { credentials: 'include' }
+    );
+    
+    if (!response.ok) {
+      // Report doesn't exist
+      if (viewBtn) viewBtn.classList.add('hidden');
+      if (editBtn) editBtn.classList.add('hidden');
+      if (generateBtn) generateBtn.classList.remove('hidden');
+      return;
+    }
+    
+    const result = await response.json();
+    
+    if (result.status === 'success') {
+      // Report exists - show view/edit buttons, hide generate button
+      if (viewBtn) viewBtn.classList.remove('hidden');
+      if (editBtn) editBtn.classList.remove('hidden');
+      if (generateBtn) generateBtn.classList.add('hidden');
+    } else {
+      // Report doesn't exist
+      if (viewBtn) viewBtn.classList.add('hidden');
+      if (editBtn) editBtn.classList.add('hidden');
+      if (generateBtn) generateBtn.classList.remove('hidden');
+    }
+  } catch (error) {
+    console.warn('Could not check report status');
+    if (generateBtn) generateBtn.classList.remove('hidden');
+  }
+}
+
+// View the saved report in full-screen modal
+async function viewDoctorReport() {
+  if (!currentAppointmentForReport) {
+    alert('No appointment selected');
+    return;
+  }
+  
+  // Close appointment modal
+  closeAppointmentModal();
+  
+  document.getElementById('view-report-apt-id').value = currentAppointmentForReport.apt_id;
+  await loadDoctorViewReport(currentAppointmentForReport.apt_id);
+  
+  const modal = document.getElementById('doctor-view-report-modal');
+  modal.classList.remove('hidden');
+  
+  // Trigger animation
+  setTimeout(() => {
+    const backdrop = document.querySelector('.doctor-report-modal-backdrop');
+    const content = document.querySelector('.doctor-report-modal-content');
+    if (backdrop && content) {
+      backdrop.style.opacity = '1';
+      backdrop.style.pointerEvents = 'auto';
+      content.style.transform = 'scale(1)';
+    }
+  }, 10);
+  
+  lucide.createIcons();
+}
+
+// Load report data for viewing
+async function loadDoctorViewReport(appointmentId) {
+  try {
+    const response = await fetch(
+      `../../api/doctor/medical_report.php?appointment_id=${appointmentId}`,
+      { credentials: 'include' }
+    );
+    
+    if (!response.ok) {
+      alert('Could not load report');
+      return;
+    }
+    
+    const result = await response.json();
+    
+    if (result.status === 'success' && result.data) {
+      const report = result.data;
+      
+      // Hospital Information
+      document.getElementById('view-report-hospital-name').textContent = 'Health Care';
+      document.getElementById('view-report-hospital-address').textContent = 'Address: 123 Medical Street, Healthcare City';
+      document.getElementById('view-report-hospital-contact').textContent = 'Phone: +1-800-HOSPITAL | Email: info@healthcare.com';
+      
+      // Patient Information
+      document.getElementById('view-report-patient-name').textContent = currentAppointmentForReport.patient_name;
+      document.getElementById('view-report-patient-id').textContent = currentAppointmentForReport.patient_id;
+      document.getElementById('view-report-patient-age').textContent = '35 years';
+      
+      // Doctor & Appointment Information
+      document.getElementById('view-report-doctor-name').textContent = `Dr. ${report.doctor_name}`;
+      document.getElementById('view-report-doctor-id').textContent = report.doctor_id;
+      document.getElementById('view-report-apt-datetime').textContent = 
+        new Date(currentAppointmentForReport.app_date + ' ' + currentAppointmentForReport.appointment_time).toLocaleString();
+      
+      // Chief Complaint
+      document.getElementById('view-report-chief-complaint').textContent = currentAppointmentForReport.reason_for_visit;
+      
+      // Medical Findings
+      document.getElementById('view-report-symptoms').textContent = report.symptoms || '';
+      document.getElementById('view-report-diagnosis').textContent = report.diagnosis || '';
+      document.getElementById('view-report-bp').textContent = report.blood_pressure || 'Not recorded';
+      document.getElementById('view-report-weight').textContent = report.weight ? `${report.weight} kg` : 'Not recorded';
+      document.getElementById('view-report-room-no').textContent = report.room_num || '--';
+      
+      // Report Metadata
+      document.getElementById('view-report-id').textContent = report.report_id;
+      document.getElementById('view-report-generated-date').textContent = 
+        new Date(report.created_at).toLocaleString();
+      
+      // Medicines
+      if (report.prescribed_medicines && Array.isArray(report.prescribed_medicines) && report.prescribed_medicines.length > 0) {
+        const medicinesList = document.getElementById('view-report-medicines');
+        medicinesList.innerHTML = '';
+        report.prescribed_medicines.forEach((medicine, idx) => {
+          const row = document.createElement('tr');
+          row.className = idx % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+          row.innerHTML = `
+            <td class="p-3 border-b border-gray-200 text-gray-900 font-medium">${medicine.name || 'N/A'}</td>
+            <td class="p-3 border-b border-gray-200 text-gray-700">${medicine.dosage || 'N/A'}</td>
+            <td class="p-3 border-b border-gray-200 text-gray-700">${medicine.frequency || 'N/A'}</td>
+          `;
+          medicinesList.appendChild(row);
+        });
+        document.getElementById('view-medicines-section').classList.remove('hidden');
+      } else {
+        document.getElementById('view-medicines-section').classList.add('hidden');
+      }
+      
+      // Notes
+      if (report.additional_notes) {
+        document.getElementById('view-report-notes').textContent = report.additional_notes;
+        document.getElementById('view-notes-section').classList.remove('hidden');
+      } else {
+        document.getElementById('view-notes-section').classList.add('hidden');
+      }
+    }
+  } catch (error) {
+    console.error('Error loading report:', error);
+    alert('Error loading report');
+  }
+}
+
+// Close view report modal
+function closeDoctorViewReportModal() {
+  const modal = document.getElementById('doctor-view-report-modal');
+  const backdrop = document.querySelector('.doctor-report-modal-backdrop');
+  const content = document.querySelector('.doctor-report-modal-content');
+  if (backdrop && content) {
+    backdrop.style.opacity = '0';
+    content.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      modal.classList.add('hidden');
+    }, 300);
+  } else {
+    modal.classList.add('hidden');
+  }
+}
+
+// Edit report - opens the form
+function editDoctorReport() {
+  closeDoctorViewReportModal();
+  if (typeof closeAppointmentModal === 'function') {
+    closeAppointmentModal();
+  }
+  openMedicalReportModal(currentAppointmentForReport);
+}
+
+// Download report as PDF
+async function downloadDoctorReportPDF() {
+  const appointmentId = document.getElementById('view-report-apt-id').value;
+  
+  try {
+    const response = await fetch(
+      `../../api/doctor/generate_medical_report_pdf.php?appointment_id=${appointmentId}`,
+      { credentials: 'include' }
+    );
+    
+    const reportData = await response.json();
+    
+    if (reportData.status !== 'success') {
+      alert('Error generating PDF');
+      return;
+    }
+    
+    const data = reportData.data;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    
+    // Helper functions
+    const hexToRgb = (hex) => {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : [0, 0, 0];
+    };
+    
+    const addText = (x, y, text, size = 11, weight = 'normal', color = '#000000', align = 'left', maxWidth = 180) => {
+      doc.setFontSize(size);
+      doc.setTextColor(...hexToRgb(color));
+      doc.setFont(undefined, weight);
+      if (text && text.toString().length > 0) {
+        const lines = doc.splitTextToSize(text.toString(), maxWidth);
+        doc.text(lines, x, y, { align });
+        return lines.length;
+      }
+      return 0;
+    };
+    
+    const addLine = (x1, y1, x2, y2, color = '#00A3AC', width = 0.5) => {
+      doc.setDrawColor(...hexToRgb(color));
+      doc.setLineWidth(width);
+      doc.line(x1, y1, x2, y2);
+    };
+    
+    let yPos = 15;
+    
+    // ===== HEADER =====
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(14);
+    doc.setTextColor(...hexToRgb('#00A3AC'));
+    doc.text('HEALTH CARE', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 6;
+    
+    doc.setFontSize(9);
+    doc.setTextColor(...hexToRgb('#666666'));
+    doc.setFont(undefined, 'normal');
+    doc.text('Address: 123 Medical Street, Healthcare City', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 4;
+    doc.text('Phone: +1-800-HOSPITAL | Email: info@healthcare.com', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 6;
+    
+    addLine(10, yPos, pageWidth - 10, yPos, '#00A3AC', 1);
+    yPos += 8;
+    
+    // Title
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor(...hexToRgb('#00A3AC'));
+    doc.text('MEDICAL REPORT', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 7;
+    
+    // Report ID and Date
+    doc.setFontSize(9);
+    doc.setTextColor(...hexToRgb('#333333'));
+    doc.setFont(undefined, 'normal');
+    doc.text(`Report ID: ${data.report.report_id} | Date: ${new Date(data.report.created_at).toLocaleDateString()}`, pageWidth / 2, yPos, { align: 'center' });
+    yPos += 8;
+    
+    // ===== PATIENT & DOCTOR SECTION =====
+    const sectionStartY = yPos;
+    
+    // Left Column - Patient Info
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(...hexToRgb('#00A3AC'));
+    doc.text('PATIENT INFORMATION', 12, yPos);
+    yPos += 6;
+    
+    doc.setFontSize(9);
+    doc.setTextColor(...hexToRgb('#333333'));
+    doc.setFont(undefined, 'normal');
+    doc.text(`Name: ${data.patient.patient_name}`, 12, yPos);
+    yPos += 4;
+    doc.text(`Patient ID: ${data.patient.patient_id}`, 12, yPos);
+    yPos += 4;
+    doc.text(`Age: 35 years`, 12, yPos);
+    yPos += 6;
+    
+    // Right Column - Doctor Info
+    yPos = sectionStartY;
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(...hexToRgb('#00A3AC'));
+    doc.text('CONSULTATION DETAILS', pageWidth / 2 + 10, yPos);
+    yPos = sectionStartY + 6;
+    
+    doc.setFontSize(9);
+    doc.setTextColor(...hexToRgb('#333333'));
+    doc.setFont(undefined, 'normal');
+    doc.text(`Doctor: Dr. ${data.doctor.doctor_name}`, pageWidth / 2 + 10, yPos);
+    yPos += 4;
+    doc.text(`Doctor ID: ${data.doctor.doctor_id}`, pageWidth / 2 + 10, yPos);
+    yPos += 4;
+    doc.text(`Date & Time: ${new Date(data.appointment.appointment_datetime).toLocaleString()}`, pageWidth / 2 + 10, yPos);
+    yPos += 8;
+    
+    yPos = Math.max(sectionStartY + 20, yPos);
+    addLine(10, yPos, pageWidth - 10, yPos, '#CCCCCC');
+    yPos += 7;
+    
+    // ===== CHIEF COMPLAINT =====
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(...hexToRgb('#00A3AC'));
+    doc.text('CHIEF COMPLAINT', 12, yPos);
+    yPos += 5;
+    
+    doc.setFontSize(9);
+    doc.setTextColor(...hexToRgb('#333333'));
+    doc.setFont(undefined, 'normal');
+    const ccLines = doc.splitTextToSize(data.appointment.reason_for_visit || 'N/A', 180);
+    doc.text(ccLines, 12, yPos);
+    yPos += ccLines.length * 4 + 5;
+    
+    // ===== CLINICAL FINDINGS =====
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(...hexToRgb('#00A3AC'));
+    doc.text('CLINICAL FINDINGS', 12, yPos);
+    yPos += 6;
+    
+    // Symptoms
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(...hexToRgb('#EF7300'));
+    doc.text('Symptoms:', 12, yPos);
+    yPos += 4;
+    
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...hexToRgb('#333333'));
+    const symptomsLines = doc.splitTextToSize(data.report.symptoms || 'N/A', 180);
+    doc.text(symptomsLines, 12, yPos);
+    yPos += symptomsLines.length * 3.5 + 3;
+    
+    // Diagnosis
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(...hexToRgb('#DC2626'));
+    doc.text('Diagnosis:', 12, yPos);
+    yPos += 4;
+    
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...hexToRgb('#333333'));
+    const diagnosisLines = doc.splitTextToSize(data.report.diagnosis || 'N/A', 180);
+    doc.text(diagnosisLines, 12, yPos);
+    yPos += diagnosisLines.length * 3.5 + 5;
+    
+    // Vital Signs
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(...hexToRgb('#16A34A'));
+    doc.text('Vital Signs:', 12, yPos);
+    yPos += 4;
+    
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...hexToRgb('#333333'));
+    doc.text(`BP: ${data.report.blood_pressure || 'N/A'}  |  Weight: ${data.report.weight || 'N/A'} kg`, 12, yPos);
+    yPos += 6;
+    
+    // Check if page is getting full
+    if (yPos > 240) {
+      doc.addPage();
+      yPos = 15;
+    }
+    
+    // ===== PRESCRIBED MEDICINES =====
+    if (data.report.medicines && data.report.medicines.length > 0) {
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(...hexToRgb('#00A3AC'));
+      doc.text('PRESCRIBED MEDICINES', 12, yPos);
+      yPos += 6;
+      
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(...hexToRgb('#FFFFFF'));
+      doc.setFillColor(...hexToRgb('#00A3AC'));
+      doc.rect(12, yPos - 2, 180, 5, 'F');
+      doc.text('Medicine Name', 14, yPos + 1);
+      doc.text('Dosage', 85, yPos + 1);
+      doc.text('Frequency', 140, yPos + 1);
+      yPos += 7;
+      
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(...hexToRgb('#333333'));
+      data.report.medicines.forEach((med, idx) => {
+        if (idx % 2 === 0) {
+          doc.setFillColor(...hexToRgb('#F3F4F6'));
+          doc.rect(12, yPos - 2, 180, 4, 'F');
+        }
+        doc.text(med.name || 'N/A', 14, yPos);
+        doc.text(med.dosage || 'N/A', 85, yPos);
+        doc.text(med.frequency || 'N/A', 140, yPos);
+        yPos += 4;
+      });
+      yPos += 3;
+    }
+    
+    // Check page again
+    if (yPos > 240) {
+      doc.addPage();
+      yPos = 15;
+    }
+    
+    // ===== ADDITIONAL NOTES =====
+    if (data.report.notes) {
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(...hexToRgb('#00A3AC'));
+      doc.text('ADDITIONAL NOTES', 12, yPos);
+      yPos += 5;
+      
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(...hexToRgb('#333333'));
+      const notesLines = doc.splitTextToSize(data.report.notes, 180);
+      doc.text(notesLines, 12, yPos);
+      yPos += notesLines.length * 3.5 + 5;
+    }
+    
+    // ===== FOOTER =====
+    yPos = Math.max(yPos + 5, pageHeight - 40);
+    addLine(10, yPos, pageWidth - 10, yPos, '#CCCCCC');
+    yPos += 6;
+    
+    // Signature lines
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...hexToRgb('#333333'));
+    doc.text('Doctor\'s Signature', 20, yPos + 15);
+    doc.text('Date & Seal', pageWidth - 40, yPos + 15, { align: 'right' });
+    
+    // Disclaimer
+    yPos = pageHeight - 15;
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(...hexToRgb('#666666'));
+    doc.text('This is a computer-generated report and is valid without a signature.', pageWidth / 2, yPos, { align: 'center' });
+    doc.text('For more information, please contact the hospital directly.', pageWidth / 2, yPos + 3, { align: 'center' });
+    
+    // Download
+    const fileName = `Medical_Report_${data.patient.patient_name}_${new Date().toISOString().split('T')[0]}.pdf`;
+    doc.save(fileName);
+    
+    showToast('✓ PDF downloaded successfully!', 'success');
+    
+  } catch (error) {
+    console.error('Error downloading PDF:', error);
+    alert('Error generating PDF: ' + error.message);
+  }
+}
+
+function addMedicineField() {
+  medicineFieldCount++;
+  const medicinesList = document.getElementById('medicines-list');
+  const medicineDiv = document.createElement('div');
+  medicineDiv.className = 'flex gap-2 medicine-field';
+  medicineDiv.id = `medicine-${medicineFieldCount}`;
+  medicineDiv.innerHTML = `
+    <input
+      type="text"
+      placeholder="Medicine name"
+      class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#00A3AC] outline-none medicine-name"
+    />
+    <input
+      type="text"
+      placeholder="Dosage (e.g., 500mg)"
+      class="w-24 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#00A3AC] outline-none medicine-dosage"
+    />
+    <input
+      type="text"
+      placeholder="Frequency (e.g., 2x daily)"
+      class="w-28 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#00A3AC] outline-none medicine-frequency"
+    />
+    <button
+      type="button"
+      onclick="removeMedicineField('medicine-${medicineFieldCount}')"
+      class="text-red-500 hover:text-red-700 transition"
+    >
+      <i data-lucide="trash-2" class="w-4 h-4"></i>
+    </button>
+  `;
+  medicinesList.appendChild(medicineDiv);
+  lucide.createIcons();
+}
+
+function removeMedicineField(id) {
+  const field = document.getElementById(id);
+  if (field) {
+    field.remove();
+  }
+}
+
+async function loadExistingReport(appointmentId) {
+  try {
+    const response = await fetch(
+      `../../api/doctor/medical_report.php?appointment_id=${appointmentId}`,
+      { credentials: 'include' }
+    );
+    
+    if (!response.ok) {
+      console.warn('API returned status:', response.status);
+      return;
+    }
+    
+    const result = await response.json();
+
+    if (result.status === 'success' && result.data) {
+      const report = result.data;
+      document.getElementById('report-symptoms').value = report.symptoms || '';
+      document.getElementById('report-diagnosis').value = report.diagnosis || '';
+      document.getElementById('report-bp').value = report.blood_pressure || '';
+      document.getElementById('report-weight').value = report.weight || '';
+      document.getElementById('report-notes').value = report.additional_notes || '';
+
+      // Load medicines
+      if (report.prescribed_medicines && Array.isArray(report.prescribed_medicines)) {
+        report.prescribed_medicines.forEach(medicine => {
+          addMedicineField();
+          const lastIndex = medicineFieldCount;
+          const medicineField = document.querySelector(`#medicine-${lastIndex}`);
+          if (medicineField) {
+            medicineField.querySelector('.medicine-name').value = medicine.name || '';
+            medicineField.querySelector('.medicine-dosage').value = medicine.dosage || '';
+            medicineField.querySelector('.medicine-frequency').value = medicine.frequency || '';
+          }
+        });
+      }
+    }
+    // If report not found, form stays empty (which is expected for new reports)
+  } catch (error) {
+    console.warn('Note: No existing report found (this is normal for new appointments)');
+  }
+}
+
+async function saveMedicalReport() {
+  const appointmentId = document.getElementById('report-apt-id').value;
+  const symptoms = document.getElementById('report-symptoms').value.trim();
+  const diagnosis = document.getElementById('report-diagnosis').value.trim();
+  const bloodPressure = document.getElementById('report-bp').value.trim();
+  const weight = document.getElementById('report-weight').value.trim();
+  const additionalNotes = document.getElementById('report-notes').value.trim();
+
+  // Validate ALL required fields with specific error messages
+  if (!symptoms) {
+    alert('Symptoms field is required');
+    document.getElementById('report-symptoms').focus();
+    return;
+  }
+  if (!diagnosis) {
+    alert('Diagnosis field is required');
+    document.getElementById('report-diagnosis').focus();
+    return;
+  }
+  if (!bloodPressure) {
+    alert('Blood Pressure field is required');
+    document.getElementById('report-bp').focus();
+    return;
+  }
+  if (!weight) {
+    alert('Weight field is required');
+    document.getElementById('report-weight').focus();
+    return;
+  }
+  if (!additionalNotes) {
+    alert('Additional Notes field is required');
+    document.getElementById('report-notes').focus();
+    return;
+  }
+
+  // Collect medicines
+  const medicines = [];
+  document.querySelectorAll('.medicine-field').forEach(field => {
+    const name = field.querySelector('.medicine-name').value.trim();
+    const dosage = field.querySelector('.medicine-dosage').value.trim();
+    const frequency = field.querySelector('.medicine-frequency').value.trim();
+    if (name) {
+      medicines.push({ name, dosage, frequency });
+    }
+  });
+  if (medicines.length === 0) {
+    alert('Please add at least one medicine');
+    return;
+  }
+
+  try {
+    const response = await fetch('../../api/doctor/medical_report.php', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        appointment_id: parseInt(appointmentId),
+        symptoms,
+        diagnosis,
+        blood_pressure: bloodPressure,
+        weight: weight ? parseFloat(weight) : null,
+        prescribed_medicines: medicines,
+        additional_notes: additionalNotes
+      })
+    });
+
+    const result = await response.json();
+    if (result.status === 'success') {
+      showToast('✓ Medical report saved successfully!', 'success');
+      closeMedicalReportModal();
+      // Update button visibility for the appointment
+      checkAndShowReportButtons(parseInt(appointmentId));
+      // Reload the schedule
+      if (selectedScheduleDate) loadScheduleForDate(selectedScheduleDate);
+    } else {
+      alert('Error: ' + result.message);
+    }
+  } catch (error) {
+    alert('Error saving report: ' + error.message);
+  }
+}

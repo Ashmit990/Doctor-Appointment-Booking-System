@@ -1,0 +1,211 @@
+<!-- Medical Report View Modal for Patients -->
+<div id="patient-medical-report-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-lg shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+    <!-- Header -->
+    <div class="sticky top-0 bg-gradient-to-r from-[#00A3AC] to-[#008A96] text-white p-6 flex items-center justify-between">
+      <h2 class="text-2xl font-bold">Your Medical Report</h2>
+      <button onclick="closePatientMedicalReportModal()" class="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="p-6 space-y-6">
+      <!-- Doctor Info -->
+      <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+        <h3 class="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+          <i data-lucide="stethoscope" class="w-4 h-4 text-blue-600"></i>
+          Examined By
+        </h3>
+        <p id="patient-report-doctor-name" class="font-semibold text-gray-900"></p>
+        <p id="patient-report-doctor-email" class="text-sm text-gray-600"></p>
+      </div>
+
+      <!-- Appointment Details -->
+      <div class="bg-gray-50 p-4 rounded-lg">
+        <h3 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+          <i data-lucide="calendar" class="w-4 h-4 text-gray-600"></i>
+          Appointment Information
+        </h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-xs text-gray-600">Date & Time</p>
+            <p id="patient-report-apt-datetime" class="font-semibold text-gray-900"></p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-600">Chief Complaint</p>
+            <p id="patient-report-chief-complaint" class="font-semibold text-gray-900"></p>
+          </div>
+          <div class="col-span-2">
+            <p class="text-xs text-gray-600">Report Generated</p>
+            <p id="patient-report-generated-date" class="font-semibold text-gray-900"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Medical Findings -->
+      <div class="space-y-4">
+        <!-- Symptoms -->
+        <div>
+          <h4 class="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-yellow-600"></i>
+            Symptoms
+          </h4>
+          <div class="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+            <p id="patient-report-symptoms" class="text-gray-900 whitespace-pre-line"></p>
+          </div>
+        </div>
+
+        <!-- Diagnosis -->
+        <div>
+          <h4 class="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+            <i data-lucide="activity" class="w-4 h-4 text-red-600"></i>
+            Diagnosis
+          </h4>
+          <div class="bg-red-50 border border-red-200 p-4 rounded-lg">
+            <p id="patient-report-diagnosis" class="text-gray-900 whitespace-pre-line"></p>
+          </div>
+        </div>
+
+        <!-- Vital Signs -->
+        <div>
+          <h4 class="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+            <i data-lucide="heart" class="w-4 h-4 text-red-600"></i>
+            Vital Signs
+          </h4>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+              <p class="text-xs text-gray-600">Blood Pressure</p>
+              <p id="patient-report-bp" class="font-semibold text-gray-900"></p>
+            </div>
+            <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+              <p class="text-xs text-gray-600">Weight</p>
+              <p id="patient-report-weight" class="font-semibold text-gray-900"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prescribed Medicines -->
+        <div id="patient-medicines-section" class="hidden">
+          <h4 class="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+            <i data-lucide="pill" class="w-4 h-4 text-green-600"></i>
+            Prescribed Medicines
+          </h4>
+          <div class="space-y-2" id="patient-medicines-list"></div>
+        </div>
+
+        <!-- Additional Notes -->
+        <div id="patient-notes-section" class="hidden">
+          <h4 class="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+            <i data-lucide="file-text" class="w-4 h-4 text-purple-600"></i>
+            Additional Notes
+          </h4>
+          <div class="bg-purple-50 border border-purple-200 p-4 rounded-lg">
+            <p id="patient-report-notes" class="text-gray-900 whitespace-pre-line"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-6 flex gap-3 justify-end">
+      <button
+        onclick="closePatientMedicalReportModal()"
+        class="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-100 transition"
+      >
+        Close
+      </button>
+
+    </div>
+
+    <input type="hidden" id="patient-report-apt-id" />
+  </div>
+</div>
+
+<script>
+function openPatientMedicalReportModal(appointmentId) {
+  document.getElementById('patient-report-apt-id').value = appointmentId;
+  loadPatientMedicalReport(appointmentId);
+  document.getElementById('patient-medical-report-modal').classList.remove('hidden');
+}
+
+function closePatientMedicalReportModal() {
+  document.getElementById('patient-medical-report-modal').classList.add('hidden');
+}
+
+async function loadPatientMedicalReport(appointmentId) {
+  try {
+    const response = await fetch(
+      `../../api/doctor/medical_report.php?appointment_id=${appointmentId}`,
+      { credentials: 'include' }
+    );
+
+    const result = await response.json();
+
+    if (result.status !== 'success') {
+      alert('Report not found: ' + result.message);
+      return;
+    }
+
+    const report = result.data;
+
+    // Populate doctor info
+    document.getElementById('patient-report-doctor-name').textContent = `Dr. ${report.doctor_name}`;
+    document.getElementById('patient-report-doctor-email').textContent = report.doctor_email;
+
+    // Populate appointment details
+    const appointmentData = await fetch(
+      `../../api/doctor/appointment_detail.php?apt_id=${appointmentId}`,
+      { credentials: 'include' }
+    ).then(r => r.json());
+
+    if (appointmentData.status === 'success') {
+      const apt = appointmentData.data;
+      const aptDate = new Date(apt.app_date + ' ' + apt.appointment_time);
+      document.getElementById('patient-report-apt-datetime').textContent = aptDate.toLocaleString();
+      document.getElementById('patient-report-chief-complaint').textContent = apt.reason_for_visit;
+    }
+
+    document.getElementById('patient-report-generated-date').textContent = 
+      new Date(report.created_at).toLocaleString();
+
+    // Populate medical findings
+    document.getElementById('patient-report-symptoms').textContent = report.symptoms;
+    document.getElementById('patient-report-diagnosis').textContent = report.diagnosis;
+    document.getElementById('patient-report-bp').textContent = report.blood_pressure || 'Not recorded';
+    document.getElementById('patient-report-weight').textContent = report.weight ? `${report.weight} kg` : 'Not recorded';
+
+    // Populate medicines
+    if (report.prescribed_medicines && report.prescribed_medicines.length > 0) {
+      const medicinesList = document.getElementById('patient-medicines-list');
+      medicinesList.innerHTML = '';
+      report.prescribed_medicines.forEach(medicine => {
+        const medicineDiv = document.createElement('div');
+        medicineDiv.className = 'bg-green-50 border border-green-200 p-3 rounded-lg';
+        medicineDiv.innerHTML = `
+          <p class="font-semibold text-gray-900">${medicine.name}</p>
+          <p class="text-sm text-gray-600">Dosage: ${medicine.dosage || 'N/A'}</p>
+          <p class="text-sm text-gray-600">Frequency: ${medicine.frequency || 'N/A'}</p>
+        `;
+        medicinesList.appendChild(medicineDiv);
+      });
+      document.getElementById('patient-medicines-section').classList.remove('hidden');
+    } else {
+      document.getElementById('patient-medicines-section').classList.add('hidden');
+    }
+
+    // Populate notes
+    if (report.additional_notes) {
+      document.getElementById('patient-report-notes').textContent = report.additional_notes;
+      document.getElementById('patient-notes-section').classList.remove('hidden');
+    } else {
+      document.getElementById('patient-notes-section').classList.add('hidden');
+    }
+
+    lucide.createIcons();
+  } catch (error) {
+    alert('Error loading report: ' + error.message);
+    console.error(error);
+  }
+}
+</script>

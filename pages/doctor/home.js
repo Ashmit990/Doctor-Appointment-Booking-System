@@ -932,6 +932,7 @@ document.addEventListener('DOMContentLoaded', () => {
     checkAndShowProfileNotification();
     loadPendingStatusAppointments();
     loadHomePageData();
+    checkAndShowPendingReportsModal();
     loadDoctorNotifications().then((rows) => renderDoctorNotificationList(rows));
 
     window.addEventListener('resize', () => updateDoctorNotificationPanelPosition());
@@ -986,3 +987,93 @@ document.addEventListener('visibilitychange', async () => {
     }
   }
 });
+
+// ===== PENDING REPORTS CHECK =====
+
+/**
+ * Check for completed appointments without generated reports
+ * Show unskippable modal if any pending reports exist
+ */
+async function checkAndShowPendingReportsModal() {
+  try {
+    const response = await fetch(`${DOCTOR_API_BASE}/doctor/pending_reports_check.php`, {
+      credentials: 'include'
+    });
+    
+    if (!response.ok) return;
+    
+    const data = await response.json();
+    
+    if (data.status === 'success' && data.has_pending_reports && data.appointment) {
+      showPendingReportsModal(data.appointment);
+    }
+  } catch (error) {
+    console.error('Error checking pending reports:', error);
+  }
+}
+
+/**
+ * Display the unskippable pending reports modal
+ */
+function showPendingReportsModal(appointment) {
+  const modal = document.getElementById('pending-reports-modal');
+  if (!modal) return;
+  
+  // Populate appointment details
+  document.getElementById('pending-patient-name').textContent = appointment.patient_name || 'Unknown';
+  
+  const aptDate = new Date(appointment.app_date + ' ' + appointment.app_time);
+  document.getElementById('pending-apt-datetime').textContent = aptDate.toLocaleString();
+  document.getElementById('pending-chief-complaint').textContent = appointment.reason_for_visit || 'Not specified';
+  document.getElementById('pending-apt-id').value = appointment.appointment_id;
+  document.getElementById('pending-apt-date').value = appointment.app_date;
+  
+  // Show modal
+  modal.classList.remove('hidden');
+  modal.style.display = 'flex';
+  
+  // Disable scrolling on body
+  document.body.style.overflow = 'hidden';
+  
+  // Initialize lucide icons
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+  
+  // Prevent closing with escape key
+  const escapeHandler = (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+  document.addEventListener('keydown', escapeHandler, true);
+  
+  // Prevent clicking outside modal to close it
+  const backdropClickHandler = (e) => {
+    if (e.target === modal) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+  modal.addEventListener('click', backdropClickHandler);
+  
+  // Store the handlers for cleanup if needed
+  modal.escapeHandler = escapeHandler;
+  modal.backdropClickHandler = backdropClickHandler;
+}
+
+/**
+ * Redirect to schedule page with the pending appointment's date
+ */
+function redirectToPendingAppointment() {
+  const aptId = document.getElementById('pending-apt-id').value;
+  const aptDate = document.getElementById('pending-apt-date').value;
+  
+  if (aptDate) {
+    // Redirect to schedules page with the date parameter
+    window.location.href = `schedules.html?date=${aptDate}&apt_id=${aptId}`;
+  } else {
+    window.location.href = 'schedules.html';
+  }
+}
