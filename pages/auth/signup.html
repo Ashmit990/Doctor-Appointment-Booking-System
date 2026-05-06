@@ -50,7 +50,7 @@
         opacity: 0;
       }
       #doctorFieldsContainer.show {
-        max-height: 600px;
+        max-height: 800px;
         opacity: 1;
         margin-top: 1.25rem;
       }
@@ -273,6 +273,25 @@
         box-shadow: 0 10px 25px -5px rgba(0, 126, 133, 0.3);
       }
 
+      /* ── Left panel scrollable ── */
+      .left-panel {
+        overflow-y: auto;
+        overflow-x: hidden;
+        /* Custom scrollbar — subtle */
+        scrollbar-width: thin;
+        scrollbar-color: #007e8540 transparent;
+      }
+      .left-panel::-webkit-scrollbar {
+        width: 4px;
+      }
+      .left-panel::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .left-panel::-webkit-scrollbar-thumb {
+        background-color: #007e8550;
+        border-radius: 20px;
+      }
+
       /* ══════════════════════════════════════════════════
          SUCCESS / ERROR MODAL  — centered overlay
       ══════════════════════════════════════════════════ */
@@ -312,7 +331,8 @@
     </style>
   </head>
 
-  <body class="overflow-hidden h-screen tracking-[1.1px] bg-[#F8FAFB]">
+  <!-- ✅ FIX: body no longer has overflow-hidden — left panel handles its own scroll -->
+  <body class="h-screen tracking-[1.1px] bg-[#F8FAFB] overflow-hidden">
     <!-- BACK BUTTON -->
     <div class="back-button" onclick="goToLandingPage()">
       <svg
@@ -330,9 +350,7 @@
       </svg>
     </div>
 
-    <!-- ══════════════════════════════════════════
-         CENTERED FEEDBACK MODAL (success + error)
-    ══════════════════════════════════════════ -->
+    <!-- CENTERED FEEDBACK MODAL -->
     <div id="feedbackModal">
       <div class="feedback-modal-box">
         <div id="feedbackIconRing" class="feedback-icon-ring"></div>
@@ -381,8 +399,7 @@
         </div>
         <div class="modal-body">
           <div class="grid grid-cols-2 gap-3" id="professionOptionsList"></div>
-
-          <!-- Other Profession Input (Hidden by default) -->
+          <!-- Other Profession Input -->
           <div
             id="otherProfessionContainer"
             class="hidden mt-6 pt-4 border-t border-gray-100"
@@ -418,11 +435,11 @@
     </div>
 
     <div class="flex h-screen w-full relative animate-fade-in">
-      <!-- ── Left Panel ── -->
+      <!-- ✅ FIX: Left Panel — scrollable, justify-start, overflow-y-auto -->
       <div
-        class="w-full lg:w-[45%] flex flex-col justify-center px-8 sm:px-10 xl:px-20 2xl:px-24 z-20 relative bg-[#F8FAFB] h-screen"
+        class="left-panel w-full lg:w-[45%] flex flex-col justify-start px-8 sm:px-10 xl:px-20 2xl:px-24 z-20 relative bg-[#F8FAFB] h-screen"
       >
-        <div class="max-w-md w-full mx-auto lg:mx-0 py-4">
+        <div class="max-w-md w-full mx-auto lg:mx-0 py-10 lg:py-14">
           <!-- Logo -->
           <div class="mb-8 flex flex-col items-start">
             <div class="flex items-center gap-3 mb-4">
@@ -459,9 +476,8 @@
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Full Name</label
                 >
-                  Full Name
-                </label>
                 <input
                   id="signupFullName"
                   type="text"
@@ -478,9 +494,8 @@
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Email Address</label
                 >
-                  Email Address
-                </label>
                 <input
                   id="signupEmail"
                   type="email"
@@ -497,9 +512,8 @@
               <div class="relative group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Register as</label
                 >
-                  Register as
-                </label>
                 <button
                   type="button"
                   id="customSelectBtn"
@@ -615,7 +629,7 @@
                     id="signupBio"
                     rows="3"
                     class="w-full p-3 rounded-xl border-2 border-slate-100 bg-slate-50 focus:border-[#007E85] focus:bg-white outline-none text-slate-800 text-sm transition-all resize-none shadow-inner"
-                    placeholder="Describe your experience, qualifications, and specialties (minimum 15 words)..."
+                    placeholder="Describe your experience, qualifications, and specialties (minimum 10 words)..."
                     oninput="
                       updateBioWordCount();
                       clearErr('signupBio');
@@ -626,12 +640,12 @@
                     class="hidden text-red-600 text-xs font-semibold mt-1"
                   ></p>
                   <p class="text-xs text-gray-400 mt-1" id="bioWordCount">
-                    0 words (minimum 15 required)
+                    0 words (minimum 10 required)
                   </p>
                 </div>
               </div>
 
-              <div class="pt-4">
+              <div class="pt-4 pb-6">
                 <button
                   type="button"
                   id="nextStepBtn"
@@ -651,9 +665,8 @@
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Phone Number</label
                 >
-                  Phone Number
-                </label>
                 <input
                   id="signupPhone"
                   type="tel"
@@ -670,9 +683,8 @@
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Age</label
                 >
-                  Age
-                </label>
                 <input
                   id="signupAge"
                   type="number"
@@ -689,9 +701,8 @@
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Create Password</label
                 >
-                  Create Password
-                </label>
                 <div class="relative">
                   <input
                     id="signupPassword"
@@ -726,8 +737,7 @@
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7
-                               -1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                       />
                     </svg>
                   </button>
@@ -753,9 +763,8 @@
               <div class="group">
                 <label
                   class="text-[#007E85] text-[10px] font-bold uppercase tracking-widest mb-1 block"
+                  >Confirm Password</label
                 >
-                  Confirm Password
-                </label>
                 <div class="relative">
                   <input
                     id="signupConfirmPassword"
@@ -787,8 +796,7 @@
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7
-                               -1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                       />
                     </svg>
                   </button>
@@ -799,7 +807,7 @@
                 ></p>
               </div>
 
-              <div class="flex gap-3 pt-4">
+              <div class="flex gap-3 pt-4 pb-6">
                 <button
                   type="button"
                   id="prevStepBtn"
@@ -817,7 +825,9 @@
                 </button>
               </div>
 
-              <p class="text-center pt-2 text-slate-500 text-sm font-medium">
+              <p
+                class="text-center pt-2 text-slate-500 text-sm font-medium pb-6"
+              >
                 Already have an account?
                 <a
                   href="login.html"
@@ -859,10 +869,8 @@
 
       // ═══════════════════════════════════════════════════════════════
       //  CENTERED FEEDBACK MODAL
-      //  — used for SUCCESS (patient & doctor) and ERROR messages
-      //  — no inline error divs anywhere in this file
       // ═══════════════════════════════════════════════════════════════
-      let _redirectOnClose = false; // true only for patient success
+      let _redirectOnClose = false;
 
       function _openFeedbackModal(
         iconHtml,
@@ -893,62 +901,45 @@
         document.body.style.overflow = "";
         if (_redirectOnClose) {
           console.log("Redirecting to login.html now...");
-          // Disable blocker before intentional redirect
           window.onbeforeunload = null;
           window.location.href = "login.html";
         }
       }
 
-      // ── Patient success ─────────────────────────────────────────────
       function showPatientSuccess(fullName) {
         _openFeedbackModal(
-          `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-green-500"
-              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-           <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-         </svg>`,
+          `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+          </svg>`,
           "linear-gradient(135deg,#d1fae5,#a7f3d0)",
           "Welcome to Healthcare!",
           `Thank you for registering, <strong>${fullName}</strong>! 🎉<br><br>
-         Your account has been created successfully. You can now
-         <strong>sign in</strong> and start booking appointments with our
-         world-class medical professionals.`,
+          Your account has been created successfully. You can now <strong>sign in</strong> and start booking appointments with our world-class medical professionals.`,
           "Go to Login →",
-          true, // ← redirect = true
+          true,
         );
       }
 
-      // ── Doctor success ──────────────────────────────────────────────
       function showDoctorSuccess(fullName) {
         _openFeedbackModal(
-          `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-teal-500"
-              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-           <path stroke-linecap="round" stroke-linejoin="round"
-                 d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944
-                    a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9
-                    c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03
-                    9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-         </svg>`,
+          `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>`,
           "linear-gradient(135deg,#ccfbf1,#99f6e4)",
           "Application Submitted!",
           `Thank you, <strong>${fullName}</strong>! 🎉<br><br>
-         Your registration as a <strong>Medical Professional</strong> has been received.
-         Our admin team will review your credentials and
-         <strong>contact you once you are approved</strong>.<br><br>
-         You'll receive an email notification with further instructions.`,
+          Your registration as a <strong>Medical Professional</strong> has been received. Our admin team will review your credentials and <strong>contact you once you are approved</strong>.<br><br>
+          You'll receive an email notification with further instructions.`,
           "Got it, I'll wait!",
-          true, // ← redirect to login to clear information
+          true,
         );
       }
 
-      // ── Error (any failure) ─────────────────────────────────────────
       function showErrorModal(msg) {
         _openFeedbackModal(
-          `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-red-500"
-              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-           <path stroke-linecap="round" stroke-linejoin="round"
-                 d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94
-                    a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-         </svg>`,
+          `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+          </svg>`,
           "linear-gradient(135deg,#fee2e2,#fecaca)",
           "Registration Failed",
           msg,
@@ -966,9 +957,13 @@
       const step2Badge = document.getElementById("step2Badge");
       const nextBtn = document.getElementById("nextStepBtn");
       const prevBtn = document.getElementById("prevStepBtn");
+      const leftPanel = document.querySelector(".left-panel");
 
       function showStep(n) {
         console.log("Switching to step:", n);
+        // ✅ Scroll back to top when switching steps
+        leftPanel.scrollTo({ top: 0, behavior: "smooth" });
+
         if (n === 1) {
           step1.style.animation = "stepFadeIn 0.3s ease-out";
           step1.classList.remove("step-hidden");
@@ -1032,8 +1027,8 @@
           if (!bio) {
             showErr("signupBio", "Professional bio is required.");
             ok = false;
-          } else if (bio.split(/\s+/).length < 15) {
-            showErr("signupBio", "Bio must contain at least 15 words.");
+          } else if (bio.split(/\s+/).length < 10) {
+            showErr("signupBio", "Bio must contain at least 10 words.");
             ok = false;
           } else clearErr("signupBio");
         }
@@ -1088,8 +1083,6 @@
           .forEach((e) => e.classList.remove("selected"));
         el.classList.add("selected");
         tempSelectedProfession = profession;
-
-        // Show/hide "Other" input field
         const otherContainer = document.getElementById(
           "otherProfessionContainer",
         );
@@ -1109,14 +1102,13 @@
           document
             .querySelectorAll(".profession-option-modal")
             .forEach((el) => {
-              const profName = el.getAttribute("data-profession");
-              if (profName === tempSelectedProfession) {
+              if (
+                el.getAttribute("data-profession") === tempSelectedProfession
+              ) {
                 el.classList.add("selected");
                 found = true;
               }
             });
-
-          // If not found in standard list, it must be an "Other" value
           if (!found && tempSelectedProfession !== "") {
             const otherBtn = Array.from(
               document.querySelectorAll(".profession-option-modal"),
@@ -1144,13 +1136,11 @@
       function confirmProfessionSelection() {
         if (tempSelectedProfession) {
           let displayValue = tempSelectedProfession;
-
           if (tempSelectedProfession === "Other") {
             const otherVal = document
               .getElementById("otherProfessionInput")
               .value.trim();
             if (!otherVal) {
-              // Highlight the other input if empty
               document.getElementById("otherProfessionInput").focus();
               document
                 .getElementById("otherProfessionInput")
@@ -1162,7 +1152,6 @@
           } else {
             finalSelectedProfession = tempSelectedProfession;
           }
-
           document.getElementById("selectedProfessionText").innerHTML =
             `<span class="chip">${displayValue}</span>`;
           document.getElementById("selectedProfessionValue").value =
@@ -1216,6 +1205,13 @@
           selectedRole = option.innerText.trim();
           if (val === "doctor") {
             doctorFieldsContainer.classList.add("show");
+            // ✅ Scroll down smoothly so user sees the new fields
+            setTimeout(() => {
+              leftPanel.scrollTo({
+                top: leftPanel.scrollHeight,
+                behavior: "smooth",
+              });
+            }, 450);
           } else {
             doctorFieldsContainer.classList.remove("show");
             finalSelectedProfession = "";
@@ -1239,9 +1235,9 @@
         const text = document.getElementById("signupBio").value.trim();
         const wordCount = text === "" ? 0 : text.split(/\s+/).length;
         const span = document.getElementById("bioWordCount");
-        span.textContent = `${wordCount} words (minimum 15 required)`;
-        span.classList.toggle("text-green-600", wordCount >= 15);
-        span.classList.toggle("text-red-500", wordCount < 15);
+        span.textContent = `${wordCount} words (minimum 10 required)`;
+        span.classList.toggle("text-green-600", wordCount >= 10);
+        span.classList.toggle("text-red-500", wordCount < 10);
       }
 
       function togglePass() {
@@ -1339,14 +1335,11 @@
       // ═══════════════════════════════════════════════════════════════
       //  FORM SUBMIT
       // ═══════════════════════════════════════════════════════════════
-      // Handle Enter key for the entire signup container
       document
         .getElementById("signupForm")
         .addEventListener("keydown", function (e) {
           if (e.key === "Enter" && !e.shiftKey) {
-            // If in a textarea, allow Enter
             if (e.target.tagName === "TEXTAREA") return;
-
             e.preventDefault();
             handleSignupSubmit();
           }
@@ -1405,13 +1398,12 @@
 
         if (hasError) return;
 
-        // Loading state
         const btn = document.getElementById("submitBtn");
         const origText = btn.innerText;
         btn.innerHTML = `<svg class="animate-spin inline w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-      </svg> Registering...`;
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+        </svg> Registering...`;
         btn.disabled = true;
 
         const formData = new FormData();
@@ -1440,33 +1432,26 @@
             data = JSON.parse(text);
           } catch {
             console.error("Non-JSON response:", text);
-            // ✅ Centered error modal — no inline div
             showErrorModal("Server error. Please try again.");
             return;
           }
 
           if (data.success) {
-            // Clear all form data so it's not visible anymore
             document
               .querySelectorAll("input, textarea")
               .forEach((el) => (el.value = ""));
-
-            // ✅ Correct modal per role
             if (isDoctor) {
               showDoctorSuccess(fullName);
             } else {
-              showPatientSuccess(fullName); // closes → redirects to login.html
+              showPatientSuccess(fullName);
             }
           } else {
             const errMsg =
               data.message || "Registration failed. Please try again.";
-
-            // Show all errors in the modal so the user stays on Step 2 and clearly sees the issue
             showErrorModal(errMsg);
           }
         } catch (err) {
           console.error("Fetch error:", err);
-          // ✅ Network errors → centered modal
           showErrorModal(
             "Network error. Please check your connection and try again.",
           );
