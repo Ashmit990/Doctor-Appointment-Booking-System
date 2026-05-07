@@ -16,6 +16,25 @@
         pointer-events: none !important;
       }
 
+      /* Teal scrollbar for booking modal */
+      #bookingScrollInner {
+        scrollbar-width: thin;
+        scrollbar-color: #0d7377 #e2e8f0;
+      }
+      #bookingScrollInner::-webkit-scrollbar {
+        width: 7px;
+      }
+      #bookingScrollInner::-webkit-scrollbar-track {
+        background: #e2e8f0;
+      }
+      #bookingScrollInner::-webkit-scrollbar-thumb {
+        background: #0d7377;
+        border-radius: 4px;
+      }
+      #bookingScrollInner::-webkit-scrollbar-thumb:hover {
+        background: #0a5a5d;
+      }
+
       /* Accent color palette */
       :root {
         --color-rose: #FEC5D9;
@@ -413,6 +432,7 @@
                       </div>
                     </div>
                     <span
+                      id="nextAppointmentBadge"
                       class="px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-[#D5D9F5] to-[#EEF0FB] text-[#6B7FD8]"
                     >
                       Next
@@ -463,7 +483,7 @@
             <div class="space-y-6">
               <div
                 id="calendarCardBtn"
-                class="bg-gradient-to-br from-white to-[#DFF3F0] rounded-[28px] p-6 border border-slate-100/60 shadow-sm hover:shadow-md transition-all"
+                class="bg-gradient-to-br from-white to-blue-50/20 rounded-[28px] p-6 border border-slate-100/60 shadow-sm hover:shadow-md transition-shadow"
               >
                 <div class="flex items-center justify-between mb-4">
                   <h3 class="text-lg font-semibold text-slate-800">Calendar</h3>
@@ -477,7 +497,11 @@
                   </button>
                 </div>
 
-                <p id="miniCalTitle" class="text-sm text-slate-400 mb-4"></p>
+                <div class="flex items-center justify-between mb-4">
+                  <button type="button" id="miniCalNavPrev" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-base">&#8249;</button>
+                  <p id="miniCalTitle" class="text-sm font-medium text-slate-600 text-center"></p>
+                  <button type="button" id="miniCalNavNext" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-base">&#8250;</button>
+                </div>
 
                 <div
                   id="miniCalGrid"
@@ -539,7 +563,7 @@
 
     <div
       id="notificationPanel"
-      class="hidden fixed w-[min(calc(100vw-2rem),390px)] bg-gradient-to-br from-white to-slate-50/50 rounded-[24px] border border-slate-200/70 shadow-[0_20px_60px_rgba(15,23,42,0.18)] overflow-hidden z-[200]"
+      class="hidden fixed w-[min(calc(100vw-2rem),390px)] bg-white rounded-[24px] border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.18)] overflow-hidden z-[200]"
     >
       <div
         class="flex items-center justify-between px-5 py-4 border-b border-slate-100"
@@ -558,35 +582,39 @@
 
     <div
       id="bookingModal"
-      class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[100] p-2"
+      class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[100] p-2"
     >
-      <div
-        class="bg-gradient-to-br from-white to-slate-50/30 w-full max-w-3xl max-h-[88vh] rounded-[20px] shadow-2xl relative overflow-y-auto transition-all duration-200 p-4"
-      >
+      <div id="bookingModalOuter" class="relative w-full max-w-3xl">
         <button
           onclick="closeBookingModal()"
-          class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white shadow flex items-center justify-center"
+          class="absolute -top-3 -right-3 z-20 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center text-slate-500 hover:text-slate-800 transition"
         >
           ✕
         </button>
-
-        <iframe
-          id="bookingIframeHome"
-          src="booking.html"
-          class="w-full border-0 block min-h-[640px]"
-          scrolling="auto"
-          onload="fitHomeBookingIframe(this)"
-        ></iframe>
+        <div
+          id="bookingModalPanel"
+          class="bg-white w-full rounded-[20px] shadow-2xl overflow-hidden transition-all duration-300"
+        >
+          <div id="bookingScrollInner" class="overflow-y-scroll max-h-[85vh] p-4">
+            <iframe
+              id="bookingIframeHome"
+              src="booking.html"
+              class="w-full border-0 block"
+              scrolling="no"
+              onload="fitHomeBookingIframe(this)"
+            ></iframe>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- ====================== CALENDAR POPUP START ====================== -->
     <div
       id="calendarModal"
-      class="fixed inset-0 hidden items-center justify-center z-[70] bg-black/30 backdrop-blur-sm p-4"
+      class="fixed inset-0 hidden items-center justify-center z-[70] bg-black/60 p-4"
     >
       <div
-        class="cal-modal-scroll w-full max-w-3xl bg-gradient-to-br from-white to-slate-50/30 rounded-[32px] shadow-[0_20px_60px_rgba(15,23,42,0.18)] border border-slate-100/60 overflow-hidden flex flex-col max-h-[92vh]"
+        class="cal-modal-scroll w-full max-w-3xl bg-white rounded-[32px] shadow-[0_20px_60px_rgba(15,23,42,0.18)] border border-slate-100 overflow-hidden flex flex-col max-h-[92vh]"
       >
         <div
           class="flex items-center justify-between px-6 py-5 border-b border-slate-100"
@@ -758,14 +786,14 @@
         }
         var modal = document.getElementById("bookingModal");
         var iframe = document.getElementById("bookingIframeHome");
-        var modalInner = document.querySelector("#bookingModal > div");
+        var modalPanel = document.getElementById("bookingModalPanel");
         // Reset height before loading fresh src
         iframe.style.height = "0px";
-        if (modalInner) modalInner.style.height = "";
+        if (modalPanel) modalPanel.style.maxHeight = "85vh";
         iframe.src = "booking.html?t=" + Date.now();
         smoothOpenModal(modal, {
           mode: "class",
-          panelSelector: "#bookingModal > div",
+          panelSelector: "#bookingModalOuter",
         });
       }
 
@@ -773,11 +801,7 @@
         try {
           const doc = iframe.contentDocument || iframe.contentWindow.document;
           const height = doc.documentElement.scrollHeight || doc.body.scrollHeight;
-          const maxH = Math.floor(window.innerHeight * 0.88);
-          const h = Math.min(height, maxH);
-          iframe.style.height = h + "px";
-          const modalInner = document.querySelector("#bookingModal > div");
-          if (modalInner) modalInner.style.height = h + "px";
+          iframe.style.height = height + "px";
         } catch (e) {
           iframe.style.height = "380px";
         }
@@ -787,7 +811,7 @@
         const modal = document.getElementById("bookingModal");
         smoothCloseModal(modal, {
           mode: "class",
-          panelSelector: "#bookingModal > div",
+          panelSelector: "#bookingModalOuter",
         });
       }
 
@@ -809,14 +833,8 @@
         if (!event.data) return;
         if (event.data.type === "booking:height") {
           const iframe = document.querySelector("#bookingModal iframe");
-          const modalInner = document.querySelector("#bookingModal > div");
-          if (iframe && modalInner) {
-            const h = Math.min(
-              event.data.height,
-              Math.floor(window.innerHeight * 0.92),
-            );
-            iframe.style.height = h + "px";
-            modalInner.style.height = h + "px";
+          if (iframe) {
+            iframe.style.height = event.data.height + "px";
           }
         }
         if (event.data.type === "patient-booking-done") {

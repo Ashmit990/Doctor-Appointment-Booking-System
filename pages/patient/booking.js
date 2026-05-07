@@ -5,7 +5,10 @@ let pendingBookingRequest = null;
 
 function notifyParentResize() {
   try {
-    window.parent.postMessage({ type: "booking:resize" }, "*");
+    setTimeout(() => {
+      const height = document.documentElement.scrollHeight || document.body.scrollHeight;
+      window.parent.postMessage({ type: "booking:height", height: height }, "*");
+    }, 60);
   } catch (err) {
     console.warn(err);
   }

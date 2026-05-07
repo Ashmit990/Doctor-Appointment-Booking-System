@@ -2,6 +2,9 @@ let calViewYear = new Date().getFullYear();
 let calViewMonth = new Date().getMonth() + 1;
 let appointmentDatesInMonth = new Set();
 let selectedCalendarDate = null;
+let miniCalYear = new Date().getFullYear();
+let miniCalMonth = new Date().getMonth() + 1;
+let _cachedNextApt = null;
 
 function goToDashboard(event) {
   if (event) event.stopPropagation();
@@ -10,6 +13,15 @@ function goToDashboard(event) {
 
 function goToProfile() {
   window.location.href = "profile.html";
+}
+
+function getDoctorInitials(name) {
+  if (!name) return '?';
+  const clean = name.replace(/^(Dr\.?|Prof\.?|Mr\.?|Ms\.?|Mrs\.?)\s*/i, '').trim();
+  const parts = clean.split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
 function escapeHtml(str) {
@@ -125,6 +137,7 @@ function applyHomeToUI(data) {
     document.getElementById("todayBookingLocation").textContent =
       todayA.room_num || "—";
     document.getElementById("todayBookingStatus").textContent = "Yes";
+    document.getElementById("todayDoctorInitials").textContent = getDoctorInitials(todayA.doctor_name);
   } else {
     document.getElementById("todayBookingMessage").classList.remove("hidden");
     document.getElementById("todayBookingCard").classList.add("hidden");
@@ -153,6 +166,10 @@ function applyHomeToUI(data) {
       nextA.room_num || "—";
     document.getElementById("nextDoctorSummary").textContent =
       nextA.doctor_name || "—";
+    _cachedNextApt = nextA;
+    document.getElementById("nextDoctorInitials").textContent = getDoctorInitials(nextA.doctor_name);
+    const nextBadgeEl = document.getElementById("nextAppointmentBadge");
+    if (nextBadgeEl) nextBadgeEl.style.display = "";
   } else if (!nextA || sameAsToday) {
     document.getElementById("nextDoctorName").textContent = "—";
     document.getElementById("nextDoctorMeta").textContent = "";
@@ -305,7 +322,7 @@ function buildCalendarGrid(container, year, month, compact) {
       cell.classList.add("has-appointment");
     }
 
-    cell.addEventListener("click", (e) => {
+    cell.addEventListener("click", async (e) => {
       e.stopPropagation();
       if (!compact) {
         selectCalendarDate(ds);
@@ -321,7 +338,11 @@ function buildCalendarGrid(container, year, month, compact) {
         } else {
           miniSelectedDate = ds;
           cell.classList.add("cal-selected");
-          highlightTodayStatusForDate(ds);
+          if (hasApt) {
+            await updateNextCardForDate(ds);
+          } else {
+            highlightTodayStatusForDate(ds);
+          }
         }
       }
     });
@@ -334,12 +355,9 @@ function buildCalendarGrid(container, year, month, compact) {
 let _cachedHomeData = null;
 
 async function renderMiniCalendar() {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = now.getMonth() + 1;
-  await refreshCalendarDots(y, m);
+  await refreshCalendarDots(miniCalYear, miniCalMonth);
   const grid = document.getElementById("miniCalGrid");
-  if (grid) buildCalendarGrid(grid, y, m, true);
+  if (grid) buildCalendarGrid(grid, miniCalYear, miniCalMonth, true);
 }
 
 /** Remove highlight ring from all appointment cards */
@@ -390,9 +408,38 @@ function highlightTodayStatusForDate(dateStr) {
   }
 }
 
-/** Restore — just remove all highlights */
+/** Restore — remove highlights and re-render original next appointment card */
 function restoreTodayStatus() {
   clearAppointmentHighlights();
+  if (_cachedHomeData) applyHomeToUI(_cachedHomeData);
+}
+
+async function updateNextCardForDate(dateStr) {
+  clearAppointmentHighlights();
+  try {
+    const r = await fetch(`${API_BASE}/patient/appointments_by_day.php?date=${encodeURIComponent(dateStr)}`, { credentials: 'include' });
+    const j = await r.json();
+    if (j.status !== 'success' || !j.data || !j.data.length) return;
+    const apt = j.data[0];
+    document.getElementById("nextDoctorName").textContent = apt.doctor_name || "";
+    document.getElementById("nextDoctorMeta").textContent = (apt.specialization || "") + " \u2022 Consultation";
+    document.getElementById("nextBookingDate").textContent = formatDateShort(apt.app_date);
+    document.getElementById("nextBookingTime").textContent = formatTime12h(apt.app_time);
+    document.getElementById("nextBookingLocation").textContent = apt.room_num || "\u2014";
+    document.getElementById("nextDoctorInitials").textContent = getDoctorInitials(apt.doctor_name);
+    const nextCard = document.getElementById("nextAppointmentCard");
+    if (nextCard) {
+      nextCard.dataset.aptDate = apt.app_date;
+      nextCard.classList.add("ring-2", "ring-[#0d7377]", "ring-offset-2");
+    }
+    const nextBadge = document.getElementById("nextAppointmentBadge");
+    if (nextBadge) {
+      const isActualNext = _cachedNextApt && String(_cachedNextApt.appointment_id) === String(apt.appointment_id);
+      nextBadge.style.display = isActualNext ? "" : "none";
+    }
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 async function openFullCalendar() {
@@ -467,6 +514,24 @@ async function selectCalendarDate(dateStr) {
     )
     .join("");
 }
+
+document.getElementById("miniCalNavPrev")?.addEventListener("click", async (e) => {
+  e.stopPropagation();
+  miniCalMonth--;
+  if (miniCalMonth < 1) { miniCalMonth = 12; miniCalYear--; }
+  miniSelectedDate = null;
+  if (_cachedHomeData) applyHomeToUI(_cachedHomeData);
+  await renderMiniCalendar();
+});
+
+document.getElementById("miniCalNavNext")?.addEventListener("click", async (e) => {
+  e.stopPropagation();
+  miniCalMonth++;
+  if (miniCalMonth > 12) { miniCalMonth = 1; miniCalYear++; }
+  miniSelectedDate = null;
+  if (_cachedHomeData) applyHomeToUI(_cachedHomeData);
+  await renderMiniCalendar();
+});
 
 document
   .getElementById("fullCalNavPrev")
