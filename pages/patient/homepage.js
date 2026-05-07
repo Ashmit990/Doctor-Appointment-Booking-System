@@ -83,6 +83,15 @@ async function loadNotifications() {
   return j.data || [];
 }
 
+async function refreshNotifications() {
+  try {
+    const rows = await loadNotifications();
+    renderNotificationList(rows);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 function applyHomeToUI(data) {
   document.getElementById("todayBookingsCount").textContent =
     data.today_bookings_count ?? 0;
@@ -581,8 +590,8 @@ document.getElementById("calendarModal").addEventListener("click", (e) => {
     _cachedHomeData = home;
     applyHomeToUI(home);
 
-    const notes = await loadNotifications();
-    renderNotificationList(notes);
+    await refreshNotifications();
+    setInterval(refreshNotifications, 5000);
 
     document.getElementById("todayDateLabel").textContent =
       new Date().toDateString();

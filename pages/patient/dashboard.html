@@ -7,6 +7,8 @@
   <title>Patient Dashboard - View Appointments</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- jsPDF Library for PDF Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <link rel="stylesheet" href="dashboard.css" />
 </head>
 
@@ -458,6 +460,377 @@
   </div>
   <!-- Security: Cache Prevention & Session Verification -->
   <script src="../../src/js/cache-prevention.js"></script>
+
+  <!-- Medical Report Viewer Modal -->
+  <div id="patient-medical-report-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[110] p-4 backdrop-blur-sm transition-all duration-300 ease-in-out opacity-0 patient-report-modal-backdrop" style="opacity: 0; pointer-events: none;">
+    <div class="bg-white rounded-lg shadow-2xl max-w-lg w-full max-h-[calc(100vh-72px)] overflow-hidden flex flex-col text-[11px] transform transition-all duration-300 ease-out scale-95 patient-report-modal-content" style="transform: scale(0.95);">
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-[#00A3AC] to-[#008A96] text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <img src="../../src/assets/Logo.svg" alt="Logo" class="w-10 h-10 rounded-md bg-white p-1" />
+          <div>
+            <h1 id="patient-report-hospital-name" class="text-sm font-bold mb-0.5">Health Care</h1>
+            <p id="patient-report-hospital-address" class="text-[11px] opacity-90 mb-0.5"></p>
+            <p id="patient-report-hospital-contact" class="text-[11px] opacity-80"></p>
+          </div>
+        </div>
+        <button onclick="closePatientMedicalReportModal()" class="text-white hover:bg-white hover:bg-opacity-20 p-1 rounded-lg transition flex-shrink-0">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Report Title -->
+      <div class="border-b border-gray-200 px-4 py-2 bg-gray-50 flex-shrink-0">
+        <div class="flex justify-between items-center gap-3">
+          <h2 class="text-base font-bold text-gray-900">MEDICAL REPORT</h2>
+          <div class="text-right text-[12px] text-gray-600">
+            <p>ID: <span id="patient-report-id" class="font-semibold"></span></p>
+            <p>Generated: <span id="patient-report-generated-date" class="font-semibold"></span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+        <div class="px-4 py-3 space-y-3 overflow-auto flex-grow">
+        <!-- Patient & Doctor Info Grid -->
+        <div class="grid grid-cols-2 gap-3 items-start">
+          <!-- Patient Information -->
+          <div>
+            <h3 class="font-bold text-[#00A3AC] text-xs mb-1 pb-0.5 border-b border-[#00A3AC]">PATIENT</h3>
+            <div class="space-y-2">
+              <div>
+                <p class="text-[11px] text-gray-600 font-semibold">Name</p>
+                <p id="patient-report-patient-name" class="text-gray-900 font-semibold text-[11px]"></p>
+              </div>
+              <div>
+                <p class="text-[11px] text-gray-600 font-semibold">ID</p>
+                <p id="patient-report-patient-id" class="text-gray-900 font-semibold text-[11px]"></p>
+              </div>
+              <div>
+                <p class="text-[11px] text-gray-600 font-semibold">Age</p>
+                <p id="patient-report-patient-age" class="text-gray-900 font-semibold text-[11px]">35 years</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Doctor & Consultation Information -->
+          <div>
+            <h3 class="font-bold text-[#00A3AC] text-xs mb-[2.5px] pb-0.5 border-b border-[#00A3AC]">DOCTOR</h3>
+            <div class="space-y-2">
+              <div>
+                <p class="text-[11px] text-gray-600 font-semibold">Doctor</p>
+                <p id="patient-report-doctor-name" class="text-gray-900 font-semibold text-[11px]"></p>
+              </div>
+              <div>
+                <p class="text-[11px] text-gray-600 font-semibold">Doctor ID</p>
+                <p id="patient-report-doctor-id" class="text-gray-900 font-semibold text-[11px]"></p>
+              </div>
+              <div>
+                <p class="text-[11px] text-gray-600 font-semibold">Date</p>
+                <p id="patient-report-apt-datetime" class="text-gray-900 font-semibold text-[11px]"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chief Complaint -->
+        <div>
+          <h3 class="font-bold text-[#00A3AC] text-xs mb-1 pb-0.5 border-b border-[#00A3AC]">COMPLAINT</h3>
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-2 rounded-r-lg">
+            <p id="patient-report-chief-complaint" class="text-gray-900 text-[12px]"></p>
+          </div>
+        </div>
+
+        <!-- Clinical Findings -->
+        <div>
+          <h3 class="font-bold text-[#00A3AC] text-xs mb-1 pb-0.5 border-b border-[#00A3AC]">FINDINGS</h3>
+          
+          <div class="grid grid-cols-2 gap-1 mb-1">
+            <!-- Symptoms -->
+            <div>
+              <h4 class="font-bold text-[#EF7300] mb-0.5 flex items-center gap-1 text-xs">
+                <span class="w-1 h-1 rounded-full bg-[#EF7300]"></span>
+                Symptoms
+              </h4>
+              <div class="bg-yellow-50 border border-yellow-200 p-2 rounded-lg">
+                <p id="patient-report-symptoms" class="text-gray-900 text-[12px] whitespace-pre-line"></p>
+              </div>
+            </div>
+
+            <!-- Diagnosis -->
+            <div>
+              <h4 class="font-bold text-[#DC2626] mb-0.5 flex items-center gap-1 text-xs">
+                <span class="w-1 h-1 rounded-full bg-[#DC2626]"></span>
+                Diagnosis
+              </h4>
+              <div class="bg-red-50 border border-red-200 p-2 rounded-lg">
+                <p id="patient-report-diagnosis" class="text-gray-900 text-[12px] whitespace-pre-line"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vital Signs -->
+          <div>
+            <h4 class="font-bold text-[#16A34A] mb-1 flex items-center gap-1 text-xs">
+              <span class="w-1 h-1 rounded-full bg-[#16A34A]"></span>
+              Vital Signs
+            </h4>
+            <div class="grid grid-cols-3 gap-1">
+              <div class="bg-green-50 border border-green-200 p-2 rounded-lg">
+                  <p class="text-[12px] text-gray-600 font-semibold mb-1">BP</p>
+                  <p id="patient-report-bp" class="text-gray-900 font-bold text-[12px]"></p>
+                </div>
+              <div class="bg-green-50 border border-green-200 p-2 rounded-lg">
+                <p class="text-[12px] text-gray-600 font-semibold mb-1">Weight</p>
+                <p id="patient-report-weight" class="text-gray-900 font-bold text-[12px]"></p>
+              </div>
+              <div class="bg-green-50 border border-green-200 p-2 rounded-lg">
+                <p class="text-[12px] text-gray-600 font-semibold mb-1">Room</p>
+                <p id="patient-report-room-no" class="text-gray-900 font-bold text-[12px]">--</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prescribed Medicines -->
+        <div id="patient-medicines-section" class="hidden">
+          <h3 class="font-bold text-[#00A3AC] text-xs mb-1 pb-0.5 border-b border-[#00A3AC]">MEDS</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+              <thead>
+                <tr class="bg-[#00A3AC] text-white">
+                  <th class="p-2 text-left font-semibold">Medicine</th>
+                  <th class="p-2 text-left font-semibold">Dosage</th>
+                  <th class="p-2 text-left font-semibold">Frequency</th>
+                </tr>
+              </thead>
+              <tbody id="patient-medicines-list">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Additional Notes -->
+        <div id="patient-notes-section" class="hidden">
+          <h3 class="font-bold text-[#00A3AC] text-sm mb-2 pb-1 border-b-2 border-[#00A3AC]">NOTES</h3>
+          <div class="bg-purple-50 border border-purple-200 p-2 rounded-lg">
+            <p id="patient-report-notes" class="text-gray-900 text-[12px] whitespace-pre-line"></p>
+          </div>
+        </div>
+
+        <!-- Signature removed per request -->
+      </div>
+
+      <!-- Footer -->
+      <div class="bg-gray-50 border-t border-gray-200 px-4 py-2 flex gap-3 justify-end flex-shrink-0">
+        <button
+          onclick="closePatientMedicalReportModal()"
+          class="px-3 py-1.5 border border-gray-300 rounded text-gray-700 font-semibold text-sm hover:bg-gray-100 transition"
+        >
+          Close
+        </button>
+
+      </div>
+
+      <input type="hidden" id="patient-report-apt-id" />
+    </div>
+  </div>
+
+    <!-- Missing Report Popup -->
+    <div id="patient-report-missing-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[120] p-4 backdrop-blur-sm transition-all duration-300 ease-in-out opacity-0 patient-report-missing-backdrop" style="opacity: 0; pointer-events: none;">
+      <div class="bg-white rounded-lg shadow-2xl max-w-md w-full transform transition-all duration-300 ease-out scale-95 patient-report-missing-content" style="transform: scale(0.95);">
+        <div class="bg-gradient-to-r from-[#00A3AC] to-[#008A96] text-white px-5 py-4 rounded-t-lg flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+            <i data-lucide="file-x" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold">Report Not Generated</h3>
+            <p class="text-xs text-teal-100">This appointment is completed, but the medical report is missing.</p>
+          </div>
+        </div>
+
+        <div class="px-5 py-4 space-y-3">
+          <div class="bg-teal-50 border border-teal-100 rounded-lg p-4">
+            <p class="text-sm text-gray-700">
+              The medical report for this completed appointment has not been generated yet.
+            </p>
+            <p class="text-sm text-gray-700 mt-2">
+              Please ask your doctor to generate it.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onclick="closePatientReportMissingModal()"
+            class="w-full px-4 py-2.5 bg-gradient-to-r from-[#00A3AC] to-[#008A96] text-white rounded-lg font-semibold hover:shadow-lg transition"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+
+  <!-- Medical Report Functions -->
+  <script src="medical_report_pdf_generator.js"></script>
+  <script>
+    function closePatientMedicalReportModal() {
+      const modal = document.getElementById('patient-medical-report-modal');
+      const backdrop = document.querySelector('.patient-report-modal-backdrop');
+      const content = document.querySelector('.patient-report-modal-content');
+      if (backdrop && content) {
+        backdrop.style.opacity = '0';
+        content.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          modal.classList.add('hidden');
+        }, 300);
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    async function openPatientMedicalReportModal(appointmentId) {
+      document.getElementById('patient-report-apt-id').value = appointmentId;
+      const loaded = await loadPatientMedicalReport(appointmentId);
+      if (!loaded) {
+        showPatientReportMissingModal();
+        return;
+      }
+      
+      const modal = document.getElementById('patient-medical-report-modal');
+      modal.classList.remove('hidden');
+      
+      // Trigger animation
+      setTimeout(() => {
+        const backdrop = document.querySelector('.patient-report-modal-backdrop');
+        const content = document.querySelector('.patient-report-modal-content');
+        if (backdrop && content) {
+          backdrop.style.opacity = '1';
+          backdrop.style.pointerEvents = 'auto';
+          content.style.transform = 'scale(1)';
+        }
+      }, 10);
+    }
+
+    async function loadPatientMedicalReport(appointmentId) {
+      try {
+        const response = await fetch(
+          `../../api/doctor/medical_report.php?appointment_id=${appointmentId}`,
+          { credentials: 'include' }
+        );
+
+        const result = await response.json();
+
+        if (result.status !== 'success') {
+          return false;
+        }
+
+        const report = result.data;
+
+        // Hospital Information
+        document.getElementById('patient-report-hospital-name').textContent = 'Health Care';
+        document.getElementById('patient-report-hospital-address').textContent = 'Address: 123 Medical Street, Healthcare City';
+        document.getElementById('patient-report-hospital-contact').textContent = 'Phone: +1-800-HOSPITAL | Email: info@healthcare.com';
+        
+        // Report Metadata
+        document.getElementById('patient-report-id').textContent = report.report_id;
+        document.getElementById('patient-report-generated-date').textContent = 
+          new Date(report.created_at).toLocaleString();
+
+        // Patient Information
+        document.getElementById('patient-report-patient-name').textContent = report.patient_name || 'N/A';
+        document.getElementById('patient-report-patient-id').textContent = report.patient_id || 'N/A';
+        document.getElementById('patient-report-patient-age').textContent = '35 years';
+        
+        // Doctor & Appointment Information
+        document.getElementById('patient-report-doctor-name').textContent = `Dr. ${report.doctor_name}`;
+        document.getElementById('patient-report-doctor-id').textContent = report.doctor_id || 'N/A';
+        
+        const aptDate = new Date(report.app_date + ' ' + report.app_time);
+        document.getElementById('patient-report-apt-datetime').textContent = aptDate.toLocaleString();
+        
+        // Chief Complaint
+        document.getElementById('patient-report-chief-complaint').textContent = report.reason_for_visit || 'N/A';
+
+        // Populate medical findings
+        document.getElementById('patient-report-symptoms').textContent = report.symptoms || 'N/A';
+        document.getElementById('patient-report-diagnosis').textContent = report.diagnosis || 'N/A';
+        document.getElementById('patient-report-bp').textContent = report.blood_pressure || 'Not recorded';
+        document.getElementById('patient-report-weight').textContent = report.weight ? `${report.weight} kg` : 'Not recorded';
+        document.getElementById('patient-report-room-no').textContent = report.room_num || '--';
+
+        // Populate medicines in table format
+        if (report.prescribed_medicines && Array.isArray(report.prescribed_medicines) && report.prescribed_medicines.length > 0) {
+          const medicinesList = document.getElementById('patient-medicines-list');
+          medicinesList.innerHTML = '';
+          report.prescribed_medicines.forEach((medicine, idx) => {
+            const row = document.createElement('tr');
+            row.className = idx % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+            row.innerHTML = `
+              <td class="p-3 border-b border-gray-200 text-gray-900 font-medium">${medicine.name || 'N/A'}</td>
+              <td class="p-3 border-b border-gray-200 text-gray-700">${medicine.dosage || 'N/A'}</td>
+              <td class="p-3 border-b border-gray-200 text-gray-700">${medicine.frequency || 'N/A'}</td>
+            `;
+            medicinesList.appendChild(row);
+          });
+          document.getElementById('patient-medicines-section').classList.remove('hidden');
+        } else {
+          document.getElementById('patient-medicines-section').classList.add('hidden');
+        }
+
+        // Populate notes
+        if (report.additional_notes) {
+          document.getElementById('patient-report-notes').textContent = report.additional_notes;
+          document.getElementById('patient-notes-section').classList.remove('hidden');
+        } else {
+          document.getElementById('patient-notes-section').classList.add('hidden');
+        }
+
+        // Store appointment ID for download
+        document.getElementById('patient-report-apt-id').value = appointmentId;
+
+        lucide.createIcons();
+        return true;
+      } catch (error) {
+        console.error(error);
+        return false;
+      }
+    }
+
+    function showPatientReportMissingModal() {
+      const modal = document.getElementById('patient-report-missing-modal');
+      modal.classList.remove('hidden');
+
+      setTimeout(() => {
+        const backdrop = document.querySelector('.patient-report-missing-backdrop');
+        const content = document.querySelector('.patient-report-missing-content');
+        if (backdrop && content) {
+          backdrop.style.opacity = '1';
+          backdrop.style.pointerEvents = 'auto';
+          content.style.transform = 'scale(1)';
+        }
+      }, 10);
+
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+
+    function closePatientReportMissingModal() {
+      const modal = document.getElementById('patient-report-missing-modal');
+      const backdrop = document.querySelector('.patient-report-missing-backdrop');
+      const content = document.querySelector('.patient-report-missing-content');
+
+      if (backdrop && content) {
+        backdrop.style.opacity = '0';
+        content.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          modal.classList.add('hidden');
+        }, 300);
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+  </script>
 </body>
 
 </html>

@@ -124,6 +124,15 @@ function renderDashboardNotificationList(rows) {
   if (typeof lucide !== "undefined") lucide.createIcons();
 }
 
+async function refreshDashboardNotifications() {
+  try {
+    const notes = await loadDashboardNotifications();
+    renderDashboardNotificationList(notes);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 function getStatusClasses(status) {
   const s = String(status).toLowerCase();
   if (s === "upcoming") return "bg-emerald-100 text-emerald-700";
@@ -265,6 +274,14 @@ function renderAppointments(rows) {
           </button>`
               : ""
           }
+          ${
+            item.status_key === "completed"
+              ? `<button type="button" data-view-report="${item.appointment_id}" class="view-report-btn w-full px-3 py-2 rounded-lg border border-[#007E85] bg-[#007E85] text-white hover:bg-[#006270] text-xs font-medium transition whitespace-nowrap text-center flex items-center justify-center gap-1">
+                <i data-lucide="file-text" class="w-3 h-3"></i>
+                View Report
+              </button>`
+              : ""
+          }
           <button type="button" data-view-ticket="${item.appointment_id}" class="view-ticket-btn w-full px-3 py-2 rounded-lg border border-[#007E85] text-[#007E85] hover:bg-teal-50 text-xs font-medium transition whitespace-nowrap text-center">
             View Ticket
           </button>
@@ -273,6 +290,12 @@ function renderAppointments(rows) {
     `;
 
     appointmentList.appendChild(card);
+  });
+
+  document.querySelectorAll(".view-report-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      openPatientMedicalReportModal(Number(button.dataset.viewReport));
+    });
   });
 
   document.querySelectorAll(".view-btn").forEach((button) => {
@@ -1100,12 +1123,8 @@ function showTreatmentToast(type, title, msg) {
   if (!ok) return;
   await reload();
   // Auto feedback popup disabled - users can click "Leave Feedback" button manually
-  try {
-    const notes = await loadDashboardNotifications();
-    renderDashboardNotificationList(notes);
-  } catch (err) {
-    console.error(err);
-  }
+  await refreshDashboardNotifications();
+  setInterval(refreshDashboardNotifications, 5000);
   
   // Check for follow-up reminders (for tomorrow's appointments)
   try {

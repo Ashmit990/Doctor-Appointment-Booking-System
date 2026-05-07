@@ -10,6 +10,8 @@
     <title>Doctor Dashboard - Schedules</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- jsPDF Library for Medical Report PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <style>
@@ -1085,18 +1087,206 @@
                 </div>
             </div>
 
-            <div class="px-6 py-5 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3 rounded-b-2xl">
-                <button onclick="closeAppointmentModal()"
-                    class="bg-white border border-gray-200 text-gray-700 px-6 py-2.5 rounded-xl font-bold hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
+            <div class="px-6 py-5 border-t border-gray-100 bg-gray-50/50 flex justify-between gap-3 rounded-b-2xl">
+                <!-- <button onclick="closeAppointmentModal()"
+                    class="ml-[-50px] bg-white border border-gray-200 text-gray-700 px-5 py-3 rounded-lg font-semibold text-sm hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
                     Close
+                </button> -->
+                <button id="view-report-btn" onclick="viewDoctorReport()" 
+                    class="hidden bg-purple-100 hover:bg-purple-200 text-purple-700 px-5 py-3 rounded-lg font-semibold text-sm transition-all duration-200 shadow-none border border-purple-200 hover:border-purple-300 flex items-center gap-2">
+                    <i data-lucide="eye" class="w-4 h-4"></i> View Report
+                </button>
+                <button id="edit-report-btn" onclick="editDoctorReport()" 
+                    class="hidden bg-orange-100 hover:bg-orange-200 text-orange-700 px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 shadow-none border border-orange-200 hover:border-orange-300 flex items-center gap-2">
+                    <i data-lucide="edit" class="w-4 h-4"></i> Edit Report
+                </button>
+                <button id="medical-report-btn" onclick="generateReportForCurrentAppointment()"
+                    class="hidden bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 shadow-none border border-blue-200 hover:border-blue-300 flex items-center gap-2">
+                    <i data-lucide="file-text" class="w-4 h-4"></i> Generate Medical Report
                 </button>
                 <button id="complete-consultation-btn" onclick="submitConsultation()"
-                    class="hidden bg-green-100 hover:bg-green-200 text-green-700 px-6 py-2.5 rounded-xl font-bold transition-all duration-200 shadow-none border border-green-200 hover:border-green-300 flex items-center gap-2">
+                    class="hidden bg-green-100 hover:bg-green-200 text-green-700 px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 shadow-none border border-green-200 hover:border-green-300 flex items-center gap-2">
                     <i data-lucide="check-circle" class="w-4 h-4"></i> Complete Consultation
                 </button>
             </div>
         </div>
     </div>
+
+    <!-- VIEW DOCTOR REPORT MODAL - Professional Report Format -->
+    <div id="doctor-view-report-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[110] p-4 backdrop-blur-sm transition-all duration-300 ease-in-out opacity-0 doctor-report-modal-backdrop" style="opacity: 0; pointer-events: none;">
+        <div class="bg-white rounded-lg shadow-2xl max-w-lg w-full max-h-[calc(100vh-72px)] overflow-hidden flex flex-col text-[11px] transform transition-all duration-300 ease-out scale-95 doctor-report-modal-content" style="transform: scale(0.95);">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-[#00A3AC] to-[#008A96] text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <img src="../../src/assets/Logo.svg" alt="Logo" class="w-10 h-10 rounded-md bg-white p-1" />
+                    <div>
+                        <h1 id="view-report-hospital-name" class="text-sm font-bold mb-0.5">Health Care</h1>
+                        <p id="view-report-hospital-address" class="text-[11px] opacity-90 mb-0.5"></p>
+                        <p id="view-report-hospital-contact" class="text-[11px] opacity-80"></p>
+                    </div>
+                </div>
+                <button onclick="closeDoctorViewReportModal()" class="text-white hover:bg-white hover:bg-opacity-20 p-1 rounded-lg transition flex-shrink-0">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Report Title -->
+            <div class="border-b border-gray-200 px-4 py-2 bg-gray-50 flex-shrink-0">
+                <div class="flex justify-between items-center gap-3">
+                    <h2 class="text-base font-bold text-gray-900">MEDICAL REPORT</h2>
+                    <div class="text-right text-[12px] text-gray-600">
+                        <p>ID: <span id="view-report-id" class="font-semibold"></span></p>
+                        <p>Generated: <span id="view-report-generated-date" class="font-semibold"></span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="px-4 py-3 space-y-3 overflow-auto flex-grow">
+                <!-- Patient & Doctor Info Grid -->
+                <div class="grid grid-cols-2 gap-3 items-start">
+                    <!-- Patient Information -->
+                    <div>
+                        <h3 class="font-bold text-[#00A3AC] text-xs mb-1 pb-0.5 border-b border-[#00A3AC]">PATIENT</h3>
+                        <div class="space-y-2">
+                            <div>
+                                <p class="text-[11px] text-gray-600 font-semibold">Name</p>
+                                <p id="view-report-patient-name" class="text-gray-900 font-semibold text-[11px]"></p>
+                            </div>
+                            <div>
+                                <p class="text-[11px] text-gray-600 font-semibold">ID</p>
+                                <p id="view-report-patient-id" class="text-gray-900 font-semibold text-[11px]"></p>
+                            </div>
+                            <div>
+                                <p class="text-[11px] text-gray-600 font-semibold">Age</p>
+                                <p id="view-report-patient-age" class="text-gray-900 font-semibold text-[11px]">35 years</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Doctor & Consultation Information -->
+                    <div>
+                        <h3 class="font-bold text-[#00A3AC] text-xs mb-[2.5px] pb-0.5 border-b border-[#00A3AC]">DOCTOR</h3>
+                        <div class="space-y-2">
+                            <div>
+                                <p class="text-[11px] text-gray-600 font-semibold">Doctor</p>
+                                <p id="view-report-doctor-name" class="text-gray-900 font-semibold text-[11px]"></p>
+                            </div>
+                            <div>
+                                <p class="text-[11px] text-gray-600 font-semibold">Doctor ID</p>
+                                <p id="view-report-doctor-id" class="text-gray-900 font-semibold text-[11px]"></p>
+                            </div>
+                            <div>
+                                <p class="text-[11px] text-gray-600 font-semibold">Date</p>
+                                <p id="view-report-apt-datetime" class="text-gray-900 font-semibold text-[11px]"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chief Complaint -->
+                <div>
+                    <h3 class="font-bold text-[#00A3AC] text-xs mb-1 pb-0.5 border-b border-[#00A3AC]">COMPLAINT</h3>
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-2 rounded-r-lg">
+                        <p id="view-report-chief-complaint" class="text-gray-900 text-[12px]"></p>
+                    </div>
+                </div>
+
+                <!-- Clinical Findings -->
+                <div>
+                    <h3 class="font-bold text-[#00A3AC] text-xs mb-1 pb-0.5 border-b border-[#00A3AC]">FINDINGS</h3>
+                    
+                    <div class="grid grid-cols-2 gap-1 mb-1">
+                        <!-- Symptoms -->
+                        <div>
+                            <h4 class="font-bold text-[#EF7300] mb-0.5 flex items-center gap-1 text-xs">
+                                <span class="w-1 h-1 rounded-full bg-[#EF7300]"></span>
+                                Symptoms
+                            </h4>
+                            <div class="bg-yellow-50 border border-yellow-200 p-2 rounded-lg">
+                                <p id="view-report-symptoms" class="text-gray-900 text-[12px] whitespace-pre-line"></p>
+                            </div>
+                        </div>
+
+                        <!-- Diagnosis -->
+                        <div>
+                            <h4 class="font-bold text-[#DC2626] mb-0.5 flex items-center gap-1 text-xs">
+                                <span class="w-1 h-1 rounded-full bg-[#DC2626]"></span>
+                                Diagnosis
+                            </h4>
+                            <div class="bg-red-50 border border-red-200 p-2 rounded-lg">
+                                <p id="view-report-diagnosis" class="text-gray-900 text-[12px] whitespace-pre-line"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vital Signs -->
+                    <div>
+                        <h4 class="font-bold text-[#16A34A] mb-1 flex items-center gap-1 text-xs">
+                            <span class="w-1 h-1 rounded-full bg-[#16A34A]"></span>
+                            Vital Signs
+                        </h4>
+                        <div class="grid grid-cols-3 gap-1">
+                            <div class="bg-green-50 border border-green-200 p-2 rounded-lg">
+                                <p class="text-[12px] text-gray-600 font-semibold mb-1">BP</p>
+                                <p id="view-report-bp" class="text-gray-900 font-bold text-[12px]"></p>
+                            </div>
+                            <div class="bg-green-50 border border-green-200 p-2 rounded-lg">
+                                <p class="text-[12px] text-gray-600 font-semibold mb-1">Weight</p>
+                                <p id="view-report-weight" class="text-gray-900 font-bold text-[12px]"></p>
+                            </div>
+                            <div class="bg-green-50 border border-green-200 p-2 rounded-lg">
+                                <p class="text-[12px] text-gray-600 font-semibold mb-1">Room</p>
+                                <p id="view-report-room-no" class="text-gray-900 font-bold text-[12px]">--</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prescribed Medicines -->
+                <div id="view-medicines-section" class="hidden">
+                    <h3 class="font-bold text-[#00A3AC] text-xs mb-1 pb-0.5 border-b border-[#00A3AC]">MEDS</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="bg-[#00A3AC] text-white">
+                                    <th class="p-2 text-left font-semibold">Medicine</th>
+                                    <th class="p-2 text-left font-semibold">Dosage</th>
+                                    <th class="p-2 text-left font-semibold">Frequency</th>
+                                </tr>
+                            </thead>
+                            <tbody id="view-report-medicines">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Additional Notes -->
+                <div id="view-notes-section" class="hidden">
+                    <h3 class="font-bold text-[#00A3AC] text-sm mb-2 pb-1 border-b-2 border-[#00A3AC]">NOTES</h3>
+                    <div class="bg-purple-50 border border-purple-200 p-2 rounded-lg">
+                        <p id="view-report-notes" class="text-gray-900 text-[12px] whitespace-pre-line"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-gray-50 border-t border-gray-200 px-4 py-2 flex gap-3 justify-end flex-shrink-0">
+                <button onclick="closeDoctorViewReportModal()" class="px-3 py-1.5 border border-gray-300 rounded text-gray-700 font-semibold text-sm hover:bg-gray-100 transition">
+                    Close
+                </button>
+                <button onclick="editDoctorReport()" class="px-3 py-1.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded font-semibold hover:shadow-lg transition flex items-center gap-2">
+                    <i data-lucide="edit" class="w-3 h-3"></i>
+                    Edit Report
+                </button>
+            </div>
+
+            <input type="hidden" id="view-report-apt-id" />
+        </div>
+    </div>
+
+    <!-- Include Medical Report Modal -->
+    <link rel="import" href="medical_report_modal.html">
 
     <!-- EDIT/DELETE SLOT MODAL -->
     <div id="edit-slot-modal"
@@ -1317,7 +1507,185 @@
         </div>
     </div>
 
+        <!-- Medical Report Modal -->
+        <div id="medical-report-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm transition-all duration-300 ease-in-out opacity-0 medical-report-modal-backdrop" style="opacity: 0; pointer-events: none;">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[92vh] overflow-hidden transform transition-all duration-300 ease-out scale-95 medical-report-modal-content border border-white/60" style="transform: scale(0.95);">
+                <!-- Header -->
+                <div class="sticky top-0 bg-gradient-to-r from-[#00A3AC] via-[#0098A3] to-[#008A96] text-white px-6 py-5 flex items-start justify-between shadow-[0_10px_30px_rgba(0,163,172,0.18)]">
+                    <div class="flex items-start gap-4">
+                        <div class="w-11 h-11 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center shadow-inner backdrop-blur-sm">
+                            <i data-lucide="file-plus-2" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="inline-flex items-center rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase">Clinical Note</span>
+                                <span class="text-[11px] text-teal-50/90">Draft before saving</span>
+                            </div>
+                            <h2 class="text-2xl font-bold leading-tight">Generate Medical Report</h2>
+                            <p class="text-sm text-teal-50/90 mt-1">Record the consultation summary, treatment plan, and prescriptions.</p>
+                        </div>
+                    </div>
+                    <button onclick="closeMedicalReportModal()" class="text-white hover:bg-white hover:bg-opacity-20 p-2.5 rounded-xl transition flex-shrink-0 border border-white/15">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- Content -->
+                <div class="bg-gradient-to-b from-slate-50 to-white p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-176px)]">
+                    <!-- Patient Info (Read-only) -->
+                    <div class="rounded-2xl border border-[#00A3AC]/10 bg-white shadow-sm overflow-hidden">
+                        <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/80 flex items-center justify-between gap-3">
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-base">Patient Information</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Reference details for this medical report</p>
+                            </div>
+                            <i data-lucide="user-round" class="w-5 h-5 text-[#00A3AC]"></i>
+                        </div>
+                        <div class="p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="rounded-xl bg-[#EBF8F8] border border-[#CCEBEF] p-4">
+                                <p class="text-[11px] font-semibold uppercase tracking-wide text-[#008A96]">Patient Name</p>
+                                <p id="report-patient-name" class="font-semibold text-slate-900 mt-1 text-sm"></p>
+                            </div>
+                            <div class="rounded-xl bg-slate-50 border border-slate-200 p-4">
+                                <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Appointment Date & Time</p>
+                                <p id="report-apt-datetime" class="font-semibold text-slate-900 mt-1 text-sm"></p>
+                            </div>
+                            <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 md:col-span-1">
+                                <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Chief Complaint</p>
+                                <p id="report-chief-complaint" class="font-semibold text-slate-900 mt-1 text-sm leading-snug"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Medical Report Form -->
+                    <form id="medical-report-form" class="space-y-5">
+                        <input type="hidden" id="report-apt-id" />
+
+                        <!-- Symptoms -->
+                        <div class="rounded-2xl border border-amber-100 bg-amber-50/70 p-5 shadow-sm">
+                            <label class="flex items-center justify-between gap-3 text-sm font-semibold text-slate-800 mb-3">
+                                <span class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                    Symptoms <span class="text-red-500">*</span>
+                                </span>
+                                <span class="text-[11px] font-medium text-amber-700 bg-white/70 px-2 py-1 rounded-full border border-amber-100">Chief presentation</span>
+                            </label>
+                            <textarea
+                                id="report-symptoms"
+                                placeholder="e.g., Persistent cough, mild fever, body aches..."
+                                class="w-full border border-amber-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none resize-none shadow-sm"
+                                rows="3"
+                                required
+                            ></textarea>
+                        </div>
+
+                        <!-- Diagnosis -->
+                        <div class="rounded-2xl border border-rose-100 bg-rose-50/70 p-5 shadow-sm">
+                            <label class="flex items-center justify-between gap-3 text-sm font-semibold text-slate-800 mb-3">
+                                <span class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                    Diagnosis <span class="text-red-500">*</span>
+                                </span>
+                                <span class="text-[11px] font-medium text-rose-700 bg-white/70 px-2 py-1 rounded-full border border-rose-100">Assessment</span>
+                            </label>
+                            <textarea
+                                id="report-diagnosis"
+                                placeholder="e.g., Acute upper respiratory infection..."
+                                class="w-full border border-rose-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none resize-none shadow-sm"
+                                rows="3"
+                                required
+                            ></textarea>
+                        </div>
+
+                        <!-- Vital Signs Row -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Blood Pressure -->
+                            <div class="rounded-2xl border border-sky-100 bg-sky-50/70 p-5 shadow-sm">
+                                <label class="block text-sm font-semibold text-slate-800 mb-3">Blood Pressure <span class="text-red-500">*</span></label>
+                                <input
+                                    type="text"
+                                    id="report-bp"
+                                    placeholder="e.g., 120/80"
+                                    class="w-full border border-sky-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none shadow-sm"
+                                    required
+                                />
+                            </div>
+
+                            <!-- Weight -->
+                            <div class="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5 shadow-sm">
+                                <label class="block text-sm font-semibold text-slate-800 mb-3">Weight (kg) <span class="text-red-500">*</span></label>
+                                <input
+                                    type="number"
+                                    id="report-weight"
+                                    placeholder="e.g., 75"
+                                    step="0.1"
+                                    class="w-full border border-emerald-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none shadow-sm"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Prescribed Medicines -->
+                        <div class="rounded-2xl border border-[#00A3AC]/10 bg-white p-5 shadow-sm">
+                            <div class="flex items-start justify-between gap-3 mb-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-800 mb-1">
+                                        Prescribed Medicines <span class="text-red-500">*</span>
+                                    </label>
+                                    <p class="text-xs text-slate-500">Add one or more medicines with dosage and frequency</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onclick="addMedicineField()"
+                                    class="inline-flex items-center gap-2 rounded-full border border-[#00A3AC]/20 bg-[#EBF8F8] px-4 py-2 text-sm font-semibold text-[#008A96] hover:bg-[#DDF4F5] hover:border-[#00A3AC]/30 transition"
+                                >
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    Add Medicine
+                                </button>
+                            </div>
+                            <div id="medicines-list" class="space-y-3">
+                                <!-- Medicines will be added dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Additional Notes -->
+                        <div class="rounded-2xl border border-violet-100 bg-violet-50/70 p-5 shadow-sm">
+                            <label class="block text-sm font-semibold text-slate-800 mb-3">
+                                Additional Notes <span class="text-red-500">*</span>
+                            </label>
+                            <textarea
+                                id="report-notes"
+                                placeholder="Any additional observations or instructions..."
+                                class="w-full border border-violet-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none resize-none shadow-sm"
+                                rows="3"
+                                required
+                            ></textarea>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Footer -->
+                <div class="sticky bottom-0 bg-white/95 backdrop-blur border-t border-slate-200 px-6 py-4 flex flex-col sm:flex-row gap-3 justify-end shadow-[0_-8px_30px_rgba(15,23,42,0.06)]">
+                    <button
+                        onclick="closeMedicalReportModal()"
+                        class="px-6 py-3 border border-slate-300 rounded-xl text-slate-700 font-semibold hover:bg-slate-50 transition sm:min-w-[120px]"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onclick="saveMedicalReport()"
+                        class="px-6 py-3 bg-gradient-to-r from-[#00A3AC] to-[#008A96] text-white rounded-xl font-semibold hover:shadow-lg transition flex items-center justify-center gap-2 sm:min-w-[150px]"
+                    >
+                        <i data-lucide="save" class="w-4 h-4"></i>
+                        Save Report
+                    </button>
+                </div>
+            </div>
+        </div>
+
     <script src="schedules.js"></script>
+    <!-- Medical Report PDF Generator -->
+    <script src="../patient/medical_report_pdf_generator.js"></script>
 </body>
 
 </html>
