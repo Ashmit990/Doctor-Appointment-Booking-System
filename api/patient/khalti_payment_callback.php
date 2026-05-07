@@ -229,13 +229,14 @@ try {
     $room_num = 'Room A1';
 
     // Double-check conflict at callback time to avoid race-condition double booking.
-    $conf = $conn->prepare("SELECT appointment_id FROM appointments WHERE patient_id = ? AND app_date = ? AND status <> 'Cancelled' LIMIT 1");
+    $conf = $conn->prepare("\n+        SELECT a.appointment_id, COALESCE(u.full_name, a.doctor_id) AS doctor_name\n+        FROM appointments a\n+        LEFT JOIN users u ON a.doctor_id = u.user_id\n+        WHERE a.patient_id = ? AND a.app_date = ? AND a.status <> 'Cancelled'\n+        LIMIT 1\n+    ");
     $conf->bind_param('ss', $payment['patient_id'], $appt_date);
     $conf->execute();
-    $has_conflict = (bool) $conf->get_result()->fetch_assoc();
+    $conflict_row = $conf->get_result()->fetch_assoc();
     $conf->close();
 
-    if ($has_conflict) {
+    if ($conflict_row) {
+        $existing_doctor = trim((string) ($conflict_row['doctor_name'] ?? 'another doctor'));
         $markConflictStmt = $conn->prepare("UPDATE appointment_payments SET payment_status = 'Failed', callback_status = 'BookingConflict', updated_at = NOW() WHERE payment_id = ?");
         $markConflictStmt->bind_param('i', $payment['payment_id']);
         $markConflictStmt->execute();
@@ -248,7 +249,7 @@ try {
 
         $conn->commit();
         http_response_code(409);
-        $render_response(false, 'Booking Conflict', 'You already have an appointment on this date. Multiple bookings on the same day are not allowed.', $pidx, $verified_txn_id);
+        $render_response(false, 'Booking Conflict', 'You already have an appointment on this date with ' . $existing_doctor . '. Multiple bookings on the same day are not allowed.', $pidx, $verified_txn_id);
         exit;
     }
 

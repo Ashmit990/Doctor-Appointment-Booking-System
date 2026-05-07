@@ -87,17 +87,17 @@ function setBookingConflictMessage(message = "") {
   notifyParentResize();
 }
 
-async function hasSameDayBookingConflict(dateStr, excludeAppointmentId = null) {
-  if (!dateStr) return false;
+async function getSameDayBookingConflict(dateStr, excludeAppointmentId = null) {
+  if (!dateStr) return null;
   try {
     const r = await fetch(
       `${API_BASE}/patient/appointments_by_day.php?date=${encodeURIComponent(dateStr)}`,
       { credentials: "include" },
     );
     const j = await r.json();
-    if (j.status !== "success" || !Array.isArray(j.data)) return false;
+    if (j.status !== "success" || !Array.isArray(j.data)) return null;
 
-    return j.data.some((apt) => {
+    const conflict = j.data.find((apt) => {
       const status = String(apt.status || "").toLowerCase();
       const isCancelled = status === "cancelled";
       const sameAsEdited =
@@ -105,9 +105,10 @@ async function hasSameDayBookingConflict(dateStr, excludeAppointmentId = null) {
         Number(apt.appointment_id) === Number(excludeAppointmentId);
       return !isCancelled && !sameAsEdited;
     });
+    return conflict || null;
   } catch (err) {
     console.error("Conflict check failed:", err);
-    return false;
+    return null;
   }
 }
 
@@ -378,12 +379,13 @@ document.getElementById("date").addEventListener("change", async () => {
     return;
   }
 
-  const hasConflict = await hasSameDayBookingConflict(dateStr, rescheduleAppointmentId);
-  if (hasConflict) {
+  const conflict = await getSameDayBookingConflict(dateStr, rescheduleAppointmentId);
+  if (conflict) {
+    const doctorName = conflict.doctor_name || "another doctor";
     confirmBtn.disabled = true;
     confirmBtn.classList.add("opacity-60", "cursor-not-allowed");
-    confirmBtn.title = "You already have an appointment on this date.";
-    setBookingConflictMessage("You already have an appointment on this date, so you cannot book another doctor on the same day. Please choose a different date.");
+    confirmBtn.title = `You already have an appointment with ${doctorName} on this date.`;
+    setBookingConflictMessage(`You already have an appointment with ${doctorName} on this date. Please choose a different date.`);
   } else {
     confirmBtn.disabled = false;
     confirmBtn.classList.remove("opacity-60", "cursor-not-allowed");
@@ -447,9 +449,10 @@ bookingForm.addEventListener("submit", async (e) => {
     return;
   }
 
-  const hasConflict = await hasSameDayBookingConflict(selectedDate, rescheduleAppointmentId);
-  if (hasConflict) {
-    setBookingConflictMessage("You have already booked an appointment on this date, so booking another doctor on the same day is not allowed.");
+  const conflict = await getSameDayBookingConflict(selectedDate, rescheduleAppointmentId);
+  if (conflict) {
+    const doctorName = conflict.doctor_name || "another doctor";
+    setBookingConflictMessage(`You already have an appointment with ${doctorName} on this date. Multiple appointments on the same day are not allowed.`);
     return;
   }
   setBookingConflictMessage("");
