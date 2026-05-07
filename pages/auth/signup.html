@@ -84,6 +84,16 @@
           transform: translateY(0);
         }
       }
+      @keyframes slideRight {
+        from {
+          opacity: 0;
+          transform: translateX(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
       @keyframes modalFadeIn {
         from {
           opacity: 0;
@@ -107,6 +117,14 @@
 
       .animate-fade-in {
         animation: fadeIn 0.6s ease-out forwards;
+      }
+
+      .animate-slide-up {
+        animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      }
+
+      .animate-slide-right {
+        animation: slideRight 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
       }
 
       /* ── Back button ── */
@@ -277,18 +295,19 @@
       .left-panel {
         overflow-y: auto;
         overflow-x: hidden;
-        /* Custom scrollbar — subtle */
-        scrollbar-width: thin;
-        scrollbar-color: #007e8540 transparent;
+        /* Keep scrollable but hide scrollbar visually */
+        -ms-overflow-style: none; /* IE/Edge */
+        scrollbar-width: none; /* Firefox */
       }
       .left-panel::-webkit-scrollbar {
-        width: 4px;
+        width: 0; /* hide scrollbar */
+        height: 0;
       }
       .left-panel::-webkit-scrollbar-track {
         background: transparent;
       }
       .left-panel::-webkit-scrollbar-thumb {
-        background-color: #007e8550;
+        background-color: transparent;
         border-radius: 20px;
       }
 
@@ -441,7 +460,7 @@
       >
         <div class="max-w-md w-full mx-auto lg:mx-0 py-10 lg:py-14">
           <!-- Logo -->
-          <div class="mb-8 flex flex-col items-start">
+          <div class="mb-8 flex flex-col items-start" data-scroll-animation="animate-slide-up" data-delay="0.1s">
             <div class="flex items-center gap-3 mb-4">
               <img
                 src="../../src/assets/logo.svg"
@@ -463,14 +482,14 @@
           </div>
 
           <!-- Step Indicators -->
-          <div class="step-indicator mb-6">
+          <div class="step-indicator mb-6" data-scroll-animation="animate-slide-up" data-delay="0.2s">
             <span class="step-badge active" id="step1Badge">1. Identity</span>
             <span class="step-badge" id="step2Badge"
               >2. Contact &amp; Security</span
             >
           </div>
 
-          <div id="signupForm" class="space-y-4">
+          <div id="signupForm" class="space-y-4" data-scroll-animation="animate-fade-in" data-delay="0.3s">
             <!-- ── STEP 1 ── -->
             <div id="step1" class="step-content space-y-4 xl:space-y-5">
               <div class="group">
@@ -848,6 +867,8 @@
         <div class="absolute inset-0 organic-bg z-0 shadow-2xl"></div>
         <div
           class="relative h-full w-full flex items-center justify-center z-10 p-12"
+          data-scroll-animation="animate-slide-right"
+          data-delay="0.4s"
         >
           <img
             src="../../src/assets/photo.png"
@@ -1460,6 +1481,40 @@
           btn.disabled = false;
         }
       }
+      // ═══════════════════════════════════════════════════════════════
+      //  Page entrance animations (staggered) - mimic landing page
+      // ═══════════════════════════════════════════════════════════════
+      function initEntranceAnimations() {
+        const nodes = Array.from(document.querySelectorAll('[data-scroll-animation]'));
+        nodes.forEach((el) => {
+          const anim = el.getAttribute('data-scroll-animation');
+          const delayAttr = el.getAttribute('data-delay') || '0s';
+          let delayMs = 0;
+          try {
+            if (delayAttr.endsWith('ms')) delayMs = parseFloat(delayAttr);
+            else if (delayAttr.endsWith('s')) delayMs = parseFloat(delayAttr) * 1000;
+            else delayMs = parseFloat(delayAttr) * 1000;
+          } catch (e) {
+            delayMs = 0;
+          }
+
+          // Start hidden to avoid flash
+          el.style.opacity = '0';
+          setTimeout(() => {
+            if (anim) el.classList.add(anim);
+            el.style.opacity = '';
+          }, delayMs + 80);
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        try {
+          initEntranceAnimations();
+        } catch (e) {
+          console.error('Entrance animations failed', e);
+        }
+      });
+
     </script>
   </body>
 </html>
