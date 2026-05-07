@@ -211,13 +211,19 @@ function renderCalendar() {
         });
         
         // Process completed appointments (green checkmarks)
-        completedData.dates.forEach(dateStr => {
+        // Be defensive: completedData.dates may be undefined or not an array
+        const completedDatesList = Array.isArray(completedData && completedData.dates)
+            ? completedData.dates
+            : (Array.isArray(completedData) ? completedData : []);
+
+        completedDatesList.forEach(dateStr => {
+            if (!dateStr || typeof dateStr !== 'string') return;
             const parts = dateStr.trim().split('-');
             if (parts.length === 3) {
                 const dateYear = parseInt(parts[0]);
                 const dateMonth = parseInt(parts[1]);
                 const dateDay = parseInt(parts[2]);
-                
+
                 if (dateYear === targetYear && dateMonth === targetMonth) {
                     completedDatesThisMonth.add(dateDay);
                 }

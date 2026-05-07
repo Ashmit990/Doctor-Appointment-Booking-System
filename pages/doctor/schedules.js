@@ -133,7 +133,13 @@ function renderScheduleCalendar() {
       }
     });
 
-    completedDates.forEach((dateStr) => {
+    // Defensive: completedDates might not be an array (API changed or returned object)
+    const completedDatesList = Array.isArray(completedDates)
+      ? completedDates
+      : (completedDates && Array.isArray(completedDates.dates) ? completedDates.dates : []);
+
+    completedDatesList.forEach((dateStr) => {
+      if (!dateStr || typeof dateStr !== 'string') return;
       const parts = dateStr.trim().split("-");
       if (parts.length === 3) {
         const dateYear = parseInt(parts[0]);
