@@ -843,7 +843,7 @@ async function submitFeedback() {
       closeFeedbackModal();
       showSuccessToast(
         isEdit ? 'Feedback Updated' : 'Feedback Sent',
-        isEdit ? 'Your review has been updated.' : 'Thank you for your rating.'
+        isEdit ? 'Your review has been updated.' : 'Thank you for your feedback!'
       );
       reload();
     } else {
