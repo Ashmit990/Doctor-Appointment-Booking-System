@@ -558,10 +558,10 @@
 
     <div
       id="bookingModal"
-      class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[100] p-4"
+      class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[100] p-2"
     >
       <div
-        class="bg-gradient-to-br from-white to-slate-50/30 w-full max-w-5xl max-h-[92vh] rounded-3xl shadow-2xl relative overflow-hidden transition-all duration-200"
+        class="bg-gradient-to-br from-white to-slate-50/30 w-full max-w-3xl max-h-[88vh] rounded-[20px] shadow-2xl relative overflow-y-auto transition-all duration-200 p-4"
       >
         <button
           onclick="closeBookingModal()"
@@ -573,8 +573,8 @@
         <iframe
           id="bookingIframeHome"
           src="booking.html"
-          class="w-full border-0 block"
-          scrolling="no"
+          class="w-full border-0 block min-h-[640px]"
+          scrolling="auto"
           onload="fitHomeBookingIframe(this)"
         ></iframe>
       </div>
@@ -830,6 +830,36 @@
             console.error(e);
           }
         }
+
+        // Handle payment result messages from booking iframe / callback
+        if (event.data.type === "payment-result") {
+          const status = String(event.data.status || '').toLowerCase().trim();
+          console.log('Payment result received on homepage:', { status, data: event.data });
+          if (status === 'completed') {
+            closeBookingModal();
+            showSuccessToast("Payment successful ✓", event.data.message || "Your appointment has been booked successfully via Khalti.");
+            try {
+              const home = await loadHomeData();
+              applyHomeToUI(home);
+              await renderMiniCalendar();
+            } catch (e) {
+              console.error(e);
+            }
+          } else if (status === 'failed' || status === 'cancelled') {
+            showSuccessToast("Payment " + status, event.data.message || "The payment did not complete. Please try again.");
+          } else if (status === 'checking') {
+            // Window closed, verify backend status by reloading home data
+            console.log('Payment window closed, refreshing home data...');
+            try {
+              const home = await loadHomeData();
+              applyHomeToUI(home);
+              await renderMiniCalendar();
+            } catch (e) {
+              console.error(e);
+            }
+          }
+        }
+
         if (event.data.type === "booking:close") {
           closeBookingModal();
         }

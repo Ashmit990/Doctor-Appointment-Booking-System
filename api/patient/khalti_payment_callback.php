@@ -49,6 +49,12 @@ $render_response = function($success, $title, $message, $pidx = '', $txn_id = ''
     $txn_short = $txn_id ? substr($txn_id, 0, 16) . '...' : '—';
     $status_msg = $success ? 'Notifying dashboard... This tab will close in 5 seconds.' : 'Please close this window and return to the dashboard.';
     
+    // Prepare safe JS values
+    $js_status_val = $success ? 'Completed' : 'Failed';
+    $js_success_val = $success ? 'true' : 'false';
+    $js_title = json_encode($title);
+    $js_message = json_encode($message);
+
     echo <<<HTML
 <!DOCTYPE html>
 <html>
@@ -91,31 +97,51 @@ $render_response = function($success, $title, $message, $pidx = '', $txn_id = ''
                     <span class="detail-value">$txn_short</span>
                 </div>
             </div>
-            <button onclick="goBack()">Back to Dashboard</button>
+            <div style="display:flex;gap:12px;">
+                <button onclick="tryNotifyAndClose()">Back to Dashboard</button>
+                <button id="manualNotifyBtn" style="background:#e5e7eb;color:#111;border:1px solid #d1d5db;">Notify & Close</button>
+            </div>
         </div>
     </div>
     <script>
         // This page was opened by booking.js in a new window
         // Communicate back to the opener (booking iframe)
-        try {
-            if (window.opener && !window.opener.closed) {
-                window.opener.postMessage({
-                    type: 'payment-result',
-                    status: $success ? 'Completed' : 'Failed',
-                    title: '$title',
-                    message: '$message',
-                    success: $success ? 'true' : 'false'
-                }, '*');
+        function sendPaymentResult() {
+            try {
+                if (window.opener && !window.opener.closed) {
+                    window.opener.postMessage({
+                        type: 'payment-result',
+                        status: '{$js_status_val}',
+                        title: {$js_title},
+                        message: {$js_message},
+                        success: {$js_success_val}
+                    }, '*');
+                    console.log('Payment result posted to opener');
+                    return true;
+                }
+            } catch (e) {
+                console.error('postMessage failed', e);
             }
-        } catch (e) {}
-
-        function goBack() {
-            // Close this window - the postMessage sent on page load will handle the notification
-            window.close();
+            console.warn('No opener available to receive postMessage');
+            return false;
         }
+
+        // Attempt automatic notify on load
+        sendPaymentResult();
+
+        function tryNotifyAndClose() {
+            sendPaymentResult();
+            // Always try to close this window/tab
+            try { window.close(); } catch (e) { /* ignore */ }
+        }
+
+        document.getElementById('manualNotifyBtn')?.addEventListener('click', function () {
+            const ok = sendPaymentResult();
+            if (ok) try { window.close(); } catch (e) {}
+        });
         
         // Auto-close after longer delay on success to ensure postMessage is received
-        if ($success) {
+        if ({$js_success_val}) {
             setTimeout(() => { 
                 window.close(); 
             }, 5000);
@@ -229,7 +255,10 @@ try {
     $room_num = 'Room A1';
 
     // Double-check conflict at callback time to avoid race-condition double booking.
-    $conf = $conn->prepare("\n+        SELECT a.appointment_id, COALESCE(u.full_name, a.doctor_id) AS doctor_name\n+        FROM appointments a\n+        LEFT JOIN users u ON a.doctor_id = u.user_id\n+        WHERE a.patient_id = ? AND a.app_date = ? AND a.status <> 'Cancelled'\n+        LIMIT 1\n+    ");
+    $conf_sql = "SELECT a.appointment_id, COALESCE(u.full_name, a.doctor_id) AS doctor_name FROM appointments a " .
+                "LEFT JOIN users u ON a.doctor_id = u.user_id " .
+                "WHERE a.patient_id = ? AND a.app_date = ? AND a.status <> 'Cancelled' LIMIT 1";
+    $conf = $conn->prepare($conf_sql);
     $conf->bind_param('ss', $payment['patient_id'], $appt_date);
     $conf->execute();
     $conflict_row = $conf->get_result()->fetch_assoc();
