@@ -2,12 +2,14 @@ let doctorsList = [];
 let selectedDoctor = null;
 let rescheduleAppointmentId = null;
 let pendingBookingRequest = null;
+let _pendingRescheduleId = null;
 
 function notifyParentResize() {
   try {
     setTimeout(() => {
       const height = document.documentElement.scrollHeight || document.body.scrollHeight;
       window.parent.postMessage({ type: "booking:height", height: height }, "*");
+      window.parent.postMessage({ type: "booking:resize" }, "*");
     }, 60);
   } catch (err) {
     console.warn(err);
@@ -285,7 +287,8 @@ async function loadSlots(doctorId, dateStr) {
   j.data.forEach((slot) => {
     const opt = document.createElement("option");
     opt.value = String(slot.avail_id);
-    opt.textContent = `${formatTime12h(slot.start_time)} – ${formatTime12h(slot.end_time)}`;
+    opt.dataset.start = slot.start_time;
+    opt.textContent = `${formatTime12h(slot.start_time)} \u2013 ${formatTime12h(slot.end_time)}`;
     timeSel.appendChild(opt);
   });
 }
@@ -302,16 +305,40 @@ async function loadRescheduleContext(appointmentId) {
     return;
   }
   const a = j.data;
-  document.getElementById("doctor").value = a.doctor_id;
+  const doctorSel = document.getElementById("doctor");
+  doctorSel.value = String(a.doctor_id);
+  doctorSel.disabled = true;
+  doctorSel.style.opacity = "0.7";
+  doctorSel.style.cursor = "not-allowed";
   updatePrice();
   await loadDates(a.doctor_id);
-  document.getElementById("date").value = "";
-  document.getElementById("time").innerHTML =
-    '<option value="">Select date first</option>';
-  document.getElementById("availId").value = "";
+  if (a.app_date) {
+    document.getElementById("date").value = a.app_date;
+    await loadSlots(a.doctor_id, a.app_date);
+    if (a.app_time) {
+      const timeSel = document.getElementById("time");
+      const appTimeNorm = String(a.app_time).trim().substring(0, 5);
+      let matched = null;
+      for (const opt of timeSel.options) {
+        if (opt.dataset.start && opt.dataset.start.trim().substring(0, 5) === appTimeNorm) {
+          matched = opt;
+          break;
+        }
+      }
+      if (matched) {
+        timeSel.value = matched.value;
+        document.getElementById("availId").value = matched.value;
+      }
+    }
+  } else {
+    document.getElementById("date").value = "";
+    document.getElementById("time").innerHTML = '<option value="">Select date first</option>';
+    document.getElementById("availId").value = "";
+  }
   document.getElementById("description").value = a.reason_for_visit || "";
   const btn = document.getElementById("confirmBtn");
   btn.textContent = "Confirm reschedule";
+  notifyParentResize();
 }
 
 const bookingForm = document.getElementById("bookingForm");
@@ -324,7 +351,12 @@ window.addEventListener("message", (event) => {
   
   // Handle reschedule context from parent dashboard
   if (event.data.type === "START_RESCHEDULE" && event.data.appointment_id) {
-    loadRescheduleContext(event.data.appointment_id);
+    const sel = document.getElementById("doctor");
+    if (sel && sel.options.length > 1) {
+      loadRescheduleContext(event.data.appointment_id);
+    } else {
+      _pendingRescheduleId = event.data.appointment_id;
+    }
   }
   
   // Forward payment result from Khalti callback to parent dashboard
@@ -346,6 +378,8 @@ cancelBooking?.addEventListener("click", () => {
   document.getElementById("patientName").value = patientName;
   rescheduleAppointmentId = null;
   document.getElementById("confirmBtn").textContent = "Confirm Booking";
+  const ds = document.getElementById("doctor");
+  ds.disabled = false; ds.style.opacity = ""; ds.style.cursor = "";
   window.parent.postMessage({ type: "booking:close" }, "*");
 });
 
@@ -549,6 +583,11 @@ bookingForm.addEventListener("submit", async (e) => {
     }
     await loadDoctors();
     updatePrice();
+    if (_pendingRescheduleId) {
+      const id = _pendingRescheduleId;
+      _pendingRescheduleId = null;
+      await loadRescheduleContext(id);
+    }
     notifyParentResize();
   } catch (e) {
     console.error(e);

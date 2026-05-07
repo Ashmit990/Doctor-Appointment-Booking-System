@@ -301,8 +301,8 @@ function buildCalendarGrid(container, year, month, compact) {
     if (isToday) {
       cell.classList.add("font-semibold");
       if (compact) {
-        cell.style.backgroundColor = "#0d7377";
-        cell.style.color = "#fff";
+        cell.style.backgroundColor = "#eaf3f3";
+        cell.style.color = "#0d7377";
         cell.style.borderRadius = "0.5rem";
       } else {
         cell.style.backgroundColor = "#eaf3f3";
@@ -327,9 +327,21 @@ function buildCalendarGrid(container, year, month, compact) {
       if (!compact) {
         selectCalendarDate(ds);
       } else {
-        // Clear previous selection
+        const todayStr2 = new Date().toISOString().slice(0, 10);
+        // Clear previous selection styles
         container.querySelectorAll(".cal-selected").forEach((el) => {
           el.classList.remove("cal-selected");
+          const d = el.dataset.date;
+          if (d === todayStr2) {
+            el.style.backgroundColor = "#eaf3f3";
+            el.style.color = "#0d7377";
+          } else if (d < todayStr2) {
+            el.style.backgroundColor = "";
+            el.style.color = "#d1d5db";
+          } else {
+            el.style.backgroundColor = "";
+            el.style.color = "";
+          }
         });
 
         if (miniSelectedDate === ds) {
@@ -338,6 +350,9 @@ function buildCalendarGrid(container, year, month, compact) {
         } else {
           miniSelectedDate = ds;
           cell.classList.add("cal-selected");
+          cell.style.backgroundColor = "#4AB8AD";
+          cell.style.color = "#fff";
+          cell.style.borderRadius = "0.5rem";
           if (hasApt) {
             await updateNextCardForDate(ds);
           } else {
