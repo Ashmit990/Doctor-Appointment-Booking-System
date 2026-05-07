@@ -2,7 +2,7 @@
 <div id="patient-medical-report-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
   <div class="bg-white rounded-lg shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
     <!-- Header -->
-    <div class="sticky top-0 bg-gradient-to-r from-[#00A3AC] to-[#008A96] text-white p-6 flex items-center justify-between">
+    <div class="sticky top-0 bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white p-6 flex items-center justify-between topbar-premium">
       <h2 class="text-2xl font-bold">Your Medical Report</h2>
       <button onclick="closePatientMedicalReportModal()" class="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition">
         <i data-lucide="x" class="w-6 h-6"></i>
@@ -12,9 +12,9 @@
     <!-- Content -->
     <div class="p-6 space-y-6">
       <!-- Doctor Info -->
-      <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+      <div class="bg-primary-light p-4 rounded-lg border border-[#dbeaea]">
         <h3 class="font-semibold text-gray-700 mb-2 flex items-center gap-2">
-          <i data-lucide="stethoscope" class="w-4 h-4 text-blue-600"></i>
+            <i data-lucide="stethoscope" class="w-4 h-4 text-[#0d7377]"></i>
           Examined By
         </h3>
         <p id="patient-report-doctor-name" class="font-semibold text-gray-900"></p>
@@ -126,11 +126,19 @@
 function openPatientMedicalReportModal(appointmentId) {
   document.getElementById('patient-report-apt-id').value = appointmentId;
   loadPatientMedicalReport(appointmentId);
-  document.getElementById('patient-medical-report-modal').classList.remove('hidden');
+  if (typeof smoothOpenModal === 'function') {
+    smoothOpenModal('patient-medical-report-modal', { mode: 'class' });
+  } else {
+    document.getElementById('patient-medical-report-modal').classList.remove('hidden');
+  }
 }
 
 function closePatientMedicalReportModal() {
-  document.getElementById('patient-medical-report-modal').classList.add('hidden');
+  if (typeof smoothCloseModal === 'function') {
+    smoothCloseModal('patient-medical-report-modal', { mode: 'class' });
+  } else {
+    document.getElementById('patient-medical-report-modal').classList.add('hidden');
+  }
 }
 
 async function loadPatientMedicalReport(appointmentId) {

@@ -37,3 +37,78 @@ function formatDateShort(iso) {
 function logoutPatient() {
   window.location.href = `${API_BASE}/auth/logout.php`;
 }
+
+function resolveModalElement(modalOrId) {
+  if (!modalOrId) return null;
+  if (typeof modalOrId === "string") return document.getElementById(modalOrId);
+  return modalOrId;
+}
+
+function resolveModalPanel(modal, panelSelector) {
+  if (!modal) return null;
+  if (panelSelector) return modal.querySelector(panelSelector);
+  return modal.firstElementChild;
+}
+
+function smoothOpenModal(modalOrId, options = {}) {
+  const modal = resolveModalElement(modalOrId);
+  if (!modal) return;
+
+  const mode = options.mode || "class";
+  const showClass = options.showClass || "flex";
+  const hideClass = options.hideClass || "hidden";
+  const displayMode = options.displayMode || "flex";
+  const panel = resolveModalPanel(modal, options.panelSelector);
+
+  if (mode === "display") {
+    modal.style.display = displayMode;
+  } else {
+    modal.classList.remove(hideClass);
+    if (showClass) modal.classList.add(showClass);
+  }
+
+  modal.style.pointerEvents = "auto";
+  modal.style.transition = "opacity .22s ease";
+  modal.style.opacity = "0";
+
+  if (panel) {
+    panel.style.transition = "transform .24s ease, opacity .24s ease";
+    panel.style.transform = "translateY(10px) scale(0.97)";
+    panel.style.opacity = "0";
+  }
+
+  requestAnimationFrame(() => {
+    modal.style.opacity = "1";
+    if (panel) {
+      panel.style.transform = "translateY(0) scale(1)";
+      panel.style.opacity = "1";
+    }
+  });
+}
+
+function smoothCloseModal(modalOrId, options = {}) {
+  const modal = resolveModalElement(modalOrId);
+  if (!modal) return;
+
+  const mode = options.mode || "class";
+  const showClass = options.showClass || "flex";
+  const hideClass = options.hideClass || "hidden";
+  const duration = options.duration || 220;
+  const panel = resolveModalPanel(modal, options.panelSelector);
+
+  modal.style.opacity = "0";
+  if (panel) {
+    panel.style.transform = "translateY(10px) scale(0.97)";
+    panel.style.opacity = "0";
+  }
+
+  setTimeout(() => {
+    if (mode === "display") {
+      modal.style.display = "none";
+    } else {
+      modal.classList.add(hideClass);
+      if (showClass) modal.classList.remove(showClass);
+    }
+    modal.style.pointerEvents = "";
+  }, duration);
+}

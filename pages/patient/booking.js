@@ -330,7 +330,11 @@ document.getElementById("time").addEventListener("change", () => {
 
 // Close success modal
 document.getElementById("closeSuccessModal").addEventListener("click", () => {
-  document.getElementById("successModal").classList.add("hidden");
+  if (typeof smoothCloseModal === "function") {
+    smoothCloseModal("successModal", { mode: "class" });
+  } else {
+    document.getElementById("successModal").classList.add("hidden");
+  }
   window.parent.postMessage({ type: "patient-booking-done" }, "*");
 });
 

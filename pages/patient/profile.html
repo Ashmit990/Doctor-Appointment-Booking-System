@@ -6,25 +6,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Patient Profile Management</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     body {
       background: #f9fafb;
     }
     .primary-color {
-      color: #007e85;
+      color: #0d7377;
     }
     .bg-primary {
-      background-color: #007e85;
+      background-color: #0d7377;
     }
     .bg-primary-light {
-      background-color: rgba(0, 126, 133, 0.1);
+      background-color: rgba(13, 115, 119, 0.08);
     }
     .card-shadow {
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
     .sidebar {
-      background: #007e85;
+      background: #0d7377;
     }
     .nav-link {
       transition: all 0.3s ease;
@@ -61,9 +62,23 @@
     textarea:focus,
     select:focus {
       outline: none;
-      ring: 2px solid #007e85;
-      border-color: #007e85;
+      ring: 2px solid #0d7377;
+      border-color: #0d7377;
     }
+    /* PREMIUM PATIENT THEME START */
+    html { font-size: clamp(15px, 1vw, 17px); }
+    * { font-family: "Poppins", sans-serif; transition: color .18s ease, background-color .18s ease, transform .18s ease; }
+    main { overflow-y: auto; overflow-x: hidden; transition: transform .25s ease, opacity .25s ease; }
+    .primary-color { color: #0d7377; }
+    .bg-primary { background: linear-gradient(135deg,#0d7377 0%,#0a5a5d 100%); }
+    .bg-primary-light { background-color: rgba(13,115,119,0.08); }
+    .card-shadow { box-shadow: 0 20px 50px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06); }
+    .topbar-premium { background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(250,252,253,0.95) 100%); backdrop-filter: blur(10px); border-bottom:1px solid rgba(13,115,119,0.06); }
+    .sidebar { background: linear-gradient(180deg,#0d7377 0%,#0a5a5d 100%); box-shadow:4px 0 30px rgba(0,0,0,0.15); }
+    .nav-link{transition:all .3s; color:white;}
+    .nav-link:hover{background-color:rgba(255,255,255,0.12); transform:translateX(4px);} 
+    .nav-link.active{background:rgba(255,255,255,0.18);} 
+    /* PREMIUM PATIENT THEME END */
   </style>
 </head>
 
@@ -71,7 +86,7 @@
   <div class="flex flex-col md:flex-row h-screen overflow-hidden">
     <!-- SIDEBAR -->
     <aside
-      class="w-full md:w-60 bg-[#007E85] text-white flex flex-row md:flex-col items-center justify-around md:justify-start py-2 md:py-0 px-2 md:px-0 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] md:shadow-xl fixed bottom-0 md:sticky md:top-0 left-0 h-auto md:h-screen z-[100] overflow-x-auto md:overflow-y-auto">
+      class="w-full md:w-60 bg-[#0d7377] text-white flex flex-row md:flex-col items-center justify-around md:justify-start py-2 md:py-0 px-2 md:px-0 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] md:shadow-xl fixed bottom-0 md:sticky md:top-0 left-0 h-auto md:h-screen z-[100] overflow-x-auto md:overflow-y-auto">
 
       <div class="hidden md:flex w-full px-6 py-7 items-center gap-3 border-b border-white/10 shrink-0 mb-2">
         <img src="../../src/assets/Logo.svg" alt="Logo" class="w-8 h-8">
@@ -127,7 +142,7 @@
       <div class="p-3 md:p-6">
         <div class="w-full">
           <!-- HERO SECTION WITH STATS -->
-          <div class="bg-gradient-to-r from-[#007E85] to-[#005f65] rounded-2xl p-5 md:p-8 mb-5 text-white shadow-lg">
+          <div class="bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] rounded-2xl p-5 md:p-8 mb-5 text-white shadow-lg">
             <div class="flex items-start justify-between flex-col md:flex-row gap-3 mb-4">
               <div>
                 <p class="text-xs font-medium opacity-90 mb-1">Manage your details</p>

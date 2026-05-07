@@ -276,13 +276,13 @@ function renderAppointments(rows) {
           }
           ${
             item.status_key === "completed"
-              ? `<button type="button" data-view-report="${item.appointment_id}" class="view-report-btn w-full px-3 py-2 rounded-lg border border-[#007E85] bg-[#007E85] text-white hover:bg-[#006270] text-xs font-medium transition whitespace-nowrap text-center flex items-center justify-center gap-1">
+              ? `<button type="button" data-view-report="${item.appointment_id}" class="view-report-btn w-full px-3 py-2 rounded-lg border border-[#0d7377] bg-[#0d7377] text-white hover:bg-[#0a5a5d] text-xs font-medium transition whitespace-nowrap text-center flex items-center justify-center gap-1">
                 <i data-lucide="file-text" class="w-3 h-3"></i>
                 View Report
               </button>`
               : ""
           }
-          <button type="button" data-view-ticket="${item.appointment_id}" class="view-ticket-btn w-full px-3 py-2 rounded-lg border border-[#007E85] text-[#007E85] hover:bg-teal-50 text-xs font-medium transition whitespace-nowrap text-center">
+          <button type="button" data-view-ticket="${item.appointment_id}" class="view-ticket-btn w-full px-3 py-2 rounded-lg border border-[#0d7377] text-[#0d7377] hover:bg-teal-50 text-xs font-medium transition whitespace-nowrap text-center">
             View Ticket
           </button>
         </div>
@@ -374,12 +374,12 @@ function openTicketModal(apt) {
   ['bookingIframe', 'bookingModalIframe'].forEach(function(id) {
     const f = document.getElementById(id); if (f) f.style.pointerEvents = 'none';
   });
-  modal.style.display = 'flex';
+  smoothOpenModal(modal, { mode: 'display' });
 }
 
 function closeTicketModal() {
   const modal = document.getElementById('ticketModal');
-  if (modal) modal.style.display = 'none';
+  if (modal) smoothCloseModal(modal, { mode: 'display' });
   // Re-enable iframe pointer events
   ['bookingIframe', 'bookingModalIframe'].forEach(function(id) {
     const f = document.getElementById(id); if (f) f.style.pointerEvents = '';
@@ -402,7 +402,7 @@ function printTicket() {
     + '* { margin:0;padding:0;box-sizing:border-box; }'
     + 'body { font-family:"Segoe UI",Arial,sans-serif;background:#f4f6f8;display:flex;align-items:center;justify-content:center;min-height:100vh; }'
     + '.ticket { background:#fff;width:420px;border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.13); }'
-    + '.header { background:linear-gradient(135deg,#007E85 0%,#005f65 100%);padding:28px 28px 22px;color:#fff; }'
+    + '.header { background:linear-gradient(135deg,#0d7377 0%,#0a5a5d 100%);padding:28px 28px 22px;color:#fff; }'
     + '.header-top { display:flex;align-items:center;gap:14px;margin-bottom:6px; }'
     + '.logo { width:44px;height:44px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px; }'
     + '.header h1 { font-size:20px;font-weight:700; } .header p { font-size:11px;opacity:0.75;margin-top:1px; }'
@@ -413,7 +413,7 @@ function printTicket() {
     + '.row:last-child { border-bottom:none; }'
     + '.lbl { font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.6px; }'
     + '.val { font-size:14px;font-weight:600;color:#1e293b;text-align:right; }'
-    + '.cost { color:#007E85;font-size:16px;font-weight:700; }'
+    + '.cost { color:#0d7377;font-size:16px;font-weight:700; }'
     + '.footer { padding:14px 28px 22px;text-align:center; }'
     + '.footer p { font-size:10px;color:#94a3b8;margin-bottom:10px; }'
     + '.barcode { display:flex;justify-content:center;gap:2px;margin:8px auto; }'
@@ -522,8 +522,7 @@ async function openBookingModal() {
   iframe.style.height = "0px";
   if (inner) inner.style.height = "";
   iframe.src = `booking.html?t=${Date.now()}`;
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
+  smoothOpenModal(modal, { mode: 'class', panelSelector: '#bookingModalInner' });
 }
 
 function openRescheduleModal(appointmentId) {
@@ -534,8 +533,7 @@ function openRescheduleModal(appointmentId) {
   iframe.style.height = "0px";
   if (inner) inner.style.height = "";
   iframe.src = `booking.html?t=${Date.now()}`;
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
+  smoothOpenModal(modal, { mode: 'class', panelSelector: '#bookingModalInner' });
 
   iframe.onload = () => {
     // Auto-resize first
@@ -551,8 +549,7 @@ function openRescheduleModal(appointmentId) {
 function closeBookingModal() {
   const modal = document.getElementById("bookingModal");
   if (!modal) return;
-  modal.classList.add("hidden");
-  modal.classList.remove("flex");
+  smoothCloseModal(modal, { mode: 'class', panelSelector: '#bookingModalInner' });
 }
 
 function showSuccessToast(title, text) {
@@ -596,16 +593,14 @@ async function openDetailModal(id) {
       <p class="text-xs text-slate-400">Reschedule date shown above is your current scheduled visit. Use Reschedule on the card to pick a new slot if allowed.</p>
     </div>
   `;
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
+  smoothOpenModal(modal, { mode: 'class' });
 
   const missBtn = document.getElementById("detailRescheduleBtn");
   if (missBtn) {
     missBtn.classList.toggle("hidden", a.status_key !== "missed");
     missBtn.onclick = () => {
-      document.getElementById("detailModal").classList.add("hidden");
-      document.getElementById("detailModal").classList.remove("flex");
-      openRescheduleModal(id);
+      smoothCloseModal("detailModal", { mode: 'class' });
+      setTimeout(() => openRescheduleModal(id), 180);
     };
   }
 }
@@ -613,8 +608,7 @@ async function openDetailModal(id) {
 function closeDetailModal() {
   const modal = document.getElementById("detailModal");
   if (!modal) return;
-  modal.classList.add("hidden");
-  modal.classList.remove("flex");
+  smoothCloseModal(modal, { mode: 'class' });
 }
 
 filterButtons.forEach((button) => {
@@ -784,8 +778,7 @@ function openViewFeedbackModal(apt) {
   document.getElementById('feedback-apt-id').value = apt.appointment_id;
   document.getElementById('fb-view-doctor').textContent = apt.doctor_name || 'Doctor';
   document.getElementById('fb-view-text').textContent = apt.feedback || '(No written feedback)';
-  document.getElementById('feedbackModal').classList.remove('hidden');
-  document.getElementById('feedbackModal').classList.add('flex');
+  smoothOpenModal('feedbackModal', { mode: 'class' });
   showPanel('fbViewPanel');
 }
 
@@ -799,8 +792,7 @@ function openFeedbackModal(apt) {
   document.getElementById('feedback-text').value = '';
   document.getElementById('fb-back-btn').classList.add('hidden');
   document.getElementById('submitFeedbackBtn').textContent = 'Submit Review';
-  document.getElementById('feedbackModal').classList.remove('hidden');
-  document.getElementById('feedbackModal').classList.add('flex');
+  smoothOpenModal('feedbackModal', { mode: 'class' });
   showPanel('fbWritePanel');
 }
 
@@ -822,8 +814,7 @@ function switchToViewMode() {
 }
 
 function closeFeedbackModal() {
-  document.getElementById('feedbackModal').classList.add('hidden');
-  document.getElementById('feedbackModal').classList.remove('flex');
+  smoothCloseModal('feedbackModal', { mode: 'class' });
 }
 
 async function submitFeedback() {
@@ -912,10 +903,10 @@ function treatSwitchTab(tab) {
   document.getElementById('treatPanelGenerate').classList.toggle('hidden', !isGenerate);
   document.getElementById('treatPanelHistory').classList.toggle('hidden', isGenerate);
   document.getElementById('treatTabGenerate').className = isGenerate
-    ? 'px-5 py-2 rounded-xl text-sm font-semibold bg-[#007E85] text-white shadow-sm transition'
+    ? 'px-5 py-2 rounded-xl text-sm font-semibold bg-[#0d7377] text-white shadow-sm transition'
     : 'px-5 py-2 rounded-xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition';
   document.getElementById('treatTabHistory').className = !isGenerate
-    ? 'px-5 py-2 rounded-xl text-sm font-semibold bg-[#007E85] text-white shadow-sm transition'
+    ? 'px-5 py-2 rounded-xl text-sm font-semibold bg-[#0d7377] text-white shadow-sm transition'
     : 'px-5 py-2 rounded-xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition';
   if (!isGenerate) treatLoadTicketHistory();
 }
@@ -938,15 +929,15 @@ async function treatLoadCategories() {
       card.className = 'treat-category-card bg-white border-2 border-slate-100 rounded-2xl p-4 flex flex-col gap-3 cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lg';
       card.dataset.id = cat.id;
       card.innerHTML = `
-        <div class="w-11 h-11 rounded-xl bg-teal-50 flex items-center justify-center">
-          <i data-lucide="${treatIconFor(cat.name)}" class="w-5 h-5 text-[#007E85]"></i>
+          <div class="w-11 h-11 rounded-xl bg-teal-50 flex items-center justify-center">
+          <i data-lucide="${treatIconFor(cat.name)}" class="w-5 h-5 text-[#0d7377]"></i>
         </div>
         <div class="flex-1">
           <p class="text-sm font-bold text-slate-800">${escHtml(cat.name)}</p>
           <p class="text-xs text-slate-400 mt-0.5 leading-relaxed">${escHtml(cat.description || '')}</p>
         </div>
         <div class="flex justify-between items-center pt-2 border-t border-slate-100">
-          <span class="text-xs font-bold text-[#007E85]">Rs. ${Number(cat.estimated_cost).toFixed(2)}</span>
+          <span class="text-xs font-bold text-[#0d7377]">Rs. ${Number(cat.estimated_cost).toFixed(2)}</span>
           <span class="text-xs text-slate-400">${cat.duration_minutes} min</span>
         </div>
       `;
@@ -967,10 +958,10 @@ function treatSelectCategory(cat) {
     c.style.boxShadow   = '';
   });
   const card = document.querySelector(`.treat-category-card[data-id="${cat.id}"]`);
-  if (card) {
-    card.style.borderColor = '#007e85';
+    if (card) {
+    card.style.borderColor = '#0d7377';
     card.style.background  = '#f0fdfc';
-    card.style.boxShadow   = '0 0 0 2px #007e8540';
+    card.style.boxShadow   = '0 0 0 2px #0d737740';
   }
   const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
   setEl('treatSummaryName',     cat.name);
@@ -1012,13 +1003,13 @@ function treatShowTicketModal(ticket) {
   setEl('treatTktDuration', `${ticket.duration_minutes} min`);
   setEl('treatTktDate',     formatDateTimeShort(ticket.generated_at));
   const modal = document.getElementById('treatTicketModal');
-  if (modal) modal.style.display = 'flex';
+  if (modal) smoothOpenModal(modal, { mode: 'display' });
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function closeTreatTicketModal() {
   const modal = document.getElementById('treatTicketModal');
-  if (modal) modal.style.display = 'none';
+  if (modal) smoothCloseModal(modal, { mode: 'display' });
 }
 
 function treatPrintTicket() {
@@ -1032,14 +1023,14 @@ function treatPrintTicket() {
   const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Treatment Ticket</title><style>'
     + '* {margin:0;padding:0;box-sizing:border-box;} body{font-family:"Segoe UI",Arial,sans-serif;background:#f4f6f8;display:flex;align-items:center;justify-content:center;min-height:100vh;}'
     + '.ticket{background:#fff;width:420px;border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.13);}'
-    + '.header{background:linear-gradient(135deg,#007E85 0%,#005f65 100%);padding:28px 28px 22px;color:#fff;}'
+    + '.header{background:linear-gradient(135deg,#0d7377 0%,#0a5a5d 100%);padding:28px 28px 22px;color:#fff;}'
     + '.header-top{display:flex;align-items:center;gap:14px;margin-bottom:6px;} .logo{width:44px;height:44px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;}'
     + '.header h1{font-size:20px;font-weight:700;} .header p{font-size:11px;opacity:0.75;margin-top:1px;}'
     + '.tid{margin-top:14px;background:rgba(255,255,255,0.15);border-radius:8px;padding:8px 14px;display:inline-block;font-size:13px;font-weight:600;letter-spacing:1px;}'
     + '.divider{border:none;border-top:2px dashed #e2e8f0;margin:0 24px;} .body{padding:22px 28px;}'
     + '.row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9;} .row:last-child{border-bottom:none;}'
     + '.lbl{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.6px;} .val{font-size:14px;font-weight:600;color:#1e293b;text-align:right;}'
-    + '.cost{color:#007E85;font-size:16px;font-weight:700;} .footer{padding:14px 28px 22px;text-align:center;}'
+    + '.cost{color:#0d7377;font-size:16px;font-weight:700;} .footer{padding:14px 28px 22px;text-align:center;}'
     + '.footer p{font-size:10px;color:#94a3b8;margin-bottom:10px;} .barcode{display:flex;justify-content:center;gap:2px;margin:8px auto;}'
     + '.barcode span{display:inline-block;background:#1e293b;width:3px;border-radius:1px;}'
     + '@media print{body{background:none;} .ticket{box-shadow:none;width:100%;}}'
@@ -1081,7 +1072,7 @@ async function treatLoadTicketHistory() {
       div.innerHTML = `
         <div class="flex items-center gap-3 min-w-0">
           <div class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center shrink-0">
-            <i data-lucide="ticket" class="w-5 h-5 text-[#007E85]"></i>
+            <i data-lucide="ticket" class="w-5 h-5 text-[#0d7377]"></i>
           </div>
           <div class="min-w-0">
             <p class="text-sm font-bold text-slate-800 truncate">${escHtml(t.category)}</p>
@@ -1089,7 +1080,7 @@ async function treatLoadTicketHistory() {
           </div>
         </div>
         <div class="text-right shrink-0">
-          <p class="text-sm font-bold text-[#007E85]">Rs. ${Number(t.cost).toFixed(2)}</p>
+          <p class="text-sm font-bold text-[#0d7377]">Rs. ${Number(t.cost).toFixed(2)}</p>
           <p class="text-xs text-slate-400">${t.duration_minutes} min · ${formatDateTimeShort(t.generated_at)}</p>
         </div>
       `;

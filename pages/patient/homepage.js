@@ -284,12 +284,12 @@ function buildCalendarGrid(container, year, month, compact) {
     if (isToday) {
       cell.classList.add("font-semibold");
       if (compact) {
-        cell.style.backgroundColor = "#007e85";
+        cell.style.backgroundColor = "#0d7377";
         cell.style.color = "#fff";
         cell.style.borderRadius = "0.5rem";
       } else {
-        cell.style.backgroundColor = "#e0f2f2";
-        cell.style.color = "#007e85";
+        cell.style.backgroundColor = "#eaf3f3";
+        cell.style.color = "#0d7377";
       }
     } else if (isPast) {
       cell.style.color = "#d1d5db";
@@ -350,9 +350,9 @@ function clearAppointmentHighlights() {
       if (el)
         el.classList.remove(
           "ring-2",
-          "ring-[#007E85]",
+          "ring-[#0d7377]",
           "ring-offset-2",
-          "shadow-[0_0_0_3px_#007E8540]",
+          "shadow-[0_0_0_3px_0d737740]",
         );
     },
   );
@@ -367,8 +367,8 @@ function highlightTodayStatusForDate(dateStr) {
   const todayCard = document.getElementById("todayBookingCard");
   if (todayDateEl && todayCard && !todayCard.classList.contains("hidden")) {
     const cardDate = (todayDateEl.textContent || "").trim();
-    if (cardDate === dateStr) {
-      todayCard.classList.add("ring-2", "ring-[#007E85]", "ring-offset-2");
+      if (cardDate === dateStr) {
+      todayCard.classList.add("ring-2", "ring-[#0d7377]", "ring-offset-2");
       return;
     }
   }
@@ -380,12 +380,12 @@ function highlightTodayStatusForDate(dateStr) {
     // nextBookingDate may be formatted, so also check raw date stored in dataset
     const rawDate = nextCard.dataset.aptDate || "";
     const displayDate = (nextDateEl.textContent || "").trim();
-    if (
+      if (
       rawDate === dateStr ||
       displayDate === dateStr ||
       formatDateShort(dateStr) === displayDate
     ) {
-      nextCard.classList.add("ring-2", "ring-[#007E85]", "ring-offset-2");
+      nextCard.classList.add("ring-2", "ring-[#0d7377]", "ring-offset-2");
     }
   }
 }
@@ -403,13 +403,17 @@ async function openFullCalendar() {
   if (grid) buildCalendarGrid(grid, calViewYear, calViewMonth, false);
   document.getElementById("calendarDayDetail").innerHTML =
     '<p class="text-sm text-slate-500">Select a date to see appointments.</p>';
-  document.getElementById("calendarModal").classList.remove("hidden");
-  document.getElementById("calendarModal").classList.add("flex");
+  smoothOpenModal("calendarModal", {
+    mode: "class",
+    panelSelector: ".cal-modal-scroll",
+  });
 }
 
 function closeCalendarPopup() {
-  document.getElementById("calendarModal").classList.add("hidden");
-  document.getElementById("calendarModal").classList.remove("flex");
+  smoothCloseModal("calendarModal", {
+    mode: "class",
+    panelSelector: ".cal-modal-scroll",
+  });
 }
 
 async function selectCalendarDate(dateStr) {
