@@ -228,6 +228,30 @@ try {
     $appt_reason = $booking['reason'] ?? 'Appointment booked via Khalti payment';
     $room_num = 'Room A1';
 
+    // Double-check conflict at callback time to avoid race-condition double booking.
+    $conf = $conn->prepare("SELECT appointment_id FROM appointments WHERE patient_id = ? AND app_date = ? AND status <> 'Cancelled' LIMIT 1");
+    $conf->bind_param('ss', $payment['patient_id'], $appt_date);
+    $conf->execute();
+    $has_conflict = (bool) $conf->get_result()->fetch_assoc();
+    $conf->close();
+
+    if ($has_conflict) {
+        $markConflictStmt = $conn->prepare("UPDATE appointment_payments SET payment_status = 'Failed', callback_status = 'BookingConflict', updated_at = NOW() WHERE payment_id = ?");
+        $markConflictStmt->bind_param('i', $payment['payment_id']);
+        $markConflictStmt->execute();
+        $markConflictStmt->close();
+
+        $releaseStmt = $conn->prepare("UPDATE doctor_availability SET status = 'Available' WHERE avail_id = ?");
+        $releaseStmt->bind_param('i', $payment['avail_id']);
+        $releaseStmt->execute();
+        $releaseStmt->close();
+
+        $conn->commit();
+        http_response_code(409);
+        $render_response(false, 'Booking Conflict', 'You already have an appointment on this date. Multiple bookings on the same day are not allowed.', $pidx, $verified_txn_id);
+        exit;
+    }
+
     // Create appointment record (use actual column names: app_date, app_time)
     $appt_insert = $conn->prepare("
         INSERT INTO appointments 

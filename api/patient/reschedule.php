@@ -90,6 +90,31 @@ try {
     $newDate = $slot['available_date'];
     $newTime = $slot['start_time'];
 
+        // Prevent double booking: one active appointment per patient per day.
+        $conf = $conn->prepare("
+            SELECT appointment_id
+            FROM appointments
+            WHERE patient_id = ?
+              AND app_date = ?
+              AND status <> 'Cancelled'
+              AND appointment_id <> ?
+            LIMIT 1
+        ");
+        $conf->bind_param("ssi", $patient_id, $newDate, $appointment_id);
+        $conf->execute();
+        $has_conflict = (bool) $conf->get_result()->fetch_assoc();
+        $conf->close();
+
+        if ($has_conflict) {
+            $conn->rollback();
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'You already have an appointment on this date, so you cannot book another doctor on the same day.'
+            ]);
+            $conn->close();
+            exit;
+        }
+
     $up = $conn->prepare("
         UPDATE appointments
         SET app_date = ?, app_time = ?, status = 'Upcoming'

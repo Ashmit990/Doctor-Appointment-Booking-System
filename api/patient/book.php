@@ -57,6 +57,24 @@ try {
         exit;
     }
 
+    // Prevent double booking: one active appointment per patient per day.
+    $app_date = (string) $slot['available_date'];
+    $conf = $conn->prepare("SELECT appointment_id FROM appointments WHERE patient_id = ? AND app_date = ? AND status <> 'Cancelled' LIMIT 1");
+    $conf->bind_param("ss", $patient_id, $app_date);
+    $conf->execute();
+    $has_conflict = (bool) $conf->get_result()->fetch_assoc();
+    $conf->close();
+
+    if ($has_conflict) {
+        $conn->rollback();
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'You already have an appointment on this date, so you cannot book another doctor on the same day.'
+        ]);
+        $conn->close();
+        exit;
+    }
+
     $upd = $conn->prepare("UPDATE doctor_availability SET status = 'Booked' WHERE avail_id = ? AND status = 'Available'");
     $upd->bind_param("i", $avail_id);
     if (!$upd->execute()) {
@@ -76,7 +94,6 @@ try {
     }
     $upd->close();
 
-    $app_date = (string) $slot['available_date'];
     $app_time = (string) $slot['start_time'];
     if (strlen($app_time) > 8) {
         $app_time = substr($app_time, 0, 8);

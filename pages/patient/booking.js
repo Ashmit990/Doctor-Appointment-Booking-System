@@ -72,6 +72,45 @@ function closePaymentPanel() {
   notifyParentResize();
 }
 
+function setBookingConflictMessage(message = "") {
+  const msgEl = document.getElementById("bookingConflictMessage");
+  if (!msgEl) return;
+  const text = String(message || "").trim();
+  if (!text) {
+    msgEl.textContent = "";
+    msgEl.classList.add("hidden");
+    notifyParentResize();
+    return;
+  }
+  msgEl.textContent = text;
+  msgEl.classList.remove("hidden");
+  notifyParentResize();
+}
+
+async function hasSameDayBookingConflict(dateStr, excludeAppointmentId = null) {
+  if (!dateStr) return false;
+  try {
+    const r = await fetch(
+      `${API_BASE}/patient/appointments_by_day.php?date=${encodeURIComponent(dateStr)}`,
+      { credentials: "include" },
+    );
+    const j = await r.json();
+    if (j.status !== "success" || !Array.isArray(j.data)) return false;
+
+    return j.data.some((apt) => {
+      const status = String(apt.status || "").toLowerCase();
+      const isCancelled = status === "cancelled";
+      const sameAsEdited =
+        excludeAppointmentId != null &&
+        Number(apt.appointment_id) === Number(excludeAppointmentId);
+      return !isCancelled && !sameAsEdited;
+    });
+  } catch (err) {
+    console.error("Conflict check failed:", err);
+    return false;
+  }
+}
+
 async function startKhaltiPayment() {
   if (!pendingBookingRequest) {
     setPaymentStatusMessage("No booking data found. Please submit the form again.", "error");
@@ -101,6 +140,9 @@ async function startKhaltiPayment() {
 
     if (j.status !== "success") {
       setPaymentStatusMessage(j.message || "Could not start Khalti payment.", "error");
+      if (/already have an appointment|same day/i.test(String(j.message || ""))) {
+        setBookingConflictMessage(j.message);
+      }
       if (proceedBtn) {
         proceedBtn.disabled = false;
         proceedBtn.textContent = "Continue to Khalti";
@@ -315,12 +357,39 @@ document.getElementById("doctor").addEventListener("change", async () => {
   updatePrice();
   const doctorId = document.getElementById("doctor").value;
   await loadDates(doctorId);
+  setBookingConflictMessage("");
+
+  const confirmBtn = document.getElementById("confirmBtn");
+  if (confirmBtn) {
+    confirmBtn.disabled = false;
+    confirmBtn.classList.remove("opacity-60", "cursor-not-allowed");
+    confirmBtn.title = "";
+  }
 });
 
 document.getElementById("date").addEventListener("change", async () => {
   const doctorId = document.getElementById("doctor").value;
   const dateStr = document.getElementById("date").value;
   await loadSlots(doctorId, dateStr);
+
+  const confirmBtn = document.getElementById("confirmBtn");
+  if (!confirmBtn || !dateStr) {
+    setBookingConflictMessage("");
+    return;
+  }
+
+  const hasConflict = await hasSameDayBookingConflict(dateStr, rescheduleAppointmentId);
+  if (hasConflict) {
+    confirmBtn.disabled = true;
+    confirmBtn.classList.add("opacity-60", "cursor-not-allowed");
+    confirmBtn.title = "You already have an appointment on this date.";
+    setBookingConflictMessage("You already have an appointment on this date, so you cannot book another doctor on the same day. Please choose a different date.");
+  } else {
+    confirmBtn.disabled = false;
+    confirmBtn.classList.remove("opacity-60", "cursor-not-allowed");
+    confirmBtn.title = "";
+    setBookingConflictMessage("");
+  }
 });
 
 document.getElementById("time").addEventListener("change", () => {
@@ -371,11 +440,19 @@ bookingForm.addEventListener("submit", async (e) => {
   const doctorId = document.getElementById("doctor").value;
   const availId = parseInt(document.getElementById("availId").value, 10);
   const description = document.getElementById("description").value.trim();
+  const selectedDate = document.getElementById("date").value;
 
   if (!doctorId || !availId) {
     alert("Please choose doctor, date, and an available time slot.");
     return;
   }
+
+  const hasConflict = await hasSameDayBookingConflict(selectedDate, rescheduleAppointmentId);
+  if (hasConflict) {
+    setBookingConflictMessage("You have already booked an appointment on this date, so booking another doctor on the same day is not allowed.");
+    return;
+  }
+  setBookingConflictMessage("");
 
   if (!rescheduleAppointmentId) {
     pendingBookingRequest = {
@@ -442,6 +519,7 @@ bookingForm.addEventListener("submit", async (e) => {
     rescheduleAppointmentId = null;
     document.getElementById("confirmBtn").textContent = "Confirm Booking";
     pendingBookingRequest = null;
+    setBookingConflictMessage("");
     closePaymentPanel();
 
     // Notify parent — parent handles the single success popup

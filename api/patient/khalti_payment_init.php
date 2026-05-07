@@ -107,6 +107,23 @@ try {
         exit;
     }
 
+    // Prevent double booking: one active appointment per patient per day.
+    $conf = $conn->prepare("SELECT appointment_id FROM appointments WHERE patient_id = ? AND app_date = ? AND status <> 'Cancelled' LIMIT 1");
+    $conf->bind_param('ss', $patient_id, $slot['available_date']);
+    $conf->execute();
+    $has_conflict = (bool) $conf->get_result()->fetch_assoc();
+    $conf->close();
+
+    if ($has_conflict) {
+        $conn->rollback();
+        http_response_code(409);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'You already have an appointment on this date. Multiple bookings on the same day are not allowed.'
+        ]);
+        exit;
+    }
+
     // Reserve slot by marking as Booked
     $bookSlot = $conn->prepare("UPDATE doctor_availability SET status = 'Booked' WHERE avail_id = ?");
     $bookSlot->bind_param('i', $avail_id);

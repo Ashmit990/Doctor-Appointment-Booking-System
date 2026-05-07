@@ -13,6 +13,27 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Doctor') {
 $user_id = $_SESSION['user_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    // First check if user has already completed the one-time schedule setup
+    $user_check_stmt = $conn->prepare("SELECT schedule_setup_completed FROM users WHERE user_id = ? AND role = 'Doctor'");
+    $user_check_stmt->bind_param("s", $user_id);
+    $user_check_stmt->execute();
+    $user_check_result = $user_check_stmt->get_result();
+    $user_row = $user_check_result->fetch_assoc();
+    $user_check_stmt->close();
+
+    if (!empty($user_row) && (bool)$user_row['schedule_setup_completed']) {
+        // User already completed initial setup — report as completed so popup won't show again
+        echo json_encode([
+            'status' => 'success',
+            'schedule_setup_completed' => true,
+            'week_start' => null,
+            'week_end' => null,
+            'slots_found' => 0
+        ]);
+        $conn->close();
+        exit;
+    }
+
     // Check if doctor has slots set for THIS WEEK
     // Calculate this week's Sunday and Saturday
     $today = new DateTime();
@@ -53,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     
     echo json_encode([
         'status' => 'success',
+        // If there are available slots this week we consider setup satisfied for now
         'schedule_setup_completed' => $has_slots_this_week,
         'week_start' => $weekStartStr,
         'week_end' => $weekEndStr,
