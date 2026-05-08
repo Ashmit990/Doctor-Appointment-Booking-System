@@ -18,7 +18,8 @@ try {
             e.payment_date,
             a.app_date,
             u.full_name as patient_name,
-            'Paid' as status
+            e.remarks,
+            'Appointment Complete' as status
         FROM earnings e
         JOIN appointments a ON e.appointment_id = a.appointment_id
         JOIN users u ON a.patient_id = u.user_id

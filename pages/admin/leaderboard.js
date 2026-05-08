@@ -156,7 +156,7 @@ function renderLeaderboard(doctors) {
         <td class="px-5 py-4 hidden md:table-cell">
           <div class="flex flex-col gap-1 w-32">
             <div class="flex justify-between text-[10px] font-bold text-gray-400">
-              <span>${doc.performance}%</span>
+              <span></span>
               <span>${doc.completed} Appts</span>
             </div>
             <div class="perf-bar-bg">
@@ -227,7 +227,7 @@ function showDoctorDetails(id) {
       <div class="space-y-3">
         <div class="flex justify-between items-end">
           <p class="text-xs font-bold text-gray-500 uppercase">Overall Performance</p>
-          <p class="text-sm font-black text-teal">${doc.performance}%</p>
+          <p class="text-sm font-black text-teal"></p>
         </div>
         <div class="perf-bar-bg h-3">
           <div class="perf-bar-fill h-3" style="width: ${doc.performance}%"></div>
