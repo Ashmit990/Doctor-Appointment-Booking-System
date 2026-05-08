@@ -707,9 +707,11 @@
                 <input
                   id="signupAge"
                   type="number"
+                  min="1"
+                  max="120"
                   class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
                   placeholder=" "
-                  oninput="clearErr('signupAge')"
+                  oninput="if(this.value < 0) this.value = Math.abs(this.value); clearErr('signupAge')"
                 />
                 <p
                   id="signupAge_err"
@@ -1335,8 +1337,8 @@
         },
         age(v) {
           if (!v) return "Age is required.";
-          if (!/^\d+$/.test(v)) return "Age must be a whole number.";
           const n = parseInt(v, 10);
+          if (isNaN(n) || n <= 0) return "Age must be a positive number.";
           if (n < 18) return "You must be at least 18 years old.";
           if (n > 120) return "Please enter a valid age.";
           return null;
