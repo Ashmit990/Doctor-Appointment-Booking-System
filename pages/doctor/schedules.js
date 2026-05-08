@@ -340,7 +340,7 @@ async function loadScheduleForDate(date) {
 
     const manageBtn = document.getElementById("manage-day-btn");
     if (manageBtn) {
-        manageBtn.classList.remove("hidden");
+      manageBtn.style.display = "inline-flex";
         if (isPastDay || (isToday && currentHour >= 17)) {
             manageBtn.disabled = true;
             manageBtn.classList.add("opacity-50", "cursor-not-allowed");

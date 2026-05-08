@@ -517,8 +517,73 @@
         }
 
         @media (max-width: 1024px) {
+            main {
+                height: auto;
+                min-height: 100vh;
+            }
+
             .page-content-container {
                 grid-template-columns: 1fr;
+                height: auto;
+                max-height: none;
+                overflow: visible;
+            }
+
+            .full-screen-panel {
+                height: auto;
+                min-height: 0;
+            }
+
+            .calendar-panel,
+            .schedule-panel {
+                padding-left: 1rem;
+                padding-right: 1rem;
+                padding-top: 1rem;
+                padding-bottom: 1rem;
+            }
+
+            .schedule-panel {
+                border-left: none;
+                border-top: 1px solid rgba(229, 231, 235, 1);
+            }
+
+            .calendar-panel .calendar-snapshot-container {
+                padding-top: 0.75rem;
+            }
+
+            .schedule-panel .schedule-scroll {
+                overflow: visible;
+            }
+
+            .schedule-panel #daily-schedule-grid {
+                min-height: auto;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .calendar-panel,
+            .schedule-panel {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
+
+            .calendar-panel #schedule-calendar-days {
+                gap: 1px;
+            }
+
+            .calendar-day {
+                min-height: 36px;
+                font-size: 12px;
+                border-radius: 7px;
+            }
+
+            .schedule-snapshot-premium {
+                margin-top: 0;
+                padding: 1rem;
+            }
+
+            .schedule-sticky-footer {
+                position: static;
             }
         }
 
@@ -819,7 +884,7 @@
             <!-- PAGE CONTENT -->
             <div class="page-content-container">
                 <!-- Left Column: Calendar -->
-                <div class="full-screen-panel premium-card calendar-panel rounded-none shadow-none p-7 overflow-hidden flex flex-col" style="background: linear-gradient(180deg, #fafbfc 0%, #f3f5f7 100%);">
+                <div class="full-screen-panel premium-card calendar-panel rounded-none shadow-none p-4 sm:p-6 lg:p-7 overflow-hidden flex flex-col" style="background: linear-gradient(180deg, #fafbfc 0%, #f3f5f7 100%);">
                     <!-- Calendar Header -->
                     <div class="flex-shrink-0">
                         <div class="flex items-center justify-between mb-3 pb-2 border-b border-gray-200">
@@ -853,7 +918,7 @@
                     </div>
 
                     <!-- Schedule Snapshot - Always Visible -->
-                    <div class="schedule-snapshot-premium rounded-[12px] p-6 shadow-md -mt-8 md:-mt-2">
+                    <div class="schedule-snapshot-premium rounded-[12px] md:p-4 p- sm:p-5 lg:p-6 shadow-md mt-1 md:-mt-2">
                         <div class="snapshot-header">
                             <div class="snapshot-label">
                                 <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
@@ -881,10 +946,10 @@
                 </div>
 
                 <!-- Right Column: Daily Schedule fixed grid -->
-                <div class="full-screen-panel premium-card schedule-panel rounded-none shadow-none p-8 border-l border-gray-200" style="background: #ffffff;">
+                <div class="full-screen-panel premium-card schedule-panel rounded-none shadow-none p-4 sm:p-6 lg:p-8 border-l border-gray-200" style="background: #ffffff;">
                     <!-- Fixed Header -->
                     <div class="schedule-header flex-shrink-0 mb-3 pb-3 border-b border-gray-200">
-                        <div class="flex items-center justify-between">
+                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 lg:gap-0">
                             <div>
                                 <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
                                     <div class="w-4 h-4 rounded-full bg-gradient-to-br from-teal-500 to-teal-600"></div>
@@ -896,7 +961,8 @@
                                 </p>
                             </div>
                             <button id="manage-day-btn" onclick="openManageDayModal()"
-                                class="bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white hover:from-[#0a5a5d] hover:to-[#084b4d] px-6 py-2.5 rounded-md text-sm font-semibold transition-all duration-300 shadow-[0_4px_12px_rgba(13,115,119,0.3)] hover:shadow-[0_6px_16px_rgba(13,115,119,0.4)] hover:-translate-y-0.5 flex items-center gap-2 hidden border border-[#0d7377]/50 group">
+                                style="display: none;"
+                                class="bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white hover:from-[#0a5a5d] hover:to-[#084b4d] px-6 py-2.5 rounded-md text-sm font-semibold transition-all duration-300 shadow-[0_4px_12px_rgba(13,115,119,0.3)] hover:shadow-[0_6px_16px_rgba(13,115,119,0.4)] hover:-translate-y-0.5 inline-flex items-center justify-center gap-2 border border-[#0d7377]/50 group w-full lg:w-auto">
                                 <i data-lucide="settings"
                                     class="w-4 h-4 group-hover:rotate-90 transition-transform duration-500"></i> Manage
                                 Schedule
