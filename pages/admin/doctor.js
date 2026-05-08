@@ -80,7 +80,7 @@ function viewDoctorDetails(doctorId) {
 
       if (result.status === "success" && result.data) {
         const doc = result.data;
-        modalTitle.textContent = `Dr. ${doc.full_name || "Doctor"} - Complete Profile`;
+        modalTitle.textContent = `${doc.full_name || "Doctor"} - Complete Profile`;
 
         modalBody.innerHTML = `
                 <div class="space-y-5">
@@ -93,7 +93,7 @@ function viewDoctorDetails(doctorId) {
                             </svg>
                         </div>
                         <div>
-                            <h4 class="text-xl font-bold text-gray-800">Dr. ${escapeHtml(doc.full_name || "N/A")}</h4>
+                            <h4 class="text-xl font-bold text-gray-800">${escapeHtml(doc.full_name || "N/A")}</h4>
                             <p class="text-teal-600 font-medium">${escapeHtml(doc.specialization || "Specialization not specified")}</p>
                         </div>
                     </div>

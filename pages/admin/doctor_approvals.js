@@ -216,7 +216,7 @@ function openConfirmModal(action, approvalId, doctorName) {
 
   const actionText = action === "approve" ? "Approve" : "Reject";
   modalTitle.textContent = `${actionText} Doctor`;
-  modalMessage.textContent = `Are you sure you want to ${action.toLowerCase()} Dr. ${doctorName}?`;
+  modalMessage.textContent = `Are you sure you want to ${action.toLowerCase()} ${doctorName}?`;
 
   if (action === "approve") {
     modalConfirmBtn.className =
