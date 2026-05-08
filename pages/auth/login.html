@@ -60,6 +60,26 @@
         }
       }
 
+      @keyframes backdropFadeIn {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes cardScaleIn {
+        0% {
+          opacity: 0;
+          transform: scale(0.95) translateY(10px);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
       .animate-fade-in {
         animation: fadeIn 0.6s ease-out forwards;
       }
@@ -73,9 +93,15 @@
       /* Modal */
       #forgotModal {
         display: none;
+        opacity: 0;
       }
       #forgotModal.show {
         display: flex;
+        animation: backdropFadeIn 0.5s ease-out forwards;
+      }
+
+      #forgotModal.show > div {
+        animation: cardScaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
       }
 
       /* Back Button Style - Arrow Only */
