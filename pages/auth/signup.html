@@ -460,7 +460,11 @@
       >
         <div class="max-w-md w-full mx-auto lg:mx-0 py-10 lg:py-14">
           <!-- Logo -->
-          <div class="mb-8 flex flex-col items-start" data-scroll-animation="animate-slide-up" data-delay="0.1s">
+          <div
+            class="mb-8 flex flex-col items-start"
+            data-scroll-animation="animate-slide-up"
+            data-delay="0.1s"
+          >
             <div class="flex items-center gap-3 mb-4">
               <img
                 src="../../src/assets/logo.svg"
@@ -482,14 +486,23 @@
           </div>
 
           <!-- Step Indicators -->
-          <div class="step-indicator mb-6" data-scroll-animation="animate-slide-up" data-delay="0.2s">
+          <div
+            class="step-indicator mb-6"
+            data-scroll-animation="animate-slide-up"
+            data-delay="0.2s"
+          >
             <span class="step-badge active" id="step1Badge">1. Identity</span>
             <span class="step-badge" id="step2Badge"
               >2. Contact &amp; Security</span
             >
           </div>
 
-          <div id="signupForm" class="space-y-4" data-scroll-animation="animate-fade-in" data-delay="0.3s">
+          <div
+            id="signupForm"
+            class="space-y-4"
+            data-scroll-animation="animate-fade-in"
+            data-delay="0.3s"
+          >
             <!-- ── STEP 1 ── -->
             <div id="step1" class="step-content space-y-4 xl:space-y-5">
               <div class="group">
@@ -520,7 +533,7 @@
                   type="email"
                   class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
                   placeholder=" "
-                  oninput="clearErr('signupEmail')"
+                  oninput="this.value = this.value.toLowerCase(); clearErr('signupEmail')"
                 />
                 <p
                   id="signupEmail_err"
@@ -711,7 +724,10 @@
                   max="120"
                   class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
                   placeholder=" "
-                  oninput="if(this.value < 0) this.value = Math.abs(this.value); clearErr('signupAge')"
+                  oninput="
+                    if (this.value < 0) this.value = Math.abs(this.value);
+                    clearErr('signupAge');
+                  "
                 />
                 <p
                   id="signupAge_err"
@@ -1020,8 +1036,10 @@
         if (!email) {
           showErr("signupEmail", "Email address is required.");
           ok = false;
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-          showErr("signupEmail", "Enter a valid email address.");
+        } else if (
+          !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
+        ) {
+          showErr("signupEmail", "Please enter a valid email address.");
           ok = false;
         } else clearErr("signupEmail");
 
@@ -1487,36 +1505,38 @@
       //  Page entrance animations (staggered) - mimic landing page
       // ═══════════════════════════════════════════════════════════════
       function initEntranceAnimations() {
-        const nodes = Array.from(document.querySelectorAll('[data-scroll-animation]'));
+        const nodes = Array.from(
+          document.querySelectorAll("[data-scroll-animation]"),
+        );
         nodes.forEach((el) => {
-          const anim = el.getAttribute('data-scroll-animation');
-          const delayAttr = el.getAttribute('data-delay') || '0s';
+          const anim = el.getAttribute("data-scroll-animation");
+          const delayAttr = el.getAttribute("data-delay") || "0s";
           let delayMs = 0;
           try {
-            if (delayAttr.endsWith('ms')) delayMs = parseFloat(delayAttr);
-            else if (delayAttr.endsWith('s')) delayMs = parseFloat(delayAttr) * 1000;
+            if (delayAttr.endsWith("ms")) delayMs = parseFloat(delayAttr);
+            else if (delayAttr.endsWith("s"))
+              delayMs = parseFloat(delayAttr) * 1000;
             else delayMs = parseFloat(delayAttr) * 1000;
           } catch (e) {
             delayMs = 0;
           }
 
           // Start hidden to avoid flash
-          el.style.opacity = '0';
+          el.style.opacity = "0";
           setTimeout(() => {
             if (anim) el.classList.add(anim);
-            el.style.opacity = '';
+            el.style.opacity = "";
           }, delayMs + 80);
         });
       }
 
-      document.addEventListener('DOMContentLoaded', () => {
+      document.addEventListener("DOMContentLoaded", () => {
         try {
           initEntranceAnimations();
         } catch (e) {
-          console.error('Entrance animations failed', e);
+          console.error("Entrance animations failed", e);
         }
       });
-
     </script>
   </body>
 </html>

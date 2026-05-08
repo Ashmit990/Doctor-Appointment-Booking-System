@@ -32,7 +32,7 @@ if (!$input) {
 $doctor_id = $_SESSION['user_id'];
 $medical_id = trim($input['medical_id'] ?? '');
 $full_name = trim($input['full_name'] ?? '');
-$email = trim($input['email'] ?? '');
+$email = strtolower(trim($input['email'] ?? ''));
 $specialization = trim($input['specialization'] ?? '');
 $phone = trim($input['phone'] ?? '');
 $experience = trim($input['experience'] ?? '');

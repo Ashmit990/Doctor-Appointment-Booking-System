@@ -99,7 +99,7 @@ try {
 
     // Trim and sanitize inputs
     $full_name = trim($input['full_name'] ?? '');
-    $email = trim($input['email'] ?? '');
+    $email = strtolower(trim($input['email'] ?? ''));
     $age = isset($input['age']) ? (int)$input['age'] : null;
     $dob = !empty($input['dob']) ? trim($input['dob']) : null;
     $blood_group = trim($input['blood_group'] ?? '') ?: null;

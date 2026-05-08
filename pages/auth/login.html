@@ -144,6 +144,7 @@
           <h2 class="text-[#007E85] font-black text-2xl mb-2">Forgot Password?</h2>
           <p class="text-gray-500 text-sm mb-6 leading-relaxed">Enter your registered email and we'll send you a verification code.</p>
           <input id="fp-email" type="email" placeholder="Enter your email"
+            oninput="this.value = this.value.toLowerCase()"
             class="w-full border-b-2 border-[#007E85] bg-transparent focus:outline-none pb-2 text-gray-800 text-base mb-4 text-left tracking-normal"
           />
           <p id="fp-step1-error" class="hidden text-red-500 text-xs mb-3 text-left"></p>
@@ -289,6 +290,7 @@
             <input
               id="loginEmail"
               type="email"
+              oninput="this.value = this.value.toLowerCase()"
               class="w-full border-b-2 border-[#007E85] bg-transparent focus:outline-none pb-2 text-gray-800 text-lg"
             />
           </div>

@@ -5,7 +5,7 @@ header('Content-Type: application/json');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $full_name    = trim($_POST['full_name'] ?? '');
-    $email        = trim($_POST['email'] ?? '');
+    $email        = strtolower(trim($_POST['email'] ?? ''));
     $phone        = trim($_POST['phone'] ?? '');
     $age          = (int)($_POST['age'] ?? 0);
     $role         = ($_POST['role'] ?? '') === 'Medical Professional' ? 'Doctor' : 'Patient';
@@ -20,6 +20,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // ── Basic required-field check ──────────────────────────────────────────
     if (empty($full_name) || empty($email) || empty($password)) {
         echo json_encode(["success" => false, "message" => "Required fields are missing."]);
+        exit;
+    }
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo json_encode(["success" => false, "message" => "Invalid email format."]);
         exit;
     }
 
