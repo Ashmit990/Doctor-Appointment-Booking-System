@@ -28,7 +28,7 @@ function normalizeAlphaNumericWithSpace(value) {
 }
 
 function normalizeEmailValue(value) {
-  return (value || '').replace(/\s/g, '').toLowerCase();
+  return (value || '').replace(/[^A-Za-z0-9.@]/g, '').toLowerCase();
 }
 
 function initializeElements() {
@@ -330,10 +330,10 @@ function validateForm() {
     setFieldError("editEmail", "emailError", "Email is required", true);
     isValid = false;
   } else if (!isValidEmail(email)) {
-    setFieldError("editEmail", "emailError", "Please enter a valid email address", true);
+    setFieldError("editEmail", "emailError", "Use only letters, numbers, dot and @ in the email", true);
     isValid = false;
-  } else if (/\s/.test(email)) {
-    setFieldError("editEmail", "emailError", "Email cannot contain spaces", true);
+  } else if (/[^A-Za-z0-9.@]/.test(email)) {
+    setFieldError("editEmail", "emailError", "Email can contain only letters, numbers, dot and @", true);
     isValid = false;
   }
 

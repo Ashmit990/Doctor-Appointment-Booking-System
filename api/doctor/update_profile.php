@@ -28,6 +28,10 @@ function is_alphanumeric_with_space($value) {
     return is_string($value) && preg_match('/^[A-Za-z0-9 ]+$/', $value);
 }
 
+function is_strict_email_chars($value) {
+    return is_string($value) && preg_match('/^[A-Za-z0-9.@]+$/', $value);
+}
+
 // Get request body
 $input = json_decode(file_get_contents('php://input'), true);
 
@@ -85,8 +89,8 @@ if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     $errors[] = 'Email format is invalid';
 }
 
-if (!empty($email) && preg_match('/\s/', $email)) {
-    $errors[] = 'Email cannot contain spaces';
+if (!empty($email) && !is_strict_email_chars($email)) {
+    $errors[] = 'Email can contain only letters, numbers, dot and @';
 }
 
 // Validate lengths

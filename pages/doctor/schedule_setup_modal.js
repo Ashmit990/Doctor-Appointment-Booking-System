@@ -4,7 +4,7 @@
  * Note: DOCTOR_API_BASE is defined in home.js (shared constant)
  */
 
-const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const APPLIED_DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 const DEFAULT_TIMES = [
     { start: '09:00', end: '09:30' },
     { start: '09:30', end: '10:00' },
@@ -14,7 +14,6 @@ const MAX_END_TIME = '17:00'; // 5 PM cutoff
 
 class ScheduleSetupModal {
     constructor() {
-        this.selectedDays = new Set();
         this.scheduleData = {};
         this.initialized = false;
         this.init();
@@ -23,7 +22,7 @@ class ScheduleSetupModal {
     init() {
         console.log('Initializing Schedule Setup Modal...');
         this.setupEventListeners();
-        this.renderDaysGrid();
+        this.renderGlobalSlotsSection();
         this.initialized = true;
     }
     
@@ -42,75 +41,37 @@ class ScheduleSetupModal {
         });
     }
     
-    renderDaysGrid() {
-        const grid = document.getElementById('daysGrid');
-        if (!grid) return;
-        
-        grid.innerHTML = '';
-        
-        DAYS_OF_WEEK.forEach(day => {
-            const dayId = `day-${day.toLowerCase()}`;
-            const container = document.createElement('div');
-            
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.id = dayId;
-            checkbox.className = 'day-checkbox';
-            checkbox.value = day;
-            checkbox.addEventListener('change', (e) => this.handleDayChange(e, day));
-            
-            const label = document.createElement('label');
-            label.className = 'day-label';
-            label.htmlFor = dayId;
-            label.innerHTML = `<span>${day}</span>`;
-            
-            container.appendChild(checkbox);
-            container.appendChild(label);
-            grid.appendChild(container);
-        });
-    }
-    
-    handleDayChange(event, day) {
-        if (event.target.checked) {
-            this.selectedDays.add(day);
-            this.addDaySection(day);
-        } else {
-            this.selectedDays.delete(day);
-            this.removeDaySection(day);
-        }
-        this.updateScheduleData();
-    }
-    
-    addDaySection(day) {
+    renderGlobalSlotsSection() {
         const container = document.getElementById('timeSlotsContainer');
-        const dayId = `slots-${day.toLowerCase()}`;
+        if (!container) return;
+        
+        const sectionId = 'slots-global';
         
         // Check if section already exists
-        if (document.getElementById(dayId)) {
-            document.getElementById(dayId).classList.add('active');
+        if (document.getElementById(sectionId)) {
             return;
         }
         
         const section = document.createElement('div');
         section.className = 'day-section active';
-        section.id = dayId;
-        section.setAttribute('data-day', day);
+        section.id = sectionId;
+        section.setAttribute('data-day', 'global');
         
         const title = document.createElement('div');
         title.className = 'day-section-title';
         title.innerHTML = `
-            <span>${day}</span>
-            <span class="day-badge">${day}</span>
+            <span>Time Slots (Applied Sunday-Friday)</span>
+            <span class="day-badge">Saturday Excluded</span>
         `;
         section.appendChild(title);
         
         const slotsWrapper = document.createElement('div');
         slotsWrapper.className = 'slots-wrapper';
-        slotsWrapper.id = `slots-list-${day.toLowerCase()}`;
+        slotsWrapper.id = 'slots-list-global';
         
         // Add default time slots
         DEFAULT_TIMES.forEach((time, index) => {
-            this.addTimeSlot(slotsWrapper, day, time.start, time.end);
+            this.addTimeSlot(slotsWrapper, time.start, time.end);
         });
         
         section.appendChild(slotsWrapper);
@@ -122,7 +83,7 @@ class ScheduleSetupModal {
         addBtn.innerHTML = '<i data-lucide="plus" class="w-4 h-4"></i> Add Time Slot';
         addBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            this.addTimeSlot(slotsWrapper, day);
+            this.addTimeSlot(slotsWrapper);
         });
         
         section.appendChild(addBtn);
@@ -132,7 +93,7 @@ class ScheduleSetupModal {
         lucide.createIcons();
     }
     
-    addTimeSlot(wrapper, day, startTime = null, endTime = null) {
+    addTimeSlot(wrapper, startTime = null, endTime = null) {
         // If no times provided, calculate based on last slot or use defaults
         if (!startTime || !endTime) {
             const slots = wrapper.querySelectorAll('.time-slot');
@@ -171,7 +132,7 @@ class ScheduleSetupModal {
         const slot = document.createElement('div');
         slot.className = 'time-slot';
         
-        const slotId = `slot-${day.toLowerCase()}-${Date.now()}`;
+        const slotId = `slot-global-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
         
         slot.innerHTML = `
             <div>
@@ -205,50 +166,41 @@ class ScheduleSetupModal {
         this.updateScheduleData();
     }
     
-    removeDaySection(day) {
-        const dayId = `slots-${day.toLowerCase()}`;
-        const section = document.getElementById(dayId);
-        if (section) {
-            section.remove(); // Actually remove from DOM, don't just hide
-        }
-    }
-    
     updateScheduleData() {
         this.scheduleData = {};
-        
-        this.selectedDays.forEach(day => {
-            this.scheduleData[day] = [];
-            
-            const slotsWrapper = document.getElementById(`slots-list-${day.toLowerCase()}`);
-            if (slotsWrapper) {
-                const slots = slotsWrapper.querySelectorAll('.time-slot');
-                const seenTimes = new Set(); // Track times to prevent duplicates
-                
-                slots.forEach(slot => {
-                    const startInput = slot.querySelector('.start-time');
-                    const endInput = slot.querySelector('.end-time');
-                    
-                    if (startInput && endInput && startInput.value && endInput.value) {
-                        const timeKey = `${startInput.value}-${endInput.value}`;
-                        
-                        // Check if this exact time slot already exists for this day
-                        if (seenTimes.has(timeKey)) {
-                            // Mark duplicate for visual indication
-                            slot.style.opacity = '0.5';
-                            slot.style.borderColor = '#fca5a5';
-                            return; // Skip this duplicate
-                        }
-                        
-                        seenTimes.add(timeKey);
-                        slot.style.opacity = '1'; // Reset opacity if not duplicate
-                        
-                        this.scheduleData[day].push({
-                            start_time: startInput.value,
-                            end_time: endInput.value
-                        });
+        const globalSlots = [];
+        const slotsWrapper = document.getElementById('slots-list-global');
+
+        if (slotsWrapper) {
+            const slots = slotsWrapper.querySelectorAll('.time-slot');
+            const seenTimes = new Set();
+
+            slots.forEach(slot => {
+                const startInput = slot.querySelector('.start-time');
+                const endInput = slot.querySelector('.end-time');
+
+                if (startInput && endInput && startInput.value && endInput.value) {
+                    const timeKey = `${startInput.value}-${endInput.value}`;
+
+                    if (seenTimes.has(timeKey)) {
+                        slot.style.opacity = '0.5';
+                        slot.style.borderColor = '#fca5a5';
+                        return;
                     }
-                });
-            }
+
+                    seenTimes.add(timeKey);
+                    slot.style.opacity = '1';
+
+                    globalSlots.push({
+                        start_time: startInput.value,
+                        end_time: endInput.value
+                    });
+                }
+            });
+        }
+
+        APPLIED_DAYS.forEach(day => {
+            this.scheduleData[day] = globalSlots.map(slot => ({ ...slot }));
         });
         
         console.log('Updated schedule data (duplicates removed):', this.scheduleData);
@@ -265,54 +217,38 @@ class ScheduleSetupModal {
         // Reset error
         errorBox.classList.remove('show');
         errorBox.innerHTML = '';
-        
-        // Check if at least one day is selected
-        if (this.selectedDays.size === 0) {
-            this.showError('Please select at least one working day.');
-            return false;
-        }
-        
-        // Check if each selected day has at least one valid time slot
+
+        // Check if at least one valid time slot is configured
         let hasValidSlot = false;
-        for (const day of this.selectedDays) {
-            const slots = this.scheduleData[day] || [];
-            if (slots.length > 0) {
-                // Validate time slots
-                let dayHasValidSlot = false;
-                for (const slot of slots) {
-                    if (slot.start_time && slot.end_time) {
-                        const startTime = new Date(`2000-01-01 ${slot.start_time}`);
-                        const endTime = new Date(`2000-01-01 ${slot.end_time}`);
-                        
-                        if (startTime >= endTime) {
-                            this.showError(`Invalid time slot on ${day}: Start time must be before end time.`);
-                            return false;
-                        }
-                        
-                        // Validate that start time doesn't reach or exceed 5 PM (17:00)
-                        if (slot.start_time >= MAX_END_TIME) {
-                            this.showError(`Invalid time slot on ${day}: Start time cannot be 5 PM (17:00) or later.`);
-                            return false;
-                        }
-                        
-                        // Validate that end time doesn't exceed 5 PM (17:00)
-                        if (slot.end_time > MAX_END_TIME) {
-                            this.showError(`Invalid time slot on ${day}: End time cannot be after 5 PM (17:00).`);
-                            return false;
-                        }
-                        
-                        dayHasValidSlot = true;
+        const sundaySlots = this.scheduleData['Sunday'] || [];
+        if (sundaySlots.length > 0) {
+            for (const slot of sundaySlots) {
+                if (slot.start_time && slot.end_time) {
+                    const startTime = new Date(`2000-01-01 ${slot.start_time}`);
+                    const endTime = new Date(`2000-01-01 ${slot.end_time}`);
+
+                    if (startTime >= endTime) {
+                        this.showError('Invalid time slot: Start time must be before end time.');
+                        return false;
                     }
-                }
-                
-                if (dayHasValidSlot) {
+
+                    if (slot.start_time >= MAX_END_TIME) {
+                        this.showError('Invalid time slot: Start time cannot be 5 PM (17:00) or later.');
+                        return false;
+                    }
+
+                    if (slot.end_time > MAX_END_TIME) {
+                        this.showError('Invalid time slot: End time cannot be after 5 PM (17:00).');
+                        return false;
+                    }
+
                     hasValidSlot = true;
                 }
             }
         }
         
         if (!hasValidSlot) {
-            this.showError('Each selected day must have at least one valid time slot (no duplicates allowed).');
+            this.showError('Please add at least one valid time slot.');
             return false;
         }
         
