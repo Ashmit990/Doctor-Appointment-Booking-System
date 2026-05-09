@@ -4,6 +4,17 @@ require_once '../config/db.php';
 
 header('Content-Type: application/json');
 
+function has_forbidden_medical_report_chars($value) {
+    return is_string($value) && preg_match('/[-*&]/', $value);
+}
+
+function reject_forbidden_medical_report_chars($label, $value) {
+    if (has_forbidden_medical_report_chars($value)) {
+        echo json_encode(['status' => 'error', 'message' => $label . ' cannot contain special characters like -, * or &.']);
+        exit;
+    }
+}
+
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['status' => 'error', 'message' => 'Not authorized']);
     exit;
@@ -17,17 +28,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data = json_decode(file_get_contents('php://input'), true);
         
         $appointment_id = isset($data['appointment_id']) ? (int)$data['appointment_id'] : null;
-        $symptoms = $data['symptoms'] ?? '';
-        $diagnosis = $data['diagnosis'] ?? '';
+        $symptoms = trim($data['symptoms'] ?? '');
+        $diagnosis = trim($data['diagnosis'] ?? '');
         $blood_pressure = $data['blood_pressure'] ?? null;
         $weight = isset($data['weight']) ? (float)$data['weight'] : null;
-        $prescribed_medicines = json_encode($data['prescribed_medicines'] ?? []);
-        $additional_notes = $data['additional_notes'] ?? '';
+        $prescribed_medicines_input = $data['prescribed_medicines'] ?? [];
+        $additional_notes = trim($data['additional_notes'] ?? '');
         
         if (!$appointment_id) {
             echo json_encode(['status' => 'error', 'message' => 'Appointment ID is required']);
             exit;
         }
+
+        if ($symptoms === '') {
+            echo json_encode(['status' => 'error', 'message' => 'Symptoms are required']);
+            exit;
+        }
+
+        if ($diagnosis === '') {
+            echo json_encode(['status' => 'error', 'message' => 'Diagnosis is required']);
+            exit;
+        }
+
+        reject_forbidden_medical_report_chars('Symptoms', $symptoms);
+        reject_forbidden_medical_report_chars('Diagnosis', $diagnosis);
+        reject_forbidden_medical_report_chars('Additional notes', $additional_notes);
+
+        if (!is_array($prescribed_medicines_input)) {
+            echo json_encode(['status' => 'error', 'message' => 'Prescribed medicines must be an array']);
+            exit;
+        }
+
+        $clean_prescribed_medicines = [];
+        foreach ($prescribed_medicines_input as $index => $medicine) {
+            $medicine_name = trim($medicine['name'] ?? '');
+            $medicine_dosage = trim($medicine['dosage'] ?? '');
+            $medicine_frequency = trim($medicine['frequency'] ?? '');
+
+            if ($medicine_name === '') {
+                continue;
+            }
+
+            reject_forbidden_medical_report_chars('Medicine name', $medicine_name);
+            reject_forbidden_medical_report_chars('Medicine dosage', $medicine_dosage);
+            reject_forbidden_medical_report_chars('Medicine frequency', $medicine_frequency);
+
+            $clean_prescribed_medicines[] = [
+                'name' => $medicine_name,
+                'dosage' => $medicine_dosage,
+                'frequency' => $medicine_frequency,
+            ];
+        }
+
+        $prescribed_medicines = json_encode($clean_prescribed_medicines);
         
         // First, verify the appointment belongs to this doctor and get patient_id
         $verify_stmt = $conn->prepare("

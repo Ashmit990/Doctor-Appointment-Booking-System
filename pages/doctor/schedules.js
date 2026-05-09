@@ -1421,6 +1421,33 @@ document.addEventListener('visibilitychange', async () => {
 // ===== MEDICAL REPORT FUNCTIONS =====
 let medicineFieldCount = 0;
 let currentAppointmentForReport = null;
+const MEDICAL_REPORT_FORBIDDEN_CHAR_PATTERN = /[-*&]/g;
+
+function stripForbiddenMedicalReportChars(value) {
+  return (value || '').replace(MEDICAL_REPORT_FORBIDDEN_CHAR_PATTERN, '');
+}
+
+function bindForbiddenCharFilter(element) {
+  if (!element || element.dataset.forbiddenFilterBound === 'true') {
+    return;
+  }
+
+  element.dataset.forbiddenFilterBound = 'true';
+  element.addEventListener('input', () => {
+    const cleanedValue = stripForbiddenMedicalReportChars(element.value);
+    if (cleanedValue !== element.value) {
+      element.value = cleanedValue;
+    }
+  });
+}
+
+function bindMedicalReportFieldFilters() {
+  ['report-symptoms', 'report-diagnosis', 'report-notes'].forEach((id) => {
+    bindForbiddenCharFilter(document.getElementById(id));
+  });
+
+  document.querySelectorAll('.medicine-name, .medicine-dosage, .medicine-frequency').forEach(bindForbiddenCharFilter);
+}
 
 function generateReportForCurrentAppointment() {
   if (!currentAppointmentForReport) {
@@ -1458,6 +1485,7 @@ function openMedicalReportModal(appointmentData) {
   document.getElementById('medical-report-form').reset();
   document.getElementById('medicines-list').innerHTML = '';
   medicineFieldCount = 0;
+  bindMedicalReportFieldFilters();
 
   // Check if report already exists
   loadExistingReport(appointmentData.apt_id);
@@ -1980,6 +2008,9 @@ function addMedicineField() {
     </button>
   `;
   medicinesList.appendChild(medicineDiv);
+  bindForbiddenCharFilter(medicineDiv.querySelector('.medicine-name'));
+  bindForbiddenCharFilter(medicineDiv.querySelector('.medicine-dosage'));
+  bindForbiddenCharFilter(medicineDiv.querySelector('.medicine-frequency'));
   lucide.createIcons();
 }
 
@@ -2006,11 +2037,11 @@ async function loadExistingReport(appointmentId) {
 
     if (result.status === 'success' && result.data) {
       const report = result.data;
-      document.getElementById('report-symptoms').value = report.symptoms || '';
-      document.getElementById('report-diagnosis').value = report.diagnosis || '';
+      document.getElementById('report-symptoms').value = stripForbiddenMedicalReportChars(report.symptoms || '');
+      document.getElementById('report-diagnosis').value = stripForbiddenMedicalReportChars(report.diagnosis || '');
       document.getElementById('report-bp').value = report.blood_pressure || '';
       document.getElementById('report-weight').value = report.weight || '';
-      document.getElementById('report-notes').value = report.additional_notes || '';
+      document.getElementById('report-notes').value = stripForbiddenMedicalReportChars(report.additional_notes || '');
 
       // Load medicines
       if (report.prescribed_medicines && Array.isArray(report.prescribed_medicines)) {
@@ -2019,9 +2050,9 @@ async function loadExistingReport(appointmentId) {
           const lastIndex = medicineFieldCount;
           const medicineField = document.querySelector(`#medicine-${lastIndex}`);
           if (medicineField) {
-            medicineField.querySelector('.medicine-name').value = medicine.name || '';
-            medicineField.querySelector('.medicine-dosage').value = medicine.dosage || '';
-            medicineField.querySelector('.medicine-frequency').value = medicine.frequency || '';
+            medicineField.querySelector('.medicine-name').value = stripForbiddenMedicalReportChars(medicine.name || '');
+            medicineField.querySelector('.medicine-dosage').value = stripForbiddenMedicalReportChars(medicine.dosage || '');
+            medicineField.querySelector('.medicine-frequency').value = stripForbiddenMedicalReportChars(medicine.frequency || '');
           }
         });
       }
@@ -2034,11 +2065,11 @@ async function loadExistingReport(appointmentId) {
 
 async function saveMedicalReport() {
   const appointmentId = document.getElementById('report-apt-id').value;
-  const symptoms = document.getElementById('report-symptoms').value.trim();
-  const diagnosis = document.getElementById('report-diagnosis').value.trim();
+  const symptoms = stripForbiddenMedicalReportChars(document.getElementById('report-symptoms').value.trim());
+  const diagnosis = stripForbiddenMedicalReportChars(document.getElementById('report-diagnosis').value.trim());
   const bloodPressure = document.getElementById('report-bp').value.trim();
   const weight = document.getElementById('report-weight').value.trim();
-  const additionalNotes = document.getElementById('report-notes').value.trim();
+  const additionalNotes = stripForbiddenMedicalReportChars(document.getElementById('report-notes').value.trim());
 
   // Validate ALL required fields with specific error messages
   if (!symptoms) {
@@ -2070,9 +2101,9 @@ async function saveMedicalReport() {
   // Collect medicines
   const medicines = [];
   document.querySelectorAll('.medicine-field').forEach(field => {
-    const name = field.querySelector('.medicine-name').value.trim();
-    const dosage = field.querySelector('.medicine-dosage').value.trim();
-    const frequency = field.querySelector('.medicine-frequency').value.trim();
+    const name = stripForbiddenMedicalReportChars(field.querySelector('.medicine-name').value.trim());
+    const dosage = stripForbiddenMedicalReportChars(field.querySelector('.medicine-dosage').value.trim());
+    const frequency = stripForbiddenMedicalReportChars(field.querySelector('.medicine-frequency').value.trim());
     if (name) {
       medicines.push({ name, dosage, frequency });
     }
