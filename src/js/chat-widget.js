@@ -106,8 +106,10 @@
       padding: 9px 12px; font-size: 13px; outline: none; resize: none;
       max-height: 80px; line-height: 1.4; color: #1e293b;
       transition: border-color 0.15s;
-      background: #f8fafc;
+      background: #f8fafc; overflow: hidden;
+      scrollbar-width: none;
     }
+    #hc-input::-webkit-scrollbar { display: none; }
     #hc-input:focus { border-color: #007E85; background: #fff; }
     #hc-input::placeholder { color: #94a3b8; }
     #hc-send-btn {
@@ -119,6 +121,31 @@
     #hc-send-btn:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; }
     #hc-send-btn svg { width: 17px; height: 17px; }
     .hc-error-msg { color: #ef4444; font-size: 12px; font-style: italic; }
+    .hc-doctor-card {
+      margin-top: 10px; padding: 11px 13px;
+      background: linear-gradient(135deg, #f0fdfd, #e6f7f7);
+      border: 1.5px solid #0d9488; border-radius: 12px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .hc-doctor-card-label {
+      font-size: 10px; font-weight: 700; color: #0d7377;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .hc-doctor-card-name { font-size: 13px; font-weight: 700; color: #0f172a; }
+    .hc-doctor-card-spec { font-size: 11px; color: #475569; margin-bottom: 4px; }
+    .hc-book-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 13px; width: fit-content;
+      background: linear-gradient(135deg, #007E85, #005f65);
+      color: #fff; font-size: 12px; font-weight: 600;
+      border: none; border-radius: 8px; cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 2px 8px rgba(0,126,133,0.35);
+    }
+    .hc-book-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,126,133,0.45); }
+    .hc-book-btn svg { width: 12px; height: 12px; }
   `;
 
   const style = document.createElement('style');
@@ -178,6 +205,10 @@
   const API_SEG = window.location.pathname.split('/').filter(Boolean)[0];
   const API_BASE = API_SEG ? `/${API_SEG}/api` : '/api';
   const ENDPOINT = window.HC_CHAT_ENDPOINT || (API_BASE + '/gemini_chat_public.php');
+  const IS_LOGGED_IN = ENDPOINT.includes('/patient/');
+  const BOOK_URL = window.HC_BOOK_URL || (IS_LOGGED_IN
+    ? `/${API_SEG}/pages/patient/homepage.html`
+    : `/${API_SEG}/pages/auth/login.html`);
 
   // ── Helpers ─────────────────────────────────────────────────────────────
   function openPanel() {
@@ -262,7 +293,28 @@
       if (data.status === 'success') {
         chatHistory.push({ role: 'user', text });
         chatHistory.push({ role: 'ai', text: data.reply });
-        appendMessage('ai', data.reply);
+        const msgEl = appendMessage('ai', data.reply);
+        if (data.suggested_booking) {
+          const card = document.createElement('div');
+          card.className = 'hc-doctor-card';
+          const title = data.doctor_title || 'Specialist';
+          const spec = data.doctor_spec || '';
+          card.innerHTML = `
+            <div class="hc-doctor-card-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              Recommended for you
+            </div>
+            <div class="hc-doctor-card-name">${escapeHtml(title)}</div>
+            ${spec ? `<div class="hc-doctor-card-spec">${escapeHtml(spec)}</div>` : ''}
+            <a href="${BOOK_URL}" class="hc-book-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Book Appointment
+            </a>
+          `;
+          const bubble = msgEl.querySelector('.hc-bubble');
+          bubble.appendChild(card);
+          scrollToBottom();
+        }
       } else {
         appendMessage('ai', data.message || 'Something went wrong. Please try again.', true);
       }
