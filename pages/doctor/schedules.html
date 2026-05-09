@@ -1075,6 +1075,7 @@
                                 class="block text-[10px] font-semibold text-blue-600 mb-1.5 uppercase tracking-wider">Doctor's
                                 Notes <span class="text-red-500">*</span></label>
                             <textarea id="modal-doctor-notes"
+                                oninput="this.value = sanitizeMedicalReportText(this.value)"
                                 class="w-full px-4 py-3 border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 text-sm transition-all shadow-sm resize-none text-gray-800"
                                 rows="3" placeholder="Enter clinical findings and notes..." required></textarea>
                             <p id="notes-error" class="text-red-500 text-[10px] mt-1 hidden">Doctor's notes are required
@@ -1094,6 +1095,7 @@
                                 class="block text-[10px] font-semibold text-green-600 mb-1.5 uppercase tracking-wider">Prescriptions
                                 <span class="text-red-500">*</span></label>
                             <textarea id="modal-prescriptions"
+                                oninput="this.value = sanitizeMedicalReportText(this.value)"
                                 class="w-full px-4 py-3 border border-green-200 bg-gradient-to-br from-green-50 to-green-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 text-sm transition-all shadow-sm resize-none text-gray-800"
                                 rows="3" placeholder="e.g. Paracetamol 500mg - 1x/day" required></textarea>
                             <p id="prescriptions-error" class="text-red-500 text-[10px] mt-1 hidden">Prescriptions are
@@ -1639,10 +1641,12 @@
                             <textarea
                                 id="report-symptoms"
                                 placeholder="e.g., Persistent cough, mild fever, body aches..."
+                                oninput="this.value = sanitizeMedicalReportText(this.value)"
                                 class="w-full border border-amber-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none resize-none shadow-sm"
                                 rows="3"
                                 required
                             ></textarea>
+                            <p id="report-symptoms-error" class="hidden mt-2 text-xs text-red-600"></p>
                         </div>
 
                         <!-- Diagnosis -->
@@ -1657,10 +1661,12 @@
                             <textarea
                                 id="report-diagnosis"
                                 placeholder="e.g., Acute upper respiratory infection..."
+                                oninput="this.value = sanitizeMedicalReportText(this.value)"
                                 class="w-full border border-rose-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none resize-none shadow-sm"
                                 rows="3"
                                 required
                             ></textarea>
+                            <p id="report-diagnosis-error" class="hidden mt-2 text-xs text-red-600"></p>
                         </div>
 
                         <!-- Vital Signs Row -->
@@ -1672,9 +1678,11 @@
                                     type="text"
                                     id="report-bp"
                                     placeholder="e.g., 120/80"
+                                    oninput="this.value = sanitizeMedicalReportBloodPressure(this.value)"
                                     class="w-full border border-sky-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none shadow-sm"
                                     required
                                 />
+                                <p id="report-bp-error" class="hidden mt-2 text-xs text-red-600"></p>
                             </div>
 
                             <!-- Weight -->
@@ -1685,9 +1693,11 @@
                                     id="report-weight"
                                     placeholder="e.g., 75"
                                     step="0.1"
+                                    oninput="this.value = sanitizeMedicalReportWeight(this.value)"
                                     class="w-full border border-emerald-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none shadow-sm"
                                     required
                                 />
+                                <p id="report-weight-error" class="hidden mt-2 text-xs text-red-600"></p>
                             </div>
                         </div>
 
@@ -1712,6 +1722,7 @@
                             <div id="medicines-list" class="space-y-3">
                                 <!-- Medicines will be added dynamically -->
                             </div>
+                            <p id="report-medicines-error" class="hidden mt-2 text-xs text-red-600"></p>
                         </div>
 
                         <!-- Additional Notes -->
@@ -1722,12 +1733,15 @@
                             <textarea
                                 id="report-notes"
                                 placeholder="Any additional observations or instructions..."
+                                oninput="this.value = sanitizeMedicalReportText(this.value)"
                                 class="w-full border border-violet-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none resize-none shadow-sm"
                                 rows="3"
                                 required
                             ></textarea>
+                            <p id="report-notes-error" class="hidden mt-2 text-xs text-red-600"></p>
                         </div>
                     </form>
+                    <p id="report-form-error" class="hidden mt-3 text-sm font-medium text-red-600"></p>
                 </div>
 
                 <!-- Footer -->
@@ -1749,7 +1763,7 @@
             </div>
         </div>
 
-    <script src="schedules.js"></script>
+    <script src="schedules.js?v=20260509c"></script>
     <!-- Medical Report PDF Generator -->
     <script src="../patient/medical_report_pdf_generator.js"></script>
 </body>

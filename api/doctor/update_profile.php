@@ -20,6 +20,14 @@ if (($_SESSION['role'] ?? '') !== 'Doctor') {
 
 require_once '../config/db.php';
 
+function is_alphanumeric_no_space($value) {
+    return is_string($value) && preg_match('/^[A-Za-z0-9]+$/', $value);
+}
+
+function is_alphanumeric_with_space($value) {
+    return is_string($value) && preg_match('/^[A-Za-z0-9 ]+$/', $value);
+}
+
 // Get request body
 $input = json_decode(file_get_contents('php://input'), true);
 
@@ -77,6 +85,10 @@ if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     $errors[] = 'Email format is invalid';
 }
 
+if (!empty($email) && preg_match('/\s/', $email)) {
+    $errors[] = 'Email cannot contain spaces';
+}
+
 // Validate lengths
 if (!empty($full_name) && strlen($full_name) < 2) {
     $errors[] = 'Full name must be at least 2 characters';
@@ -88,12 +100,38 @@ if (!empty($medical_id) && strlen($medical_id) < 4) {
     $errors[] = 'Medical ID must be at least 4 characters';
 }
 
+if (!empty($medical_id) && !is_alphanumeric_no_space($medical_id)) {
+    $errors[] = 'Medical ID must contain only letters and numbers with no spaces';
+}
+
+if (!empty($full_name) && !is_alphanumeric_with_space($full_name)) {
+    $errors[] = 'Full name must contain only letters and numbers';
+}
+
+if (!empty($specialization) && !is_alphanumeric_with_space($specialization)) {
+    $errors[] = 'Specialization must contain only letters and numbers';
+}
+
+if (!empty($qualification) && !is_alphanumeric_with_space($qualification)) {
+    $errors[] = 'Qualification must contain only letters and numbers';
+}
+
+if (!empty($description) && !is_alphanumeric_with_space($description)) {
+    $errors[] = 'Professional description must contain only letters and numbers';
+}
+
 // Validate phone format
 if (!empty($phone)) {
     $digits = preg_replace('/[^\d]/', '', $phone);
-    if (strlen($digits) < 8) {
-        $errors[] = 'Phone number must have at least 8 digits';
+    if (!preg_match('/^\d{10}$/', $digits)) {
+        $errors[] = 'Mobile number must be exactly 10 digits';
     }
+    $phone = $digits;
+}
+
+// Validate experience format
+if (!empty($experience) && !preg_match('/^\d+$/', $experience)) {
+    $errors[] = 'Experience must be a number only';
 }
 
 // Validate age if provided

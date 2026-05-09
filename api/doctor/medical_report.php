@@ -4,13 +4,24 @@ require_once '../config/db.php';
 
 header('Content-Type: application/json');
 
-function has_forbidden_medical_report_chars($value) {
-    return is_string($value) && preg_match('/[-*&]/', $value);
+function has_invalid_medical_report_text_chars($value) {
+    return is_string($value) && preg_match('/[^A-Za-z0-9\s]/', $value);
 }
 
-function reject_forbidden_medical_report_chars($label, $value) {
-    if (has_forbidden_medical_report_chars($value)) {
-        echo json_encode(['status' => 'error', 'message' => $label . ' cannot contain special characters like -, * or &.']);
+function has_invalid_blood_pressure_chars($value) {
+    return is_string($value) && $value !== '' && preg_match('/[^0-9\/]/', $value);
+}
+
+function reject_invalid_medical_report_text_chars($label, $value) {
+    if (has_invalid_medical_report_text_chars($value)) {
+        echo json_encode(['status' => 'error', 'message' => $label . ' cannot contain special characters.']);
+        exit;
+    }
+}
+
+function reject_invalid_blood_pressure_chars($value) {
+    if (has_invalid_blood_pressure_chars($value)) {
+        echo json_encode(['status' => 'error', 'message' => 'Blood pressure can contain only digits and /.']);
         exit;
     }
 }
@@ -30,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $appointment_id = isset($data['appointment_id']) ? (int)$data['appointment_id'] : null;
         $symptoms = trim($data['symptoms'] ?? '');
         $diagnosis = trim($data['diagnosis'] ?? '');
-        $blood_pressure = $data['blood_pressure'] ?? null;
+        $blood_pressure = trim($data['blood_pressure'] ?? '');
         $weight = isset($data['weight']) ? (float)$data['weight'] : null;
         $prescribed_medicines_input = $data['prescribed_medicines'] ?? [];
         $additional_notes = trim($data['additional_notes'] ?? '');
@@ -50,9 +61,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        reject_forbidden_medical_report_chars('Symptoms', $symptoms);
-        reject_forbidden_medical_report_chars('Diagnosis', $diagnosis);
-        reject_forbidden_medical_report_chars('Additional notes', $additional_notes);
+        reject_invalid_medical_report_text_chars('Symptoms', $symptoms);
+        reject_invalid_medical_report_text_chars('Diagnosis', $diagnosis);
+        reject_invalid_medical_report_text_chars('Additional notes', $additional_notes);
+        reject_invalid_blood_pressure_chars($blood_pressure);
 
         if (!is_array($prescribed_medicines_input)) {
             echo json_encode(['status' => 'error', 'message' => 'Prescribed medicines must be an array']);
@@ -69,9 +81,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 continue;
             }
 
-            reject_forbidden_medical_report_chars('Medicine name', $medicine_name);
-            reject_forbidden_medical_report_chars('Medicine dosage', $medicine_dosage);
-            reject_forbidden_medical_report_chars('Medicine frequency', $medicine_frequency);
+            reject_invalid_medical_report_text_chars('Medicine name', $medicine_name);
+            reject_invalid_medical_report_text_chars('Medicine dosage', $medicine_dosage);
+            reject_invalid_medical_report_text_chars('Medicine frequency', $medicine_frequency);
 
             $clean_prescribed_medicines[] = [
                 'name' => $medicine_name,

@@ -1180,10 +1180,17 @@ async function submitConsultation() {
   const aptId = document.getElementById("complete-consultation-btn").dataset
     .aptId;
   const statusVal = document.getElementById("modal-edit-status").value.trim();
-  const notes = document.getElementById("modal-doctor-notes").value.trim();
-  const rx = document.getElementById("modal-prescriptions").value.trim();
+  const notesInput = document.getElementById("modal-doctor-notes");
+  const rxInput = document.getElementById("modal-prescriptions");
+  const rawNotes = notesInput.value.trim();
+  const rawRx = rxInput.value.trim();
+  const notes = sanitizeMedicalReportText(rawNotes);
+  const rx = sanitizeMedicalReportText(rawRx);
   let fDate = document.getElementById("modal-followup-date").value;
   let fTime = document.getElementById("modal-followup-time").value;
+
+  notesInput.value = notes;
+  rxInput.value = rx;
 
   if (followupLocked) {
     fDate = "";
@@ -1210,15 +1217,33 @@ async function submitConsultation() {
     hasErrors = true;
   }
 
+  if (rawNotes !== notes) {
+    const notesError = document.getElementById("notes-error");
+    notesError.textContent = "Special characters are not allowed in doctor's notes";
+    notesError.classList.remove("hidden");
+    hasErrors = true;
+  }
+
+  if (rawRx !== rx) {
+    const prescriptionsError = document.getElementById("prescriptions-error");
+    prescriptionsError.textContent = "Special characters are not allowed in prescriptions";
+    prescriptionsError.classList.remove("hidden");
+    hasErrors = true;
+  }
+
   // Only require notes and prescriptions if the status is Completed
   if (statusVal === 'Completed') {
     if (!notes) {
-      document.getElementById("notes-error").classList.remove("hidden");
+      const notesError = document.getElementById("notes-error");
+      notesError.textContent = "Doctor's notes are required";
+      notesError.classList.remove("hidden");
       hasErrors = true;
     }
 
     if (!rx) {
-      document.getElementById("prescriptions-error").classList.remove("hidden");
+      const prescriptionsError = document.getElementById("prescriptions-error");
+      prescriptionsError.textContent = "Prescriptions are required";
+      prescriptionsError.classList.remove("hidden");
       hasErrors = true;
     }
   }
@@ -1236,7 +1261,6 @@ async function submitConsultation() {
   }
 
   if (hasErrors) {
-    alert("Please fill in all required fields (marked with *) and ensure follow-up date is not in the past");
     return;
   }
 
@@ -1421,32 +1445,121 @@ document.addEventListener('visibilitychange', async () => {
 // ===== MEDICAL REPORT FUNCTIONS =====
 let medicineFieldCount = 0;
 let currentAppointmentForReport = null;
-const MEDICAL_REPORT_FORBIDDEN_CHAR_PATTERN = /[-*&]/g;
+const MEDICAL_REPORT_TEXT_SANITIZE_PATTERN = /[^A-Za-z0-9\s]/g;
+const MEDICAL_REPORT_BP_SANITIZE_PATTERN = /[^0-9/]/g;
+const MEDICAL_REPORT_WEIGHT_SANITIZE_PATTERN = /[^0-9.]/g;
 
-function stripForbiddenMedicalReportChars(value) {
-  return (value || '').replace(MEDICAL_REPORT_FORBIDDEN_CHAR_PATTERN, '');
+function sanitizeMedicalReportText(value) {
+  return (value || '').replace(MEDICAL_REPORT_TEXT_SANITIZE_PATTERN, '');
 }
 
-function bindForbiddenCharFilter(element) {
+function sanitizeMedicalReportBloodPressure(value) {
+  return (value || '').replace(MEDICAL_REPORT_BP_SANITIZE_PATTERN, '');
+}
+
+function sanitizeMedicalReportWeight(value) {
+  const cleaned = (value || '').replace(MEDICAL_REPORT_WEIGHT_SANITIZE_PATTERN, '');
+  const firstDotIndex = cleaned.indexOf('.');
+  if (firstDotIndex === -1) {
+    return cleaned;
+  }
+  return cleaned.slice(0, firstDotIndex + 1) + cleaned.slice(firstDotIndex + 1).replace(/\./g, '');
+}
+
+function bindMedicalReportSanitizer(element, sanitizeFn, errorId, errorMessage) {
   if (!element || element.dataset.forbiddenFilterBound === 'true') {
     return;
   }
 
   element.dataset.forbiddenFilterBound = 'true';
   element.addEventListener('input', () => {
-    const cleanedValue = stripForbiddenMedicalReportChars(element.value);
-    if (cleanedValue !== element.value) {
+    const originalValue = element.value;
+    const cleanedValue = sanitizeFn(originalValue);
+
+    if (cleanedValue !== originalValue) {
       element.value = cleanedValue;
+      setMedicalReportFieldError(errorId, errorMessage);
+      return;
+    }
+
+    const errorEl = document.getElementById(errorId);
+    if (errorEl && errorEl.textContent === errorMessage) {
+      errorEl.textContent = '';
+      errorEl.classList.add('hidden');
     }
   });
 }
 
 function bindMedicalReportFieldFilters() {
-  ['report-symptoms', 'report-diagnosis', 'report-notes'].forEach((id) => {
-    bindForbiddenCharFilter(document.getElementById(id));
-  });
+  bindMedicalReportSanitizer(
+    document.getElementById('report-symptoms'),
+    sanitizeMedicalReportText,
+    'report-symptoms-error',
+    'Special characters are not allowed in symptoms.'
+  );
+  bindMedicalReportSanitizer(
+    document.getElementById('report-diagnosis'),
+    sanitizeMedicalReportText,
+    'report-diagnosis-error',
+    'Special characters are not allowed in diagnosis.'
+  );
+  bindMedicalReportSanitizer(
+    document.getElementById('report-notes'),
+    sanitizeMedicalReportText,
+    'report-notes-error',
+    'Special characters are not allowed in additional notes.'
+  );
+  bindMedicalReportSanitizer(
+    document.getElementById('report-bp'),
+    sanitizeMedicalReportBloodPressure,
+    'report-bp-error',
+    'Blood pressure allows only digits and /.'
+  );
+  bindMedicalReportSanitizer(
+    document.getElementById('report-weight'),
+    sanitizeMedicalReportWeight,
+    'report-weight-error',
+    'Weight allows only numbers and one decimal point.'
+  );
 
-  document.querySelectorAll('.medicine-name, .medicine-dosage, .medicine-frequency').forEach(bindForbiddenCharFilter);
+  document.querySelectorAll('.medicine-name, .medicine-dosage, .medicine-frequency').forEach((field) => {
+    bindMedicalReportSanitizer(
+      field,
+      sanitizeMedicalReportText,
+      'report-medicines-error',
+      'Special characters are not allowed in medicine fields.'
+    );
+  });
+}
+
+function clearMedicalReportErrors() {
+  const errorIds = [
+    'report-symptoms-error',
+    'report-diagnosis-error',
+    'report-bp-error',
+    'report-weight-error',
+    'report-medicines-error',
+    'report-notes-error',
+    'report-form-error',
+  ];
+
+  errorIds.forEach((id) => {
+    const errorEl = document.getElementById(id);
+    if (errorEl) {
+      errorEl.textContent = '';
+      errorEl.classList.add('hidden');
+    }
+  });
+}
+
+function setMedicalReportFieldError(errorId, message) {
+  const errorEl = document.getElementById(errorId);
+  if (!errorEl) {
+    return;
+  }
+
+  errorEl.textContent = message;
+  errorEl.classList.remove('hidden');
 }
 
 function generateReportForCurrentAppointment() {
@@ -1485,6 +1598,7 @@ function openMedicalReportModal(appointmentData) {
   document.getElementById('medical-report-form').reset();
   document.getElementById('medicines-list').innerHTML = '';
   medicineFieldCount = 0;
+  clearMedicalReportErrors();
   bindMedicalReportFieldFilters();
 
   // Check if report already exists
@@ -1630,9 +1744,9 @@ async function loadDoctorViewReport(appointmentId) {
       document.getElementById('view-report-chief-complaint').textContent = currentAppointmentForReport.reason_for_visit;
       
       // Medical Findings
-      document.getElementById('view-report-symptoms').textContent = report.symptoms || '';
-      document.getElementById('view-report-diagnosis').textContent = report.diagnosis || '';
-      document.getElementById('view-report-bp').textContent = report.blood_pressure || 'Not recorded';
+      document.getElementById('view-report-symptoms').textContent = sanitizeMedicalReportText(report.symptoms || '');
+      document.getElementById('view-report-diagnosis').textContent = sanitizeMedicalReportText(report.diagnosis || '');
+      document.getElementById('view-report-bp').textContent = sanitizeMedicalReportBloodPressure(report.blood_pressure || '') || 'Not recorded';
       document.getElementById('view-report-weight').textContent = report.weight ? `${report.weight} kg` : 'Not recorded';
       document.getElementById('view-report-room-no').textContent = report.room_num || '--';
       
@@ -1649,9 +1763,9 @@ async function loadDoctorViewReport(appointmentId) {
           const row = document.createElement('tr');
           row.className = idx % 2 === 0 ? 'bg-gray-50' : 'bg-white';
           row.innerHTML = `
-            <td class="p-3 border-b border-gray-200 text-gray-900 font-medium">${medicine.name || 'N/A'}</td>
-            <td class="p-3 border-b border-gray-200 text-gray-700">${medicine.dosage || 'N/A'}</td>
-            <td class="p-3 border-b border-gray-200 text-gray-700">${medicine.frequency || 'N/A'}</td>
+            <td class="p-3 border-b border-gray-200 text-gray-900 font-medium">${sanitizeMedicalReportText(medicine.name || 'N/A')}</td>
+            <td class="p-3 border-b border-gray-200 text-gray-700">${sanitizeMedicalReportText(medicine.dosage || 'N/A')}</td>
+            <td class="p-3 border-b border-gray-200 text-gray-700">${sanitizeMedicalReportText(medicine.frequency || 'N/A')}</td>
           `;
           medicinesList.appendChild(row);
         });
@@ -1662,7 +1776,7 @@ async function loadDoctorViewReport(appointmentId) {
       
       // Notes
       if (report.additional_notes) {
-        document.getElementById('view-report-notes').textContent = report.additional_notes;
+        document.getElementById('view-report-notes').textContent = sanitizeMedicalReportText(report.additional_notes);
         document.getElementById('view-notes-section').classList.remove('hidden');
       } else {
         document.getElementById('view-notes-section').classList.add('hidden');
@@ -1987,16 +2101,19 @@ function addMedicineField() {
     <input
       type="text"
       placeholder="Medicine name"
+      oninput="this.value = sanitizeMedicalReportText(this.value)"
       class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#00A3AC] outline-none medicine-name"
     />
     <input
       type="text"
       placeholder="Dosage (e.g., 500mg)"
+      oninput="this.value = sanitizeMedicalReportText(this.value)"
       class="w-24 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#00A3AC] outline-none medicine-dosage"
     />
     <input
       type="text"
       placeholder="Frequency (e.g., 2x daily)"
+      oninput="this.value = sanitizeMedicalReportText(this.value)"
       class="w-28 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#00A3AC] outline-none medicine-frequency"
     />
     <button
@@ -2008,9 +2125,24 @@ function addMedicineField() {
     </button>
   `;
   medicinesList.appendChild(medicineDiv);
-  bindForbiddenCharFilter(medicineDiv.querySelector('.medicine-name'));
-  bindForbiddenCharFilter(medicineDiv.querySelector('.medicine-dosage'));
-  bindForbiddenCharFilter(medicineDiv.querySelector('.medicine-frequency'));
+  bindMedicalReportSanitizer(
+    medicineDiv.querySelector('.medicine-name'),
+    sanitizeMedicalReportText,
+    'report-medicines-error',
+    'Special characters are not allowed in medicine fields.'
+  );
+  bindMedicalReportSanitizer(
+    medicineDiv.querySelector('.medicine-dosage'),
+    sanitizeMedicalReportText,
+    'report-medicines-error',
+    'Special characters are not allowed in medicine fields.'
+  );
+  bindMedicalReportSanitizer(
+    medicineDiv.querySelector('.medicine-frequency'),
+    sanitizeMedicalReportText,
+    'report-medicines-error',
+    'Special characters are not allowed in medicine fields.'
+  );
   lucide.createIcons();
 }
 
@@ -2037,11 +2169,11 @@ async function loadExistingReport(appointmentId) {
 
     if (result.status === 'success' && result.data) {
       const report = result.data;
-      document.getElementById('report-symptoms').value = stripForbiddenMedicalReportChars(report.symptoms || '');
-      document.getElementById('report-diagnosis').value = stripForbiddenMedicalReportChars(report.diagnosis || '');
-      document.getElementById('report-bp').value = report.blood_pressure || '';
-      document.getElementById('report-weight').value = report.weight || '';
-      document.getElementById('report-notes').value = stripForbiddenMedicalReportChars(report.additional_notes || '');
+      document.getElementById('report-symptoms').value = sanitizeMedicalReportText(report.symptoms || '');
+      document.getElementById('report-diagnosis').value = sanitizeMedicalReportText(report.diagnosis || '');
+      document.getElementById('report-bp').value = sanitizeMedicalReportBloodPressure(report.blood_pressure || '');
+      document.getElementById('report-weight').value = sanitizeMedicalReportWeight(String(report.weight || ''));
+      document.getElementById('report-notes').value = sanitizeMedicalReportText(report.additional_notes || '');
 
       // Load medicines
       if (report.prescribed_medicines && Array.isArray(report.prescribed_medicines)) {
@@ -2050,9 +2182,9 @@ async function loadExistingReport(appointmentId) {
           const lastIndex = medicineFieldCount;
           const medicineField = document.querySelector(`#medicine-${lastIndex}`);
           if (medicineField) {
-            medicineField.querySelector('.medicine-name').value = stripForbiddenMedicalReportChars(medicine.name || '');
-            medicineField.querySelector('.medicine-dosage').value = stripForbiddenMedicalReportChars(medicine.dosage || '');
-            medicineField.querySelector('.medicine-frequency').value = stripForbiddenMedicalReportChars(medicine.frequency || '');
+            medicineField.querySelector('.medicine-name').value = sanitizeMedicalReportText(medicine.name || '');
+            medicineField.querySelector('.medicine-dosage').value = sanitizeMedicalReportText(medicine.dosage || '');
+            medicineField.querySelector('.medicine-frequency').value = sanitizeMedicalReportText(medicine.frequency || '');
           }
         });
       }
@@ -2064,36 +2196,38 @@ async function loadExistingReport(appointmentId) {
 }
 
 async function saveMedicalReport() {
+  clearMedicalReportErrors();
+
   const appointmentId = document.getElementById('report-apt-id').value;
-  const symptoms = stripForbiddenMedicalReportChars(document.getElementById('report-symptoms').value.trim());
-  const diagnosis = stripForbiddenMedicalReportChars(document.getElementById('report-diagnosis').value.trim());
-  const bloodPressure = document.getElementById('report-bp').value.trim();
-  const weight = document.getElementById('report-weight').value.trim();
-  const additionalNotes = stripForbiddenMedicalReportChars(document.getElementById('report-notes').value.trim());
+  const symptoms = sanitizeMedicalReportText(document.getElementById('report-symptoms').value.trim());
+  const diagnosis = sanitizeMedicalReportText(document.getElementById('report-diagnosis').value.trim());
+  const bloodPressure = sanitizeMedicalReportBloodPressure(document.getElementById('report-bp').value.trim());
+  const weight = sanitizeMedicalReportWeight(document.getElementById('report-weight').value.trim());
+  const additionalNotes = sanitizeMedicalReportText(document.getElementById('report-notes').value.trim());
 
   // Validate ALL required fields with specific error messages
   if (!symptoms) {
-    alert('Symptoms field is required');
+    setMedicalReportFieldError('report-symptoms-error', 'Symptoms field is required');
     document.getElementById('report-symptoms').focus();
     return;
   }
   if (!diagnosis) {
-    alert('Diagnosis field is required');
+    setMedicalReportFieldError('report-diagnosis-error', 'Diagnosis field is required');
     document.getElementById('report-diagnosis').focus();
     return;
   }
   if (!bloodPressure) {
-    alert('Blood Pressure field is required');
+    setMedicalReportFieldError('report-bp-error', 'Blood pressure field is required');
     document.getElementById('report-bp').focus();
     return;
   }
   if (!weight) {
-    alert('Weight field is required');
+    setMedicalReportFieldError('report-weight-error', 'Weight field is required');
     document.getElementById('report-weight').focus();
     return;
   }
   if (!additionalNotes) {
-    alert('Additional Notes field is required');
+    setMedicalReportFieldError('report-notes-error', 'Additional notes field is required');
     document.getElementById('report-notes').focus();
     return;
   }
@@ -2101,15 +2235,15 @@ async function saveMedicalReport() {
   // Collect medicines
   const medicines = [];
   document.querySelectorAll('.medicine-field').forEach(field => {
-    const name = stripForbiddenMedicalReportChars(field.querySelector('.medicine-name').value.trim());
-    const dosage = stripForbiddenMedicalReportChars(field.querySelector('.medicine-dosage').value.trim());
-    const frequency = stripForbiddenMedicalReportChars(field.querySelector('.medicine-frequency').value.trim());
+    const name = sanitizeMedicalReportText(field.querySelector('.medicine-name').value.trim());
+    const dosage = sanitizeMedicalReportText(field.querySelector('.medicine-dosage').value.trim());
+    const frequency = sanitizeMedicalReportText(field.querySelector('.medicine-frequency').value.trim());
     if (name) {
       medicines.push({ name, dosage, frequency });
     }
   });
   if (medicines.length === 0) {
-    alert('Please add at least one medicine');
+    setMedicalReportFieldError('report-medicines-error', 'Please add at least one medicine');
     return;
   }
 
@@ -2138,9 +2272,9 @@ async function saveMedicalReport() {
       // Reload the schedule
       if (selectedScheduleDate) loadScheduleForDate(selectedScheduleDate);
     } else {
-      alert('Error: ' + result.message);
+      setMedicalReportFieldError('report-form-error', result.message || 'Unable to save medical report.');
     }
   } catch (error) {
-    alert('Error saving report: ' + error.message);
+    setMedicalReportFieldError('report-form-error', 'Error saving report: ' + error.message);
   }
 }
