@@ -192,7 +192,7 @@
 
     <!-- Full Width Header -->
     <header
-        class="fixed top-0 left-0 w-full z-50 glass-header h-[85px] flex items-center py-[60px] justify-between px-6 md:px-12 lg:px-20"
+        class="fixed top-0 left-0 w-full z-50 glass-header h-[85px] flex items-center py-[60px] justify-between px-5 md:px-10 lg:px-16"
         data-scroll-animation="animate-fade-in" data-delay="0s">
 
         <div class="flex items-center gap-3 cursor-pointer z-10" data-scroll-animation="animate-slide-up"
@@ -209,6 +209,7 @@
             <a href="#home" class="nav-link">Home</a>
             <a href="#about" class="nav-link">About</a>
             <a href="#service" class="nav-link">Services</a>
+            <a href="#remedies" class="nav-link">Urgent Care</a>
             <a href="#contact" class="nav-link">Contact</a>
         </nav>
 
@@ -230,7 +231,7 @@
         </div>
 
         <div
-            class="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-20 flex flex-col lg:flex-row items-center justify-between gap-16 relative z-10">
+            class="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-16 flex flex-col lg:flex-row items-center justify-between gap-16 relative z-10">
             <!-- Left Content -->
             <div class="flex-1 w-full" data-scroll-animation="animate-slide-up" data-delay="0.4s">
                 <div class="inline-flex items-center gap-2 bg-gradient-to-r from-[#007E85]/10 to-[#6EAB36]/10 text-[#007E85] font-bold px-5 py-2.5 rounded-md text-[14px] mb-8 border border-[#007E85]/10 shadow-sm"
@@ -326,7 +327,7 @@
 
     <!-- About Section (Full Width) -->
     <section id="about" class="w-full bg-[#FAFAFA] py-24 lg:py-32 border-t border-gray-100">
-        <div class="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-20">
+        <div class="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-16">
             <!-- Section Title -->
             <div class="text-center mb-24" data-scroll-animation="animate-slide-up" data-delay="0s">
                 <p class="font-bold text-[#6EAB36] uppercase tracking-widest text-[16px] mb-4">Discover Us</p>
@@ -398,7 +399,7 @@
         </div>
         <div class="absolute inset-0 bg-gradient-to-r from-transparent via-[#007E85]/50 to-transparent"></div>
 
-        <div class="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-20 relative z-10">
+        <div class="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-16 relative z-10">
             <div
                 class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center divide-y md:divide-y-0 md:divide-x divide-white/20">
                 <div class="pt-6 md:pt-0" data-scroll-animation="animate-slide-up" data-delay="0.1s">
@@ -425,7 +426,7 @@
 
     <!-- Services Section (Full Width) -->
     <section id="service" class="w-full bg-white py-24 lg:py-32">
-        <div class="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-20">
+        <div class="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-16">
             <div class="text-center mb-20" data-scroll-animation="animate-slide-up">
                 <p class="font-bold text-[#6EAB36] uppercase tracking-widest text-[16px] mb-4">Specialties</p>
                 <h2 class="font-black text-[48px] lg:text-[56px] text-[#333333] mb-6 tracking-tight">
@@ -539,132 +540,131 @@
 
     <!-- Emergency Remedies Section (Full Width) -->
     <section id="remedies" class="w-full bg-[#F4FBFA] py-24 lg:py-32 border-t border-[#d9ece9] overflow-hidden">
-        <div class="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-20">
+        <div class="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-16">
             <div class="text-center mb-16" data-scroll-animation="animate-slide-up" data-delay="0s">
-                <p class="font-bold text-[#6EAB36] uppercase tracking-widest text-[16px] mb-4">Quick Relief</p>
-                <h2 class="font-black text-[48px] lg:text-[56px] text-[#007E85] mb-6 tracking-tight">Emergency home remedies</h2>
+                <p class="font-bold text-[#6EAB36] uppercase tracking-widest text-[16px] mb-4">Critical Emergencies</p>
+                <h2 class="font-black text-[48px] lg:text-[56px] text-[#007E85] mb-6 tracking-tight">Danger signs and immediate first aid</h2>
                 <p class="text-[20px] text-[#666666] max-w-4xl mx-auto leading-relaxed font-medium">
-                    Hardcoded home remedy cards that scroll continuously. Each card shows what it is, how it happens,
-                    and what you can do for temporary relief.
+                    These are serious emergencies. Use first aid only as a temporary step and call emergency medical services immediately.
                 </p>
             </div>
 
-            <div class="remedy-marquee">
+            <div class="remedy-marquee" data-scroll-animation="animate-fade-in" data-delay="0.1s">
                 <div class="absolute left-0 top-0 h-full w-24 bg-gradient-to-r from-[#F4FBFA] to-transparent z-10 pointer-events-none"></div>
                 <div class="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-[#F4FBFA] to-transparent z-10 pointer-events-none"></div>
 
                 <div class="remedy-track py-2">
                     <div class="remedy-row">
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
+                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift" data-scroll-animation="animate-slide-up" data-delay="0.1s">
                             <div class="flex items-center gap-4 mb-5">
                                 <div class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
-                                    <img src="https://img.icons8.com/ios-filled/100/007E85/thermometer.png" alt="Fever" class="w-8 h-8 object-contain" loading="lazy">
+                                    <img src="https://img.icons8.com/ios-filled/100/007E85/heart-with-pulse.png" alt="Heart attack" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Home remedy</p>
-                                    <h3 class="font-black text-[24px] text-[#1f2937]">Fever</h3>
+                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
+                                    <h3 class="font-black text-[24px] text-[#1f2937]">Heart attack</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> The body raises its temperature while fighting an infection or inflammation.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">What helps:</span> Rest, drink water or electrolyte fluids, wear light clothes, and use a lukewarm sponge bath if needed.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Blood flow to heart muscle gets blocked, usually by a clot.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Call emergency now, keep person seated and calm, loosen tight clothes, and begin CPR if they collapse and are not breathing.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
+                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift" data-scroll-animation="animate-slide-up" data-delay="0.15s">
                             <div class="flex items-center gap-4 mb-5">
                                 <div class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
-                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/fire-element.png" alt="Minor burns" class="w-8 h-8 object-contain" loading="lazy">
+                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/brain.png" alt="Stroke" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Home remedy</p>
-                                    <h3 class="font-black text-[24px] text-[#1f2937]">Minor burns</h3>
+                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
+                                    <h3 class="font-black text-[24px] text-[#1f2937]">Stroke</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Skin is exposed to hot water, steam, oil, or another heat source.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">What helps:</span> Cool the area under running water for 20 minutes, cover with a clean cloth, and avoid ice, toothpaste, or butter.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Brain blood flow is blocked or a vessel bursts.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Use FAST signs, call emergency immediately, keep patient on side if vomiting, do not give food or drink.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
+                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift" data-scroll-animation="animate-slide-up" data-delay="0.2s">
                             <div class="flex items-center gap-4 mb-5">
                                 <div class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
-                                    <img src="https://img.icons8.com/ios-filled/100/007E85/bandage.png" alt="Cuts and scrapes" class="w-8 h-8 object-contain" loading="lazy">
+                                    <img src="https://img.icons8.com/ios-filled/100/007E85/drop-of-blood.png" alt="Severe bleeding" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Home remedy</p>
-                                    <h3 class="font-black text-[24px] text-[#1f2937]">Cuts & scrapes</h3>
+                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
+                                    <h3 class="font-black text-[24px] text-[#1f2937]">Severe bleeding</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Small skin injuries happen from falls, sharp edges, or friction.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">What helps:</span> Rinse with clean water, apply gentle pressure, use antiseptic if available, and cover with a clean bandage.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Deep cuts, trauma, or arterial injury can cause rapid blood loss.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Apply firm direct pressure with clean cloth, elevate if possible, call emergency, and do not remove soaked cloth layers.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
+                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift" data-scroll-animation="animate-slide-up" data-delay="0.25s">
                             <div class="flex items-center gap-4 mb-5">
                                 <div class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
-                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/ankle.png" alt="Sprain" class="w-8 h-8 object-contain" loading="lazy">
+                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/lungs.png" alt="Choking" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Home remedy</p>
-                                    <h3 class="font-black text-[24px] text-[#1f2937]">Sprain</h3>
+                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
+                                    <h3 class="font-black text-[24px] text-[#1f2937]">Choking</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> A joint is twisted or stretched beyond its normal range during movement or a fall.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">What helps:</span> Rest the joint, apply ice, use light compression, and keep it elevated.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Food or object blocks the airway and stops airflow.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> If unable to speak or breathe, give abdominal thrusts, call emergency, and start CPR if they become unresponsive.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
+                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift" data-scroll-animation="animate-slide-up" data-delay="0.3s">
                             <div class="flex items-center gap-4 mb-5">
                                 <div class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
-                                    <img src="https://img.icons8.com/ios-filled/100/007E85/nose.png" alt="Nosebleed" class="w-8 h-8 object-contain" loading="lazy">
+                                    <img src="https://img.icons8.com/ios-filled/100/007E85/warning-shield.png" alt="Anaphylaxis" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Home remedy</p>
-                                    <h3 class="font-black text-[24px] text-[#1f2937]">Nosebleed</h3>
+                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
+                                    <h3 class="font-black text-[24px] text-[#1f2937]">Anaphylaxis</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Dry air, nose picking, minor trauma, or irritation can break tiny blood vessels.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">What helps:</span> Sit upright, lean forward, pinch the soft part of the nose for 10 minutes, and avoid blowing afterward.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Severe allergic reaction causes airway swelling and shock.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Use epinephrine auto-injector if available, call emergency now, lay person flat with legs raised unless breathing is hard.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
+                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift" data-scroll-animation="animate-slide-up" data-delay="0.35s">
                             <div class="flex items-center gap-4 mb-5">
                                 <div class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
-                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/stomach.png" alt="Acidity" class="w-8 h-8 object-contain" loading="lazy">
+                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/poison.png" alt="Poisoning" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Home remedy</p>
-                                    <h3 class="font-black text-[24px] text-[#1f2937]">Acidity</h3>
+                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
+                                    <h3 class="font-black text-[24px] text-[#1f2937]">Poisoning</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Heavy meals, spicy food, caffeine, or lying down too soon can trigger acid reflux.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">What helps:</span> Sip water, stay upright, eat bland foods, and avoid greasy or very spicy meals for a while.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Harmful chemicals, medicines, gases, or contaminated food enter the body.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Call poison help or emergency, keep substance container for identification, and do not induce vomiting unless told by experts.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
+                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift" data-scroll-animation="animate-slide-up" data-delay="0.4s">
                             <div class="flex items-center gap-4 mb-5">
                                 <div class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
-                                    <img src="https://img.icons8.com/ios-filled/100/007E85/sneeze.png" alt="Common cold" class="w-8 h-8 object-contain" loading="lazy">
+                                    <img src="https://img.icons8.com/ios-filled/100/007E85/fire-element.png" alt="Severe burns" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Home remedy</p>
-                                    <h3 class="font-black text-[24px] text-[#1f2937]">Common cold</h3>
+                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
+                                    <h3 class="font-black text-[24px] text-[#1f2937]">Severe burns</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Viral infections spread through droplets or contaminated surfaces and irritate the upper airways.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">What helps:</span> Warm fluids, steam inhalation, rest, and honey for soothing the throat if appropriate.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> High heat, electricity, chemicals, or explosions damage deep skin layers.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Remove from source, cool with clean running water, cover with sterile cloth, and call emergency for large, deep, or facial burns.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
+                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift" data-scroll-animation="animate-slide-up" data-delay="0.45s">
                             <div class="flex items-center gap-4 mb-5">
                                 <div class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
-                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/headache.png" alt="Headache" class="w-8 h-8 object-contain" loading="lazy">
+                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/ambulance.png" alt="Unconscious or not breathing" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Home remedy</p>
-                                    <h3 class="font-black text-[24px] text-[#1f2937]">Headache</h3>
+                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
+                                    <h3 class="font-black text-[24px] text-[#1f2937]">Unconscious, not breathing</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Stress, dehydration, poor sleep, eye strain, or skipping meals can trigger a headache.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">What helps:</span> Drink water, rest in a quiet room, use a cool compress, and take a short break from screens.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Cardiac arrest, severe trauma, drowning, overdose, or shock can stop breathing.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Call emergency, start CPR at once, and use AED if available.</p>
                         </article>
                     </div>
 
@@ -672,128 +672,127 @@
                         <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
                             <div class="flex items-center gap-4 mb-5">
                                 <div class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
-                                    <img src="https://img.icons8.com/ios-filled/100/007E85/thermometer.png" alt="Fever" class="w-8 h-8 object-contain" loading="lazy">
+                                    <img src="https://img.icons8.com/ios-filled/100/007E85/heart-with-pulse.png" alt="Heart attack" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Home remedy</p>
-                                    <h3 class="font-black text-[24px] text-[#1f2937]">Fever</h3>
+                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
+                                    <h3 class="font-black text-[24px] text-[#1f2937]">Heart attack</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> The body raises its temperature while fighting an infection or inflammation.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">What helps:</span> Rest, drink water or electrolyte fluids, wear light clothes, and use a lukewarm sponge bath if needed.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Blood flow to heart muscle gets blocked, usually by a clot.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Call emergency now, keep person seated and calm, loosen tight clothes, and begin CPR if they collapse and are not breathing.</p>
                         </article>
 
                         <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
                             <div class="flex items-center gap-4 mb-5">
                                 <div class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
-                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/fire-element.png" alt="Minor burns" class="w-8 h-8 object-contain" loading="lazy">
+                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/brain.png" alt="Stroke" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Home remedy</p>
-                                    <h3 class="font-black text-[24px] text-[#1f2937]">Minor burns</h3>
+                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
+                                    <h3 class="font-black text-[24px] text-[#1f2937]">Stroke</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Skin is exposed to hot water, steam, oil, or another heat source.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">What helps:</span> Cool the area under running water for 20 minutes, cover with a clean cloth, and avoid ice, toothpaste, or butter.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Brain blood flow is blocked or a vessel bursts.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Use FAST signs, call emergency immediately, keep patient on side if vomiting, do not give food or drink.</p>
                         </article>
 
                         <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
                             <div class="flex items-center gap-4 mb-5">
                                 <div class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
-                                    <img src="https://img.icons8.com/ios-filled/100/007E85/bandage.png" alt="Cuts and scrapes" class="w-8 h-8 object-contain" loading="lazy">
+                                    <img src="https://img.icons8.com/ios-filled/100/007E85/drop-of-blood.png" alt="Severe bleeding" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Home remedy</p>
-                                    <h3 class="font-black text-[24px] text-[#1f2937]">Cuts & scrapes</h3>
+                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
+                                    <h3 class="font-black text-[24px] text-[#1f2937]">Severe bleeding</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Small skin injuries happen from falls, sharp edges, or friction.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">What helps:</span> Rinse with clean water, apply gentle pressure, use antiseptic if available, and cover with a clean bandage.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Deep cuts, trauma, or arterial injury can cause rapid blood loss.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Apply firm direct pressure with clean cloth, elevate if possible, call emergency, and do not remove soaked cloth layers.</p>
                         </article>
 
                         <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
                             <div class="flex items-center gap-4 mb-5">
                                 <div class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
-                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/ankle.png" alt="Sprain" class="w-8 h-8 object-contain" loading="lazy">
+                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/lungs.png" alt="Choking" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Home remedy</p>
-                                    <h3 class="font-black text-[24px] text-[#1f2937]">Sprain</h3>
+                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
+                                    <h3 class="font-black text-[24px] text-[#1f2937]">Choking</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> A joint is twisted or stretched beyond its normal range during movement or a fall.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">What helps:</span> Rest the joint, apply ice, use light compression, and keep it elevated.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Food or object blocks the airway and stops airflow.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> If unable to speak or breathe, give abdominal thrusts, call emergency, and start CPR if they become unresponsive.</p>
                         </article>
 
                         <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
                             <div class="flex items-center gap-4 mb-5">
                                 <div class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
-                                    <img src="https://img.icons8.com/ios-filled/100/007E85/nose.png" alt="Nosebleed" class="w-8 h-8 object-contain" loading="lazy">
+                                    <img src="https://img.icons8.com/ios-filled/100/007E85/warning-shield.png" alt="Anaphylaxis" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Home remedy</p>
-                                    <h3 class="font-black text-[24px] text-[#1f2937]">Nosebleed</h3>
+                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
+                                    <h3 class="font-black text-[24px] text-[#1f2937]">Anaphylaxis</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Dry air, nose picking, minor trauma, or irritation can break tiny blood vessels.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">What helps:</span> Sit upright, lean forward, pinch the soft part of the nose for 10 minutes, and avoid blowing afterward.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Severe allergic reaction causes airway swelling and shock.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Use epinephrine auto-injector if available, call emergency now, lay person flat with legs raised unless breathing is hard.</p>
                         </article>
 
                         <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
                             <div class="flex items-center gap-4 mb-5">
                                 <div class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
-                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/stomach.png" alt="Acidity" class="w-8 h-8 object-contain" loading="lazy">
+                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/poison.png" alt="Poisoning" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Home remedy</p>
-                                    <h3 class="font-black text-[24px] text-[#1f2937]">Acidity</h3>
+                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
+                                    <h3 class="font-black text-[24px] text-[#1f2937]">Poisoning</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Heavy meals, spicy food, caffeine, or lying down too soon can trigger acid reflux.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">What helps:</span> Sip water, stay upright, eat bland foods, and avoid greasy or very spicy meals for a while.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Harmful chemicals, medicines, gases, or contaminated food enter the body.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Call poison help or emergency, keep substance container for identification, and do not induce vomiting unless told by experts.</p>
                         </article>
 
                         <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
                             <div class="flex items-center gap-4 mb-5">
                                 <div class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
-                                    <img src="https://img.icons8.com/ios-filled/100/007E85/sneeze.png" alt="Common cold" class="w-8 h-8 object-contain" loading="lazy">
+                                    <img src="https://img.icons8.com/ios-filled/100/007E85/fire-element.png" alt="Severe burns" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Home remedy</p>
-                                    <h3 class="font-black text-[24px] text-[#1f2937]">Common cold</h3>
+                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
+                                    <h3 class="font-black text-[24px] text-[#1f2937]">Severe burns</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Viral infections spread through droplets or contaminated surfaces and irritate the upper airways.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">What helps:</span> Warm fluids, steam inhalation, rest, and honey for soothing the throat if appropriate.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> High heat, electricity, chemicals, or explosions damage deep skin layers.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Remove from source, cool with clean running water, cover with sterile cloth, and call emergency for large, deep, or facial burns.</p>
                         </article>
 
                         <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
                             <div class="flex items-center gap-4 mb-5">
                                 <div class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
-                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/headache.png" alt="Headache" class="w-8 h-8 object-contain" loading="lazy">
+                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/ambulance.png" alt="Unconscious or not breathing" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Home remedy</p>
-                                    <h3 class="font-black text-[24px] text-[#1f2937]">Headache</h3>
+                                    <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
+                                    <h3 class="font-black text-[24px] text-[#1f2937]">Unconscious, not breathing</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Stress, dehydration, poor sleep, eye strain, or skipping meals can trigger a headache.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">What helps:</span> Drink water, rest in a quiet room, use a cool compress, and take a short break from screens.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Cardiac arrest, severe trauma, drowning, overdose, or shock can stop breathing.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Call emergency, start CPR at once, and use AED if available.</p>
                         </article>
                     </div>
                 </div>
             </div>
 
-            <p class="text-center mt-12 text-[15px] md:text-[16px] text-[#666666] font-medium max-w-4xl mx-auto">
-                If symptoms are severe, worsening, or involve breathing trouble, chest pain, heavy bleeding, fainting,
-                or loss of consciousness, seek urgent medical care immediately.
+            <p class="text-center mt-12 text-[15px] md:text-[16px] text-[#666666] font-medium max-w-4xl mx-auto" data-scroll-animation="animate-slide-up" data-delay="0.5s">
+                If any of these signs appear, treat as life-threatening and call emergency services immediately. Do not delay for home treatment.
             </p>
         </div>
     </section>
 
     <!-- Results Section (Full Width) -->
     <section id="results" class="w-full bg-[#FAFAFA] py-24 lg:py-32 border-t border-b border-gray-200">
-        <div class="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-20">
+        <div class="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-16">
             <div class="text-center mb-20" data-scroll-animation="animate-slide-up">
                 <h2 class="font-black text-[48px] lg:text-[56px] text-[#007E85] tracking-tight">Our impact in numbers
                 </h2>
@@ -827,7 +826,7 @@
 
     <!-- Contact Section (Full Width) -->
     <section id="contact" class="w-full bg-white py-24 lg:py-32">
-        <div class="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-20">
+        <div class="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-16">
             <div class="text-center mb-20" data-scroll-animation="animate-slide-up">
                 <p class="font-bold text-[#6EAB36] uppercase tracking-widest text-[16px] mb-4">Support</p>
                 <h2 class="font-black text-[48px] lg:text-[56px] text-[#007E85] tracking-tight mb-6">Contact Us</h2>
@@ -890,7 +889,7 @@
 
     <!-- Footer (Full Width) -->
     <footer class="w-full bg-[#007E85] text-white pt-24 pb-12">
-        <div class="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-20">
+        <div class="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-16">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
                 <!-- Company Info -->
                 <div class="col-span-1 lg:col-span-1">
