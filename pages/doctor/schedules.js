@@ -15,7 +15,7 @@ function showToast(message, type = 'info', duration = 2000) {
   })();
 
   const toast = document.createElement('div');
-  const bgColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6';
+  const bgColor = type === 'success' ? '#007E85' : type === 'error' ? '#ef4444' : '#3b82f6';
   const slideOutDelay = (duration - 300) / 1000;
   toast.style.cssText = `background-color: ${bgColor}; color: white; padding: 12px 16px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); animation: slideIn 0.3s ease, slideOut 0.3s ease ${slideOutDelay}s forwards; min-width: 250px;`;
   toast.textContent = message;
@@ -185,7 +185,7 @@ function renderScheduleCalendar() {
       // Mark selected date and today's date
       if (dateStr === todayStr) {
         dayDiv.classList.add('selected');
-        dayDiv.style.backgroundColor = "#0d7377";
+        dayDiv.style.backgroundColor = "#007E85";
         dayDiv.style.color = "white";
         dayDiv.style.fontWeight = "bold";
         dayDiv.style.borderRadius = "10px";
@@ -195,7 +195,7 @@ function renderScheduleCalendar() {
         dayDiv.style.color = "white";
         dayDiv.style.fontWeight = "bold";
         dayDiv.style.borderRadius = "10px";
-        dayDiv.style.boxShadow = "0 4px 12px rgba(13, 115, 119, 0.25)";
+        dayDiv.style.boxShadow = "0 4px 12px rgba(0, 126, 133, 0.25)";
       } else if (dateStr < todayStr) {
         dayDiv.style.color = "#d1d5db";
       }
@@ -403,17 +403,17 @@ async function loadScheduleForDate(date) {
         } else if (slot.status === 'Available') {
           // Available slot (no appointment)
           gridContainer.innerHTML += `
-            <div class="flex items-center justify-between p-3 bg-green-50 border border-green-100 rounded-md shadow-sm hover:border-green-200 hover:shadow-md transition text-sm\">
+            <div class="flex items-center justify-between p-3 bg-[#007E85]/10 border border-[#007E85]/15 rounded-md shadow-sm hover:border-[#007E85]/20 hover:shadow-md transition text-sm\">
               <div class="flex items-center gap-2\">
-                <div class=\"w-8 h-8 bg-green-200 rounded-full flex items-center justify-center flex-shrink-0\">
-                  <i data-lucide=\"clock\" class=\"text-green-700 w-4 h-4\"></i>
+                <div class=\"w-8 h-8 bg-[#007E85]/20 rounded-full flex items-center justify-center flex-shrink-0\">
+                  <i data-lucide=\"clock\" class=\"text-[#007E85] w-4 h-4\"></i>
                 </div>
                 <div>
                   <span class=\"font-bold text-gray-900 text-sm\">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
-                  <p class=\"text-[10px] text-green-700 font-semibold mt-0.5 flex items-center gap-1\"><i data-lucide=\"check\" class=\"w-3 h-3\"></i>Available for booking</p>
+                  <p class=\"text-[10px] text-[#007E85] font-semibold mt-0.5 flex items-center gap-1\"><i data-lucide=\"check\" class=\"w-3 h-3\"></i>Available for booking</p>
                 </div>
               </div>
-              <button onclick=\"openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})\" class=\"bg-green-100 hover:bg-green-200 text-green-700 border border-green-200 px-3 py-1.5 rounded-md text-xs font-semibold transition-all shadow-none whitespace-nowrap ml-2 ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}\">
+              <button onclick=\"openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})\" class=\"bg-[#007E85]/15 hover:bg-[#007E85]/20 text-[#007E85] border border-[#007E85]/20 px-3 py-1.5 rounded-md text-xs font-semibold transition-all shadow-none whitespace-nowrap ml-2 ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}\">
                 Edit Slot
               </button>
             </div>`;
@@ -483,14 +483,14 @@ function openEditSlotModal(start, end, availId, status, isPast) {
   
   if (status === 'Available') {
     statusEl.textContent = "Available";
-    statusEl.className = "inline-block px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800";
+    statusEl.className = "inline-block px-3 py-1 rounded-full text-xs font-semibold bg-[#007E85]/15 text-[#007E85]";
     toggleBtn.textContent = "Block Slot";
     toggleBtn.className = "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 px-4 py-2 rounded-md text-sm font-semibold transition";
   } else {
     statusEl.textContent = "Blocked";
     statusEl.className = "inline-block px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800";
     toggleBtn.textContent = "Unblock Slot";
-    toggleBtn.className = "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 px-4 py-2 rounded-md text-sm font-semibold transition";
+    toggleBtn.className = "bg-[#007E85]/10 text-[#007E85] border border-[#007E85]/20 hover:bg-[#007E85]/15 px-4 py-2 rounded-md text-sm font-semibold transition";
   }
   
   const modal = document.getElementById("edit-slot-modal");
@@ -660,7 +660,7 @@ function renderManageDaySlots() {
     fetchedAvailability.forEach(slot => {
     let statusBadge = '';
     if (slot.status === 'Available') {
-      statusBadge = `<span class="bg-green-500 text-white text-[8px] px-2 py-0.5 rounded-full uppercase font-bold shadow-sm">Available</span>`;
+      statusBadge = `<span class="bg-[#007E85]/100 text-white text-[8px] px-2 py-0.5 rounded-full uppercase font-bold shadow-sm">Available</span>`;
     } else if (slot.status === 'Blocked') {
       statusBadge = `<span class="bg-amber-500 text-white text-[8px] px-2 py-0.5 rounded-full uppercase font-bold shadow-sm">Blocked</span>`;
     } else if (slot.status === 'Booked' || slot.status === 'Completed') {
@@ -1346,12 +1346,12 @@ async function loadPatientHistory(patientId) {
                 <p class="font-semibold text-gray-900 text-xs">${apt.doctor_name || '-'}</p>
                 <p class="text-[10px] text-gray-500">${apt.specialization || 'Consultation'}</p>
               </div>
-              <span class="text-[10px] bg-green-100 text-green-800 px-2 py-1 rounded">Completed</span>
+              <span class="text-[10px] bg-[#007E85]/15 text-[#007E85] px-2 py-1 rounded">Completed</span>
             </div>
             <p class="text-[10px] text-gray-600 mb-2">📅 ${new Date(apt.app_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${apt.app_time}</p>
             ${apt.reason_for_visit ? `<p class="text-[10px] text-gray-600 mb-2"><strong>Visit:</strong> ${apt.reason_for_visit}</p>` : ''}
             ${apt.doctor_comments ? `<p class="text-[10px] text-gray-700 mb-2 p-2 bg-white rounded border-l-2 border-blue-400"><strong>Notes:</strong> ${apt.doctor_comments}</p>` : ''}
-            ${apt.prescribed_medicines ? `<p class="text-[10px] text-gray-700 p-2 bg-white rounded border-l-2 border-green-400"><strong>Medicines:</strong> ${apt.prescribed_medicines}</p>` : ''}
+            ${apt.prescribed_medicines ? `<p class="text-[10px] text-gray-700 p-2 bg-white rounded border-l-2 border-[#007E85]/30"><strong>Medicines:</strong> ${apt.prescribed_medicines}</p>` : ''}
           </div>
         </div>
       `).join('');
@@ -1853,7 +1853,7 @@ async function downloadDoctorReportPDF() {
       return 0;
     };
     
-    const addLine = (x1, y1, x2, y2, color = '#00A3AC', width = 0.5) => {
+    const addLine = (x1, y1, x2, y2, color = '#007E85', width = 0.5) => {
       doc.setDrawColor(...hexToRgb(color));
       doc.setLineWidth(width);
       doc.line(x1, y1, x2, y2);
@@ -1864,7 +1864,7 @@ async function downloadDoctorReportPDF() {
     // ===== HEADER =====
     doc.setFont(undefined, 'bold');
     doc.setFontSize(14);
-    doc.setTextColor(...hexToRgb('#00A3AC'));
+    doc.setTextColor(...hexToRgb('#007E85'));
     doc.text('HEALTH CARE', pageWidth / 2, yPos, { align: 'center' });
     yPos += 6;
     
@@ -1876,13 +1876,13 @@ async function downloadDoctorReportPDF() {
     doc.text('Phone: +1-800-HOSPITAL | Email: info@healthcare.com', pageWidth / 2, yPos, { align: 'center' });
     yPos += 6;
     
-    addLine(10, yPos, pageWidth - 10, yPos, '#00A3AC', 1);
+    addLine(10, yPos, pageWidth - 10, yPos, '#007E85', 1);
     yPos += 8;
     
     // Title
     doc.setFont(undefined, 'bold');
     doc.setFontSize(13);
-    doc.setTextColor(...hexToRgb('#00A3AC'));
+    doc.setTextColor(...hexToRgb('#007E85'));
     doc.text('MEDICAL REPORT', pageWidth / 2, yPos, { align: 'center' });
     yPos += 7;
     
@@ -1899,7 +1899,7 @@ async function downloadDoctorReportPDF() {
     // Left Column - Patient Info
     doc.setFont(undefined, 'bold');
     doc.setFontSize(10);
-    doc.setTextColor(...hexToRgb('#00A3AC'));
+    doc.setTextColor(...hexToRgb('#007E85'));
     doc.text('PATIENT INFORMATION', 12, yPos);
     yPos += 6;
     
@@ -1917,7 +1917,7 @@ async function downloadDoctorReportPDF() {
     yPos = sectionStartY;
     doc.setFont(undefined, 'bold');
     doc.setFontSize(10);
-    doc.setTextColor(...hexToRgb('#00A3AC'));
+    doc.setTextColor(...hexToRgb('#007E85'));
     doc.text('CONSULTATION DETAILS', pageWidth / 2 + 10, yPos);
     yPos = sectionStartY + 6;
     
@@ -1938,7 +1938,7 @@ async function downloadDoctorReportPDF() {
     // ===== CHIEF COMPLAINT =====
     doc.setFont(undefined, 'bold');
     doc.setFontSize(10);
-    doc.setTextColor(...hexToRgb('#00A3AC'));
+    doc.setTextColor(...hexToRgb('#007E85'));
     doc.text('CHIEF COMPLAINT', 12, yPos);
     yPos += 5;
     
@@ -1952,7 +1952,7 @@ async function downloadDoctorReportPDF() {
     // ===== CLINICAL FINDINGS =====
     doc.setFont(undefined, 'bold');
     doc.setFontSize(10);
-    doc.setTextColor(...hexToRgb('#00A3AC'));
+    doc.setTextColor(...hexToRgb('#007E85'));
     doc.text('CLINICAL FINDINGS', 12, yPos);
     yPos += 6;
     
@@ -2007,14 +2007,14 @@ async function downloadDoctorReportPDF() {
     if (data.report.medicines && data.report.medicines.length > 0) {
       doc.setFont(undefined, 'bold');
       doc.setFontSize(10);
-      doc.setTextColor(...hexToRgb('#00A3AC'));
+      doc.setTextColor(...hexToRgb('#007E85'));
       doc.text('PRESCRIBED MEDICINES', 12, yPos);
       yPos += 6;
       
       doc.setFont(undefined, 'bold');
       doc.setFontSize(8);
       doc.setTextColor(...hexToRgb('#FFFFFF'));
-      doc.setFillColor(...hexToRgb('#00A3AC'));
+      doc.setFillColor(...hexToRgb('#007E85'));
       doc.rect(12, yPos - 2, 180, 5, 'F');
       doc.text('Medicine Name', 14, yPos + 1);
       doc.text('Dosage', 85, yPos + 1);
@@ -2047,7 +2047,7 @@ async function downloadDoctorReportPDF() {
     if (data.report.notes) {
       doc.setFont(undefined, 'bold');
       doc.setFontSize(10);
-      doc.setTextColor(...hexToRgb('#00A3AC'));
+      doc.setTextColor(...hexToRgb('#007E85'));
       doc.text('ADDITIONAL NOTES', 12, yPos);
       yPos += 5;
       
@@ -2102,19 +2102,19 @@ function addMedicineField() {
       type="text"
       placeholder="Medicine name"
       oninput="this.value = sanitizeMedicalReportText(this.value)"
-      class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#00A3AC] outline-none medicine-name"
+      class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#007E85] outline-none medicine-name"
     />
     <input
       type="text"
       placeholder="Dosage (e.g., 500mg)"
       oninput="this.value = sanitizeMedicalReportText(this.value)"
-      class="w-24 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#00A3AC] outline-none medicine-dosage"
+      class="w-24 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#007E85] outline-none medicine-dosage"
     />
     <input
       type="text"
       placeholder="Frequency (e.g., 2x daily)"
       oninput="this.value = sanitizeMedicalReportText(this.value)"
-      class="w-28 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#00A3AC] outline-none medicine-frequency"
+      class="w-28 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#007E85] outline-none medicine-frequency"
     />
     <button
       type="button"

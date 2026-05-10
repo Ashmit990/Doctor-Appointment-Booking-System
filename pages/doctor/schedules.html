@@ -86,7 +86,7 @@
         }
 
         :root {
-            --calendar-selected: #0d7377; /* primary selected background */
+            --calendar-selected: #007E85; /* primary selected background */
             --calendar-selected-foreground: #ffffff; /* selected text color */
         }
 
@@ -130,15 +130,15 @@
         }
 
         .primary-color {
-            color: #0d7377;
+            color: #007E85;
         }
 
         .bg-primary {
-            background: linear-gradient(135deg, #0d7377 0%, #0a5a5d 100%);
+            background: linear-gradient(135deg, #007E85 0%, #007E85 100%);
         }
 
         .bg-primary-light {
-            background-color: rgba(13, 115, 119, 0.08);
+            background-color: rgba(0, 126, 133, 0.08);
         }
 
         .card-shadow {
@@ -151,11 +151,11 @@
 
         .card-hover:hover {
             transform: translateY(-8px);
-            box-shadow: 0 25px 60px rgba(13, 115, 119, 0.12);
+            box-shadow: 0 25px 60px rgba(0, 126, 133, 0.12);
         }
 
         .sidebar {
-            background: linear-gradient(180deg, #0d7377 0%, #0a5a5d 100%);
+            background: linear-gradient(180deg, #007E85 0%, #007E85 100%);
             box-shadow: 4px 0 30px rgba(0, 0, 0, 0.15);
         }
 
@@ -206,7 +206,7 @@
         }
 
         .calendar-day:hover {
-            background: linear-gradient(135deg, rgba(13, 115, 119, 0.12), rgba(13, 115, 119, 0.08));
+            background: linear-gradient(135deg, rgba(0, 126, 133, 0.12), rgba(0, 126, 133, 0.08));
             transform: scale(1.05);
         }
 
@@ -231,7 +231,7 @@
         .calendar-day.has-completed {
             position: relative;
             font-weight: bold;
-            color: #059669;
+            color: #007E85;
         }
 
         .calendar-day.has-completed::after {
@@ -241,7 +241,7 @@
             right: 2px;
             width: 18px;
             height: 18px;
-            background: linear-gradient(135deg, #10b981, #059669);
+            background: linear-gradient(135deg, #007E85, #007E85);
             color: white;
             border-radius: 50%;
             display: flex;
@@ -302,7 +302,7 @@
         .premium-card {
             background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(13, 115, 119, 0.1);
+            border: 1px solid rgba(0, 126, 133, 0.1);
             position: relative;
             overflow: hidden;
         }
@@ -314,14 +314,14 @@
             right: -50%;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle, rgba(13, 115, 119, 0.05) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(0, 126, 133, 0.05) 0%, transparent 70%);
             pointer-events: none;
         }
 
         .topbar-premium {
             background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(250,252,253,0.95) 100%);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(13, 115, 119, 0.06);
+            border-bottom: 1px solid rgba(0, 126, 133, 0.06);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
         }
 
@@ -348,28 +348,28 @@
             left: 0;
             width: 50px;
             height: 3px;
-            background: linear-gradient(90deg, #0d7377, #0a5a5d);
+            background: linear-gradient(90deg, #007E85, #007E85);
             border-radius: 2px;
-            box-shadow: 0 2px 8px rgba(13, 115, 119, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 126, 133, 0.2);
         }
 
         /* Updated Calendar Styles to match home.html */
         .calendar-day {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: rgba(13, 115, 119, 0.03);
+            background: rgba(0, 126, 133, 0.03);
             border-radius: 10px;
         }
 
         .calendar-day:hover {
-            background: linear-gradient(135deg, rgba(13, 115, 119, 0.15), rgba(13, 115, 119, 0.08));
-            box-shadow: 0 8px 20px rgba(13, 115, 119, 0.1);
+            background: linear-gradient(135deg, rgba(0, 126, 133, 0.15), rgba(0, 126, 133, 0.08));
+            box-shadow: 0 8px 20px rgba(0, 126, 133, 0.1);
             transform: translateY(-2px);
         }
 
         .calendar-day.selected {
             background: var(--calendar-selected);
             color: var(--calendar-selected-foreground);
-            box-shadow: 0 10px 30px rgba(13, 115, 119, 0.28);
+            box-shadow: 0 10px 30px rgba(0, 126, 133, 0.28);
             border: 1px solid rgba(255,255,255,0.06);
         }
 
@@ -458,7 +458,7 @@
             flex-direction: column;
             gap: clamp(8px, 1vh, 10px);
             scrollbar-width: thin !important;
-            scrollbar-color: #0d7377 rgba(13, 115, 119, 0.08) !important;
+            scrollbar-color: #007E85 rgba(0, 126, 133, 0.08) !important;
         }
 
         .slots-list::-webkit-scrollbar {
@@ -467,21 +467,21 @@
         }
 
         .slots-list::-webkit-scrollbar-track {
-            background: rgba(13, 115, 119, 0.05);
+            background: rgba(0, 126, 133, 0.05);
             border-radius: 8px;
             margin: 3px 0;
         }
 
         .slots-list::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, #0d7377 0%, #0a5a5d 100%) !important;
+            background: linear-gradient(180deg, #007E85 0%, #007E85 100%) !important;
             border-radius: 8px;
-            border: 1px solid rgba(13, 115, 119, 0.1);
+            border: 1px solid rgba(0, 126, 133, 0.1);
             min-height: 30px;
         }
 
         .slots-list::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, #0a5a5d 0%, #084b4d 100%) !important;
-            border: 1px solid rgba(13, 115, 119, 0.15);
+            background: linear-gradient(180deg, #007E85 0%, #007E85 100%) !important;
+            border: 1px solid rgba(0, 126, 133, 0.15);
         }
 
         .schedule-sticky-footer {
@@ -589,8 +589,8 @@
 
         /* Premium Schedule Snapshot */
         .schedule-snapshot-premium {
-            background: linear-gradient(135deg, rgba(13, 115, 119, 0.05) 0%, rgba(10, 90, 93, 0.03) 100%);
-            border: 1px solid rgba(13, 115, 119, 0.1);
+            background: linear-gradient(135deg, rgba(0, 126, 133, 0.05) 0%, rgba(10, 90, 93, 0.03) 100%);
+            border: 1px solid rgba(0, 126, 133, 0.1);
             position: relative;
             overflow: hidden;
             backdrop-filter: blur(10px);
@@ -601,7 +601,7 @@
             position: absolute;
             inset: 0;
             background: 
-                radial-gradient(circle at 20% 50%, rgba(13, 115, 119, 0.08), transparent 50%),
+                radial-gradient(circle at 20% 50%, rgba(0, 126, 133, 0.08), transparent 50%),
                 radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.06), transparent 50%),
                 radial-gradient(circle at 50% 0%, rgba(34, 197, 94, 0.04), transparent 50%);
             pointer-events: none;
@@ -611,7 +611,7 @@
             position: relative;
             z-index: 1;
             padding-bottom: 12px;
-            border-bottom: 1px solid rgba(13, 115, 119, 0.08);
+            border-bottom: 1px solid rgba(0, 126, 133, 0.08);
             margin-bottom: 14px;
         }
 
@@ -619,7 +619,7 @@
             font-size: 9px;
             font-weight: 700;
             letter-spacing: 0.12em;
-            color: #0d7377;
+            color: #007E85;
             text-transform: uppercase;
             display: flex;
             align-items: center;
@@ -636,13 +636,13 @@
         .snapshot-title {
             font-size: 15px;
             font-weight: 700;
-            color: #0a5a5d;
+            color: #007E85;
             line-height: 1.2;
         }
 
         .snapshot-description {
             font-size: 12px;
-            color: #0d7377;
+            color: #007E85;
             opacity: 0.7;
             margin-top: 4px;
             line-height: 1.3;
@@ -657,8 +657,8 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, rgba(13, 115, 119, 0.08) 0%, rgba(16, 185, 129, 0.05) 100%);
-            border: 1px solid rgba(13, 115, 119, 0.12);
+            background: linear-gradient(135deg, rgba(0, 126, 133, 0.08) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 1px solid rgba(0, 126, 133, 0.12);
             padding: 12px 10px;
             border-radius: 10px;
             text-align: center;
@@ -671,17 +671,17 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: radial-gradient(circle at top right, rgba(13, 115, 119, 0.1), transparent 70%);
+            background: radial-gradient(circle at top right, rgba(0, 126, 133, 0.1), transparent 70%);
             opacity: 0;
             transition: opacity 0.3s;
             pointer-events: none;
         }
 
         .stat-card:hover {
-            background: linear-gradient(135deg, rgba(13, 115, 119, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%);
-            border-color: rgba(13, 115, 119, 0.18);
+            background: linear-gradient(135deg, rgba(0, 126, 133, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%);
+            border-color: rgba(0, 126, 133, 0.18);
             transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(13, 115, 119, 0.06);
+            box-shadow: 0 4px 8px rgba(0, 126, 133, 0.06);
         }
 
         .stat-card:hover::before {
@@ -692,7 +692,7 @@
             font-size: 8px;
             font-weight: 700;
             letter-spacing: 0.1em;
-            color: #0d7377;
+            color: #007E85;
             text-transform: uppercase;
             opacity: 0.75;
             margin-bottom: 4px;
@@ -702,7 +702,7 @@
         .stat-value {
             font-size: 18px;
             font-weight: 800;
-            color: #0a5a5d;
+            color: #007E85;
             line-height: 1;
         }
 
@@ -891,11 +891,11 @@
                             <h4 id="schedule-calendar-month" class="font-bold text-gray-900 text-base section-title-premium">Loading...</h4>
                             <div class="flex gap-2">
                                 <button onclick="prevMonthSchedule()"
-                                    class="p-1.5 hover:bg-gray-200 rounded-lg transition duration-300 text-gray-600 hover:text-[#0d7377]">
+                                    class="p-1.5 hover:bg-gray-200 rounded-lg transition duration-300 text-gray-600 hover:text-[#007E85]">
                                     <i data-lucide="chevron-left" class="w-4 h-4"></i>
                                 </button>
                                 <button onclick="nextMonthSchedule()"
-                                    class="p-1.5 hover:bg-gray-200 rounded-lg transition duration-300 text-gray-600 hover:text-[#0d7377]">
+                                    class="p-1.5 hover:bg-gray-200 rounded-lg transition duration-300 text-gray-600 hover:text-[#007E85]">
                                     <i data-lucide="chevron-right" class="w-4 h-4"></i>
                                 </button>
                             </div>
@@ -962,7 +962,7 @@
                             </div>
                             <button id="manage-day-btn" onclick="openManageDayModal()"
                                 style="display: none;"
-                                class="bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white hover:from-[#0a5a5d] hover:to-[#084b4d] px-6 py-2.5 rounded-md text-sm font-semibold transition-all duration-300 shadow-[0_4px_12px_rgba(13,115,119,0.3)] hover:shadow-[0_6px_16px_rgba(13,115,119,0.4)] hover:-translate-y-0.5 inline-flex items-center justify-center gap-2 border border-[#0d7377]/50 group w-full lg:w-auto">
+                                class="bg-gradient-to-r from-[#007E85] to-[#007E85] text-white hover:from-[#007E85] hover:to-[#007E85] px-6 py-2.5 rounded-md text-sm font-semibold transition-all duration-300 shadow-[0_4px_12px_rgba(0,126,133,0.3)] hover:shadow-[0_6px_16px_rgba(0,126,133,0.4)] hover:-translate-y-0.5 inline-flex items-center justify-center gap-2 border border-[#007E85]/50 group w-full lg:w-auto">
                                 <i data-lucide="settings"
                                     class="w-4 h-4 group-hover:rotate-90 transition-transform duration-500"></i> Manage
                                 Schedule
@@ -993,7 +993,7 @@
         <div
             class="appointment-console-scroll bg-white rounded-md shadow-elevated max-w-2xl w-full mx-auto max-h-[90vh] overflow-y-auto border border-gray-200">
             <div
-                class="sticky top-0 bg-[#0d7377] text-white px-6 py-5 flex justify-between items-center shadow-sm z-10 rounded-t-2xl border-b border-[#0a5a5d]">
+                class="sticky top-0 bg-[#007E85] text-white px-6 py-5 flex justify-between items-center shadow-sm z-10 rounded-t-2xl border-b border-[#007E85]">
                 <div class="flex items-center gap-4">
                     <div
                         class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30">
@@ -1012,25 +1012,25 @@
 
             <div class="p-6 space-y-5">
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <div class="bg-gradient-to-br from-blue-100 to-slate-100 p-4 rounded-xl border border-blue-300 hover:border-[#0d7377] transition">
+                    <div class="bg-gradient-to-br from-blue-100 to-slate-100 p-4 rounded-xl border border-blue-300 hover:border-[#007E85] transition">
                         <p class="text-blue-700 mb-2 text-[10px] uppercase tracking-wider font-semibold">Patient ID</p>
                         <p id="modal-patient-id" class="font-bold text-slate-900 text-sm truncate" title="Patient ID">-
                         </p>
                     </div>
-                    <div class="bg-gradient-to-br from-blue-100 to-slate-100 p-4 rounded-xl border border-blue-300 hover:border-[#0d7377] transition">
+                    <div class="bg-gradient-to-br from-blue-100 to-slate-100 p-4 rounded-xl border border-blue-300 hover:border-[#007E85] transition">
                         <p class="text-blue-700 mb-2 text-[10px] uppercase tracking-wider font-semibold">Contact</p>
                         <p id="modal-contact" class="font-bold text-slate-900 text-sm">-</p>
                     </div>
-                    <div class="bg-gradient-to-br from-blue-100 to-slate-100 p-4 rounded-xl border border-blue-300 hover:border-[#0d7377] transition">
+                    <div class="bg-gradient-to-br from-blue-100 to-slate-100 p-4 rounded-xl border border-blue-300 hover:border-[#007E85] transition">
                         <p class="text-blue-700 mb-2 text-[10px] uppercase tracking-wider font-semibold">Time Segment
                         </p>
                         <p id="modal-apt-time" class="font-bold text-slate-900 text-sm">-</p>
                     </div>
-                    <div class="bg-gradient-to-br from-blue-100 to-slate-100 p-4 rounded-xl border border-blue-300 hover:border-[#0d7377] transition">
+                    <div class="bg-gradient-to-br from-blue-100 to-slate-100 p-4 rounded-xl border border-blue-300 hover:border-[#007E85] transition">
                         <p class="text-blue-700 mb-2 text-[10px] uppercase tracking-wider font-semibold">Blood Group</p>
                         <p id="modal-blood-group" class="font-bold text-slate-900 text-sm">-</p>
                     </div>
-                    <div class="bg-gradient-to-br from-blue-100 to-slate-100 p-4 rounded-xl border border-blue-300 hover:border-[#0d7377] transition">
+                    <div class="bg-gradient-to-br from-blue-100 to-slate-100 p-4 rounded-xl border border-blue-300 hover:border-[#007E85] transition">
                         <p class="text-blue-700 mb-2 text-[10px] uppercase tracking-wider font-semibold">Status</p>
                         <p id="modal-status-text" class="font-bold text-gray-900 text-sm">-</p>
                     </div>
@@ -1038,7 +1038,7 @@
 
                 <div class="border-t border-gray-200 pt-5">
                     <p class="text-gray-600 text-xs mb-3 font-semibold uppercase tracking-wider flex items-center gap-2">
-                        <i data-lucide="message-square" class="w-4 h-4 text-[#0d7377]"></i>
+                        <i data-lucide="message-square" class="w-4 h-4 text-[#007E85]"></i>
                         Reason for Visit</p>
                     <p id="modal-reason"
                         class="font-medium text-gray-800 bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200 leading-relaxed text-sm">
@@ -1060,7 +1060,7 @@
                                 class="block text-[10px] font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Appointment
                                 Status <span class="text-red-500">*</span></label>
                             <select id="modal-edit-status" onchange="toggleFollowUpVisibility()"
-                                class="w-full px-4 py-2.5 border border-gray-200 bg-gray-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0d7377]/30 focus:border-[#0d7377] text-sm font-medium transition-all shadow-sm appearance-none cursor-pointer"
+                                class="w-full px-4 py-2.5 border border-gray-200 bg-gray-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#007E85]/30 focus:border-[#007E85] text-sm font-medium transition-all shadow-sm appearance-none cursor-pointer"
                                 required>
                                 <option value="Upcoming">Upcoming</option>
                                 <option value="Completed">Completed</option>
@@ -1092,18 +1092,18 @@
                         <!-- Prescriptions -->
                         <div id="rx-edit-wrapper">
                             <label
-                                class="block text-[10px] font-semibold text-green-600 mb-1.5 uppercase tracking-wider">Prescriptions
+                                class="block text-[10px] font-semibold text-[#007E85] mb-1.5 uppercase tracking-wider">Prescriptions
                                 <span class="text-red-500">*</span></label>
                             <textarea id="modal-prescriptions"
                                 oninput="this.value = sanitizeMedicalReportText(this.value)"
-                                class="w-full px-4 py-3 border border-green-200 bg-gradient-to-br from-green-50 to-green-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 text-sm transition-all shadow-sm resize-none text-gray-800"
+                                class="w-full px-4 py-3 border border-[#007E85]/20 bg-gradient-to-br from-[#007E85]/10 to-[#007E85]/15 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#007E85]/30 focus:border-[#007E85] text-sm transition-all shadow-sm resize-none text-gray-800"
                                 rows="3" placeholder="e.g. Paracetamol 500mg - 1x/day" required></textarea>
                             <p id="prescriptions-error" class="text-red-500 text-[10px] mt-1 hidden">Prescriptions are
                                 required</p>
                         </div>
                         <div id="readonly-rx-wrapper"
-                            class="hidden bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200">
-                            <p class="text-[10px] font-semibold text-green-700 uppercase tracking-wider mb-2">
+                            class="hidden bg-gradient-to-br from-[#007E85]/10 to-[#007E85]/15 p-4 rounded-xl border border-[#007E85]/20">
+                            <p class="text-[10px] font-semibold text-[#007E85] uppercase tracking-wider mb-2">
                                 Prescriptions</p>
                             <p id="readonly-prescriptions"
                                 class="font-medium text-gray-800 text-sm whitespace-pre-wrap"></p>
@@ -1115,11 +1115,11 @@
                                 (Optional)</label>
                             <div class="grid grid-cols-2 gap-3">
                                 <select id="modal-followup-date" onchange="updateFollowupTimes()"
-                                    class="w-full px-4 py-2.5 border-2 border-blue-400 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0d7377]/30 focus:border-[#0d7377] text-sm font-medium transition-all shadow-md appearance-none cursor-pointer">
+                                    class="w-full px-4 py-2.5 border-2 border-blue-400 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#007E85]/30 focus:border-[#007E85] text-sm font-medium transition-all shadow-md appearance-none cursor-pointer">
                                     <option value="">-- Select Date --</option>
                                 </select>
                                 <select id="modal-followup-time" disabled
-                                    class="w-full px-4 py-2.5 border-2 border-blue-400 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0d7377]/30 focus:border-[#0d7377] text-sm font-medium transition-all shadow-md appearance-none cursor-pointer disabled:opacity-50">
+                                    class="w-full px-4 py-2.5 border-2 border-blue-400 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#007E85]/30 focus:border-[#007E85] text-sm font-medium transition-all shadow-md appearance-none cursor-pointer disabled:opacity-50">
                                     <option value="">-- Select Date First --</option>
                                 </select>
                             </div>
@@ -1139,8 +1139,8 @@
                         <!-- Patient History Timeline -->
                         <div id="patient-history-section" class="pt-5 border-t border-gray-100">
                             <button type="button" onclick="togglePatientHistory()"
-                                class="font-bold text-gray-900 mb-3 flex items-center gap-2 w-full text-sm hover:text-[#0d7377] transition-colors p-2 -ml-2 rounded-lg hover:bg-gray-50">
-                                <i data-lucide="history" class="w-4 h-4 text-[#0d7377]"></i> Patient Medical History
+                                class="font-bold text-gray-900 mb-3 flex items-center gap-2 w-full text-sm hover:text-[#007E85] transition-colors p-2 -ml-2 rounded-lg hover:bg-gray-50">
+                                <i data-lucide="history" class="w-4 h-4 text-[#007E85]"></i> Patient Medical History
                                 <i id="history-toggle-icon" data-lucide="chevron-down"
                                     class="w-4 h-4 ml-auto text-gray-400"></i>
                             </button>
@@ -1173,7 +1173,7 @@
                     <i data-lucide="file-text" class="w-4 h-4"></i> Generate Medical Report
                 </button>
                 <button id="complete-consultation-btn" onclick="submitConsultation()"
-                    class="hidden bg-green-100 hover:bg-green-200 text-green-700 px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 shadow-none border border-green-200 hover:border-green-300 flex items-center gap-2">
+                    class="hidden bg-[#007E85]/15 hover:bg-[#007E85]/20 text-[#007E85] px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 shadow-none border border-[#007E85]/20 hover:border-[#007E85]/25 flex items-center gap-2">
                     <i data-lucide="check-circle" class="w-4 h-4"></i> Complete Consultation
                 </button>
             </div>
@@ -1184,7 +1184,7 @@
     <div id="doctor-view-report-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[110] p-4 backdrop-blur-sm transition-all duration-300 ease-in-out opacity-0 doctor-report-modal-backdrop" style="opacity: 0; pointer-events: none;">
         <div class="bg-white rounded-lg shadow-2xl max-w-lg w-full max-h-[calc(100vh-72px)] overflow-hidden flex flex-col text-[11px] transform transition-all duration-300 ease-out scale-95 doctor-report-modal-content" style="transform: scale(0.95);">
             <!-- Header -->
-            <div class="bg-gradient-to-r from-[#00A3AC] to-[#008A96] text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
+            <div class="bg-gradient-to-r from-[#007E85] to-[#007E85] text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
                 <div class="flex items-center gap-3">
                     <img src="../../src/assets/Logo.svg" alt="Logo" class="w-10 h-10 rounded-md bg-white p-1" />
                     <div>
@@ -1215,7 +1215,7 @@
                 <div class="grid grid-cols-2 gap-3 items-start">
                     <!-- Patient Information -->
                     <div>
-                        <h3 class="font-bold text-[#00A3AC] text-xs mb-1 pb-0.5 border-b border-[#00A3AC]">PATIENT</h3>
+                        <h3 class="font-bold text-[#007E85] text-xs mb-1 pb-0.5 border-b border-[#007E85]">PATIENT</h3>
                         <div class="space-y-2">
                             <div>
                                 <p class="text-[11px] text-gray-600 font-semibold">Name</p>
@@ -1234,7 +1234,7 @@
 
                     <!-- Doctor & Consultation Information -->
                     <div>
-                        <h3 class="font-bold text-[#00A3AC] text-xs mb-[2.5px] pb-0.5 border-b border-[#00A3AC]">DOCTOR</h3>
+                        <h3 class="font-bold text-[#007E85] text-xs mb-[2.5px] pb-0.5 border-b border-[#007E85]">DOCTOR</h3>
                         <div class="space-y-2">
                             <div>
                                 <p class="text-[11px] text-gray-600 font-semibold">Doctor</p>
@@ -1254,7 +1254,7 @@
 
                 <!-- Chief Complaint -->
                 <div>
-                    <h3 class="font-bold text-[#00A3AC] text-xs mb-1 pb-0.5 border-b border-[#00A3AC]">COMPLAINT</h3>
+                    <h3 class="font-bold text-[#007E85] text-xs mb-1 pb-0.5 border-b border-[#007E85]">COMPLAINT</h3>
                     <div class="bg-blue-50 border-l-4 border-blue-500 p-2 rounded-r-lg">
                         <p id="view-report-chief-complaint" class="text-gray-900 text-[12px]"></p>
                     </div>
@@ -1262,7 +1262,7 @@
 
                 <!-- Clinical Findings -->
                 <div>
-                    <h3 class="font-bold text-[#00A3AC] text-xs mb-1 pb-0.5 border-b border-[#00A3AC]">FINDINGS</h3>
+                    <h3 class="font-bold text-[#007E85] text-xs mb-1 pb-0.5 border-b border-[#007E85]">FINDINGS</h3>
                     
                     <div class="grid grid-cols-2 gap-1 mb-1">
                         <!-- Symptoms -->
@@ -1295,15 +1295,15 @@
                             Vital Signs
                         </h4>
                         <div class="grid grid-cols-3 gap-1">
-                            <div class="bg-green-50 border border-green-200 p-2 rounded-lg">
+                            <div class="bg-[#007E85]/10 border border-[#007E85]/20 p-2 rounded-lg">
                                 <p class="text-[12px] text-gray-600 font-semibold mb-1">BP</p>
                                 <p id="view-report-bp" class="text-gray-900 font-bold text-[12px]"></p>
                             </div>
-                            <div class="bg-green-50 border border-green-200 p-2 rounded-lg">
+                            <div class="bg-[#007E85]/10 border border-[#007E85]/20 p-2 rounded-lg">
                                 <p class="text-[12px] text-gray-600 font-semibold mb-1">Weight</p>
                                 <p id="view-report-weight" class="text-gray-900 font-bold text-[12px]"></p>
                             </div>
-                            <div class="bg-green-50 border border-green-200 p-2 rounded-lg">
+                            <div class="bg-[#007E85]/10 border border-[#007E85]/20 p-2 rounded-lg">
                                 <p class="text-[12px] text-gray-600 font-semibold mb-1">Room</p>
                                 <p id="view-report-room-no" class="text-gray-900 font-bold text-[12px]">--</p>
                             </div>
@@ -1313,11 +1313,11 @@
 
                 <!-- Prescribed Medicines -->
                 <div id="view-medicines-section" class="hidden">
-                    <h3 class="font-bold text-[#00A3AC] text-xs mb-1 pb-0.5 border-b border-[#00A3AC]">MEDS</h3>
+                    <h3 class="font-bold text-[#007E85] text-xs mb-1 pb-0.5 border-b border-[#007E85]">MEDS</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-xs">
                             <thead>
-                                <tr class="bg-[#00A3AC] text-white">
+                                <tr class="bg-[#007E85] text-white">
                                     <th class="p-2 text-left font-semibold">Medicine</th>
                                     <th class="p-2 text-left font-semibold">Dosage</th>
                                     <th class="p-2 text-left font-semibold">Frequency</th>
@@ -1331,7 +1331,7 @@
 
                 <!-- Additional Notes -->
                 <div id="view-notes-section" class="hidden">
-                    <h3 class="font-bold text-[#00A3AC] text-sm mb-2 pb-1 border-b-2 border-[#00A3AC]">NOTES</h3>
+                    <h3 class="font-bold text-[#007E85] text-sm mb-2 pb-1 border-b-2 border-[#007E85]">NOTES</h3>
                     <div class="bg-purple-50 border border-purple-200 p-2 rounded-lg">
                         <p id="view-report-notes" class="text-gray-900 text-[12px] whitespace-pre-line"></p>
                     </div>
@@ -1360,7 +1360,7 @@
     <div id="edit-slot-modal"
         class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[400] p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-md shadow-elevated max-w-md w-full mx-auto border border-gray-200">
-            <div class="sticky top-0 bg-[#0d7377] text-white px-6 py-5 flex justify-between items-center z-10 shadow-sm rounded-t-2xl border-b border-[#0a5a5d]">
+            <div class="sticky top-0 bg-[#007E85] text-white px-6 py-5 flex justify-between items-center z-10 shadow-sm rounded-t-2xl border-b border-[#007E85]">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm border border-white/30">
                         <i data-lucide="clock" class="w-5 h-5 text-white"></i>
@@ -1385,7 +1385,7 @@
                         <label class="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wider">Start Time</label>
                         <div class="relative">
                             <select id="edit-slot-start" onchange="updateEndTimeOptions('edit-slot-start', 'edit-slot-end')"
-                                class="w-full text-sm border border-blue-300 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 pr-10 focus:ring-2 focus:ring-[#0d7377]/30 focus:border-[#0d7377] focus:bg-white appearance-none cursor-pointer hover:border-[#0d7377] transition-all font-semibold text-slate-800 outline-none shadow-sm">
+                                class="w-full text-sm border border-blue-300 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 pr-10 focus:ring-2 focus:ring-[#007E85]/30 focus:border-[#007E85] focus:bg-white appearance-none cursor-pointer hover:border-[#007E85] transition-all font-semibold text-slate-800 outline-none shadow-sm">
                                 <option value="09:00:00">09:00 AM</option>
                                 <option value="09:30:00">09:30 AM</option>
                                 <option value="10:00:00">10:00 AM</option>
@@ -1403,14 +1403,14 @@
                                 <option value="16:00:00">04:00 PM</option>
                                 <option value="16:30:00">04:30 PM</option>
                             </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#0d7377]"><i data-lucide="clock" class="w-4 h-4"></i></div>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#007E85]"><i data-lucide="clock" class="w-4 h-4"></i></div>
                         </div>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wider">End Time</label>
                         <div class="relative">
                             <select id="edit-slot-end"
-                                class="w-full text-sm border border-blue-300 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 pr-10 focus:ring-2 focus:ring-[#0d7377]/30 focus:border-[#0d7377] focus:bg-white appearance-none cursor-pointer hover:border-[#0d7377] transition-all font-semibold text-slate-800 outline-none shadow-sm">
+                                class="w-full text-sm border border-blue-300 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 pr-10 focus:ring-2 focus:ring-[#007E85]/30 focus:border-[#007E85] focus:bg-white appearance-none cursor-pointer hover:border-[#007E85] transition-all font-semibold text-slate-800 outline-none shadow-sm">
                                 <option value="09:00:00">09:00 AM</option>
                                 <option value="09:30:00">09:30 AM</option>
                                 <option value="10:00:00">10:00 AM</option>
@@ -1429,7 +1429,7 @@
                                 <option value="16:30:00">04:30 PM</option>
                                 <option value="17:00:00">05:00 PM</option>
                             </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#0d7377]"><i data-lucide="clock" class="w-4 h-4"></i></div>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#007E85]"><i data-lucide="clock" class="w-4 h-4"></i></div>
                         </div>
                     </div>
                 </div>
@@ -1445,7 +1445,7 @@
                         <i data-lucide="trash-2" class="w-4 h-4 inline mr-1.5"></i>
                         Delete
                     </button>
-                    <button onclick="saveSlotChanges()" class="bg-green-100 hover:bg-green-200 text-green-700 px-5 py-2.5 rounded-md text-sm font-semibold transition-all shadow-none border border-green-200 hover:border-green-300">
+                    <button onclick="saveSlotChanges()" class="bg-[#007E85]/15 hover:bg-[#007E85]/20 text-[#007E85] px-5 py-2.5 rounded-md text-sm font-semibold transition-all shadow-none border border-[#007E85]/20 hover:border-[#007E85]/25">
                         <i data-lucide="save" class="w-4 h-4 inline mr-1.5"></i>
                         Save
                     </button>
@@ -1458,7 +1458,7 @@
     <div id="manage-day-modal"
         class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[400] p-4 backdrop-blur-sm transition-opacity">
         <div class="manage-schedule-scroll bg-white rounded-md shadow-elevated max-w-md w-full mx-auto max-h-[84vh] overflow-y-auto border border-gray-200">
-            <div class="sticky top-0 bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white px-5 py-4 flex justify-between items-center z-10 shadow-md rounded-t-2xl">
+            <div class="sticky top-0 bg-gradient-to-r from-[#007E85] to-[#007E85] text-white px-5 py-4 flex justify-between items-center z-10 shadow-md rounded-t-2xl">
                 <div class="flex items-center gap-3">
                     <div class="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-md border border-white/30">
                         <i data-lucide="settings" class="w-4 h-4 text-white"></i>
@@ -1488,7 +1488,7 @@
 
                 <div class="pt-4 border-t border-gray-200">
                     <h4 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
-                        <i data-lucide="plus-circle" class="w-4 h-4 text-green-600"></i>
+                        <i data-lucide="plus-circle" class="w-4 h-4 text-[#007E85]"></i>
                         Add New Slot
                     </h4>
                     <div class="flex items-end gap-3">
@@ -1496,7 +1496,7 @@
                             <label class="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wider">Start Time</label>
                             <div class="relative">
                                 <select id="new-slot-start" onchange="updateEndTimeOptions('new-slot-start', 'new-slot-end')"
-                                    class="w-full text-sm border border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 pr-10 focus:ring-2 focus:ring-[#0d7377]/30 focus:border-[#0d7377] focus:bg-white appearance-none cursor-pointer hover:border-[#0d7377] transition-all font-semibold text-gray-800 outline-none shadow-sm">
+                                    class="w-full text-sm border border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 pr-10 focus:ring-2 focus:ring-[#007E85]/30 focus:border-[#007E85] focus:bg-white appearance-none cursor-pointer hover:border-[#007E85] transition-all font-semibold text-gray-800 outline-none shadow-sm">
                                     <option value="" disabled selected>-- Select Time --</option>
                                     <option value="09:00:00">09:00 AM</option>
                                     <option value="09:30:00">09:30 AM</option>
@@ -1515,14 +1515,14 @@
                                     <option value="16:00:00">04:00 PM</option>
                                     <option value="16:30:00">04:30 PM</option>
                                 </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#0d7377]"><i data-lucide="clock" class="w-4 h-4"></i></div>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#007E85]"><i data-lucide="clock" class="w-4 h-4"></i></div>
                             </div>
                         </div>
                         <div class="flex-1">
                             <label class="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wider">End Time</label>
                             <div class="relative">
                                 <select id="new-slot-end"
-                                    class="w-full text-sm border border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 pr-10 focus:ring-2 focus:ring-[#0d7377]/30 focus:border-[#0d7377] focus:bg-white appearance-none cursor-pointer hover:border-[#0d7377] transition-all font-semibold text-gray-800 outline-none shadow-sm">
+                                    class="w-full text-sm border border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 pr-10 focus:ring-2 focus:ring-[#007E85]/30 focus:border-[#007E85] focus:bg-white appearance-none cursor-pointer hover:border-[#007E85] transition-all font-semibold text-gray-800 outline-none shadow-sm">
                                     <option value="" disabled selected>-- Select Time --</option>
                                     <option value="09:00:00">09:00 AM</option>
                                     <option value="09:30:00">09:30 AM</option>
@@ -1542,10 +1542,10 @@
                                     <option value="16:30:00">04:30 PM</option>
                                     <option value="17:00:00">05:00 PM</option>
                                 </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#0d7377]"><i data-lucide="clock" class="w-4 h-4"></i></div>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#007E85]"><i data-lucide="clock" class="w-4 h-4"></i></div>
                             </div>
                         </div>
-                        <button onclick="addNewSlotToDay()" class="bg-green-100 hover:bg-green-200 text-green-700 px-5 py-3 rounded-md text-sm font-semibold transition-all shadow-none border border-green-200 hover:border-green-300 h-[44px] flex items-center gap-2">
+                        <button onclick="addNewSlotToDay()" class="bg-[#007E85]/15 hover:bg-[#007E85]/20 text-[#007E85] px-5 py-3 rounded-md text-sm font-semibold transition-all shadow-none border border-[#007E85]/20 hover:border-[#007E85]/25 h-[44px] flex items-center gap-2">
                             <i data-lucide="plus" class="w-4 h-4"></i>
                             Add Slot
                         </button>
@@ -1579,7 +1579,7 @@
         <div id="medical-report-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm transition-all duration-300 ease-in-out opacity-0 medical-report-modal-backdrop" style="opacity: 0; pointer-events: none;">
             <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[92vh] overflow-hidden transform transition-all duration-300 ease-out scale-95 medical-report-modal-content border border-white/60" style="transform: scale(0.95);">
                 <!-- Header -->
-                <div class="sticky top-0 bg-gradient-to-r from-[#00A3AC] via-[#0098A3] to-[#008A96] text-white px-6 py-5 flex items-start justify-between shadow-[0_10px_30px_rgba(0,163,172,0.18)]">
+                <div class="sticky top-0 bg-gradient-to-r from-[#007E85] via-[#007E85] to-[#007E85] text-white px-6 py-5 flex items-start justify-between shadow-[0_10px_30px_rgba(0,163,172,0.18)]">
                     <div class="flex items-start gap-4">
                         <div class="w-11 h-11 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center shadow-inner backdrop-blur-sm">
                             <i data-lucide="file-plus-2" class="w-5 h-5"></i>
@@ -1601,17 +1601,17 @@
                 <!-- Content -->
                 <div class="bg-gradient-to-b from-slate-50 to-white p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-176px)]">
                     <!-- Patient Info (Read-only) -->
-                    <div class="rounded-2xl border border-[#00A3AC]/10 bg-white shadow-sm overflow-hidden">
+                    <div class="rounded-2xl border border-[#007E85]/10 bg-white shadow-sm overflow-hidden">
                         <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/80 flex items-center justify-between gap-3">
                             <div>
                                 <h3 class="font-bold text-slate-900 text-base">Patient Information</h3>
                                 <p class="text-xs text-slate-500 mt-0.5">Reference details for this medical report</p>
                             </div>
-                            <i data-lucide="user-round" class="w-5 h-5 text-[#00A3AC]"></i>
+                            <i data-lucide="user-round" class="w-5 h-5 text-[#007E85]"></i>
                         </div>
                         <div class="p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="rounded-xl bg-[#EBF8F8] border border-[#CCEBEF] p-4">
-                                <p class="text-[11px] font-semibold uppercase tracking-wide text-[#008A96]">Patient Name</p>
+                                <p class="text-[11px] font-semibold uppercase tracking-wide text-[#007E85]">Patient Name</p>
                                 <p id="report-patient-name" class="font-semibold text-slate-900 mt-1 text-sm"></p>
                             </div>
                             <div class="rounded-xl bg-slate-50 border border-slate-200 p-4">
@@ -1642,7 +1642,7 @@
                                 id="report-symptoms"
                                 placeholder="e.g., Persistent cough, mild fever, body aches..."
                                 oninput="this.value = sanitizeMedicalReportText(this.value)"
-                                class="w-full border border-amber-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none resize-none shadow-sm"
+                                class="w-full border border-amber-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#007E85] focus:border-transparent outline-none resize-none shadow-sm"
                                 rows="3"
                                 required
                             ></textarea>
@@ -1662,7 +1662,7 @@
                                 id="report-diagnosis"
                                 placeholder="e.g., Acute upper respiratory infection..."
                                 oninput="this.value = sanitizeMedicalReportText(this.value)"
-                                class="w-full border border-rose-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none resize-none shadow-sm"
+                                class="w-full border border-rose-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#007E85] focus:border-transparent outline-none resize-none shadow-sm"
                                 rows="3"
                                 required
                             ></textarea>
@@ -1679,7 +1679,7 @@
                                     id="report-bp"
                                     placeholder="e.g., 120/80"
                                     oninput="this.value = sanitizeMedicalReportBloodPressure(this.value)"
-                                    class="w-full border border-sky-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none shadow-sm"
+                                    class="w-full border border-sky-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#007E85] focus:border-transparent outline-none shadow-sm"
                                     required
                                 />
                                 <p id="report-bp-error" class="hidden mt-2 text-xs text-red-600"></p>
@@ -1694,7 +1694,7 @@
                                     placeholder="e.g., 75"
                                     step="0.1"
                                     oninput="this.value = sanitizeMedicalReportWeight(this.value)"
-                                    class="w-full border border-emerald-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none shadow-sm"
+                                    class="w-full border border-emerald-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#007E85] focus:border-transparent outline-none shadow-sm"
                                     required
                                 />
                                 <p id="report-weight-error" class="hidden mt-2 text-xs text-red-600"></p>
@@ -1702,7 +1702,7 @@
                         </div>
 
                         <!-- Prescribed Medicines -->
-                        <div class="rounded-2xl border border-[#00A3AC]/10 bg-white p-5 shadow-sm">
+                        <div class="rounded-2xl border border-[#007E85]/10 bg-white p-5 shadow-sm">
                             <div class="flex items-start justify-between gap-3 mb-4">
                                 <div>
                                     <label class="block text-sm font-semibold text-slate-800 mb-1">
@@ -1713,7 +1713,7 @@
                                 <button
                                     type="button"
                                     onclick="addMedicineField()"
-                                    class="inline-flex items-center gap-2 rounded-full border border-[#00A3AC]/20 bg-[#EBF8F8] px-4 py-2 text-sm font-semibold text-[#008A96] hover:bg-[#DDF4F5] hover:border-[#00A3AC]/30 transition"
+                                    class="inline-flex items-center gap-2 rounded-full border border-[#007E85]/20 bg-[#EBF8F8] px-4 py-2 text-sm font-semibold text-[#007E85] hover:bg-[#DDF4F5] hover:border-[#007E85]/30 transition"
                                 >
                                     <i data-lucide="plus" class="w-4 h-4"></i>
                                     Add Medicine
@@ -1734,7 +1734,7 @@
                                 id="report-notes"
                                 placeholder="Any additional observations or instructions..."
                                 oninput="this.value = sanitizeMedicalReportText(this.value)"
-                                class="w-full border border-violet-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none resize-none shadow-sm"
+                                class="w-full border border-violet-200 bg-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#007E85] focus:border-transparent outline-none resize-none shadow-sm"
                                 rows="3"
                                 required
                             ></textarea>
@@ -1754,7 +1754,7 @@
                     </button>
                     <button
                         onclick="saveMedicalReport()"
-                        class="px-6 py-3 bg-gradient-to-r from-[#00A3AC] to-[#008A96] text-white rounded-xl font-semibold hover:shadow-lg transition flex items-center justify-center gap-2 sm:min-w-[150px]"
+                        class="px-6 py-3 bg-gradient-to-r from-[#007E85] to-[#007E85] text-white rounded-xl font-semibold hover:shadow-lg transition flex items-center justify-center gap-2 sm:min-w-[150px]"
                     >
                         <i data-lucide="save" class="w-4 h-4"></i>
                         Save Report

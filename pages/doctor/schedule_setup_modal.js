@@ -368,7 +368,7 @@ class ScheduleSetupModal {
         // Create toast element
         const toast = document.createElement('div');
         toast.style.cssText = `
-            background-color: #10b981;
+            background-color: #007E85;
             color: white;
             padding: 16px 24px;
             border-radius: 8px;

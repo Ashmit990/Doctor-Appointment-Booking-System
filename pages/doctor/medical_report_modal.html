@@ -2,7 +2,7 @@
 <div id="medical-report-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
   <div class="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[calc(100vh-80px)] overflow-hidden flex flex-col">
     <!-- Header -->
-    <div class="sticky top-0 bg-gradient-to-r from-[#00A3AC] to-[#008A96] text-white p-6 flex items-center justify-between">
+    <div class="sticky top-0 bg-gradient-to-r from-[#007E85] to-[#007E85] text-white p-6 flex items-center justify-between">
       <h2 class="text-2xl font-bold">Generate Medical Report</h2>
       <button onclick="closeMedicalReportModal()" class="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition">
         <i data-lucide="x" class="w-6 h-6"></i>
@@ -42,7 +42,7 @@
           <textarea
             id="report-symptoms"
             placeholder="e.g., Persistent cough, mild fever, body aches..."
-            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none resize-none"
+            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#007E85] focus:border-transparent outline-none resize-none"
             rows="4"
             required
           ></textarea>
@@ -56,7 +56,7 @@
           <textarea
             id="report-diagnosis"
             placeholder="e.g., Acute upper respiratory infection..."
-            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none resize-none"
+            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#007E85] focus:border-transparent outline-none resize-none"
             rows="4"
             required
           ></textarea>
@@ -73,7 +73,7 @@
               type="text"
               id="report-bp"
               placeholder="e.g., 120/80"
-              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none"
+              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#007E85] focus:border-transparent outline-none"
             />
           </div>
 
@@ -87,7 +87,7 @@
               id="report-weight"
               placeholder="e.g., 75"
               step="0.1"
-              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none"
+              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#007E85] focus:border-transparent outline-none"
             />
           </div>
         </div>
@@ -103,7 +103,7 @@
           <button
             type="button"
             onclick="addMedicineField()"
-            class="flex items-center gap-2 text-[#00A3AC] hover:text-[#008A96] font-semibold transition"
+            class="flex items-center gap-2 text-[#007E85] hover:text-[#007E85] font-semibold transition"
           >
             <i data-lucide="plus" class="w-4 h-4"></i>
             Add Medicine
@@ -118,7 +118,7 @@
           <textarea
             id="report-notes"
             placeholder="Any additional observations or instructions..."
-            class="w-full border border-gray-300 rounded-lg px-6 py-4 focus:ring-2 focus:ring-[#00A3AC] focus:border-transparent outline-none resize-none"
+            class="w-full border border-gray-300 rounded-lg px-6 py-4 focus:ring-2 focus:ring-[#007E85] focus:border-transparent outline-none resize-none"
             rows="4"
           ></textarea>
         </div>
@@ -135,7 +135,7 @@
       </button>
       <button
         onclick="saveMedicalReport()"
-        class="px-4 py-2 bg-gradient-to-r from-[#00A3AC] to-[#008A96] text-white rounded-lg font-semibold hover:shadow-lg transition"
+        class="px-4 py-2 bg-gradient-to-r from-[#007E85] to-[#007E85] text-white rounded-lg font-semibold hover:shadow-lg transition"
       >
         <i data-lucide="save" class="w-4 h-4 inline mr-2"></i>
         Save Report
@@ -209,17 +209,17 @@ function addMedicineField() {
     <input
       type="text"
       placeholder="Medicine name"
-      class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#00A3AC] outline-none medicine-name"
+      class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#007E85] outline-none medicine-name"
     />
     <input
       type="text"
       placeholder="Dosage (e.g., 500mg)"
-      class="w-24 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#00A3AC] outline-none medicine-dosage"
+      class="w-24 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#007E85] outline-none medicine-dosage"
     />
     <input
       type="text"
       placeholder="Frequency (e.g., 2x daily)"
-      class="w-28 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#00A3AC] outline-none medicine-frequency"
+      class="w-28 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#007E85] outline-none medicine-frequency"
     />
     <button
       type="button"

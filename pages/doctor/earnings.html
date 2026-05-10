@@ -58,15 +58,15 @@
       }
 
       .primary-color {
-        color: #0d7377;
+        color: #007E85;
       }
 
       .bg-primary {
-        background: linear-gradient(135deg, #0d7377 0%, #0a5a5d 100%);
+        background: linear-gradient(135deg, #007E85 0%, #007E85 100%);
       }
 
       .bg-primary-light {
-        background-color: rgba(13, 115, 119, 0.08);
+        background-color: rgba(0, 126, 133, 0.08);
       }
 
       .card-shadow {
@@ -76,7 +76,7 @@
       }
 
       .sidebar {
-        background: linear-gradient(180deg, #0d7377 0%, #0a5a5d 100%);
+        background: linear-gradient(180deg, #007E85 0%, #007E85 100%);
         box-shadow: 4px 0 30px rgba(0, 0, 0, 0.15);
       }
 
@@ -401,7 +401,7 @@
                     <td class="px-6 py-3 text-sm font-medium text-gray-800">${escapeHtml(item.patient_name || "Unknown Patient")}</td>
                     <td class="px-6 py-3 text-sm text-gray-500">#${item.appointment_id || "-"}</td>
                     <td class="px-6 py-3 text-sm text-gray-500">${escapeHtml(item.remarks || "Appointment completed successfully")}</td>
-                    <td class="px-6 py-3"><span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap">${item.status || "Appointment Complete"}</span></td>
+                    <td class="px-6 py-3"><span class="bg-[#007E85]/15 text-[#007E85] px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap">${item.status || "Appointment Complete"}</span></td>
                 </tr>
             `,
           )
