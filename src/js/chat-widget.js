@@ -14,6 +14,37 @@
     }
     #hc-chat-toggle:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(0,126,133,0.55); }
     #hc-chat-toggle svg { width: 26px; height: 26px; color: #fff; }
+    #hc-greet-bubble {
+      position: fixed; bottom: 24px; right: 92px; z-index: 9997;
+      background: #fff; border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.13);
+      padding: 0 12px 0 12px;
+      display: flex; align-items: center; gap: 6px;
+      height: 56px; white-space: nowrap;
+      opacity: 0; transform: scale(0.92);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+    }
+    #hc-greet-bubble::after {
+      content: '';
+      position: absolute; right: -8px; top: 50%; transform: translateY(-50%);
+      border-width: 7px 0 7px 8px;
+      border-style: solid;
+      border-color: transparent transparent transparent #fff;
+      filter: drop-shadow(2px 0 1px rgba(0,0,0,0.06));
+    }
+    #hc-greet-bubble.hc-greet-visible {
+      opacity: 1; transform: scale(1); pointer-events: all;
+    }
+    .hc-greet-text { flex: 1; }
+    .hc-greet-text strong { display: block; font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 1px; }
+    .hc-greet-text span { font-size: 11px; color: #64748b; }
+    .hc-greet-close {
+      background: none; border: none; cursor: pointer;
+      color: #cbd5e1; font-size: 15px; line-height: 1;
+      padding: 0; flex-shrink: 0;
+    }
+    .hc-greet-close:hover { color: #475569; }
     #hc-chat-badge {
       position: absolute; top: -4px; right: -4px;
       width: 18px; height: 18px; border-radius: 50%;
@@ -135,8 +166,8 @@
     .hc-doctor-card-name { font-size: 13px; font-weight: 700; color: #0f172a; }
     .hc-doctor-card-spec { font-size: 11px; color: #475569; margin-bottom: 4px; }
     .hc-book-btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 7px 13px; width: fit-content;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 8px 13px; width: 100%; white-space: nowrap;
       background: linear-gradient(135deg, #007E85, #005f65);
       color: #fff; font-size: 12px; font-weight: 600;
       border: none; border-radius: 8px; cursor: pointer;
@@ -145,7 +176,81 @@
       box-shadow: 0 2px 8px rgba(0,126,133,0.35);
     }
     .hc-book-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,126,133,0.45); }
-    .hc-book-btn svg { width: 12px; height: 12px; }
+    .hc-book-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+    .hc-hist-btn {
+      background: rgba(255,255,255,0.15); border: none; cursor: pointer;
+      width: 30px; height: 30px; border-radius: 50%; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s; flex-shrink: 0;
+    }
+    .hc-hist-btn:hover { background: rgba(255,255,255,0.3); }
+    .hc-hist-btn svg { width: 16px; height: 16px; }
+    #hc-history-panel {
+      position: absolute; inset: 0; background: #fff; z-index: 10;
+      display: flex; flex-direction: column;
+      transform: translateX(100%); transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+    }
+    #hc-history-panel.hc-hist-open { transform: translateX(0); }
+    .hc-hist-header {
+      background: linear-gradient(135deg, #007E85, #005060);
+      padding: 14px 16px; display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    }
+    .hc-hist-header-title { color: #fff; font-size: 14px; font-weight: 700; flex: 1; }
+    .hc-hist-back {
+      background: rgba(255,255,255,0.15); border: none; cursor: pointer;
+      width: 30px; height: 30px; border-radius: 50%; color: #fff;
+      display: flex; align-items: center; justify-content: center; transition: background 0.15s;
+    }
+    .hc-hist-back:hover { background: rgba(255,255,255,0.3); }
+    .hc-hist-back svg { width: 16px; height: 16px; }
+    #hc-hist-messages {
+      flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px;
+      scrollbar-width: thin; scrollbar-color: #007E85 #f1f5f9;
+    }
+    #hc-hist-messages::-webkit-scrollbar { width: 4px; }
+    #hc-hist-messages::-webkit-scrollbar-thumb { background: #007E85; border-radius: 99px; }
+    .hc-hist-date-label {
+      text-align: center; font-size: 10px; font-weight: 700;
+      color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;
+      margin: 6px 0 2px;
+    }
+    .hc-hist-empty {
+      text-align: center; color: #94a3b8; font-size: 13px;
+      margin: auto; padding: 24px;
+    }
+    .hc-session-item {
+      padding: 10px 12px; border-radius: 10px; cursor: pointer;
+      border: 1px solid #e2e8f0; background: #f8fafc;
+      transition: background 0.15s, border-color 0.15s;
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .hc-session-item:hover { background: #f0fdfd; border-color: #0d9488; }
+    .hc-session-preview {
+      font-size: 12px; font-weight: 600; color: #1e293b;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .hc-session-meta { font-size: 10px; color: #94a3b8; }
+    #hc-hist-detail {
+      position: absolute; inset: 0; background: #fff; z-index: 11;
+      display: flex; flex-direction: column;
+      transform: translateX(100%); transition: transform 0.22s cubic-bezier(.4,0,.2,1);
+    }
+    #hc-hist-detail.hc-detail-open { transform: translateX(0); }
+    .hc-hist-detail-header {
+      background: linear-gradient(135deg, #007E85, #005060);
+      padding: 14px 16px; display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    }
+    .hc-hist-detail-title {
+      color: #fff; font-size: 13px; font-weight: 600; flex: 1;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    #hc-hist-detail-messages {
+      flex: 1; overflow-y: auto; padding: 14px;
+      display: flex; flex-direction: column; gap: 10px;
+      scrollbar-width: thin; scrollbar-color: #007E85 #f1f5f9;
+    }
+    #hc-hist-detail-messages::-webkit-scrollbar { width: 4px; }
+    #hc-hist-detail-messages::-webkit-scrollbar-thumb { background: #007E85; border-radius: 99px; }
   `;
 
   const style = document.createElement('style');
@@ -156,6 +261,14 @@
   const widget = document.createElement('div');
   widget.id = 'hc-chat-widget';
   widget.innerHTML = `
+    <div id="hc-greet-bubble">
+      <div class="hc-greet-text">
+        <strong>Namaste! &#x1F64F;</strong>
+        <span>Welcome to Healthcare</span>
+      </div>
+      <button class="hc-greet-close" id="hc-greet-close" aria-label="Dismiss">&times;</button>
+    </div>
+
     <button id="hc-chat-toggle" aria-label="Open AI Assistant" title="Healthcare AI Assistant">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -163,17 +276,38 @@
     </button>
 
     <div id="hc-chat-panel" role="dialog" aria-label="Healthcare AI Assistant">
-      <div class="hc-header">
-        <div class="hc-avatar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-          </svg>
+      <div class="hc-header" style="position:relative;">
+        <div class="hc-avatar" style="background:transparent;overflow:hidden;">
+          <img src="/Doctor-Appointment-Booking-System/src/assets/Logo.svg" alt="Healthcare" style="width:34px;height:34px;object-fit:contain;" />
         </div>
         <div class="hc-header-info">
           <p class="hc-header-title">Healthcare AI</p>
           <p class="hc-header-sub"><span class="hc-online-dot"></span> Online · Medical Assistant</p>
         </div>
-        <button class="hc-close-btn" id="hc-close-btn" aria-label="Close">✕</button>
+        <button class="hc-hist-btn" id="hc-hist-btn" aria-label="Chat History" title="Chat History" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </button>
+        <button class="hc-close-btn" id="hc-close-btn" aria-label="Close" style="display:none">✕</button>
+      </div>
+
+      <div id="hc-history-panel">
+        <div class="hc-hist-header">
+          <button class="hc-hist-back" id="hc-hist-back" aria-label="Back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <span class="hc-hist-header-title">Chat History</span>
+        </div>
+        <div id="hc-hist-messages"></div>
+
+        <div id="hc-hist-detail">
+          <div class="hc-hist-detail-header">
+            <button class="hc-hist-back" id="hc-detail-back" aria-label="Back to list">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span class="hc-hist-detail-title" id="hc-detail-title">Conversation</span>
+          </div>
+          <div id="hc-hist-detail-messages"></div>
+        </div>
       </div>
 
       <div id="hc-messages"></div>
@@ -197,10 +331,19 @@
   const messagesEl = document.getElementById('hc-messages');
   const input = document.getElementById('hc-input');
   const sendBtn = document.getElementById('hc-send-btn');
+  const histBtn = document.getElementById('hc-hist-btn');
+  const histPanel = document.getElementById('hc-history-panel');
+  const histBack = document.getElementById('hc-hist-back');
+  const histMessages = document.getElementById('hc-hist-messages');
+  const histDetail = document.getElementById('hc-hist-detail');
+  const detailBack = document.getElementById('hc-detail-back');
+  const detailTitle = document.getElementById('hc-detail-title');
+  const detailMessages = document.getElementById('hc-hist-detail-messages');
 
   let isOpen = false;
   let isLoading = false;
   let chatHistory = []; // [{role:'user'|'ai', text:'...'}]
+  const sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
 
   const API_SEG = window.location.pathname.split('/').filter(Boolean)[0];
   const API_BASE = API_SEG ? `/${API_SEG}/api` : '/api';
@@ -209,6 +352,21 @@
   const BOOK_URL = window.HC_BOOK_URL || (IS_LOGGED_IN
     ? `/${API_SEG}/pages/patient/homepage.html`
     : `/${API_SEG}/pages/auth/login.html`);
+  const HISTORY_ENDPOINT = IS_LOGGED_IN
+    ? ENDPOINT.replace('ai_chat.php', 'ai_chat_history.php')
+    : null;
+
+  if (IS_LOGGED_IN && histBtn) histBtn.style.display = 'flex';
+
+  function formatRelativeDate(dateStr) {
+    const d = new Date(dateStr);
+    const now = new Date();
+    const diff = Math.floor((now - d) / 86400000);
+    if (diff === 0) return 'Today';
+    if (diff === 1) return 'Yesterday';
+    if (diff < 7) return diff + ' days ago';
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
 
   // ── Helpers ─────────────────────────────────────────────────────────────
   function openPanel() {
@@ -231,7 +389,7 @@
   function appendMessage(role, text, isError) {
     const div = document.createElement('div');
     div.className = `hc-msg hc-${role === 'user' ? 'user' : 'ai'}`;
-    const avatarHTML = role !== 'user' ? `<div class="hc-msg-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>` : '';
+    const avatarHTML = role !== 'user' ? `<div class="hc-msg-avatar"><img src="/Doctor-Appointment-Booking-System/src/assets/Logo.svg" style="width:22px;height:22px;object-fit:contain;" /></div>` : '';
     div.innerHTML = `${avatarHTML}<div class="hc-bubble${isError ? ' hc-error-msg' : ''}">${escapeHtml(text)}</div>`;
     messagesEl.appendChild(div);
     scrollToBottom();
@@ -242,7 +400,7 @@
     const div = document.createElement('div');
     div.className = 'hc-msg hc-ai';
     div.id = 'hc-typing-indicator';
-    div.innerHTML = `<div class="hc-msg-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div class="hc-bubble hc-typing"><div class="hc-dot"></div><div class="hc-dot"></div><div class="hc-dot"></div></div>`;
+    div.innerHTML = `<div class="hc-msg-avatar"><img src="/Doctor-Appointment-Booking-System/src/assets/Logo.svg" style="width:22px;height:22px;object-fit:contain;" /></div><div class="hc-bubble hc-typing"><div class="hc-dot"></div><div class="hc-dot"></div><div class="hc-dot"></div></div>`;
     messagesEl.appendChild(div);
     scrollToBottom();
   }
@@ -285,7 +443,7 @@
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, history: historyPayload })
+        body: JSON.stringify({ message: text, history: historyPayload, session_id: sessionId })
       });
       const data = await res.json();
       removeTyping();
@@ -306,13 +464,24 @@
             </div>
             <div class="hc-doctor-card-name">${escapeHtml(title)}</div>
             ${spec ? `<div class="hc-doctor-card-spec">${escapeHtml(spec)}</div>` : ''}
-            <a href="${BOOK_URL}" class="hc-book-btn">
+            <button class="hc-book-btn" id="hc-book-btn-${Date.now()}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               Book Appointment
-            </a>
+            </button>
           `;
           const bubble = msgEl.querySelector('.hc-bubble');
           bubble.appendChild(card);
+          const bookBtn = card.querySelector('.hc-book-btn');
+          if (bookBtn) {
+            bookBtn.addEventListener('click', () => {
+              closePanel();
+              if (IS_LOGGED_IN && typeof openBookingModal === 'function') {
+                openBookingModal();
+              } else {
+                window.location.href = BOOK_URL;
+              }
+            });
+          }
           scrollToBottom();
         }
       } else {
@@ -332,6 +501,53 @@
   toggle.addEventListener('click', (e) => { e.stopPropagation(); isOpen ? closePanel() : openPanel(); });
   closeBtn.addEventListener('click', closePanel);
 
+  histBtn && histBtn.addEventListener('click', async () => {
+    histMessages.innerHTML = '<div class="hc-hist-empty">Loading...</div>';
+    histPanel.classList.add('hc-hist-open');
+    histDetail.classList.remove('hc-detail-open');
+    try {
+      const res = await fetch(HISTORY_ENDPOINT, { credentials: 'include' });
+      const data = await res.json();
+      histMessages.innerHTML = '';
+      if (!data.sessions || data.sessions.length === 0) {
+        histMessages.innerHTML = '<div class="hc-hist-empty">No chat history yet.<br>Start a conversation!</div>';
+        return;
+      }
+      data.sessions.forEach(s => {
+        const item = document.createElement('div');
+        item.className = 'hc-session-item';
+        const preview = (s.preview || 'Conversation').slice(0, 60) + ((s.preview || '').length > 60 ? '…' : '');
+        item.innerHTML = `<div class="hc-session-preview">${escapeHtml(preview)}</div><div class="hc-session-meta">${formatRelativeDate(s.started_at)}</div>`;
+        item.addEventListener('click', async () => {
+          detailTitle.textContent = preview;
+          detailMessages.innerHTML = '<div class="hc-hist-empty">Loading...</div>';
+          histDetail.classList.add('hc-detail-open');
+          try {
+            const r2 = await fetch(HISTORY_ENDPOINT + '?session_id=' + encodeURIComponent(s.session_id), { credentials: 'include' });
+            const d2 = await r2.json();
+            detailMessages.innerHTML = '';
+            (d2.messages || []).forEach(m => {
+              const div = document.createElement('div');
+              div.className = `hc-msg ${m.role === 'user' ? 'hc-user' : 'hc-ai'}`;
+              const av = m.role !== 'user' ? `<div class="hc-msg-avatar"><img src="/Doctor-Appointment-Booking-System/src/assets/Logo.svg" style="width:22px;height:22px;object-fit:contain;" /></div>` : '';
+              div.innerHTML = `${av}<div class="hc-bubble">${escapeHtml(m.message)}</div>`;
+              detailMessages.appendChild(div);
+            });
+            detailMessages.scrollTop = detailMessages.scrollHeight;
+          } catch(e) {
+            detailMessages.innerHTML = '<div class="hc-hist-empty">Failed to load.</div>';
+          }
+        });
+        histMessages.appendChild(item);
+      });
+    } catch (e) {
+      histMessages.innerHTML = '<div class="hc-hist-empty">Failed to load history.</div>';
+    }
+  });
+
+  histBack && histBack.addEventListener('click', () => histPanel.classList.remove('hc-hist-open'));
+  detailBack && detailBack.addEventListener('click', () => histDetail.classList.remove('hc-detail-open'));
+
   sendBtn.addEventListener('click', sendMessage);
 
   input.addEventListener('keydown', (e) => {
@@ -347,5 +563,19 @@
   document.addEventListener('click', (e) => {
     if (isOpen && !widget.contains(e.target)) closePanel();
   });
+
+  // ── Greeting bubble ─────────────────────────────────────────────────────
+  const greetBubble = document.getElementById('hc-greet-bubble');
+  const greetClose = document.getElementById('hc-greet-close');
+
+  function hideGreet() { greetBubble.classList.remove('hc-greet-visible'); }
+
+  // Show after 1.5s — stays until dismissed or chat opened
+  setTimeout(() => {
+    if (!isOpen) greetBubble.classList.add('hc-greet-visible');
+  }, 1500);
+
+  greetClose.addEventListener('click', (e) => { e.stopPropagation(); hideGreet(); });
+  toggle.addEventListener('click', hideGreet);
 
 })();

@@ -34,6 +34,30 @@ if (empty($apiKey) || $apiKey === 'your_groq_api_key_here') {
     exit;
 }
 
+// Fetch doctors for context (no session needed — public endpoint)
+$doctorContext = '';
+try {
+    require_once __DIR__ . '/config/db.php';
+    if (isset($conn) && !$conn->connect_error) {
+        $res = $conn->query("
+            SELECT u.full_name, dp.specialization
+            FROM users u
+            INNER JOIN doctor_profiles dp ON u.user_id = dp.user_id
+            WHERE u.role = 'Doctor'
+            ORDER BY u.full_name ASC
+            LIMIT 20
+        ");
+        if ($res && $res->num_rows > 0) {
+            $docs = [];
+            while ($row = $res->fetch_assoc()) {
+                $docs[] = "- {$row['full_name']} ({$row['specialization']})";
+            }
+            $doctorContext = "\n\nCurrently available doctors on our platform:\n" . implode("\n", $docs);
+        }
+        $conn->close();
+    }
+} catch (Exception $e) { /* silently skip if DB unavailable */ }
+
 $body = json_decode(file_get_contents('php://input'), true);
 $message = trim($body['message'] ?? '');
 $history = $body['history'] ?? [];
@@ -43,7 +67,18 @@ if (empty($message)) {
     exit;
 }
 
-$systemPrompt = "You are a friendly and knowledgeable medical assistant for a doctor appointment booking platform called Healthcare. Your role is to:\n- Help visitors understand their symptoms\n- Suggest appropriate doctor specializations they should consult\n- Answer general health-related questions\n- Encourage users to sign up and book an appointment on our platform\n\nGuidelines:\n- Be conversational, empathetic, and easy to understand\n- Keep responses concise (2-4 sentences unless more detail is genuinely needed)\n- Always remind users that your suggestions are not a substitute for professional medical advice\n- Do not make specific diagnoses\n- IMPORTANT: ONLY append the [BOOK] token when the user explicitly describes a medical symptom or health problem (e.g. headache, chest pain, fever). When you do, place it at the very end on a new line in this exact format: [BOOK:SpecialistTitle:Specialization] — for example [BOOK:Neurologist:Neurology]. Do NOT include this token for greetings, general chat, follow-up questions, or non-symptom messages.";
+$systemPrompt = "You are a friendly and knowledgeable medical assistant for a doctor appointment booking platform called Healthcare. Your role is to:
+- Help visitors understand their symptoms
+- Suggest appropriate doctor specializations they should consult
+- Answer general health-related questions
+- Encourage users to sign up and book an appointment on our platform
+
+Guidelines:
+- Be conversational, empathetic, and easy to understand
+- Keep responses concise (2-4 sentences unless more detail is genuinely needed)
+- Always remind users that your suggestions are not a substitute for professional medical advice
+- Do not make specific diagnoses
+- IMPORTANT: ONLY append the [BOOK] token when the user explicitly describes a medical symptom or health problem (e.g. headache, chest pain, fever). When you do, place it at the very end on a new line in this exact format: [BOOK:SpecialistTitle:Specialization] — for example [BOOK:Neurologist:Neurology] or [BOOK:Dr. Sarah:Cardiology]. If a specific platform doctor matches the symptom, use their name as SpecialistTitle. Do NOT include this token for greetings, general chat, follow-up questions, or non-symptom messages.{$doctorContext}";
 
 $messages = [['role' => 'system', 'content' => $systemPrompt]];
 foreach ($history as $h) {
