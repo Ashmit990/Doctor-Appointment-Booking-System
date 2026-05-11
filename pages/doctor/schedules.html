@@ -155,41 +155,101 @@
         }
 
         .sidebar {
-            background: linear-gradient(180deg, #007E85 0%, #007E85 100%);
-            box-shadow: 4px 0 30px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(180deg, #007E85 0%, #00556B 100%);
+            box-shadow: 8px 0 40px rgba(0, 0, 0, 0.25), inset -1px 0 2px rgba(255, 255, 255, 0.1);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse 100% 80% at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 70%);
+            pointer-events: none;
         }
 
         .nav-link {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            color: white;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            color: rgba(255, 255, 255, 0.9);
             position: relative;
-            overflow: hidden;
+            overflow: visible;
+            display: flex;
+            align-items: center;
+            gap: inherit;
+            font-weight: 500;
+            letter-spacing: 0.3px;
         }
 
         .nav-link::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.15);
-            transition: left 0.3s ease;
-            z-index: -1;
+            top: 50%;
+            left: -8px;
+            width: 4px;
+            height: 0%;
+            background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0) 100%);
+            transform: translateY(-50%);
+            border-radius: 2px;
+            transition: height 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 1;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 100%);
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            z-index: 0;
         }
 
         .nav-link:hover::before {
-            left: 0;
+            height: 100%;
+        }
+
+        .nav-link:hover::after {
+            opacity: 1;
         }
 
         .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.15);
+            background: linear-gradient(90deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%);
+            color: rgba(255, 255, 255, 1);
             transform: translateX(4px);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-link i {
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .nav-link:hover i {
+            transform: scale(1.15) rotate(5deg);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
         }
 
         .nav-link.active {
-            background: rgba(255, 255, 255, 0.25);
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(90deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 100%);
+            color: #ffffff;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .nav-link.active::before {
+            height: 100%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.3) 100%);
+        }
+
+        .nav-link.active i {
+            transform: scale(1.2);
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
         }
 
         .calendar-day {
@@ -829,42 +889,43 @@
         <!-- SIDEBAR -->
         <aside
             class="sidebar w-full md:w-64 text-white shadow-lg fixed bottom-0 md:top-0 h-auto md:h-full overflow-x-auto md:overflow-y-auto z-40">
-            <div class="hidden md:block p-8 border-b border-gray-700">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                        <img src="../../src/assets/Logo.svg" alt="">
-                    </div>
-                    <h1 class="text-xl font-bold">Healthcare</h1>
+            <div class="hidden md:flex items-center gap-3 p-8 border-b border-b-white/10 bg-gradient-to-r from-white/5 to-transparent">
+                <div class="w-12 h-12 bg-gradient-to-br from-white/30 to-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-lg">
+                    <img src="../../src/assets/Logo.svg" alt="Healthcare" class="w-7 h-7">
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight">Healthcare</h1>
+                    <p class="text-xs text-white/60">Doctor Portal</p>
                 </div>
             </div>
 
             <nav
-                class="p-2 md:p-6 flex flex-row md:flex-col gap-2 md:gap-0 space-y-0 md:space-y-2 justify-around md:justify-start md:flex-1">
+                class="p-2 md:p-4 flex flex-row md:flex-col gap-2 md:gap-2 space-y-0 md:space-y-1 justify-around md:justify-start md:flex-1">
                 <a href="home.html"
-                    class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
-                    <i data-lucide="home" class="w-5 h-5"></i>
-                    <span>Home</span>
+                    class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-[10px] md:text-sm whitespace-nowrap">
+                    <i data-lucide="home" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="hidden md:inline">Home</span>
                 </a>
                 <a href="schedules.html"
-                    class="nav-link active flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
-                    <i data-lucide="calendar" class="w-5 h-5"></i>
-                    <span>Schedules</span>
+                    class="nav-link active flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-[10px] md:text-sm whitespace-nowrap">
+                    <i data-lucide="calendar" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="hidden md:inline">Schedules</span>
                 </a>
                 <a href="earnings.html"
-                    class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
-                    <i data-lucide="dollar-sign" class="w-5 h-5"></i>
-                    <span>Earnings</span>
+                    class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-[10px] md:text-sm whitespace-nowrap">
+                    <i data-lucide="dollar-sign" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="hidden md:inline">Earnings</span>
                 </a>
                 <a href="profile.html"
-                    class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base">
-                    <i data-lucide="user" class="w-5 h-5"></i>
-                    <span>Profile</span>
+                    class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-[10px] md:text-sm whitespace-nowrap">
+                    <i data-lucide="user" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="hidden md:inline">Profile</span>
                 </a>
-                <div class="hidden md:block mt-auto border-t border-gray-600 pt-3"></div>
+                <div class="hidden md:block mt-auto border-t border-white/10 pt-3"></div>
                 <a href="../../api/auth/logout.php"
-                    class="flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:bg-red-500/70 transition text-red-300 hover:text-red-50 text-[10px] md:text-base">
-                    <i data-lucide="log-out" class="w-5 h-5"></i>
-                    <span>Logout</span>
+                    class="flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition-all duration-300 text-red-300 hover:text-red-50 hover:bg-red-500/20 text-[10px] md:text-sm whitespace-nowrap">
+                    <i data-lucide="log-out" class="w-5 h-5 flex-shrink-0"></i>
+                    <span class="hidden md:inline">Logout</span>
                 </a>
             </nav>
         </aside>
