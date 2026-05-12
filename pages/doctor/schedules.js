@@ -108,114 +108,116 @@ function renderScheduleCalendar() {
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  // Fetch both appointment dates and completed appointments for this month
-  Promise.all([fetchAppointmentDatesForSchedule(), fetchCompletedAppointmentsForSchedule()]).then(([appointmentDates, completedDates]) => {
-    const daysContainer = document.getElementById("schedule-calendar-days");
-    daysContainer.innerHTML = "";
-    // Create a Set of dates for this month/year only
-    const targetYear = year;
-    const targetMonth = month + 1; // Convert from 0-11 to 1-12
+  // Fetch appointment dates with completion status
+  fetch("../../api/doctor/appointment_dates_completion_status.php?t=" + new Date().getTime())
+    .then(response => response.json())
+    .then(result => {
+      const daysContainer = document.getElementById("schedule-calendar-days");
+      daysContainer.innerHTML = "";
+      // Create a Set of dates for this month/year only
+      const targetYear = year;
+      const targetMonth = month + 1; // Convert from 0-11 to 1-12
 
-    const datesThisMonth = new Set();
-    const completedDatesThisMonth = new Set();
+      const allCompletedDatesThisMonth = new Set();
+      const hasPendingDatesThisMonth = new Set();
 
-    appointmentDates.forEach((dateStr) => {
-      const parts = dateStr.trim().split("-");
-      if (parts.length === 3) {
-        const dateYear = parseInt(parts[0]);
-        const dateMonth = parseInt(parts[1]);
-        const dateDay = parseInt(parts[2]);
+      // Process all_completed dates (where ALL appointments are completed)
+      if (result.status === 'success' && result.data && Array.isArray(result.data.all_completed)) {
+        result.data.all_completed.forEach((dateStr) => {
+          const parts = dateStr.trim().split("-");
+          if (parts.length === 3) {
+            const dateYear = parseInt(parts[0]);
+            const dateMonth = parseInt(parts[1]);
+            const dateDay = parseInt(parts[2]);
 
-        // Only add if it matches this year AND this month
-        if (dateYear === targetYear && dateMonth === targetMonth) {
-          datesThisMonth.add(dateDay);
+            // Only add if it matches this year AND this month
+            if (dateYear === targetYear && dateMonth === targetMonth) {
+              allCompletedDatesThisMonth.add(dateDay);
+            }
+          }
+        });
+      }
+
+      // Process has_pending dates (where there are any pending appointments)
+      if (result.status === 'success' && result.data && Array.isArray(result.data.has_pending)) {
+        result.data.has_pending.forEach((dateStr) => {
+          const parts = dateStr.trim().split("-");
+          if (parts.length === 3) {
+            const dateYear = parseInt(parts[0]);
+            const dateMonth = parseInt(parts[1]);
+            const dateDay = parseInt(parts[2]);
+
+            // Only add if it matches this year AND this month
+            if (dateYear === targetYear && dateMonth === targetMonth) {
+              hasPendingDatesThisMonth.add(dateDay);
+            }
+          }
+        });
+      }
+
+      // Previous month's grayed days
+      const prevMonthDays = new Date(year, month, 0).getDate();
+      for (let i = prevMonthDays - firstDay + 1; i <= prevMonthDays; i++) {
+        const dayDiv = document.createElement("div");
+        dayDiv.className = "calendar-day text-gray-300 rounded-md";
+        dayDiv.textContent = i;
+        daysContainer.appendChild(dayDiv);
+      }
+
+      const todayObj = new Date();
+      const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, "0")}-${String(todayObj.getDate()).padStart(2, "0")}`;
+
+      // Current month dates
+      for (let i = 1; i <= daysInMonth; i++) {
+        const dayDiv = document.createElement("div");
+        dayDiv.className = "calendar-day cursor-pointer rounded-md";
+        dayDiv.textContent = i;
+
+        // Add green checkmark if ALL appointments for this date are completed
+        if (allCompletedDatesThisMonth.has(i)) {
+          dayDiv.classList.add("has-completed");
         }
-      }
-    });
-
-    // Defensive: completedDates might not be an array (API changed or returned object)
-    const completedDatesList = Array.isArray(completedDates)
-      ? completedDates
-      : (completedDates && Array.isArray(completedDates.dates) ? completedDates.dates : []);
-
-    completedDatesList.forEach((dateStr) => {
-      if (!dateStr || typeof dateStr !== 'string') return;
-      const parts = dateStr.trim().split("-");
-      if (parts.length === 3) {
-        const dateYear = parseInt(parts[0]);
-        const dateMonth = parseInt(parts[1]);
-        const dateDay = parseInt(parts[2]);
-
-        // Only add if it matches this year AND this month
-        if (dateYear === targetYear && dateMonth === targetMonth) {
-          completedDatesThisMonth.add(dateDay);
+        // Add red dot if there are any pending appointments for this date
+        else if (hasPendingDatesThisMonth.has(i)) {
+          dayDiv.classList.add("has-appointment");
         }
+
+        const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
+        
+        // Mark selected date and today's date
+        if (dateStr === todayStr) {
+          dayDiv.classList.add('selected');
+          dayDiv.style.backgroundColor = "#007E85";
+          dayDiv.style.color = "white";
+          dayDiv.style.fontWeight = "bold";
+          dayDiv.style.borderRadius = "10px";
+        } else if (dateStr === selectedScheduleDate) {
+          dayDiv.classList.add('selected');
+          dayDiv.style.backgroundColor = "#0a9db5";
+          dayDiv.style.color = "white";
+          dayDiv.style.fontWeight = "bold";
+          dayDiv.style.borderRadius = "10px";
+          dayDiv.style.boxShadow = "0 4px 12px rgba(0, 126, 133, 0.25)";
+        } else if (dateStr < todayStr) {
+          dayDiv.style.color = "#d1d5db";
+        }
+
+        dayDiv.onclick = () => selectScheduleDate(dateStr);
+
+        daysContainer.appendChild(dayDiv);
       }
+
+      // Next month's grayed days
+      const remainingDays = 42 - (firstDay + daysInMonth);
+      for (let i = 1; i <= remainingDays; i++) {
+        const dayDiv = document.createElement("div");
+        dayDiv.className = "calendar-day text-gray-300 rounded-md";
+        dayDiv.textContent = i;
+        daysContainer.appendChild(dayDiv);
+      }
+
+      updateScheduleInsights(selectedScheduleDate, [], []);
     });
-
-    // Previous month's grayed days
-    const prevMonthDays = new Date(year, month, 0).getDate();
-    for (let i = prevMonthDays - firstDay + 1; i <= prevMonthDays; i++) {
-      const dayDiv = document.createElement("div");
-      dayDiv.className = "calendar-day text-gray-300 rounded-md";
-      dayDiv.textContent = i;
-      daysContainer.appendChild(dayDiv);
-    }
-
-    const todayObj = new Date();
-    const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, "0")}-${String(todayObj.getDate()).padStart(2, "0")}`;
-
-    // Current month dates
-    for (let i = 1; i <= daysInMonth; i++) {
-      const dayDiv = document.createElement("div");
-      dayDiv.className = "calendar-day cursor-pointer rounded-md";
-      dayDiv.textContent = i;
-
-      // Add green checkmark if doctor has completed appointments for this date
-      if (completedDatesThisMonth.has(i)) {
-        dayDiv.classList.add("has-completed");
-      }
-      // Add red dot if doctor has set availability for this date (but not completed)
-      else if (datesThisMonth.has(i)) {
-        dayDiv.classList.add("has-appointment");
-      }
-
-      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
-      
-      // Mark selected date and today's date
-      if (dateStr === todayStr) {
-        dayDiv.classList.add('selected');
-        dayDiv.style.backgroundColor = "#007E85";
-        dayDiv.style.color = "white";
-        dayDiv.style.fontWeight = "bold";
-        dayDiv.style.borderRadius = "10px";
-      } else if (dateStr === selectedScheduleDate) {
-        dayDiv.classList.add('selected');
-        dayDiv.style.backgroundColor = "#0a9db5";
-        dayDiv.style.color = "white";
-        dayDiv.style.fontWeight = "bold";
-        dayDiv.style.borderRadius = "10px";
-        dayDiv.style.boxShadow = "0 4px 12px rgba(0, 126, 133, 0.25)";
-      } else if (dateStr < todayStr) {
-        dayDiv.style.color = "#d1d5db";
-      }
-
-      dayDiv.onclick = () => selectScheduleDate(dateStr);
-
-      daysContainer.appendChild(dayDiv);
-    }
-
-    // Next month's grayed days
-    const remainingDays = 42 - (firstDay + daysInMonth);
-    for (let i = 1; i <= remainingDays; i++) {
-      const dayDiv = document.createElement("div");
-      dayDiv.className = "calendar-day text-gray-300 rounded-md";
-      dayDiv.textContent = i;
-      daysContainer.appendChild(dayDiv);
-    }
-
-    updateScheduleInsights(selectedScheduleDate, [], []);
-  });
 }
 
 function updateScheduleInsights(date, availability = [], appointments = []) {

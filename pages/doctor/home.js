@@ -185,117 +185,117 @@ function renderCalendar() {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const daysInPrevMonth = new Date(year, month, 0).getDate();
     
-    // Fetch both availability dates and completed appointments
-    Promise.all([fetchAppointmentDates(), fetchCompletedAppointments()]).then(([appointmentDates, completedData]) => {
-        daysContainer.innerHTML = '';
-        
-        // Create a Set of dates for this month only for faster lookup
-        const targetYear = year;
-        const targetMonth = month + 1;
-        
-        const appointmentDatesThisMonth = new Set();
-        const completedDatesThisMonth = new Set();
-        
-        // Process appointment dates (red dots for both upcoming and completed)
-        appointmentDates.forEach(dateStr => {
-            const parts = dateStr.trim().split('-');
-            if (parts.length === 3) {
-                const dateYear = parseInt(parts[0]);
-                const dateMonth = parseInt(parts[1]);
-                const dateDay = parseInt(parts[2]);
+    // Fetch appointment dates with completion status
+    fetch('../../api/doctor/appointment_dates_completion_status.php?t=' + new Date().getTime())
+        .then(response => response.json())
+        .then(result => {
+            daysContainer.innerHTML = '';
+            
+            // Create Sets for this month only for faster lookup
+            const targetYear = year;
+            const targetMonth = month + 1;
+            
+            const allCompletedDatesThisMonth = new Set();
+            const hasPendingDatesThisMonth = new Set();
+            
+            // Process all_completed dates
+            if (result.status === 'success' && result.data && Array.isArray(result.data.all_completed)) {
+                result.data.all_completed.forEach(dateStr => {
+                    const parts = dateStr.trim().split('-');
+                    if (parts.length === 3) {
+                        const dateYear = parseInt(parts[0]);
+                        const dateMonth = parseInt(parts[1]);
+                        const dateDay = parseInt(parts[2]);
+                        
+                        if (dateYear === targetYear && dateMonth === targetMonth) {
+                            allCompletedDatesThisMonth.add(dateDay);
+                        }
+                    }
+                });
+            }
+            
+            // Process has_pending dates (dates with any pending appointments)
+            if (result.status === 'success' && result.data && Array.isArray(result.data.has_pending)) {
+                result.data.has_pending.forEach(dateStr => {
+                    const parts = dateStr.trim().split('-');
+                    if (parts.length === 3) {
+                        const dateYear = parseInt(parts[0]);
+                        const dateMonth = parseInt(parts[1]);
+                        const dateDay = parseInt(parts[2]);
+                        
+                        if (dateYear === targetYear && dateMonth === targetMonth) {
+                            hasPendingDatesThisMonth.add(dateDay);
+                        }
+                    }
+                });
+            }
+            
+            // Previous month's days
+            let prevMonthDayCounter = daysInPrevMonth - firstDay + 1;
+            for (let i = 0; i < firstDay; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day text-center p-2 rounded-md text-gray-400';
+                dayDiv.textContent = prevMonthDayCounter;
+                daysContainer.appendChild(dayDiv);
+                prevMonthDayCounter++;
+            }
+            
+            // Get today's date for comparison
+            const todayObj = new Date();
+            const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
+            
+            // Current month's days
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day-premium text-center p-2 rounded-md cursor-pointer transition text-gray-900 font-medium';
+                dayDiv.textContent = i;
                 
-                if (dateYear === targetYear && dateMonth === targetMonth) {
-                    appointmentDatesThisMonth.add(dateDay);
+                // Mark dates where ALL appointments are completed with checkmark
+                if (allCompletedDatesThisMonth.has(i)) {
+                    dayDiv.classList.add('has-completed');
+                } 
+                // Mark dates with any pending appointments with red dot
+                else if (hasPendingDatesThisMonth.has(i)) {
+                    dayDiv.classList.add('has-appointment');
                 }
+                
+                // Define date string for current day
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                
+                // Style dates based on selection and today
+                if (dateStr === todayStr) {
+                    // Highlight today's date (Teal gradient)
+                    dayDiv.classList.add('selected');
+                    dayDiv.style.backgroundColor = '#007E85';
+                    dayDiv.style.color = 'white';
+                    dayDiv.style.fontWeight = 'bold';
+                } else if (dateStr === currentSelectedDateStr) {
+                    // Highlight selected date (Teal with white text)
+                    dayDiv.classList.add('selected');
+                    dayDiv.style.backgroundColor = '#0a9db5';
+                    dayDiv.style.color = 'white';
+                    dayDiv.style.fontWeight = 'bold';
+                    dayDiv.style.boxShadow = '0 4px 12px rgba(0, 126, 133, 0.25)';
+                } else if (dateStr < todayStr) {
+                    // Past dates in gray
+                    dayDiv.style.color = '#d1d5db';
+                }
+                
+                dayDiv.onclick = () => loadAppointmentsForDate(dateStr);
+                
+                daysContainer.appendChild(dayDiv);
+            }
+            
+            // Next month's days
+            const totalCells = daysContainer.children.length;
+            const remainingCells = 42 - totalCells;
+            for (let i = 1; i <= remainingCells; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day text-center p-2 rounded-md text-gray-400';
+                dayDiv.textContent = i;
+                daysContainer.appendChild(dayDiv);
             }
         });
-        
-        // Process completed appointments (green checkmarks)
-        // Be defensive: completedData.dates may be undefined or not an array
-        const completedDatesList = Array.isArray(completedData && completedData.dates)
-            ? completedData.dates
-            : (Array.isArray(completedData) ? completedData : []);
-
-        completedDatesList.forEach(dateStr => {
-            if (!dateStr || typeof dateStr !== 'string') return;
-            const parts = dateStr.trim().split('-');
-            if (parts.length === 3) {
-                const dateYear = parseInt(parts[0]);
-                const dateMonth = parseInt(parts[1]);
-                const dateDay = parseInt(parts[2]);
-
-                if (dateYear === targetYear && dateMonth === targetMonth) {
-                    completedDatesThisMonth.add(dateDay);
-                }
-            }
-        });
-        
-        // Previous month's days
-        let prevMonthDayCounter = daysInPrevMonth - firstDay + 1;
-        for (let i = 0; i < firstDay; i++) {
-            const dayDiv = document.createElement('div');
-            dayDiv.className = 'calendar-day text-center p-2 rounded-md text-gray-400';
-            dayDiv.textContent = prevMonthDayCounter;
-            daysContainer.appendChild(dayDiv);
-            prevMonthDayCounter++;
-        }
-        
-        // Get today's date for comparison
-        const todayObj = new Date();
-        const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
-        
-        // Current month's days
-        for (let i = 1; i <= daysInMonth; i++) {
-            const dayDiv = document.createElement('div');
-            dayDiv.className = 'calendar-day-premium text-center p-2 rounded-md cursor-pointer transition text-gray-900 font-medium';
-            dayDiv.textContent = i;
-            
-            // Mark dates with completed appointments with checkmark
-            if (completedDatesThisMonth.has(i)) {
-                dayDiv.classList.add('has-completed');
-            } 
-            // Mark dates with upcoming appointments with red dot
-            else if (appointmentDatesThisMonth.has(i)) {
-                dayDiv.classList.add('has-appointment');
-            }
-            
-            // Define date string for current day
-            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-            
-            // Style dates based on selection and today
-            if (dateStr === todayStr) {
-                // Highlight today's date (Teal gradient)
-                dayDiv.classList.add('selected');
-                dayDiv.style.backgroundColor = '#007E85';
-                dayDiv.style.color = 'white';
-                dayDiv.style.fontWeight = 'bold';
-            } else if (dateStr === currentSelectedDateStr) {
-                // Highlight selected date (Teal with white text)
-                dayDiv.classList.add('selected');
-                dayDiv.style.backgroundColor = '#0a9db5';
-                dayDiv.style.color = 'white';
-                dayDiv.style.fontWeight = 'bold';
-                dayDiv.style.boxShadow = '0 4px 12px rgba(0, 126, 133, 0.25)';
-            } else if (dateStr < todayStr) {
-                // Past dates in gray
-                dayDiv.style.color = '#d1d5db';
-            }
-            
-            dayDiv.onclick = () => loadAppointmentsForDate(dateStr);
-            
-            daysContainer.appendChild(dayDiv);
-        }
-        
-        // Next month's days
-        const totalCells = daysContainer.children.length;
-        const remainingCells = 42 - totalCells;
-        for (let i = 1; i <= remainingCells; i++) {
-            const dayDiv = document.createElement('div');
-            dayDiv.className = 'calendar-day text-center p-2 rounded-md text-gray-400';
-            dayDiv.textContent = i;
-            daysContainer.appendChild(dayDiv);
-        }
-    });
 }
 
 let currentSelectedDateStr = new Date().toISOString().split('T')[0];
