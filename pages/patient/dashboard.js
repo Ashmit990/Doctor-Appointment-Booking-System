@@ -219,7 +219,7 @@ function renderAppointments(rows) {
 
     const card = document.createElement("div");
     card.className =
-      "appointment-card relative overflow-hidden bg-white rounded-[20px] p-4 border border-slate-100 shadow-sm hover:shadow-md transition";
+      "appointment-card apt-card card-hover relative overflow-hidden bg-white rounded-[20px] p-4 border border-slate-100 shadow-sm";
 
     card.innerHTML = `
       <div class="absolute left-0 top-0 h-full w-1 ${lineColor} rounded-l-[20px]"></div>

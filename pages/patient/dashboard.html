@@ -22,9 +22,44 @@
     .card-shadow { box-shadow: 0 20px 50px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06); }
     .topbar-premium { background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(250,252,253,0.95) 100%); backdrop-filter: blur(10px); border-bottom:1px solid rgba(13,115,119,0.06); }
     .sidebar { background: linear-gradient(180deg,#0d7377 0%,#0a5a5d 100%); box-shadow:4px 0 30px rgba(0,0,0,0.15); }
-    .nav-link{transition:all .3s; color:white;}
+    .nav-link{transition:all .3s; color:white; letter-spacing:0.3px; font-weight:500;}
     .nav-link:hover{background-color:rgba(255,255,255,0.12); transform:translateX(4px);} 
-    .nav-link.active{background:rgba(255,255,255,0.18);} 
+    .nav-link.active{background:rgba(255,255,255,0.18); font-weight:600;}
+    
+    /* Premium Card Hover Effects */
+    .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 50px rgba(13, 115, 119, 0.12) !important; }
+    
+    /* Filter Button Premium Styling */
+    .filter-btn {
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .filter-btn.active-filter {
+      background: linear-gradient(135deg, #0d7377 0%, #0a5a5d 100%);
+      box-shadow: 0 8px 16px rgba(13, 115, 119, 0.2);
+    }
+    .filter-btn:not(.active-filter):hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      transform: translateY(-2px);
+    }
+    
+    /* Button Premium Styling */
+    .btn-primary {
+      background: linear-gradient(135deg, #0d7377 0%, #0a5a5d 100%);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 20px rgba(13, 115, 119, 0.25) !important;
+    }
+    
+    /* Icon Animations */
+    .apt-card i {
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .apt-card:hover i {
+      transform: scale(1.1);
+    } 
     /* PREMIUM PATIENT THEME END */
   </style>
 </head>

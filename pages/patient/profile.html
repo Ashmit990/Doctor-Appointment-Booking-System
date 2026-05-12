@@ -75,9 +75,34 @@
     .card-shadow { box-shadow: 0 20px 50px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06); }
     .topbar-premium { background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(250,252,253,0.95) 100%); backdrop-filter: blur(10px); border-bottom:1px solid rgba(13,115,119,0.06); }
     .sidebar { background: linear-gradient(180deg,#0d7377 0%,#0a5a5d 100%); box-shadow:4px 0 30px rgba(0,0,0,0.15); }
-    .nav-link{transition:all .3s; color:white;}
+    .nav-link{transition:all .3s; color:white; letter-spacing:0.3px; font-weight:500;}
     .nav-link:hover{background-color:rgba(255,255,255,0.12); transform:translateX(4px);} 
-    .nav-link.active{background:rgba(255,255,255,0.18);} 
+    .nav-link.active{background:rgba(255,255,255,0.18); font-weight:600;}
+    
+    /* Premium Card Hover Effects */
+    .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 50px rgba(13, 115, 119, 0.12) !important; }
+    
+    /* Button Premium Styling */
+    .btn-primary {
+      background: linear-gradient(135deg, #0d7377 0%, #0a5a5d 100%);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 20px rgba(13, 115, 119, 0.25) !important;
+    }
+    
+    /* Input Field Premium Styling */
+    input, select, textarea {
+      transition: all 0.2s ease;
+      border: 1px solid rgba(203, 213, 225, 0.6);
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #0d7377;
+      box-shadow: inset 0 0 0 1px rgba(13, 115, 119, 0.2), 0 0 0 3px rgba(13, 115, 119, 0.1);
+      background-color: rgba(13, 115, 119, 0.02);
+    } 
     /* PREMIUM PATIENT THEME END */
   </style>
 </head>
@@ -169,11 +194,11 @@
           <!-- TWO COLUMN LAYOUT -->
           <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
             <!-- MAIN FORM SECTION (3 columns) -->
-            <div class="lg:col-span-3 bg-white rounded-lg card-shadow overflow-hidden">                <!-- CARD HEADER WITH EDIT BUTTON -->
+            <div class="lg:col-span-3 card-hover bg-white rounded-lg card-shadow overflow-hidden">                <!-- CARD HEADER WITH EDIT BUTTON -->
                 <div class="flex justify-between items-center p-4 md:p-5 border-b border-gray-100 bg-gray-50 flex-wrap gap-2">
                   <h3 class="text-sm font-semibold text-gray-800" id="cardTitle">Profile Information</h3>
                   <button id="cardEditBtn"
-                    class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-sm hover:opacity-90 transition flex items-center gap-1.5">
+                    class="btn-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm flex items-center gap-1.5">
                     <i data-lucide="edit" class="w-3.5 h-3.5"></i> Edit
                   </button>
                   <button id="cardCancelBtn"
@@ -246,32 +271,32 @@
                     <div>
                       <label class="block text-xs font-medium text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
                       <input type="text" id="editName" required
-                        class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+                        class="w-full border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-[#0d7377]/40 focus:border-[#0d7377] transition-all" />
                       <p class="text-[10px] text-red-500 hidden mt-1" id="nameError">Full name is required</p>
                     </div>
                     <div>
                       <label class="block text-xs font-medium text-gray-700 mb-1">Email Address <span class="text-red-500">*</span></label>
                       <input type="email" id="editEmail" required
                         oninput="this.value = this.value.toLowerCase()"
-                        class="w-full border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+                        class="w-full border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-[#0d7377]/40 focus:border-[#0d7377] transition-all" />
                       <p class="text-[10px] text-red-500 hidden mt-1" id="emailError">Email is required</p>
                     </div>
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span class="text-red-500">*</span></label>
                       <input type="tel" id="editPhone" required
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+                        class="w-full border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#0d7377]/40 focus:border-[#0d7377] transition-all" />
                       <p class="text-xs text-red-500 hidden mt-1" id="phoneError">Valid phone number required (min 8 digits)</p>
                     </div>
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">Age <span class="text-red-500">*</span></label>
                       <input type="number" id="editAge" min="0" max="150" required
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+                        class="w-full border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#0d7377]/40 focus:border-[#0d7377] transition-all" />
                       <p class="text-xs text-red-500 hidden mt-1" id="ageError">Age must be between 0 and 150</p>
                     </div>
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">Gender <span class="text-red-500">*</span></label>
                       <select id="editGender" required
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition">
+                        class="w-full border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#0d7377]/40 focus:border-[#0d7377] transition-all">
                         <option value="">Select gender</option>
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
@@ -282,7 +307,7 @@
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">Blood Group <span class="text-red-500">*</span></label>
                       <select id="editBlood" required
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition">
+                        class="w-full border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#0d7377]/40 focus:border-[#0d7377] transition-all">
                         <option value="">Select blood group</option>
                         <option value="A+">A+</option>
                         <option value="A-">A-</option>
@@ -305,20 +330,20 @@
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">Address <span class="text-red-500">*</span></label>
                       <textarea id="editAddress" rows="3" required
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition resize-none"></textarea>
+                        class="w-full border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#0d7377]/40 focus:border-[#0d7377] transition-all resize-none"></textarea>
                       <p class="text-xs text-red-500 hidden mt-1" id="addressError">Address is required</p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact Name <span class="text-red-500">*</span></label>
                         <input type="text" id="editEmergencyName" required
-                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+                          class="w-full border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#0d7377]/40 focus:border-[#0d7377] transition-all" />
                         <p class="text-xs text-red-500 hidden mt-1" id="emergencyNameError">Emergency contact name is required</p>
                       </div>
                       <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact Phone <span class="text-red-500">*</span></label>
                         <input type="tel" id="editEmergencyPhone" required
-                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition" />
+                          class="w-full border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#0d7377]/40 focus:border-[#0d7377] transition-all" />
                         <p class="text-xs text-red-500 hidden mt-1" id="emergencyPhoneError">Emergency contact phone is required (min 8 digits)</p>
                       </div>
                     </div>
@@ -328,7 +353,7 @@
                 <!-- Form Actions -->
                 <div class="flex gap-3 pt-6 border-t border-gray-100">
                   <button type="submit"
-                    class="bg-primary text-white px-6 py-2.5 rounded-lg text-sm font-medium shadow-sm hover:opacity-90 transition flex items-center gap-2">
+                    class="btn-primary text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm flex items-center gap-2">
                     <i data-lucide="save" class="w-4 h-4"></i> Save Profile
                   </button>
                   <button type="button" id="resetBtn"
@@ -343,7 +368,7 @@
             <!-- PROFILE SUMMARY SIDEBAR (1 column) -->
             <div class="lg:col-span-1 space-y-6">
               <!-- Profile Card -->
-              <div class="bg-white rounded-2xl card-shadow p-6">
+              <div class="card-hover bg-white rounded-2xl card-shadow p-6">
                 <div class="flex flex-col items-center">
                   <div class="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-teal-600 flex items-center justify-center text-white font-bold text-2xl mb-3" id="userInitialsLarge">
                     -
@@ -368,7 +393,7 @@
               </div>
 
               <!-- Account Details -->
-              <div class="bg-white rounded-2xl card-shadow p-6">
+              <div class="card-hover bg-white rounded-2xl card-shadow p-6">
                 <div class="text-sm text-gray-600 space-y-3">
                   <div class="flex justify-between items-center">
                     <span>Last Updated</span>
