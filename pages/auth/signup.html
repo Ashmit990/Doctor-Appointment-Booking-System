@@ -3,12 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="_csrf_token" content="" />
     <title>Healthcare | Premium Sign Up</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+    <script>
+      // Load CSRF token on page load
+      window.addEventListener('DOMContentLoaded', function() {
+        fetch('../../api/auth/get_csrf_token.php')
+          .then(response => response.json())
+          .then(data => {
+            if (data.token) {
+              document.querySelector('meta[name="_csrf_token"]').setAttribute('content', data.token);
+            }
+          })
+          .catch(error => console.error('Failed to load CSRF token:', error));
+      });
+    </script>
     <style>
       body {
         font-family: "Plus Jakarta Sans", sans-serif;
@@ -1454,6 +1468,13 @@
         formData.append("age", age);
         formData.append("role", selectedRole);
         formData.append("password", password);
+        
+        // Add CSRF token
+        const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content || '';
+        if (csrfToken) {
+          formData.append("_csrf_token", csrfToken);
+        }
+        
         if (isDoctor) {
           formData.append("medical_id", medicalId);
           formData.append("bio", bio);

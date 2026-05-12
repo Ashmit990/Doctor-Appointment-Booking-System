@@ -1264,6 +1264,38 @@ async function submitConsultation() {
     return;
   }
 
+  // Check for appointment conflicts on the followup date
+  if (fDate && fTime) {
+    const apt = storedAppointmentsForModal.find((a) => a.apt_id == aptId);
+    if (apt && apt.patient_id) {
+      const conflictResponse = await fetch("../../api/doctor/check_patient_date_conflicts.php", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          patient_id: apt.patient_id,
+          check_date: fDate
+        })
+      });
+      
+      const conflictData = await conflictResponse.json();
+      console.log("Appointment Conflict Check:", conflictData);
+      
+      if (conflictData.has_conflict) {
+        console.error("❌ APPOINTMENT CONFLICT DETECTED");
+        console.error(`Patient already has ${conflictData.appointments.length} appointment(s) on ${fDate}:`);
+        conflictData.appointments.forEach((apt, idx) => {
+          console.error(`  ${idx + 1}. Time: ${apt.app_time}, Status: ${apt.status}, Doctor: ${apt.doctor_id}`);
+        });
+        
+        const followupError = document.getElementById("followup-date-error");
+        followupError.textContent = "Patient already has appointment on this date. Please choose another followup date.";
+        followupError.classList.remove("hidden");
+        return;
+      }
+    }
+  }
+
   const btn = document.getElementById("complete-consultation-btn");
   const oldText = btn.innerHTML;
   btn.innerHTML = "Saving...";

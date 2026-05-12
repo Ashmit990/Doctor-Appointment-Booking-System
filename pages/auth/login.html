@@ -3,12 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="_csrf_token" content="" />
     <title>Healthcare Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap"
       rel="stylesheet"
     />
+    <script>
+      // Load CSRF token on page load
+      window.addEventListener('DOMContentLoaded', function() {
+        fetch('../../api/auth/get_csrf_token.php')
+          .then(response => response.json())
+          .then(data => {
+            if (data.token) {
+              document.querySelector('meta[name="_csrf_token"]').setAttribute('content', data.token);
+            }
+          })
+          .catch(error => console.error('Failed to load CSRF token:', error));
+      });
+    </script>
     <style>
       body {
         font-family: "Lato", sans-serif;
@@ -452,6 +466,12 @@
         const formData = new FormData();
         formData.append("email", email);
         formData.append("password", password);
+        
+        // Add CSRF token
+        const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content || '';
+        if (csrfToken) {
+          formData.append("_csrf_token", csrfToken);
+        }
 
         fetch("../../api/auth/login_process.php", {
           method: "POST",
