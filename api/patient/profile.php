@@ -136,6 +136,8 @@ try {
     }
     if (empty($emergency_name)) {
         $errors[] = 'Emergency contact name is required';
+    } elseif (!preg_match('/^[a-zA-Z\s]+$/', $emergency_name)) {
+        $errors[] = 'Emergency contact name must contain letters only';
     }
     if (empty($emergency_phone)) {
         $errors[] = 'Emergency contact phone is required';
@@ -147,8 +149,8 @@ try {
     }
 
     // Validate age if provided
-    if ($age !== null && ($age < 0 || $age > 150)) {
-        $errors[] = 'Age must be between 0 and 150';
+    if ($age !== null && ($age < 1 || $age > 80)) {
+        $errors[] = 'Age must be between 1 and 80';
     }
 
     // Validate phone format if provided
