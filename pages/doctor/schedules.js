@@ -363,7 +363,7 @@ async function loadScheduleForDate(date) {
       availability.forEach((slot) => {
         let slotIsPast = isPastDay;
         if (isToday) {
-          if (slot.start_time < currentTimeStr) {
+          if (slot.end_time <= currentTimeStr) {
             slotIsPast = true;
           }
         }
@@ -413,7 +413,7 @@ async function loadScheduleForDate(date) {
                   <p class=\"text-[10px] text-[#007E85] font-semibold mt-0.5 flex items-center gap-1\"><i data-lucide=\"check\" class=\"w-3 h-3\"></i>Available for booking</p>
                 </div>
               </div>
-              <button onclick=\"openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})\" class=\"bg-[#007E85]/15 hover:bg-[#007E85]/20 text-[#007E85] border border-[#007E85]/20 px-3 py-1.5 rounded-md text-xs font-semibold transition-all shadow-none whitespace-nowrap ml-2 ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}\">
+              <button ${slotIsPast ? "disabled" : `onclick="openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})"`} class="bg-[#007E85]/15 hover:bg-[#007E85]/20 text-[#007E85] border border-[#007E85]/20 px-3 py-1.5 rounded-md text-xs font-semibold transition-all shadow-none whitespace-nowrap ml-2 ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}\">
                 Edit Slot
               </button>
             </div>`;
@@ -430,7 +430,7 @@ async function loadScheduleForDate(date) {
                   <p class=\"text-[10px] text-yellow-700 font-semibold mt-0.5 flex items-center gap-1\"><i data-lucide=\"alert-circle\" class=\"w-3 h-3\"></i>Blocked</p>
                 </div>
               </div>
-              <button onclick=\"openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})\" class=\"bg-amber-100 hover:bg-amber-200 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-md text-xs font-semibold transition-all shadow-none whitespace-nowrap ml-2 ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}\">
+              <button ${slotIsPast ? "disabled" : `onclick="openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})"`} class="bg-amber-100 hover:bg-amber-200 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-md text-xs font-semibold transition-all shadow-none whitespace-nowrap ml-2 ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}\">
                 Edit Slot
               </button>
             </div>`;
@@ -632,6 +632,50 @@ function openManageDayModal() {
   if (newSlotStart) newSlotStart.value = "";
   if (newSlotEnd) newSlotEnd.value = "";
   
+  // Disable past time slots if managing today's schedule
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  
+  if (selectedScheduleDate === todayStr) {
+    const currentHour = today.getHours();
+    const currentMinute = today.getMinutes();
+    const currentTimeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}:00`;
+    
+    // Disable start times for slots that would already be past
+    Array.from(newSlotStart.options).forEach(opt => {
+      if (opt.value === "") return; // Don't disable the placeholder
+      
+      // Calculate end time (30 minutes after start)
+      const [hours, mins] = opt.value.split(':');
+      const endMinutes = parseInt(mins) + 30;
+      const endHours = parseInt(hours) + Math.floor(endMinutes / 60);
+      const endTimeStr = `${String(endHours).padStart(2, '0')}:${String(endMinutes % 60).padStart(2, '0')}:00`;
+      
+      // If slot end time has passed, disable this option
+      if (endTimeStr <= currentTimeStr) {
+        opt.disabled = true;
+      } else {
+        opt.disabled = false;
+      }
+    });
+    
+    // Also disable past times in end time select
+    Array.from(newSlotEnd.options).forEach(opt => {
+      if (opt.value === "") return;
+      
+      // If end time has passed, disable this option
+      if (opt.value <= currentTimeStr) {
+        opt.disabled = true;
+      } else {
+        opt.disabled = false;
+      }
+    });
+  } else {
+    // For future dates, enable all times
+    Array.from(newSlotStart.options).forEach(opt => opt.disabled = (opt.value === ""));
+    Array.from(newSlotEnd.options).forEach(opt => opt.disabled = (opt.value === ""));
+  }
+  
   renderManageDaySlots();
   const modal = document.getElementById("manage-day-modal");
   modal.classList.remove("hidden");
@@ -731,6 +775,22 @@ async function addNewSlotToDay() {
     return;
   }
   
+  // Check if slot is in the past (for today only)
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  
+  if (selectedScheduleDate === todayStr) {
+    const currentHour = today.getHours();
+    const currentMinute = today.getMinutes();
+    const currentTimeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}:00`;
+    
+    // end time must be after current time
+    if (end <= currentTimeStr) {
+      showToast("Cannot add slots for past times.", 'error');
+      return;
+    }
+  }
+  
   for (const slot of fetchedAvailability) {
     if (
       (start >= slot.start_time && start < slot.end_time) ||
@@ -784,6 +844,18 @@ function updateEndTimeOptions(startId, endId) {
     
     const timeIndex = timeValues.indexOf(startSelect.value);
     
+    // Check if we're managing today's schedule
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const isToday = selectedScheduleDate === todayStr;
+    
+    let currentTimeStr = "";
+    if (isToday) {
+      const currentHour = today.getHours();
+      const currentMinute = today.getMinutes();
+      currentTimeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}:00`;
+    }
+    
     if (timeIndex !== -1 && timeIndex < timeValues.length - 1) {
         const expectedEndValue = timeValues[timeIndex + 1];
         
@@ -791,7 +863,12 @@ function updateEndTimeOptions(startId, endId) {
             if (opt.value === "") return;
             
             if (opt.value === expectedEndValue) {
-                opt.disabled = false;
+                // Check if this end time is in the past (for today only)
+                if (isToday && opt.value <= currentTimeStr) {
+                  opt.disabled = true;
+                } else {
+                  opt.disabled = false;
+                }
                 endSelect.value = expectedEndValue;
             } else {
                 opt.disabled = true;
@@ -1102,18 +1179,53 @@ async function openAppointmentModal(aptId) {
             // Get unique future dates
             const uniqueDates = [...new Set(validSlots.map(slot => slot.available_date))].sort();
             
+            // Get patient's existing appointments to exclude conflicting dates
+            let patientAppointmentDates = [];
+            if (apt && apt.patient_id) {
+                try {
+                    const allAptRes = await fetch('../../api/doctor/appointments.php', { credentials: 'include' });
+                    const allAptData = await allAptRes.json();
+                    if (allAptData.status === 'success' && allAptData.data) {
+                        // Get dates of all appointments for this patient (excluding current appointment)
+                        patientAppointmentDates = allAptData.data
+                            .filter(a => a.patient_id === apt.patient_id && a.apt_id !== apt.apt_id) // Filter by patient, exclude current appointment
+                            .map(a => a.app_date)
+                            .filter(date => date); // Remove any null/empty dates
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch patient appointments:", e);
+                }
+            }
+            
+            console.log("Patient appointment dates (conflicts):", patientAppointmentDates);
             console.log("Unique dates available:", uniqueDates);
             console.log("Appointment next_followup_date:", apt.next_followup_date);
             
-            // Also include existing followup date if it exists (even if not in current availability)
-            if (apt.next_followup_date && !uniqueDates.includes(apt.next_followup_date)) {
-                console.log("Adding existing followup date to options");
-                uniqueDates.push(apt.next_followup_date);
-                uniqueDates.sort();
+            // Filter out dates that conflict with patient's existing appointments
+            const availableDatesForFollowup = uniqueDates.filter(date => {
+                // Allow if it's the previously scheduled followup date
+                if (apt && apt.next_followup_date === date) return true;
+                // Allow if patient doesn't have an appointment on this date
+                return !patientAppointmentDates.includes(date);
+            });
+            
+            // Show conflict info message if some dates were filtered out
+            const conflictInfo = document.getElementById("followup-conflict-info");
+            if (uniqueDates.length > availableDatesForFollowup.length) {
+                conflictInfo.classList.remove("hidden");
+            } else {
+                conflictInfo.classList.add("hidden");
             }
             
-            if (uniqueDates.length > 0) {
-                uniqueDates.forEach(date => {
+            // Also include existing followup date if it exists (even if not in current availability)
+            if (apt.next_followup_date && !availableDatesForFollowup.includes(apt.next_followup_date)) {
+                console.log("Adding existing followup date to options");
+                availableDatesForFollowup.push(apt.next_followup_date);
+                availableDatesForFollowup.sort();
+            }
+            
+            if (availableDatesForFollowup.length > 0) {
+                availableDatesForFollowup.forEach(date => {
                     const dateObj = new Date(date + "T00:00:00");
                     const dateDisplay = dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
                     const isExistingDate = date === apt.next_followup_date ? " (Previously Scheduled)" : "";

@@ -35,14 +35,14 @@ if ($method === 'GET') {
             $close_stmt->execute();
             $close_stmt->close();
         } elseif ($date === $today) {
-            // For today, close only 'Available' slots that are in the past (by time)
+            // For today, close only slots that are in the past (by time)
             $close_stmt = $conn->prepare("
                 UPDATE doctor_availability
                 SET status = 'Closed'
                 WHERE doctor_id = ?
                   AND available_date = ?
-                  AND status = 'Available'
-                  AND start_time < ?
+                  AND status IN ('Available', 'Blocked', 'Booked')
+                  AND end_time <= ?
             ");
             $close_stmt->bind_param("sss", $doctor_id, $today, $current_time);
             $close_stmt->execute();
@@ -58,7 +58,35 @@ if ($method === 'GET') {
         
         echo json_encode(['status' => 'success', 'data' => $availability]);
     } else {
-        // Get all availability
+        // Get all availability - also auto-close past slots
+        $today = date('Y-m-d');
+        $current_time = date('H:i:s');
+        
+        // Close all slots for past dates
+        $close_past_dates = $conn->prepare("
+            UPDATE doctor_availability
+            SET status = 'Closed'
+            WHERE doctor_id = ?
+              AND available_date < ?
+              AND status IN ('Available', 'Blocked', 'Booked')
+        ");
+        $close_past_dates->bind_param("ss", $doctor_id, $today);
+        $close_past_dates->execute();
+        $close_past_dates->close();
+        
+        // Close slots for today that are in the past (by time)
+        $close_today = $conn->prepare("
+            UPDATE doctor_availability
+            SET status = 'Closed'
+            WHERE doctor_id = ?
+              AND available_date = ?
+              AND status IN ('Available', 'Blocked', 'Booked')
+              AND end_time <= ?
+        ");
+        $close_today->bind_param("sss", $doctor_id, $today, $current_time);
+        $close_today->execute();
+        $close_today->close();
+        
         $stmt = $conn->prepare("SELECT avail_id, available_date, start_time, end_time, status FROM doctor_availability WHERE doctor_id = ? ORDER BY available_date DESC");
         $stmt->bind_param("s", $doctor_id);
         $stmt->execute();
