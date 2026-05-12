@@ -1362,6 +1362,21 @@ async function submitConsultation() {
     }
   }
 
+  // Validate follow-up date and time (both must be provided together)
+  if (fDate && !fTime) {
+    const followupError = document.getElementById("followup-date-error");
+    followupError.textContent = "Follow-up time is required when a follow-up date is selected";
+    followupError.classList.remove("hidden");
+    hasErrors = true;
+  }
+
+  if (fTime && !fDate) {
+    const followupError = document.getElementById("followup-date-error");
+    followupError.textContent = "Follow-up date is required when a follow-up time is selected";
+    followupError.classList.remove("hidden");
+    hasErrors = true;
+  }
+
   // Validate follow-up date (if provided, must not be in the past)
   if (fDate) {
     const selectedDate = new Date(fDate + "T00:00:00");
