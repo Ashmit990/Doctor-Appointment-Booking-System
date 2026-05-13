@@ -112,3 +112,14 @@ function smoothCloseModal(modalOrId, options = {}) {
     modal.style.pointerEvents = "";
   }, duration);
 }
+function goToHome() {
+  window.location.href = "homepage.html";
+}
+
+function goToDashboard() {
+  window.location.href = "dashboard.html";
+}
+
+function goToProfile() {
+  window.location.href = "profile.html";
+}

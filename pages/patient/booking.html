@@ -5,27 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Book Appointment</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="booking.css" />
     <style>
       /* PREMIUM PATIENT THEME START */
-      html { font-size: clamp(15px, 1vw, 17px); }
-      * { font-family: "Poppins", sans-serif; transition: color .18s ease, background-color .18s ease, transform .18s ease; }
-      main { overflow-y: auto; overflow-x: hidden; transition: transform .25s ease, opacity .25s ease; }
-      .primary-color { color: #0d7377; }
-      .bg-primary { background: linear-gradient(135deg,#0d7377 0%,#0a5a5d 100%); }
-      .bg-primary-light { background-color: rgba(13,115,119,0.08); }
-      .card-shadow { box-shadow: 0 20px 50px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06); }
-      .sidebar { background: linear-gradient(180deg,#0d7377 0%,#0a5a5d 100%); box-shadow:4px 0 30px rgba(0,0,0,0.15); }
+      html {
+        font-size: clamp(15px, 1vw, 17px);
+      }
+      * {
+        font-family: "Poppins", sans-serif;
+        transition:
+          color 0.18s ease,
+          background-color 0.18s ease,
+          transform 0.18s ease;
+      }
+      main {
+        overflow-y: auto;
+        overflow-x: hidden;
+        transition:
+          transform 0.25s ease,
+          opacity 0.25s ease;
+      }
+      .primary-color {
+        color: #0d7377;
+      }
+      .bg-primary {
+        background: linear-gradient(135deg, #0d7377 0%, #0a5a5d 100%);
+      }
+      .bg-primary-light {
+        background-color: rgba(13, 115, 119, 0.08);
+      }
+      .card-shadow {
+        box-shadow:
+          0 20px 50px rgba(0, 0, 0, 0.08),
+          0 1px 3px rgba(0, 0, 0, 0.06);
+      }
+      .sidebar {
+        background: linear-gradient(180deg, #0d7377 0%, #0a5a5d 100%);
+        box-shadow: 4px 0 30px rgba(0, 0, 0, 0.15);
+      }
       /* PREMIUM PATIENT THEME END */
     </style>
   </head>
   <body class="bg-white font-sans">
     <div class="p-3 md:p-4">
       <div class="mb-2">
-        <h2 class="text-lg font-semibold text-slate-800">
-          Book Appointment
-        </h2>
+        <h2 class="text-lg font-semibold text-slate-800">Book Appointment</h2>
         <p class="text-xs text-slate-500 mt-0.5">
           Fill in details to schedule a new appointment
         </p>
@@ -103,7 +131,9 @@
           ></textarea>
         </div>
 
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 pt-1.5 border-t border-slate-100 mt-2 pb-1">
+        <div
+          class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 pt-1.5 border-t border-slate-100 mt-2 pb-1"
+        >
           <div>
             <span class="text-xs text-slate-500">Total: </span>
             <span id="totalPrice" class="text-base font-bold text-[#0d7377]"
@@ -111,13 +141,13 @@
             >
           </div>
           <div class="flex gap-2 w-full sm:w-auto">
-          <button
-            type="submit"
-            id="confirmBtn"
-            class="bg-[#0d7377] hover:bg-[#0a5a5d] text-white flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-medium transition"
-          >
-            Confirm Booking
-          </button>
+            <button
+              type="submit"
+              id="confirmBtn"
+              class="bg-[#0d7377] hover:bg-[#0a5a5d] text-white flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-medium transition"
+            >
+              Confirm Booking
+            </button>
           </div>
         </div>
 
@@ -127,75 +157,7 @@
         ></div>
       </form>
 
-      <div id="paymentPanel" class="hidden mt-4 rounded-[20px] border border-slate-200 bg-slate-50 p-4 shadow-sm">
-        <div class="flex items-start justify-between gap-3">
-          <div>
-            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0d7377]">Payment Method</p>
-            <h3 class="mt-1 text-lg font-semibold text-slate-800">Choose how you want to pay</h3>
-            <p class="mt-1 text-xs text-slate-500">Your slot is reserved while Khalti verifies the transaction.</p>
-          </div>
-          <button
-            type="button"
-            id="backToFormBtn"
-            class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-100"
-          >
-            Back
-          </button>
-        </div>
-
-        <div class="mt-4 grid gap-3 md:grid-cols-[1.2fr_0.8fr]">
-          <div class="rounded-2xl border border-[#0d7377]/20 bg-white p-4 shadow-sm">
-            <div class="flex items-center gap-3">
-              <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-500 text-lg font-bold">K</div>
-              <div>
-                <p class="text-sm font-semibold text-slate-800">Khalti</p>
-                <p class="text-xs text-slate-500">Secure digital wallet and card checkout</p>
-              </div>
-            </div>
-            <label class="mt-4 flex cursor-pointer items-center gap-3 rounded-2xl border border-[#0d7377]/20 bg-[#0d7377]/5 px-4 py-3 transition hover:border-[#0d7377]/40">
-              <input type="radio" name="paymentMethod" value="khalti" checked class="h-4 w-4 accent-[#0d7377]" />
-              <div class="flex-1">
-                <p class="text-sm font-semibold text-slate-800">Pay with Khalti</p>
-                <p class="text-xs text-slate-500">You will be redirected to Khalti to complete the payment.</p>
-              </div>
-            </label>
-          </div>
-
-          <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Booking Summary</p>
-            <div class="mt-3 space-y-2 text-sm">
-              <div class="flex items-center justify-between gap-4">
-                <span class="text-slate-500">Doctor</span>
-                <span id="paymentSummaryDoctor" class="font-semibold text-slate-800 text-right">—</span>
-              </div>
-              <div class="flex items-center justify-between gap-4">
-                <span class="text-slate-500">Date</span>
-                <span id="paymentSummaryDate" class="font-semibold text-slate-800 text-right">—</span>
-              </div>
-              <div class="flex items-center justify-between gap-4">
-                <span class="text-slate-500">Time</span>
-                <span id="paymentSummaryTime" class="font-semibold text-slate-800 text-right">—</span>
-              </div>
-              <div class="mt-3 border-t border-slate-100 pt-3 flex items-center justify-between gap-4">
-                <span class="text-slate-600 font-medium">Payable amount</span>
-                <span id="paymentSummaryAmount" class="text-base font-bold text-[#0d7377]">—</span>
-              </div>
-            </div>
-
-            <div id="paymentStatusMessage" class="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-500">
-              The payment will be confirmed by Khalti before the appointment is created.
-            </div>
-
-            <button
-              type="button"
-              id="proceedPaymentBtn"
-              class="mt-4 w-full rounded-xl bg-[#0d7377] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0a5a5d] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              Continue to Khalti
-            </button>
-          </div>
-        </div>
-      </div>
+      <!-- Payment panel removed - replaced by dedicated payment page -->
 
       <div
         id="bookingSuccess"
@@ -206,23 +168,51 @@
     </div>
 
     <!-- Success Modal -->
-    <div id="successModal" class="hidden fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-[20px] shadow-lg border border-slate-100 max-w-sm w-full overflow-hidden">
-        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-          <h3 class="text-lg font-semibold text-slate-800">Booking Successful</h3>
-          <button id="closeSuccessModal" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition">
+    <div
+      id="successModal"
+      class="hidden fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+    >
+      <div
+        class="bg-white rounded-[20px] shadow-lg border border-slate-100 max-w-sm w-full overflow-hidden"
+      >
+        <div
+          class="flex items-center justify-between px-5 py-4 border-b border-slate-100"
+        >
+          <h3 class="text-lg font-semibold text-slate-800">
+            Booking Successful
+          </h3>
+          <button
+            id="closeSuccessModal"
+            class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition"
+          >
             ✕
           </button>
         </div>
         <div class="p-5">
           <div class="flex flex-col items-center text-center">
-            <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mb-4">
-              <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            <div
+              class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mb-4"
+            >
+              <svg
+                class="w-8 h-8 text-emerald-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 13l4 4L19 7"
+                ></path>
               </svg>
             </div>
-            <p class="text-base font-semibold text-slate-800 mb-1">Booking Succeed</p>
-            <p class="text-sm text-slate-500">Your appointment has been booked successfully.</p>
+            <p class="text-base font-semibold text-slate-800 mb-1">
+              Booking Succeed
+            </p>
+            <p class="text-sm text-slate-500">
+              Your appointment has been booked successfully.
+            </p>
           </div>
         </div>
       </div>

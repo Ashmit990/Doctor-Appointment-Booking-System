@@ -41,7 +41,7 @@ $transaction_id = trim($_GET['transaction_id'] ?? $_GET['txnId'] ?? $_GET['tidx'
 $amount = isset($_GET['amount']) ? (int)$_GET['amount'] : 0;
 
 // Response renderer
-$render_response = function($success, $title, $message, $pidx = '', $txn_id = '') {
+$render_response = function($success, $title, $message, $pidx = '', $txn_id = '', $appointment_id = null) {
     $bg = $success ? '#d1fae5' : '#fee2e2';
     $color = $success ? '#047857' : '#dc2626';
     $icon = $success ? '✓' : '✕';
@@ -49,6 +49,11 @@ $render_response = function($success, $title, $message, $pidx = '', $txn_id = ''
     $txn_short = $txn_id ? substr($txn_id, 0, 16) . '...' : '—';
     $status_msg = $success ? 'Notifying dashboard... This tab will close in 5 seconds.' : 'Please close this window and return to the dashboard.';
     
+    // Receipt button only on success
+    $receipt_btn = ($success && $appointment_id) 
+        ? "<button onclick=\"window.open('../../pages/patient/receipt.html?appointment_id={$appointment_id}', '_blank', 'width=800,height=900')\" style=\"background:#10b981;box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.39);\">View Receipt</button>"
+        : "";
+
     // Prepare safe JS values
     $js_status_val = $success ? 'Completed' : 'Failed';
     $js_success_val = $success ? 'true' : 'false';
@@ -97,24 +102,28 @@ $render_response = function($success, $title, $message, $pidx = '', $txn_id = ''
                     <span class="detail-value">$txn_short</span>
                 </div>
             </div>
-            <div style="display:flex;gap:12px;">
-                <button onclick="tryNotifyAndClose()">Back to Dashboard</button>
-                <button id="manualNotifyBtn" style="background:#e5e7eb;color:#111;border:1px solid #d1d5db;">Notify & Close</button>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                <button onclick="handleReturn()">Back to Dashboard</button>
+                $receipt_btn
+                <button id="manualNotifyBtn" style="background:#f3f4f6;color:#374151;border:1px solid #d1d5db;">Notify & Close</button>
             </div>
         </div>
     </div>
     <script>
-        // This page was opened by booking.js in a new window
-        // Communicate back to the opener (booking iframe)
+        // Check if we are in a same-tab redirect flow or a new-tab/popup flow
+        const hasOpener = window.opener && !window.opener.closed;
+        const dashboardUrl = '../../pages/patient/dashboard.html?payment_status={$js_status_val}&success={$js_success_val}&appointment_id={$appointment_id}';
+
         function sendPaymentResult() {
             try {
-                if (window.opener && !window.opener.closed) {
+                if (hasOpener) {
                     window.opener.postMessage({
                         type: 'payment-result',
                         status: '{$js_status_val}',
                         title: {$js_title},
                         message: {$js_message},
-                        success: {$js_success_val}
+                        success: {$js_success_val},
+                        appointment_id: '{$appointment_id}'
                     }, '*');
                     console.log('Payment result posted to opener');
                     return true;
@@ -122,30 +131,29 @@ $render_response = function($success, $title, $message, $pidx = '', $txn_id = ''
             } catch (e) {
                 console.error('postMessage failed', e);
             }
-            console.warn('No opener available to receive postMessage');
             return false;
         }
 
-        // Attempt automatic notify on load
+        // Attempt notification
         sendPaymentResult();
 
-        function tryNotifyAndClose() {
+        function handleReturn() {
             sendPaymentResult();
-            // Always try to close this window/tab
-            try { window.close(); } catch (e) { /* ignore */ }
+            if (hasOpener) {
+                try { window.close(); } catch (e) { window.top.location.href = dashboardUrl; }
+            } else {
+                window.top.location.href = dashboardUrl;
+            }
         }
 
-        document.getElementById('manualNotifyBtn')?.addEventListener('click', function () {
-            const ok = sendPaymentResult();
-            if (ok) try { window.close(); } catch (e) {}
-        });
+        document.getElementById('manualNotifyBtn')?.addEventListener('click', handleReturn);
         
-        // Auto-close after longer delay on success to ensure postMessage is received
-        if ({$js_success_val}) {
-            setTimeout(() => { 
-                window.close(); 
-            }, 5000);
-        }
+        // Auto-redirect or Auto-close
+        setTimeout(() => {
+            if ({$js_success_val}) {
+                handleReturn();
+            }
+        }, hasOpener ? 5000 : 3000);
     </script>
 </body>
 </html>
@@ -336,7 +344,7 @@ try {
     http_response_code(200);
     $render_response(true, 'Payment Successful', 
         'Your appointment has been booked successfully! Check your dashboard for details.',
-        $pidx, $verified_txn_id);
+        $pidx, $verified_txn_id, $appointment_id);
     exit;
 
 } catch (Exception $e) {

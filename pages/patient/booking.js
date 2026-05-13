@@ -7,8 +7,12 @@ let _pendingRescheduleId = null;
 function notifyParentResize() {
   try {
     setTimeout(() => {
-      const height = document.documentElement.scrollHeight || document.body.scrollHeight;
-      window.parent.postMessage({ type: "booking:height", height: height }, "*");
+      const height =
+        document.documentElement.scrollHeight || document.body.scrollHeight;
+      window.parent.postMessage(
+        { type: "booking:height", height: height },
+        "*",
+      );
       window.parent.postMessage({ type: "booking:resize" }, "*");
     }, 60);
   } catch (err) {
@@ -45,30 +49,40 @@ function setPaymentStatusMessage(message, variant = "info") {
   if (variant === "error") {
     box.classList.add("bg-red-50", "text-red-700", "border", "border-red-200");
   } else if (variant === "success") {
-    box.classList.add("bg-emerald-50", "text-emerald-700", "border", "border-emerald-200");
+    box.classList.add(
+      "bg-emerald-50",
+      "text-emerald-700",
+      "border",
+      "border-emerald-200",
+    );
   } else {
-    box.classList.add("bg-slate-50", "text-slate-500", "border", "border-slate-100");
+    box.classList.add(
+      "bg-slate-50",
+      "text-slate-500",
+      "border",
+      "border-slate-100",
+    );
   }
 }
 
 function openPaymentPanel() {
-  const panel = document.getElementById("paymentPanel");
-  if (!panel) return;
+  const doctorId = document.getElementById("doctor").value;
+  const availId = document.getElementById("availId").value;
+  const reason = document.getElementById("description").value;
   const doctorName = selectedDoctor
-    ? `${selectedDoctor.full_name} (${selectedDoctor.specialization || "Consultation"})`
-    : document.getElementById("doctor").selectedOptions?.[0]?.textContent || "—";
+    ? selectedDoctor.full_name
+    : document.getElementById("doctor").selectedOptions?.[0]?.textContent ||
+      "—";
+  const specialization = selectedDoctor
+    ? selectedDoctor.specialization
+    : "Consultation";
   const dateValue = document.getElementById("date").value || "—";
-  const timeValue = document.getElementById("time").selectedOptions?.[0]?.textContent || "—";
+  const timeValue =
+    document.getElementById("time").selectedOptions?.[0]?.textContent || "—";
 
-  const amount = selectedDoctor ? formatMoney(selectedDoctor.consultation_fee) : "—";
-  document.getElementById("paymentSummaryDoctor").textContent = doctorName;
-  document.getElementById("paymentSummaryDate").textContent = dateValue;
-  document.getElementById("paymentSummaryTime").textContent = timeValue;
-  document.getElementById("paymentSummaryAmount").textContent = amount;
-  setPaymentStatusMessage("Confirm the summary below, then complete payment with Khalti.");
-  panel.classList.remove("hidden");
-  panel.scrollIntoView({ behavior: "smooth", block: "start" });
-  notifyParentResize();
+  const paymentUrl = `payment.html?doctor_id=${encodeURIComponent(doctorId)}&avail_id=${encodeURIComponent(availId)}&reason=${encodeURIComponent(reason)}&doctor_name=${encodeURIComponent(doctorName)}&specialization=${encodeURIComponent(specialization)}&date=${encodeURIComponent(dateValue)}&time=${encodeURIComponent(timeValue)}`;
+
+  window.location.href = paymentUrl;
 }
 
 function closePaymentPanel() {
@@ -119,7 +133,10 @@ async function getSameDayBookingConflict(dateStr, excludeAppointmentId = null) {
 
 async function startKhaltiPayment() {
   if (!pendingBookingRequest) {
-    setPaymentStatusMessage("No booking data found. Please submit the form again.", "error");
+    setPaymentStatusMessage(
+      "No booking data found. Please submit the form again.",
+      "error",
+    );
     return;
   }
 
@@ -130,6 +147,9 @@ async function startKhaltiPayment() {
   }
 
   setPaymentStatusMessage("Creating a secure payment request...", "info");
+
+  // Open the new tab IMMEDIATELY to bypass popup blockers (user activation context)
+  const khaltiWindow = window.open('about:blank', '_blank');
 
   try {
     const r = await fetch(`${API_BASE}/patient/khalti_payment_init.php`, {
@@ -145,10 +165,40 @@ async function startKhaltiPayment() {
     const j = await r.json();
 
     if (j.status !== "success") {
-      setPaymentStatusMessage(j.message || "Could not start Khalti payment.", "error");
-      if (/already have an appointment|same day/i.test(String(j.message || ""))) {
+      setPaymentStatusMessage(
+        j.message || "Could not start Khalti payment.",
+        "error",
+      );
+      if (
+        /already have an appointment|same day/i.test(String(j.message || ""))
+      ) {
         setBookingConflictMessage(j.message);
       }
+      if (proceedBtn) {
+        proceedBtn.disabled = false;
+        proceedBtn.textContent = "Continue to Khalti";
+      }
+      if (khaltiWindow) khaltiWindow.close();
+      return;
+    }
+
+    setPaymentStatusMessage(
+      "Redirecting to Khalti for payment verification...",
+      "success",
+    );
+
+    // Redirect the already-opened new tab to Khalti
+    if (khaltiWindow) {
+      khaltiWindow.location.href = j.payment_url;
+    } else {
+      window.open(j.payment_url, "_blank");
+    }
+
+    if (!khaltiWindow) {
+      setPaymentStatusMessage(
+        "Could not open payment tab. Please check popup blocker.",
+        "error",
+      );
       if (proceedBtn) {
         proceedBtn.disabled = false;
         proceedBtn.textContent = "Continue to Khalti";
@@ -156,21 +206,6 @@ async function startKhaltiPayment() {
       return;
     }
 
-    setPaymentStatusMessage("Redirecting to Khalti for payment verification...", "success");
-    
-    // Open Khalti in new tab (not new window)
-    // Using _blank opens in a new tab by default in modern browsers
-    const khaltiWindow = window.open(j.payment_url, '_blank');
-    
-    if (!khaltiWindow) {
-      setPaymentStatusMessage("Could not open payment tab. Please check popup blocker.", "error");
-      if (proceedBtn) {
-        proceedBtn.disabled = false;
-        proceedBtn.textContent = "Continue to Khalti";
-      }
-      return;
-    }
-    
     // Poll to check if payment was completed
     // Callback page will postMessage back to us, but we also check periodically
     let checkCount = 0;
@@ -179,13 +214,19 @@ async function startKhaltiPayment() {
       // Check if payment tab was closed by user
       if (khaltiWindow.closed) {
         clearInterval(checkInterval);
-        setPaymentStatusMessage("Payment tab closed. Checking payment status...", "info");
+        setPaymentStatusMessage(
+          "Payment tab closed. Checking payment status...",
+          "info",
+        );
         // Wait a bit longer for backend to update payment status
         setTimeout(() => {
-          parent.postMessage({
-            type: 'payment-result',
-            status: 'checking', // Will reload appointments on parent side
-          }, '*');
+          parent.postMessage(
+            {
+              type: "payment-result",
+              status: "checking", // Will reload appointments on parent side
+            },
+            "*",
+          );
         }, 2000); // Increased delay to 2 seconds for reliability
         return;
       }
@@ -196,7 +237,10 @@ async function startKhaltiPayment() {
     }, 1000);
   } catch (err) {
     console.error(err);
-    setPaymentStatusMessage("Something went wrong while starting the payment.", "error");
+    setPaymentStatusMessage(
+      "Something went wrong while starting the payment.",
+      "error",
+    );
     if (proceedBtn) {
       proceedBtn.disabled = false;
       proceedBtn.textContent = "Continue to Khalti";
@@ -219,7 +263,7 @@ async function loadDoctors() {
     opt.textContent = `${d.full_name} (${d.specialization})`;
     sel.appendChild(opt);
   });
-  
+
   // If a doctor is already selected (e.g., reschedule mode), update price
   if (sel.value) {
     updatePrice();
@@ -320,7 +364,10 @@ async function loadRescheduleContext(appointmentId) {
       const appTimeNorm = String(a.app_time).trim().substring(0, 5);
       let matched = null;
       for (const opt of timeSel.options) {
-        if (opt.dataset.start && opt.dataset.start.trim().substring(0, 5) === appTimeNorm) {
+        if (
+          opt.dataset.start &&
+          opt.dataset.start.trim().substring(0, 5) === appTimeNorm
+        ) {
           matched = opt;
           break;
         }
@@ -332,7 +379,8 @@ async function loadRescheduleContext(appointmentId) {
     }
   } else {
     document.getElementById("date").value = "";
-    document.getElementById("time").innerHTML = '<option value="">Select date first</option>';
+    document.getElementById("time").innerHTML =
+      '<option value="">Select date first</option>';
     document.getElementById("availId").value = "";
   }
   document.getElementById("description").value = a.reason_for_visit || "";
@@ -348,7 +396,7 @@ const proceedPaymentBtn = document.getElementById("proceedPaymentBtn");
 
 window.addEventListener("message", (event) => {
   if (!event.data) return;
-  
+
   // Handle reschedule context from parent dashboard
   if (event.data.type === "START_RESCHEDULE" && event.data.appointment_id) {
     const sel = document.getElementById("doctor");
@@ -358,17 +406,24 @@ window.addEventListener("message", (event) => {
       _pendingRescheduleId = event.data.appointment_id;
     }
   }
-  
+
   // Forward payment result from Khalti callback to parent dashboard
   if (event.data.type === "payment-result") {
-    console.log("Payment result received in booking iframe, forwarding to parent:", event.data);
-    window.parent.postMessage({
-      type: "payment-result",
-      status: event.data.status,
-      title: event.data.title,
-      message: event.data.message,
-      success: event.data.success
-    }, "*");
+    console.log(
+      "Payment result received in booking iframe, forwarding to parent:",
+      event.data,
+    );
+    window.parent.postMessage(
+      {
+        type: "payment-result",
+        status: event.data.status,
+        title: event.data.title,
+        message: event.data.message,
+        success: event.data.success,
+        appointment_id: event.data.appointment_id,
+      },
+      "*",
+    );
   }
 });
 
@@ -379,14 +434,18 @@ cancelBooking?.addEventListener("click", () => {
   rescheduleAppointmentId = null;
   document.getElementById("confirmBtn").textContent = "Confirm Booking";
   const ds = document.getElementById("doctor");
-  ds.disabled = false; ds.style.opacity = ""; ds.style.cursor = "";
+  ds.disabled = false;
+  ds.style.opacity = "";
+  ds.style.cursor = "";
   window.parent.postMessage({ type: "booking:close" }, "*");
 });
 
 backToFormBtn?.addEventListener("click", () => {
   pendingBookingRequest = null;
   closePaymentPanel();
-  setPaymentStatusMessage("The payment will be confirmed by Khalti before the appointment is created.");
+  setPaymentStatusMessage(
+    "The payment will be confirmed by Khalti before the appointment is created.",
+  );
 });
 
 proceedPaymentBtn?.addEventListener("click", startKhaltiPayment);
@@ -416,13 +475,18 @@ document.getElementById("date").addEventListener("change", async () => {
     return;
   }
 
-  const conflict = await getSameDayBookingConflict(dateStr, rescheduleAppointmentId);
+  const conflict = await getSameDayBookingConflict(
+    dateStr,
+    rescheduleAppointmentId,
+  );
   if (conflict) {
     const doctorName = conflict.doctor_name || "another doctor";
     confirmBtn.disabled = true;
     confirmBtn.classList.add("opacity-60", "cursor-not-allowed");
     confirmBtn.title = `You already have an appointment with ${doctorName} on this date.`;
-    setBookingConflictMessage(`You already have an appointment with ${doctorName} on this date. Please choose a different date.`);
+    setBookingConflictMessage(
+      `You already have an appointment with ${doctorName} on this date. Please choose a different date.`,
+    );
   } else {
     confirmBtn.disabled = false;
     confirmBtn.classList.remove("opacity-60", "cursor-not-allowed");
@@ -451,20 +515,33 @@ bookingForm.addEventListener("submit", async (e) => {
 
   // --- Profile completion check ---
   try {
-    const profileRes = await fetch(`${API_BASE}/patient/profile.php`, { credentials: "include" });
+    const profileRes = await fetch(`${API_BASE}/patient/profile.php`, {
+      credentials: "include",
+    });
     const profileJson = await profileRes.json();
     if (profileJson.status === "success" && profileJson.data) {
       const p = profileJson.data;
       const fields = [
-        p.full_name, p.email, p.contact_number,
-        p.age, p.gender, p.blood_group, p.address,
-        p.emergency_contact_name, p.emergency_contact_phone
+        p.full_name,
+        p.email,
+        p.contact_number,
+        p.age,
+        p.gender,
+        p.blood_group,
+        p.address,
+        p.emergency_contact_name,
+        p.emergency_contact_phone,
       ];
-      const complete = fields.every(f => f !== null && f !== undefined && String(f).trim() !== "");
+      const complete = fields.every(
+        (f) => f !== null && f !== undefined && String(f).trim() !== "",
+      );
       if (!complete) {
         // Notify parent dashboard to show popup and redirect
         if (window.self !== window.top) {
-          window.parent.postMessage({ type: "profile-incomplete-redirect" }, "*");
+          window.parent.postMessage(
+            { type: "profile-incomplete-redirect" },
+            "*",
+          );
         } else {
           window.location.href = "profile.html";
         }
@@ -486,10 +563,15 @@ bookingForm.addEventListener("submit", async (e) => {
     return;
   }
 
-  const conflict = await getSameDayBookingConflict(selectedDate, rescheduleAppointmentId);
+  const conflict = await getSameDayBookingConflict(
+    selectedDate,
+    rescheduleAppointmentId,
+  );
   if (conflict) {
     const doctorName = conflict.doctor_name || "another doctor";
-    setBookingConflictMessage(`You already have an appointment with ${doctorName} on this date. Multiple appointments on the same day are not allowed.`);
+    setBookingConflictMessage(
+      `You already have an appointment with ${doctorName} on this date. Multiple appointments on the same day are not allowed.`,
+    );
     return;
   }
   setBookingConflictMessage("");
@@ -537,7 +619,9 @@ bookingForm.addEventListener("submit", async (e) => {
         return;
       }
       if (!j.appointment_id || j.appointment_id < 1) {
-        alert("Booking did not save correctly (no appointment id). Check the server log or try again.");
+        alert(
+          "Booking did not save correctly (no appointment id). Check the server log or try again.",
+        );
         return;
       }
       // Auto-generate treatment ticket (silent — errors don't block booking)

@@ -688,6 +688,35 @@ document.getElementById("calendarModal").addEventListener("click", (e) => {
     } catch (err) {
       console.error('Error checking follow-up reminders:', err);
     }
+    // Handle payment result messages from popup flow
+    window.addEventListener("message", async (event) => {
+      if (event.data && event.data.type === "payment-result") {
+        const status = String(event.data.status || "").toLowerCase().trim();
+        console.log("Payment result received on homepage:", event.data);
+
+        if (status === "completed") {
+          const modal = document.getElementById("bookingModal");
+          if (modal) {
+            smoothCloseModal(modal, {
+              mode: "class",
+              panelSelector: "#bookingModalOuter",
+            });
+          }
+          showSuccessToast("Payment successful ✓", event.data.message || "Your appointment has been booked successfully via Khalti.");
+          
+          try {
+            const home = await loadHomeData();
+            _cachedHomeData = home;
+            applyHomeToUI(home);
+            await renderMiniCalendar();
+          } catch (e) {
+            console.error(e);
+          }
+        } else if (status === "failed" || status === "cancelled") {
+          showSuccessToast("Payment " + status, event.data.message || "The payment did not complete. Please try again.");
+        }
+      }
+    });
   } catch (e) {
     console.error(e);
   }
