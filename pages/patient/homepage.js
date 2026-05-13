@@ -325,6 +325,7 @@ function buildCalendarGrid(container, year, month, compact) {
     cell.addEventListener("click", async (e) => {
       e.stopPropagation();
       if (!compact) {
+        if (selectedCalendarDate === ds) return;
         selectCalendarDate(ds);
       } else {
         const todayStr2 = new Date().toISOString().slice(0, 10);
@@ -458,6 +459,7 @@ async function updateNextCardForDate(dateStr) {
 }
 
 async function openFullCalendar() {
+  selectedCalendarDate = null;
   calViewYear = new Date().getFullYear();
   calViewMonth = new Date().getMonth() + 1;
   await refreshCalendarDots(calViewYear, calViewMonth);
@@ -479,6 +481,7 @@ function closeCalendarPopup() {
 }
 
 async function selectCalendarDate(dateStr) {
+  if (selectedCalendarDate === dateStr) return;
   selectedCalendarDate = dateStr;
 
   // Highlight selected date in full calendar
@@ -492,13 +495,23 @@ async function selectCalendarDate(dateStr) {
   }
 
   const panel = document.getElementById("calendarDayDetail");
-  panel.innerHTML = '<p class="text-sm text-slate-400">Loading…</p>';
 
-  const r = await fetch(
-    `${API_BASE}/patient/appointments_by_day.php?date=${encodeURIComponent(dateStr)}`,
-    { credentials: "include" },
-  );
-  const j = await r.json();
+  // Fetch first, then update DOM in one shot to avoid loading flash
+  let j;
+  try {
+    const r = await fetch(
+      `${API_BASE}/patient/appointments_by_day.php?date=${encodeURIComponent(dateStr)}`,
+      { credentials: "include" },
+    );
+    j = await r.json();
+  } catch (err) {
+    panel.innerHTML = `<p class="text-sm text-red-500">Failed to load.</p>`;
+    return;
+  }
+
+  // If user switched to another date while this was loading, discard result
+  if (selectedCalendarDate !== dateStr) return;
+
   if (j.status !== "success") {
     panel.innerHTML = `<p class="text-sm text-red-500">${j.message || "Error"}</p>`;
     return;
@@ -556,9 +569,11 @@ document
       calViewMonth = 12;
       calViewYear--;
     }
+    selectedCalendarDate = null;
     await refreshCalendarDots(calViewYear, calViewMonth);
     const grid = document.getElementById("fullCalGrid");
     if (grid) buildCalendarGrid(grid, calViewYear, calViewMonth, false);
+    document.getElementById("calendarDayDetail").innerHTML = '<p class="text-sm text-slate-500">Select a date to see appointments.</p>';
   });
 
 document
@@ -569,9 +584,11 @@ document
       calViewMonth = 1;
       calViewYear++;
     }
+    selectedCalendarDate = null;
     await refreshCalendarDots(calViewYear, calViewMonth);
     const grid = document.getElementById("fullCalGrid");
     if (grid) buildCalendarGrid(grid, calViewYear, calViewMonth, false);
+    document.getElementById("calendarDayDetail").innerHTML = '<p class="text-sm text-slate-500">Select a date to see appointments.</p>';
   });
 
 const notificationBtnEl = document.getElementById("notificationBtn");
