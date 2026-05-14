@@ -280,6 +280,19 @@ function renderAppointments(rows) {
               <span class="font-medium text-slate-700">${item.room_num || "—"}</span>
             </div>
           </div>
+          ${item.status_key === "completed" ? `
+          <div class="mt-3 pt-3 border-t border-slate-100">
+            <button type="button"
+              data-open-docs="${item.appointment_id}"
+              data-docs-label="${item.doctor_name} · ${item.app_date}"
+              class="open-docs-btn flex items-center gap-2 text-xs font-medium text-[#0d7377] hover:text-[#0a5a5d] transition-colors group">
+              <span class="w-6 h-6 rounded-lg bg-teal-50 group-hover:bg-teal-100 flex items-center justify-center transition-colors">
+                <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
+              </span>
+              My Documents
+              <span class="docs-count-badge-${item.appointment_id} px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-semibold hidden"></span>
+            </button>
+          </div>` : ""}
         </div>
 
         <div class="flex flex-wrap gap-1.5 lg:flex-col w-28 shrink-0">
@@ -306,7 +319,7 @@ function renderAppointments(rows) {
           }
           ${
             item.status_key === "completed"
-              ? `<button type="button" data-view-report="${item.appointment_id}" class="view-report-btn w-full px-3 py-2 rounded-lg border border-[#0d7377] bg-[#0d7377] text-white hover:bg-[#0a5a5d] text-xs font-medium transition whitespace-nowrap text-center flex items-center justify-center gap-1">
+              ? `<button type="button" data-view-report="${item.appointment_id}" class="view-report-btn w-full px-3 py-2 rounded-lg border border-red-600 bg-red-600 text-white hover:bg-red-700 text-xs font-medium transition whitespace-nowrap text-center flex items-center justify-center gap-1">
                 <i data-lucide="file-text" class="w-3 h-3"></i>
                 View Report
               </button>`
@@ -314,7 +327,7 @@ function renderAppointments(rows) {
           }
           ${
             item.payment_status_key === "completed"
-              ? `<button type="button" data-view-receipt="${item.appointment_id}" class="view-receipt-btn w-full px-3 py-2 rounded-lg border border-emerald-500 bg-emerald-500 text-white hover:bg-emerald-600 text-xs font-medium shadow-sm transition whitespace-nowrap text-center flex items-center justify-center gap-1">
+              ? `<button type="button" data-view-receipt="${item.appointment_id}" class="view-receipt-btn w-full px-3 py-2 rounded-lg border border-[#0d7377] bg-[#0d7377] text-white hover:bg-[#0a5a5d] text-xs font-medium shadow-sm transition whitespace-nowrap text-center flex items-center justify-center gap-1">
                 <i data-lucide="receipt" class="w-3 h-3"></i>
                 View Receipt
               </button>`
@@ -410,7 +423,258 @@ function renderAppointments(rows) {
     });
   });
 
+  document.querySelectorAll(".open-docs-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      openPatientDocsModal(
+        Number(button.dataset.openDocs),
+        button.dataset.docsLabel,
+      );
+    });
+  });
+
   if (typeof lucide !== "undefined") lucide.createIcons();
+
+  // Load doc counts for completed appointments
+  document.querySelectorAll(".open-docs-btn").forEach((button) => {
+    const aptId = Number(button.dataset.openDocs);
+    fetch(`${API_BASE}/patient/patient_docs.php?appointment_id=${aptId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.status === "success" && j.data.length > 0) {
+          const badge = document.querySelector(`.docs-count-badge-${aptId}`);
+          if (badge) {
+            badge.textContent = j.data.length;
+            badge.classList.remove("hidden");
+          }
+        }
+      })
+      .catch(() => {});
+  });
+}
+
+// ── Patient Documents Modal ────────────────────────────────────────────────────
+let _currentDocsAptId = null;
+
+function openPatientDocsModal(appointmentId, label) {
+  _currentDocsAptId = appointmentId;
+  const modal = document.getElementById("patientDocsModal");
+  const inner = document.getElementById("patientDocsModalInner");
+  const subtitle = document.getElementById("docsModalSubtitle");
+  if (!modal) return;
+
+  if (subtitle) subtitle.textContent = label || "";
+  document.getElementById("docsPendingList").classList.add("hidden");
+  document.getElementById("docsPendingItems").innerHTML = "";
+  document.getElementById("docsFileInput").value = "";
+
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+  setTimeout(() => {
+    inner.classList.remove("scale-95");
+    inner.classList.add("scale-100");
+  }, 10);
+
+  if (typeof lucide !== "undefined") lucide.createIcons();
+  loadUploadedDocs(appointmentId);
+}
+
+function closePatientDocsModal() {
+  const modal = document.getElementById("patientDocsModal");
+  const inner = document.getElementById("patientDocsModalInner");
+  if (!modal) return;
+  inner.classList.remove("scale-100");
+  inner.classList.add("scale-95");
+  setTimeout(() => {
+    modal.classList.remove("flex");
+    modal.classList.add("hidden");
+    _currentDocsAptId = null;
+  }, 200);
+}
+
+document.getElementById("patientDocsModal")?.addEventListener("click", (e) => {
+  if (e.target === document.getElementById("patientDocsModal")) closePatientDocsModal();
+});
+
+async function loadUploadedDocs(appointmentId) {
+  const container = document.getElementById("docsUploadedList");
+  if (!container) return;
+  container.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs">Loading…</div>';
+
+  try {
+    const r = await fetch(`${API_BASE}/patient/patient_docs.php?appointment_id=${appointmentId}`, { credentials: "include" });
+    const j = await r.json();
+    if (j.status !== "success" || !j.data.length) {
+      container.innerHTML = `<div class="text-center py-8 text-slate-300">
+        <p class="text-sm">No documents yet</p></div>`;
+      return;
+    }
+    renderUploadedDocs(j.data);
+  } catch (e) {
+    container.innerHTML = '<div class="text-center py-6 text-red-400 text-xs">Failed to load</div>';
+  }
+}
+
+function renderUploadedDocs(docs) {
+  const container = document.getElementById("docsUploadedList");
+  if (!container) return;
+
+  container.innerHTML = docs.map((doc) => {
+    const ext = doc.original_name.split(".").pop().toUpperCase();
+    const isImage = ["JPG", "JPEG", "PNG", "GIF"].includes(ext);
+    const isPdf   = ext === "PDF";
+    const iconColor = isPdf ? "text-red-500" : isImage ? "text-blue-500" : "text-slate-500";
+    const sizeKB = doc.file_size > 1024 * 1024
+      ? (doc.file_size / 1024 / 1024).toFixed(1) + " MB"
+      : Math.round(doc.file_size / 1024) + " KB";
+    const url = `${window.location.origin}/Doctor-Appointment-Booking-System/uploads/patient_docs/${doc.stored_name}`;
+
+    return `<div class="flex items-center gap-3 p-3.5 rounded-2xl bg-white border border-slate-100 hover:border-slate-200 shadow-sm hover:shadow-md transition-all duration-200" data-doc-id="${doc.id}">
+      <div class="w-10 h-10 rounded-xl ${isPdf ? 'bg-red-50' : isImage ? 'bg-blue-50' : 'bg-slate-100'} flex items-center justify-center shrink-0">
+        <span class="text-[9px] font-extrabold ${iconColor}">${ext}</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-semibold text-slate-700 truncate">${doc.original_name}</p>
+        <p class="text-[10px] text-slate-400 mt-0.5">${sizeKB} &nbsp;·&nbsp; ${doc.uploaded_at.slice(0, 10)}</p>
+      </div>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <a href="${url}" target="_blank" download="${doc.original_name}"
+          class="w-8 h-8 rounded-xl bg-teal-50 hover:bg-teal-100 border border-teal-100 flex items-center justify-center transition"
+          title="Download">
+          <i data-lucide="download" class="w-3.5 h-3.5 text-[#0d7377]"></i>
+        </a>
+        <button type="button" onclick="showDeleteConfirm(${doc.id})"
+          class="w-8 h-8 rounded-xl bg-red-50 hover:bg-red-100 border border-red-100 flex items-center justify-center transition"
+          title="Delete">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-500"></i>
+        </button>
+      </div>
+    </div>`;
+  }).join("");
+
+  if (typeof lucide !== "undefined") lucide.createIcons();
+}
+
+function handleDocsFileSelect(input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+
+  const pendingSection = document.getElementById("docsPendingList");
+  const pendingItems   = document.getElementById("docsPendingItems");
+  pendingSection.classList.remove("hidden");
+
+  pendingItems.innerHTML = files.map((f) => {
+    const sizeKB = f.size > 1024 * 1024
+      ? (f.size / 1024 / 1024).toFixed(1) + " MB"
+      : Math.round(f.size / 1024) + " KB";
+    return `<div class="flex items-center gap-3 p-3 rounded-xl bg-teal-50 border border-teal-100">
+      <div class="w-8 h-8 rounded-lg bg-white border border-teal-100 flex items-center justify-center shrink-0">
+        <i data-lucide="file" class="w-4 h-4 text-[#0d7377]"></i>
+      </div>
+      <span class="text-xs font-medium text-slate-700 flex-1 truncate">${f.name}</span>
+      <span class="text-[10px] text-slate-400 bg-white px-2 py-0.5 rounded-full border border-teal-100 shrink-0">${sizeKB}</span>
+    </div>`;
+  }).join("");
+
+  if (typeof lucide !== "undefined") lucide.createIcons();
+}
+
+async function uploadPendingDocs() {
+  if (!_currentDocsAptId) return;
+  const input = document.getElementById("docsFileInput");
+  const btn   = document.getElementById("docsUploadBtn");
+  if (!input.files.length) return;
+
+  btn.disabled = true;
+  btn.textContent = "Uploading…";
+
+  const formData = new FormData();
+  formData.append("appointment_id", _currentDocsAptId);
+  Array.from(input.files).forEach((f) => formData.append("files[]", f));
+
+  try {
+    const r = await fetch(`${API_BASE}/patient/patient_docs.php`, {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
+    const j = await r.json();
+
+    document.getElementById("docsPendingList").classList.add("hidden");
+    document.getElementById("docsPendingItems").innerHTML = "";
+    input.value = "";
+
+    if (j.status === "success") {
+      await loadUploadedDocs(_currentDocsAptId);
+      // Refresh badge
+      const badge = document.querySelector(`.docs-count-badge-${_currentDocsAptId}`);
+      if (badge) {
+        const count = parseInt(badge.textContent || "0") + j.uploaded.length;
+        badge.textContent = count;
+        badge.classList.remove("hidden");
+      }
+    } else {
+      alert(j.message || "Upload failed");
+    }
+  } catch (e) {
+    console.error(e);
+    alert("Upload error");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="upload" class="w-3 h-3"></i> Upload';
+    if (typeof lucide !== "undefined") lucide.createIcons();
+  }
+}
+
+function closeDeleteConfirm() {
+  const modal = document.getElementById("docsDeleteConfirm");
+  const inner = document.getElementById("docsDeleteConfirmInner");
+  if (!modal) return;
+  inner.classList.remove("scale-100");
+  inner.classList.add("scale-95");
+  setTimeout(() => {
+    modal.classList.remove("flex");
+    modal.classList.add("hidden");
+  }, 150);
+}
+
+function showDeleteConfirm(docId) {
+  const modal = document.getElementById("docsDeleteConfirm");
+  const inner = document.getElementById("docsDeleteConfirmInner");
+  const btn   = document.getElementById("docsDeleteConfirmBtn");
+  if (!modal) { deletePatientDoc(docId); return; }
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+  setTimeout(() => {
+    inner.classList.remove("scale-95");
+    inner.classList.add("scale-100");
+  }, 10);
+  if (typeof lucide !== "undefined") lucide.createIcons();
+  btn.onclick = () => { closeDeleteConfirm(); deletePatientDoc(docId); };
+}
+
+async function deletePatientDoc(docId) {
+  try {
+    const r = await fetch(`${API_BASE}/patient/patient_docs.php?doc_id=${docId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    const j = await r.json();
+    if (j.status === "success" && _currentDocsAptId) {
+      await loadUploadedDocs(_currentDocsAptId);
+      // Refresh badge
+      const r2 = await fetch(`${API_BASE}/patient/patient_docs.php?appointment_id=${_currentDocsAptId}`, { credentials: "include" });
+      const j2 = await r2.json();
+      const badge = document.querySelector(`.docs-count-badge-${_currentDocsAptId}`);
+      if (badge) {
+        const cnt = j2.data?.length || 0;
+        badge.textContent = cnt;
+        if (cnt === 0) badge.classList.add("hidden");
+      }
+    }
+  } catch (e) {
+    console.error(e);
+    alert("Delete failed");
+  }
 }
 
 function openTicketModal(apt) {
