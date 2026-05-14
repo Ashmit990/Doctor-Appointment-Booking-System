@@ -19,7 +19,7 @@
 -- Table structure for table `ai_chat_history`
 --
 
-DROP TABLE IF EXISTS `ai_chat_history`;
+
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `ai_chat_history` (
@@ -39,7 +39,7 @@ CREATE TABLE `ai_chat_history` (
 -- Table structure for table `appointment_payments`
 --
 
-DROP TABLE IF EXISTS `appointment_payments`;
+
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `appointment_payments` (
@@ -73,7 +73,6 @@ CREATE TABLE `appointment_payments` (
 -- Table structure for table `appointments`
 --
 
-DROP TABLE IF EXISTS `appointments`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `appointments` (
@@ -106,7 +105,7 @@ CREATE TABLE `appointments` (
 -- Table structure for table `doctor_approvals`
 --
 
-DROP TABLE IF EXISTS `doctor_approvals`;
+
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `doctor_approvals` (
@@ -128,7 +127,7 @@ CREATE TABLE `doctor_approvals` (
 -- Table structure for table `doctor_availability`
 --
 
-DROP TABLE IF EXISTS `doctor_availability`;
+
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `doctor_availability` (
@@ -149,7 +148,7 @@ CREATE TABLE `doctor_availability` (
 -- Table structure for table `doctor_profiles`
 --
 
-DROP TABLE IF EXISTS `doctor_profiles`;
+
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `doctor_profiles` (
@@ -171,7 +170,7 @@ CREATE TABLE `doctor_profiles` (
 -- Table structure for table `earnings`
 --
 
-DROP TABLE IF EXISTS `earnings`;
+
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `earnings` (
@@ -193,7 +192,7 @@ CREATE TABLE `earnings` (
 -- Table structure for table `medical_reports`
 --
 
-DROP TABLE IF EXISTS `medical_reports`;
+
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `medical_reports` (
@@ -223,7 +222,7 @@ CREATE TABLE `medical_reports` (
 -- Table structure for table `notifications`
 --
 
-DROP TABLE IF EXISTS `notifications`;
+
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `notifications` (
@@ -243,7 +242,6 @@ CREATE TABLE `notifications` (
 -- Table structure for table `patient_profiles`
 --
 
-DROP TABLE IF EXISTS `patient_profiles`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `patient_profiles` (
@@ -264,7 +262,7 @@ CREATE TABLE `patient_profiles` (
 -- Table structure for table `treatment_categories`
 --
 
-DROP TABLE IF EXISTS `treatment_categories`;
+
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `treatment_categories` (
@@ -280,7 +278,7 @@ CREATE TABLE `treatment_categories` (
 -- Table structure for table `treatment_tickets`
 --
 
-DROP TABLE IF EXISTS `treatment_tickets`;
+
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `treatment_tickets` (
@@ -303,7 +301,7 @@ CREATE TABLE `treatment_tickets` (
 -- Table structure for table `users`
 --
 
-DROP TABLE IF EXISTS `users`;
+
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `users` (

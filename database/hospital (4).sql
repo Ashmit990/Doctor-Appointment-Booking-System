@@ -929,7 +929,7 @@ INSERT INTO `treatment_categories` (`id`, `name`, `description`, `estimated_cost
 (4, 'Dermatology', 'Skin condition evaluation and treatment', 1200.00),
 (5, 'Neurology', 'Brain and nervous system assessment', 2000.00),
 (6, 'Pediatrics', 'Child health consultation and checkup', 1000.00),
-(7, 'Gynecology', 'Women\'s health consultation', 1000.00),
+(7, 'Gynecology', "Women's health consultation", 1000.00),
 (8, 'Ophthalmology', 'Eye examination and diagnosis', 1200.00),
 (9, 'Physiotherapy', 'Physical rehabilitation and therapy session', 1100.00),
 (10, 'Dentistry', 'Dental checkup and treatment', 1500.00);

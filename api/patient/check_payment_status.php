@@ -69,6 +69,46 @@ if (!empty($payment['pidx'])) {
                 $appointment_id = $appt_insert->insert_id;
                 $appt_insert->close();
 
+                // Auto-generate treatment ticket
+                $astmt = $conn->prepare("SELECT dp.specialization FROM doctor_profiles dp WHERE dp.user_id = ?");
+                $astmt->bind_param("s", $payment['doctor_id']);
+                $astmt->execute();
+                $astmt_result = $astmt->get_result()->fetch_assoc();
+                $astmt->close();
+                $specialization = $astmt_result['specialization'] ?? '';
+            
+                $cstmt = $conn->prepare("
+                    SELECT id, name, estimated_cost FROM treatment_categories 
+                    WHERE LOWER(name) = LOWER(?) 
+                       OR LOWER(name) LIKE CONCAT('%', LOWER(?), '%')
+                       OR LOWER(?) LIKE CONCAT('%', SUBSTRING(LOWER(name), 1, 5), '%')
+                    LIMIT 1
+                ");
+                $cstmt->bind_param("sss", $specialization, $specialization, $specialization);
+                $cstmt->execute();
+                $cat = $cstmt->get_result()->fetch_assoc();
+                $cstmt->close();
+                
+                if (!$cat) {
+                    $cat = $conn->query("SELECT id, name, estimated_cost FROM treatment_categories WHERE name = 'General Consultation' LIMIT 1")->fetch_assoc();
+                }
+                if (!$cat) {
+                    $cat = $conn->query("SELECT id, name, estimated_cost FROM treatment_categories ORDER BY id ASC LIMIT 1")->fetch_assoc();
+                }
+            
+                if ($cat) {
+                    date_default_timezone_set('Asia/Kathmandu');
+                    $ticket_number = 'TKT-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
+                    $cost = (float)$cat['estimated_cost'];
+                    $cat_id = (int)$cat['id'];
+                    $generated_at = date('Y-m-d H:i:s');
+                    
+                    $ins = $conn->prepare("INSERT INTO treatment_tickets (ticket_number, patient_id, appointment_id, category_id, cost, generated_at) VALUES (?, ?, ?, ?, ?, ?)");
+                    $ins->bind_param("ssiids", $ticket_number, $payment['patient_id'], $appointment_id, $cat_id, $cost, $generated_at);
+                    $ins->execute();
+                    $ins->close();
+                }
+
                 // Update payment
                 $updateStmt = $conn->prepare("UPDATE appointment_payments SET appointment_id = ?, payment_status = 'Completed', transaction_id = ?, callback_status = ?, verified_at = NOW(), updated_at = NOW() WHERE payment_id = ?");
                 $updateStmt->bind_param('issi', $appointment_id, $verified_txn_id, $verified_status, $payment['payment_id']);

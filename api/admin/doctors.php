@@ -32,19 +32,19 @@ try {
                     dp.contact_number,
                     dp.experience_years,
                     dp.qualifications,
-                    (SELECT estimated_cost FROM treatment_categories
-                     WHERE name = CASE
-                         WHEN LOWER(dp.specialization) LIKE '%cardio%'  THEN 'Cardiology'
-                         WHEN LOWER(dp.specialization) LIKE '%ortho%'   THEN 'Orthopedics'
-                         WHEN LOWER(dp.specialization) LIKE '%derma%'   THEN 'Dermatology'
-                         WHEN LOWER(dp.specialization) LIKE '%neuro%'   THEN 'Neurology'
-                         WHEN LOWER(dp.specialization) LIKE '%ediatri%' THEN 'Pediatrics'
-                         WHEN LOWER(dp.specialization) LIKE '%gynec%'   THEN 'Gynecology'
-                         WHEN LOWER(dp.specialization) LIKE '%ophthal%' THEN 'Ophthalmology'
-                         WHEN LOWER(dp.specialization) LIKE '%physio%'  THEN 'Physiotherapy'
-                         WHEN LOWER(dp.specialization) LIKE '%dent%'    THEN 'Dentistry'
-                         ELSE 'General Consultation'
-                     END LIMIT 1) AS consultation_fee,
+                    COALESCE(
+                        (SELECT tc.estimated_cost 
+                         FROM treatment_categories tc 
+                         WHERE LOWER(tc.name) = LOWER(dp.specialization) 
+                         OR LOWER(tc.name) LIKE CONCAT('%', LOWER(dp.specialization), '%')
+                         OR LOWER(dp.specialization) LIKE CONCAT('%', SUBSTRING(LOWER(tc.name), 1, 5), '%')
+                         LIMIT 1),
+                        (SELECT tc.estimated_cost 
+                         FROM treatment_categories tc 
+                         WHERE tc.name = 'General Consultation' 
+                         LIMIT 1),
+                        500
+                    ) AS consultation_fee,
                     dp.bio,
                     dp.age,
                     (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id) as total_appointments,
@@ -76,19 +76,19 @@ try {
                     u.full_name,
                     u.email,
                     COALESCE(dp.specialization, 'Not Specified') as specialization,
-                    (SELECT estimated_cost FROM treatment_categories
-                     WHERE name = CASE
-                         WHEN LOWER(dp.specialization) LIKE '%cardio%'  THEN 'Cardiology'
-                         WHEN LOWER(dp.specialization) LIKE '%ortho%'   THEN 'Orthopedics'
-                         WHEN LOWER(dp.specialization) LIKE '%derma%'   THEN 'Dermatology'
-                         WHEN LOWER(dp.specialization) LIKE '%neuro%'   THEN 'Neurology'
-                         WHEN LOWER(dp.specialization) LIKE '%ediatri%' THEN 'Pediatrics'
-                         WHEN LOWER(dp.specialization) LIKE '%gynec%'   THEN 'Gynecology'
-                         WHEN LOWER(dp.specialization) LIKE '%ophthal%' THEN 'Ophthalmology'
-                         WHEN LOWER(dp.specialization) LIKE '%physio%'  THEN 'Physiotherapy'
-                         WHEN LOWER(dp.specialization) LIKE '%dent%'    THEN 'Dentistry'
-                         ELSE 'General Consultation'
-                     END LIMIT 1) AS consultation_fee,
+                    COALESCE(
+                        (SELECT tc.estimated_cost 
+                         FROM treatment_categories tc 
+                         WHERE LOWER(tc.name) = LOWER(dp.specialization) 
+                         OR LOWER(tc.name) LIKE CONCAT('%', LOWER(dp.specialization), '%')
+                         OR LOWER(dp.specialization) LIKE CONCAT('%', SUBSTRING(LOWER(tc.name), 1, 5), '%')
+                         LIMIT 1),
+                        (SELECT tc.estimated_cost 
+                         FROM treatment_categories tc 
+                         WHERE tc.name = 'General Consultation' 
+                         LIMIT 1),
+                        500
+                    ) AS consultation_fee,
                     (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id) as total_appointments
                 FROM users u
                 LEFT JOIN doctor_profiles dp ON u.user_id = dp.user_id

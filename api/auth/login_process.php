@@ -6,6 +6,22 @@ require_once '../includes/password_helper.php';
 
 header('Content-Type: application/json');
 
+/**
+ * Map DB role to canonical session role (trim / case-insensitive).
+ */
+function login_canonical_role(string $raw): ?string
+{
+    $t = trim($raw);
+    $lower = strtolower($t);
+    return match (true) {
+        $lower === 'doctor' => 'Doctor',
+        $lower === 'patient' => 'Patient',
+        $lower === 'admin', $lower === 'administrator' => 'Admin',
+        in_array($t, ['Doctor', 'Patient', 'Admin'], true) => $t,
+        default => null,
+    };
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // CSRF Token Validation
     if (!CSRFProtection::validateToken()) {
@@ -39,29 +55,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $up->close();
                 }
             }
+
+            $role = login_canonical_role((string) ($user['role'] ?? ''));
+            if ($role === null) {
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Your account has an invalid role. Please contact support.',
+                ]);
+                $stmt->close();
+                $conn->close();
+                exit;
+            }
+
             $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['full_name'] = $user['full_name'];
-            $_SESSION['role'] = $user['role'];
+            $_SESSION['role'] = $role;
 
-            // FIX: Using paths relative to the project root
-            $redirect = '';
-            switch ($user['role']) {
-                case 'Doctor':
-                    $redirect = '/Doctor-Appointment-Booking-System/pages/doctor/home.html';
-                    break;
-                case 'Patient':
-                    $redirect = '/Doctor-Appointment-Booking-System/pages/patient/homepage.html';
-                    break;
-                case 'Admin':
-                    $redirect = '/Doctor-Appointment-Booking-System/pages/admin/dashboard.html';
-                    break;
-                default:
-                    $redirect = '/Doctor-Appointment-Booking-System/index.html';
-            }
+            // Paths relative to pages/auth/login.html so they work on any host/folder name
+            $redirect = match ($role) {
+                'Doctor' => '../doctor/home.html',
+                'Patient' => '../patient/homepage.html',
+                'Admin' => '../admin/dashboard.html',
+                default => '../../index.html',
+            };
 
             echo json_encode([
                 'status' => 'success',
-                'role' => $user['role'],
+                'role' => $role,
                 'redirect' => $redirect
             ]);
         } else {

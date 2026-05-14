@@ -132,9 +132,56 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else if ($role === 'Doctor') {
 
         try {
-            if (empty($medical_id)) {
+            if ($medical_id === '') {
                 throw new Exception("Medical ID is required for medical professionals.");
             }
+            if (!preg_match('/^\d{4}$/', $medical_id)) {
+                throw new Exception("Medical ID must be exactly 4 digits (0-9).");
+            }
+
+            $approvalCols = [];
+            $colRes       = $conn->query("SHOW COLUMNS FROM doctor_approvals");
+            if ($colRes) {
+                while ($row = $colRes->fetch_assoc()) {
+                    $approvalCols[$row['Field']] = true;
+                }
+            }
+
+            $dup = $conn->prepare("SELECT 1 FROM doctor_profiles WHERE medical_id = ? LIMIT 1");
+            if (!$dup) {
+                throw new Exception("Database error: " . $conn->error);
+            }
+            $dup->bind_param("s", $medical_id);
+            $dup->execute();
+            if ($dup->get_result()->num_rows > 0) {
+                $dup->close();
+                throw new Exception("This Medical ID is already registered to an active doctor.");
+            }
+            $dup->close();
+
+            if (isset($approvalCols['medical_id'])) {
+                $dup2 = $conn->prepare(
+                    "SELECT 1 FROM doctor_approvals WHERE medical_id = ? AND status != 'Rejected' LIMIT 1"
+                );
+            } else {
+                $dup2 = $conn->prepare(
+                    "SELECT 1 FROM doctor_approvals
+                     WHERE status IN ('Pending','Accepted')
+                       AND JSON_VALID(bio)
+                       AND JSON_UNQUOTE(JSON_EXTRACT(bio, '$.medical_id')) = ?
+                     LIMIT 1"
+                );
+            }
+            if (!$dup2) {
+                throw new Exception("Database error: " . $conn->error);
+            }
+            $dup2->bind_param("s", $medical_id);
+            $dup2->execute();
+            if ($dup2->get_result()->num_rows > 0) {
+                $dup2->close();
+                throw new Exception("This Medical ID is already used in another application.");
+            }
+            $dup2->close();
 
             // Pack extra info into bio JSON so nothing is lost before admin approval
             $bio_data = json_encode([
@@ -144,15 +191,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 'specialization' => $specialization,
                 'bio'            => $bio
             ]);
-
-            // Detect schema (with / without medical_id column)
-            $approvalCols = [];
-            $colRes       = $conn->query("SHOW COLUMNS FROM doctor_approvals");
-            if ($colRes) {
-                while ($row = $colRes->fetch_assoc()) {
-                    $approvalCols[$row['Field']] = true;
-                }
-            }
 
             $approval_password_hash = app_hash_password($password);
             if (isset($approvalCols['medical_id'])) {

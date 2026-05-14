@@ -8,6 +8,7 @@ $sql = "
              FROM treatment_categories tc 
              WHERE LOWER(tc.name) = LOWER(dp.specialization) 
              OR LOWER(tc.name) LIKE CONCAT('%', LOWER(dp.specialization), '%')
+             OR LOWER(dp.specialization) LIKE CONCAT('%', SUBSTRING(LOWER(tc.name), 1, 5), '%')
              LIMIT 1),
             (SELECT tc.estimated_cost 
              FROM treatment_categories tc 

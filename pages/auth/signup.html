@@ -619,10 +619,16 @@
                   <input
                     id="signupMedicalId"
                     type="text"
+                    inputmode="numeric"
+                    maxlength="4"
+                    autocomplete="off"
                     class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
-                    placeholder="Enter your medical registration ID"
+                    placeholder="e.g. 4829"
                     oninput="clearErr('signupMedicalId')"
                   />
+                  <p class="text-slate-500 text-[10px] mt-1">
+                    Exactly 4 digits. Must be unique across all doctors.
+                  </p>
                   <p
                     id="signupMedicalId_err"
                     class="hidden text-red-600 text-xs font-semibold mt-1"
@@ -1059,14 +1065,9 @@
 
         if (selectedRole === "Medical Professional") {
           const mid = document.getElementById("signupMedicalId").value.trim();
-          if (!mid) {
-            showErr("signupMedicalId", "Medical ID is required.");
-            ok = false;
-          } else if (mid.length < 4) {
-            showErr(
-              "signupMedicalId",
-              "Medical ID must be at least 4 characters.",
-            );
+          const midErr = Validators.medicalId(mid);
+          if (midErr) {
+            showErr("signupMedicalId", midErr);
             ok = false;
           } else clearErr("signupMedicalId");
 
@@ -1385,6 +1386,12 @@
             return "Password must include a special character.";
           return null;
         },
+        medicalId(v) {
+          if (!v) return "Medical ID is required.";
+          if (!/^\d{4}$/.test(v))
+            return "Medical ID must be exactly 4 digits (0-9).";
+          return null;
+        },
       };
 
       // ═══════════════════════════════════════════════════════════════
@@ -1422,8 +1429,17 @@
           "signupAge",
           "signupPassword",
           "signupConfirmPassword",
+          "signupMedicalId",
         ].forEach(clearErr);
         let hasError = false;
+
+        if (isDoctor) {
+          const midErr = Validators.medicalId(medicalId);
+          if (midErr) {
+            showErr("signupMedicalId", midErr);
+            hasError = true;
+          }
+        }
 
         const phoneErr = Validators.phone(phone);
         if (phoneErr) {

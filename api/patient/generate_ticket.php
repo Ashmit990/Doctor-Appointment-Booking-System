@@ -51,35 +51,23 @@ if ($appointment_id > 0) {
         exit;
     }
 
-    // Map specialization keyword → category name
-    $spec_lower = strtolower($apt['specialization'] ?? '');
-    $keyword_map = [
-        'cardio'   => 'Cardiology',
-        'ortho'    => 'Orthopedics',
-        'derma'    => 'Dermatology',
-        'neuro'    => 'Neurology',
-        'pediatr'  => 'Pediatrics',
-        'paediatr' => 'Pediatrics',
-        'gynaeco'  => 'Gynecology',
-        'gyneco'   => 'Gynecology',
-        'ophthal'  => 'Ophthalmology',
-        'physio'   => 'Physiotherapy',
-        'dent'     => 'Dentistry',
-        'general'  => 'General Consultation',
-    ];
-    $category_name = 'General Consultation';
-    foreach ($keyword_map as $kw => $name) {
-        if (strpos($spec_lower, $kw) !== false) {
-            $category_name = $name;
-            break;
-        }
-    }
+    $specialization = $apt['specialization'] ?? '';
 
-    $cstmt = $conn->prepare("SELECT id, name, estimated_cost FROM treatment_categories WHERE name = ?");
-    $cstmt->bind_param("s", $category_name);
+    $cstmt = $conn->prepare("
+        SELECT id, name, estimated_cost FROM treatment_categories 
+        WHERE LOWER(name) = LOWER(?) 
+           OR LOWER(name) LIKE CONCAT('%', LOWER(?), '%')
+           OR LOWER(?) LIKE CONCAT('%', SUBSTRING(LOWER(name), 1, 5), '%')
+        LIMIT 1
+    ");
+    $cstmt->bind_param("sss", $specialization, $specialization, $specialization);
     $cstmt->execute();
     $cat = $cstmt->get_result()->fetch_assoc();
     $cstmt->close();
+
+    if (!$cat) {
+        $cat = $conn->query("SELECT id, name, estimated_cost FROM treatment_categories WHERE name = 'General Consultation' LIMIT 1")->fetch_assoc();
+    }
 }
 
 // Fallback: use category_id_override or first category

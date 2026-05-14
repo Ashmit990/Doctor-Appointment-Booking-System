@@ -17,19 +17,19 @@ try {
     // 1. Doctor Profile Info
     $stmt = $conn->prepare("
         SELECT u.full_name, u.email, dp.specialization, dp.bio,
-            (SELECT estimated_cost FROM treatment_categories
-             WHERE name = CASE
-                 WHEN LOWER(dp.specialization) LIKE '%cardio%'  THEN 'Cardiology'
-                 WHEN LOWER(dp.specialization) LIKE '%ortho%'   THEN 'Orthopedics'
-                 WHEN LOWER(dp.specialization) LIKE '%derma%'   THEN 'Dermatology'
-                 WHEN LOWER(dp.specialization) LIKE '%neuro%'   THEN 'Neurology'
-                 WHEN LOWER(dp.specialization) LIKE '%ediatri%' THEN 'Pediatrics'
-                 WHEN LOWER(dp.specialization) LIKE '%gynec%'   THEN 'Gynecology'
-                 WHEN LOWER(dp.specialization) LIKE '%ophthal%' THEN 'Ophthalmology'
-                 WHEN LOWER(dp.specialization) LIKE '%physio%'  THEN 'Physiotherapy'
-                 WHEN LOWER(dp.specialization) LIKE '%dent%'    THEN 'Dentistry'
-                 ELSE 'General Consultation'
-             END LIMIT 1) AS consultation_fee 
+            COALESCE(
+                (SELECT tc.estimated_cost 
+                 FROM treatment_categories tc 
+                 WHERE LOWER(tc.name) = LOWER(dp.specialization) 
+                 OR LOWER(tc.name) LIKE CONCAT('%', LOWER(dp.specialization), '%')
+                 OR LOWER(dp.specialization) LIKE CONCAT('%', SUBSTRING(LOWER(tc.name), 1, 5), '%')
+                 LIMIT 1),
+                (SELECT tc.estimated_cost 
+                 FROM treatment_categories tc 
+                 WHERE tc.name = 'General Consultation' 
+                 LIMIT 1),
+                500
+            ) AS consultation_fee 
         FROM users u 
         LEFT JOIN doctor_profiles dp ON u.user_id = dp.user_id 
         WHERE u.user_id = ?

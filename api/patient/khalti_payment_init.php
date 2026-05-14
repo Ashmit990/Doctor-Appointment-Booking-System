@@ -148,10 +148,12 @@ try {
     $treatStmt = $conn->prepare("
         SELECT estimated_cost 
         FROM treatment_categories 
-        WHERE name = ? OR name LIKE CONCAT('%', ?, '%')
+        WHERE LOWER(name) = LOWER(?) 
+           OR LOWER(name) LIKE CONCAT('%', LOWER(?), '%')
+           OR LOWER(?) LIKE CONCAT('%', SUBSTRING(LOWER(name), 1, 5), '%')
         LIMIT 1
     ");
-    $treatStmt->bind_param('ss', $specialization, $specialization);
+    $treatStmt->bind_param('sss', $specialization, $specialization, $specialization);
     $treatStmt->execute();
     $treatData = $treatStmt->get_result()->fetch_assoc();
     $treatStmt->close();
