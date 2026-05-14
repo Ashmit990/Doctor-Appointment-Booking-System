@@ -15,7 +15,7 @@ function showToast(message, type = 'info', duration = 2000) {
   })();
 
   const toast = document.createElement('div');
-  const bgColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6';
+  const bgColor = type === 'success' ? '#007E85' : type === 'error' ? '#ef4444' : '#3b82f6';
   const slideOutDelay = (duration - 300) / 1000;
   toast.style.cssText = `background-color: ${bgColor}; color: white; padding: 12px 16px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); animation: slideIn 0.3s ease, slideOut 0.3s ease ${slideOutDelay}s forwards; min-width: 250px;`;
   toast.textContent = message;
@@ -108,114 +108,116 @@ function renderScheduleCalendar() {
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  // Fetch both appointment dates and completed appointments for this month
-  Promise.all([fetchAppointmentDatesForSchedule(), fetchCompletedAppointmentsForSchedule()]).then(([appointmentDates, completedDates]) => {
-    const daysContainer = document.getElementById("schedule-calendar-days");
-    daysContainer.innerHTML = "";
-    // Create a Set of dates for this month/year only
-    const targetYear = year;
-    const targetMonth = month + 1; // Convert from 0-11 to 1-12
+  // Fetch appointment dates with completion status
+  fetch("../../api/doctor/appointment_dates_completion_status.php?t=" + new Date().getTime())
+    .then(response => response.json())
+    .then(result => {
+      const daysContainer = document.getElementById("schedule-calendar-days");
+      daysContainer.innerHTML = "";
+      // Create a Set of dates for this month/year only
+      const targetYear = year;
+      const targetMonth = month + 1; // Convert from 0-11 to 1-12
 
-    const datesThisMonth = new Set();
-    const completedDatesThisMonth = new Set();
+      const allCompletedDatesThisMonth = new Set();
+      const hasPendingDatesThisMonth = new Set();
 
-    appointmentDates.forEach((dateStr) => {
-      const parts = dateStr.trim().split("-");
-      if (parts.length === 3) {
-        const dateYear = parseInt(parts[0]);
-        const dateMonth = parseInt(parts[1]);
-        const dateDay = parseInt(parts[2]);
+      // Process all_completed dates (where ALL appointments are completed)
+      if (result.status === 'success' && result.data && Array.isArray(result.data.all_completed)) {
+        result.data.all_completed.forEach((dateStr) => {
+          const parts = dateStr.trim().split("-");
+          if (parts.length === 3) {
+            const dateYear = parseInt(parts[0]);
+            const dateMonth = parseInt(parts[1]);
+            const dateDay = parseInt(parts[2]);
 
-        // Only add if it matches this year AND this month
-        if (dateYear === targetYear && dateMonth === targetMonth) {
-          datesThisMonth.add(dateDay);
+            // Only add if it matches this year AND this month
+            if (dateYear === targetYear && dateMonth === targetMonth) {
+              allCompletedDatesThisMonth.add(dateDay);
+            }
+          }
+        });
+      }
+
+      // Process has_pending dates (where there are any pending appointments)
+      if (result.status === 'success' && result.data && Array.isArray(result.data.has_pending)) {
+        result.data.has_pending.forEach((dateStr) => {
+          const parts = dateStr.trim().split("-");
+          if (parts.length === 3) {
+            const dateYear = parseInt(parts[0]);
+            const dateMonth = parseInt(parts[1]);
+            const dateDay = parseInt(parts[2]);
+
+            // Only add if it matches this year AND this month
+            if (dateYear === targetYear && dateMonth === targetMonth) {
+              hasPendingDatesThisMonth.add(dateDay);
+            }
+          }
+        });
+      }
+
+      // Previous month's grayed days
+      const prevMonthDays = new Date(year, month, 0).getDate();
+      for (let i = prevMonthDays - firstDay + 1; i <= prevMonthDays; i++) {
+        const dayDiv = document.createElement("div");
+        dayDiv.className = "calendar-day text-gray-300 rounded-md";
+        dayDiv.textContent = i;
+        daysContainer.appendChild(dayDiv);
+      }
+
+      const todayObj = new Date();
+      const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, "0")}-${String(todayObj.getDate()).padStart(2, "0")}`;
+
+      // Current month dates
+      for (let i = 1; i <= daysInMonth; i++) {
+        const dayDiv = document.createElement("div");
+        dayDiv.className = "calendar-day cursor-pointer rounded-md";
+        dayDiv.textContent = i;
+
+        // Add green checkmark if ALL appointments for this date are completed
+        if (allCompletedDatesThisMonth.has(i)) {
+          dayDiv.classList.add("has-completed");
         }
-      }
-    });
-
-    // Defensive: completedDates might not be an array (API changed or returned object)
-    const completedDatesList = Array.isArray(completedDates)
-      ? completedDates
-      : (completedDates && Array.isArray(completedDates.dates) ? completedDates.dates : []);
-
-    completedDatesList.forEach((dateStr) => {
-      if (!dateStr || typeof dateStr !== 'string') return;
-      const parts = dateStr.trim().split("-");
-      if (parts.length === 3) {
-        const dateYear = parseInt(parts[0]);
-        const dateMonth = parseInt(parts[1]);
-        const dateDay = parseInt(parts[2]);
-
-        // Only add if it matches this year AND this month
-        if (dateYear === targetYear && dateMonth === targetMonth) {
-          completedDatesThisMonth.add(dateDay);
+        // Add red dot if there are any pending appointments for this date
+        else if (hasPendingDatesThisMonth.has(i)) {
+          dayDiv.classList.add("has-appointment");
         }
+
+        const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
+        
+        // Mark selected date and today's date
+        if (dateStr === todayStr) {
+          dayDiv.classList.add('selected');
+          dayDiv.style.backgroundColor = "#007E85";
+          dayDiv.style.color = "white";
+          dayDiv.style.fontWeight = "bold";
+          dayDiv.style.borderRadius = "10px";
+        } else if (dateStr === selectedScheduleDate) {
+          dayDiv.classList.add('selected');
+          dayDiv.style.backgroundColor = "#0a9db5";
+          dayDiv.style.color = "white";
+          dayDiv.style.fontWeight = "bold";
+          dayDiv.style.borderRadius = "10px";
+          dayDiv.style.boxShadow = "0 4px 12px rgba(0, 126, 133, 0.25)";
+        } else if (dateStr < todayStr) {
+          dayDiv.style.color = "#d1d5db";
+        }
+
+        dayDiv.onclick = () => selectScheduleDate(dateStr);
+
+        daysContainer.appendChild(dayDiv);
       }
+
+      // Next month's grayed days
+      const remainingDays = 42 - (firstDay + daysInMonth);
+      for (let i = 1; i <= remainingDays; i++) {
+        const dayDiv = document.createElement("div");
+        dayDiv.className = "calendar-day text-gray-300 rounded-md";
+        dayDiv.textContent = i;
+        daysContainer.appendChild(dayDiv);
+      }
+
+      updateScheduleInsights(selectedScheduleDate, [], []);
     });
-
-    // Previous month's grayed days
-    const prevMonthDays = new Date(year, month, 0).getDate();
-    for (let i = prevMonthDays - firstDay + 1; i <= prevMonthDays; i++) {
-      const dayDiv = document.createElement("div");
-      dayDiv.className = "calendar-day text-gray-300 rounded-md";
-      dayDiv.textContent = i;
-      daysContainer.appendChild(dayDiv);
-    }
-
-    const todayObj = new Date();
-    const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, "0")}-${String(todayObj.getDate()).padStart(2, "0")}`;
-
-    // Current month dates
-    for (let i = 1; i <= daysInMonth; i++) {
-      const dayDiv = document.createElement("div");
-      dayDiv.className = "calendar-day cursor-pointer rounded-md";
-      dayDiv.textContent = i;
-
-      // Add green checkmark if doctor has completed appointments for this date
-      if (completedDatesThisMonth.has(i)) {
-        dayDiv.classList.add("has-completed");
-      }
-      // Add red dot if doctor has set availability for this date (but not completed)
-      else if (datesThisMonth.has(i)) {
-        dayDiv.classList.add("has-appointment");
-      }
-
-      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
-      
-      // Mark selected date and today's date
-      if (dateStr === todayStr) {
-        dayDiv.classList.add('selected');
-        dayDiv.style.backgroundColor = "#0d7377";
-        dayDiv.style.color = "white";
-        dayDiv.style.fontWeight = "bold";
-        dayDiv.style.borderRadius = "10px";
-      } else if (dateStr === selectedScheduleDate) {
-        dayDiv.classList.add('selected');
-        dayDiv.style.backgroundColor = "#0a9db5";
-        dayDiv.style.color = "white";
-        dayDiv.style.fontWeight = "bold";
-        dayDiv.style.borderRadius = "10px";
-        dayDiv.style.boxShadow = "0 4px 12px rgba(13, 115, 119, 0.25)";
-      } else if (dateStr < todayStr) {
-        dayDiv.style.color = "#d1d5db";
-      }
-
-      dayDiv.onclick = () => selectScheduleDate(dateStr);
-
-      daysContainer.appendChild(dayDiv);
-    }
-
-    // Next month's grayed days
-    const remainingDays = 42 - (firstDay + daysInMonth);
-    for (let i = 1; i <= remainingDays; i++) {
-      const dayDiv = document.createElement("div");
-      dayDiv.className = "calendar-day text-gray-300 rounded-md";
-      dayDiv.textContent = i;
-      daysContainer.appendChild(dayDiv);
-    }
-
-    updateScheduleInsights(selectedScheduleDate, [], []);
-  });
 }
 
 function updateScheduleInsights(date, availability = [], appointments = []) {
@@ -340,7 +342,7 @@ async function loadScheduleForDate(date) {
 
     const manageBtn = document.getElementById("manage-day-btn");
     if (manageBtn) {
-        manageBtn.classList.remove("hidden");
+      manageBtn.style.display = "inline-flex";
         if (isPastDay || (isToday && currentHour >= 17)) {
             manageBtn.disabled = true;
             manageBtn.classList.add("opacity-50", "cursor-not-allowed");
@@ -363,7 +365,7 @@ async function loadScheduleForDate(date) {
       availability.forEach((slot) => {
         let slotIsPast = isPastDay;
         if (isToday) {
-          if (slot.start_time < currentTimeStr) {
+          if (slot.end_time <= currentTimeStr) {
             slotIsPast = true;
           }
         }
@@ -403,17 +405,17 @@ async function loadScheduleForDate(date) {
         } else if (slot.status === 'Available') {
           // Available slot (no appointment)
           gridContainer.innerHTML += `
-            <div class="flex items-center justify-between p-3 bg-green-50 border border-green-100 rounded-md shadow-sm hover:border-green-200 hover:shadow-md transition text-sm\">
+            <div class="flex items-center justify-between p-3 bg-[#007E85]/10 border border-[#007E85]/15 rounded-md shadow-sm hover:border-[#007E85]/20 hover:shadow-md transition text-sm\">
               <div class="flex items-center gap-2\">
-                <div class=\"w-8 h-8 bg-green-200 rounded-full flex items-center justify-center flex-shrink-0\">
-                  <i data-lucide=\"clock\" class=\"text-green-700 w-4 h-4\"></i>
+                <div class=\"w-8 h-8 bg-[#007E85]/20 rounded-full flex items-center justify-center flex-shrink-0\">
+                  <i data-lucide=\"clock\" class=\"text-[#007E85] w-4 h-4\"></i>
                 </div>
                 <div>
                   <span class=\"font-bold text-gray-900 text-sm\">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
-                  <p class=\"text-[10px] text-green-700 font-semibold mt-0.5 flex items-center gap-1\"><i data-lucide=\"check\" class=\"w-3 h-3\"></i>Available for booking</p>
+                  <p class=\"text-[10px] text-[#007E85] font-semibold mt-0.5 flex items-center gap-1\"><i data-lucide=\"check\" class=\"w-3 h-3\"></i>Available for booking</p>
                 </div>
               </div>
-              <button onclick=\"openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})\" class=\"bg-green-100 hover:bg-green-200 text-green-700 border border-green-200 px-3 py-1.5 rounded-md text-xs font-semibold transition-all shadow-none whitespace-nowrap ml-2 ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}\">
+              <button ${slotIsPast ? "disabled" : `onclick="openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})"`} class="bg-[#007E85]/15 hover:bg-[#007E85]/20 text-[#007E85] border border-[#007E85]/20 px-3 py-1.5 rounded-md text-xs font-semibold transition-all shadow-none whitespace-nowrap ml-2 ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}\">
                 Edit Slot
               </button>
             </div>`;
@@ -430,7 +432,7 @@ async function loadScheduleForDate(date) {
                   <p class=\"text-[10px] text-yellow-700 font-semibold mt-0.5 flex items-center gap-1\"><i data-lucide=\"alert-circle\" class=\"w-3 h-3\"></i>Blocked</p>
                 </div>
               </div>
-              <button onclick=\"openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})\" class=\"bg-amber-100 hover:bg-amber-200 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-md text-xs font-semibold transition-all shadow-none whitespace-nowrap ml-2 ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}\">
+              <button ${slotIsPast ? "disabled" : `onclick="openEditSlotModal('${slot.start_time}', '${slot.end_time}', ${slot.avail_id}, '${slot.status}', ${slotIsPast})"`} class="bg-amber-100 hover:bg-amber-200 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-md text-xs font-semibold transition-all shadow-none whitespace-nowrap ml-2 ${slotIsPast ? "opacity-50 cursor-not-allowed" : ""}\">
                 Edit Slot
               </button>
             </div>`;
@@ -483,14 +485,14 @@ function openEditSlotModal(start, end, availId, status, isPast) {
   
   if (status === 'Available') {
     statusEl.textContent = "Available";
-    statusEl.className = "inline-block px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800";
+    statusEl.className = "inline-block px-3 py-1 rounded-full text-xs font-semibold bg-[#007E85]/15 text-[#007E85]";
     toggleBtn.textContent = "Block Slot";
     toggleBtn.className = "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 px-4 py-2 rounded-md text-sm font-semibold transition";
   } else {
     statusEl.textContent = "Blocked";
     statusEl.className = "inline-block px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800";
     toggleBtn.textContent = "Unblock Slot";
-    toggleBtn.className = "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 px-4 py-2 rounded-md text-sm font-semibold transition";
+    toggleBtn.className = "bg-[#007E85]/10 text-[#007E85] border border-[#007E85]/20 hover:bg-[#007E85]/15 px-4 py-2 rounded-md text-sm font-semibold transition";
   }
   
   const modal = document.getElementById("edit-slot-modal");
@@ -632,6 +634,50 @@ function openManageDayModal() {
   if (newSlotStart) newSlotStart.value = "";
   if (newSlotEnd) newSlotEnd.value = "";
   
+  // Disable past time slots if managing today's schedule
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  
+  if (selectedScheduleDate === todayStr) {
+    const currentHour = today.getHours();
+    const currentMinute = today.getMinutes();
+    const currentTimeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}:00`;
+    
+    // Disable start times for slots that would already be past
+    Array.from(newSlotStart.options).forEach(opt => {
+      if (opt.value === "") return; // Don't disable the placeholder
+      
+      // Calculate end time (30 minutes after start)
+      const [hours, mins] = opt.value.split(':');
+      const endMinutes = parseInt(mins) + 30;
+      const endHours = parseInt(hours) + Math.floor(endMinutes / 60);
+      const endTimeStr = `${String(endHours).padStart(2, '0')}:${String(endMinutes % 60).padStart(2, '0')}:00`;
+      
+      // If slot end time has passed, disable this option
+      if (endTimeStr <= currentTimeStr) {
+        opt.disabled = true;
+      } else {
+        opt.disabled = false;
+      }
+    });
+    
+    // Also disable past times in end time select
+    Array.from(newSlotEnd.options).forEach(opt => {
+      if (opt.value === "") return;
+      
+      // If end time has passed, disable this option
+      if (opt.value <= currentTimeStr) {
+        opt.disabled = true;
+      } else {
+        opt.disabled = false;
+      }
+    });
+  } else {
+    // For future dates, enable all times
+    Array.from(newSlotStart.options).forEach(opt => opt.disabled = (opt.value === ""));
+    Array.from(newSlotEnd.options).forEach(opt => opt.disabled = (opt.value === ""));
+  }
+  
   renderManageDaySlots();
   const modal = document.getElementById("manage-day-modal");
   modal.classList.remove("hidden");
@@ -660,7 +706,7 @@ function renderManageDaySlots() {
     fetchedAvailability.forEach(slot => {
     let statusBadge = '';
     if (slot.status === 'Available') {
-      statusBadge = `<span class="bg-green-500 text-white text-[8px] px-2 py-0.5 rounded-full uppercase font-bold shadow-sm">Available</span>`;
+      statusBadge = `<span class="bg-[#007E85]/100 text-white text-[8px] px-2 py-0.5 rounded-full uppercase font-bold shadow-sm">Available</span>`;
     } else if (slot.status === 'Blocked') {
       statusBadge = `<span class="bg-amber-500 text-white text-[8px] px-2 py-0.5 rounded-full uppercase font-bold shadow-sm">Blocked</span>`;
     } else if (slot.status === 'Booked' || slot.status === 'Completed') {
@@ -731,6 +777,22 @@ async function addNewSlotToDay() {
     return;
   }
   
+  // Check if slot is in the past (for today only)
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  
+  if (selectedScheduleDate === todayStr) {
+    const currentHour = today.getHours();
+    const currentMinute = today.getMinutes();
+    const currentTimeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}:00`;
+    
+    // end time must be after current time
+    if (end <= currentTimeStr) {
+      showToast("Cannot add slots for past times.", 'error');
+      return;
+    }
+  }
+  
   for (const slot of fetchedAvailability) {
     if (
       (start >= slot.start_time && start < slot.end_time) ||
@@ -784,6 +846,18 @@ function updateEndTimeOptions(startId, endId) {
     
     const timeIndex = timeValues.indexOf(startSelect.value);
     
+    // Check if we're managing today's schedule
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const isToday = selectedScheduleDate === todayStr;
+    
+    let currentTimeStr = "";
+    if (isToday) {
+      const currentHour = today.getHours();
+      const currentMinute = today.getMinutes();
+      currentTimeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}:00`;
+    }
+    
     if (timeIndex !== -1 && timeIndex < timeValues.length - 1) {
         const expectedEndValue = timeValues[timeIndex + 1];
         
@@ -791,7 +865,12 @@ function updateEndTimeOptions(startId, endId) {
             if (opt.value === "") return;
             
             if (opt.value === expectedEndValue) {
-                opt.disabled = false;
+                // Check if this end time is in the past (for today only)
+                if (isToday && opt.value <= currentTimeStr) {
+                  opt.disabled = true;
+                } else {
+                  opt.disabled = false;
+                }
                 endSelect.value = expectedEndValue;
             } else {
                 opt.disabled = true;
@@ -1102,18 +1181,53 @@ async function openAppointmentModal(aptId) {
             // Get unique future dates
             const uniqueDates = [...new Set(validSlots.map(slot => slot.available_date))].sort();
             
+            // Get patient's existing appointments to exclude conflicting dates
+            let patientAppointmentDates = [];
+            if (apt && apt.patient_id) {
+                try {
+                    const allAptRes = await fetch('../../api/doctor/appointments.php', { credentials: 'include' });
+                    const allAptData = await allAptRes.json();
+                    if (allAptData.status === 'success' && allAptData.data) {
+                        // Get dates of all appointments for this patient (excluding current appointment)
+                        patientAppointmentDates = allAptData.data
+                            .filter(a => a.patient_id === apt.patient_id && a.apt_id !== apt.apt_id) // Filter by patient, exclude current appointment
+                            .map(a => a.app_date)
+                            .filter(date => date); // Remove any null/empty dates
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch patient appointments:", e);
+                }
+            }
+            
+            console.log("Patient appointment dates (conflicts):", patientAppointmentDates);
             console.log("Unique dates available:", uniqueDates);
             console.log("Appointment next_followup_date:", apt.next_followup_date);
             
-            // Also include existing followup date if it exists (even if not in current availability)
-            if (apt.next_followup_date && !uniqueDates.includes(apt.next_followup_date)) {
-                console.log("Adding existing followup date to options");
-                uniqueDates.push(apt.next_followup_date);
-                uniqueDates.sort();
+            // Filter out dates that conflict with patient's existing appointments
+            const availableDatesForFollowup = uniqueDates.filter(date => {
+                // Allow if it's the previously scheduled followup date
+                if (apt && apt.next_followup_date === date) return true;
+                // Allow if patient doesn't have an appointment on this date
+                return !patientAppointmentDates.includes(date);
+            });
+            
+            // Show conflict info message if some dates were filtered out
+            const conflictInfo = document.getElementById("followup-conflict-info");
+            if (uniqueDates.length > availableDatesForFollowup.length) {
+                conflictInfo.classList.remove("hidden");
+            } else {
+                conflictInfo.classList.add("hidden");
             }
             
-            if (uniqueDates.length > 0) {
-                uniqueDates.forEach(date => {
+            // Also include existing followup date if it exists (even if not in current availability)
+            if (apt.next_followup_date && !availableDatesForFollowup.includes(apt.next_followup_date)) {
+                console.log("Adding existing followup date to options");
+                availableDatesForFollowup.push(apt.next_followup_date);
+                availableDatesForFollowup.sort();
+            }
+            
+            if (availableDatesForFollowup.length > 0) {
+                availableDatesForFollowup.forEach(date => {
                     const dateObj = new Date(date + "T00:00:00");
                     const dateDisplay = dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
                     const isExistingDate = date === apt.next_followup_date ? " (Previously Scheduled)" : "";
@@ -1180,10 +1294,17 @@ async function submitConsultation() {
   const aptId = document.getElementById("complete-consultation-btn").dataset
     .aptId;
   const statusVal = document.getElementById("modal-edit-status").value.trim();
-  const notes = document.getElementById("modal-doctor-notes").value.trim();
-  const rx = document.getElementById("modal-prescriptions").value.trim();
+  const notesInput = document.getElementById("modal-doctor-notes");
+  const rxInput = document.getElementById("modal-prescriptions");
+  const rawNotes = notesInput.value.trim();
+  const rawRx = rxInput.value.trim();
+  const notes = sanitizeMedicalReportText(rawNotes);
+  const rx = sanitizeMedicalReportText(rawRx);
   let fDate = document.getElementById("modal-followup-date").value;
   let fTime = document.getElementById("modal-followup-time").value;
+
+  notesInput.value = notes;
+  rxInput.value = rx;
 
   if (followupLocked) {
     fDate = "";
@@ -1210,17 +1331,50 @@ async function submitConsultation() {
     hasErrors = true;
   }
 
+  if (rawNotes !== notes) {
+    const notesError = document.getElementById("notes-error");
+    notesError.textContent = "Special characters are not allowed in doctor's notes";
+    notesError.classList.remove("hidden");
+    hasErrors = true;
+  }
+
+  if (rawRx !== rx) {
+    const prescriptionsError = document.getElementById("prescriptions-error");
+    prescriptionsError.textContent = "Special characters are not allowed in prescriptions";
+    prescriptionsError.classList.remove("hidden");
+    hasErrors = true;
+  }
+
   // Only require notes and prescriptions if the status is Completed
   if (statusVal === 'Completed') {
     if (!notes) {
-      document.getElementById("notes-error").classList.remove("hidden");
+      const notesError = document.getElementById("notes-error");
+      notesError.textContent = "Doctor's notes are required";
+      notesError.classList.remove("hidden");
       hasErrors = true;
     }
 
     if (!rx) {
-      document.getElementById("prescriptions-error").classList.remove("hidden");
+      const prescriptionsError = document.getElementById("prescriptions-error");
+      prescriptionsError.textContent = "Prescriptions are required";
+      prescriptionsError.classList.remove("hidden");
       hasErrors = true;
     }
+  }
+
+  // Validate follow-up date and time (both must be provided together)
+  if (fDate && !fTime) {
+    const followupError = document.getElementById("followup-date-error");
+    followupError.textContent = "Follow-up time is required when a follow-up date is selected";
+    followupError.classList.remove("hidden");
+    hasErrors = true;
+  }
+
+  if (fTime && !fDate) {
+    const followupError = document.getElementById("followup-date-error");
+    followupError.textContent = "Follow-up date is required when a follow-up time is selected";
+    followupError.classList.remove("hidden");
+    hasErrors = true;
   }
 
   // Validate follow-up date (if provided, must not be in the past)
@@ -1236,8 +1390,39 @@ async function submitConsultation() {
   }
 
   if (hasErrors) {
-    alert("Please fill in all required fields (marked with *) and ensure follow-up date is not in the past");
     return;
+  }
+
+  // Check for appointment conflicts on the followup date
+  if (fDate && fTime) {
+    const apt = storedAppointmentsForModal.find((a) => a.apt_id == aptId);
+    if (apt && apt.patient_id) {
+      const conflictResponse = await fetch("../../api/doctor/check_patient_date_conflicts.php", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          patient_id: apt.patient_id,
+          check_date: fDate
+        })
+      });
+      
+      const conflictData = await conflictResponse.json();
+      console.log("Appointment Conflict Check:", conflictData);
+      
+      if (conflictData.has_conflict) {
+        console.error("❌ APPOINTMENT CONFLICT DETECTED");
+        console.error(`Patient already has ${conflictData.appointments.length} appointment(s) on ${fDate}:`);
+        conflictData.appointments.forEach((apt, idx) => {
+          console.error(`  ${idx + 1}. Time: ${apt.app_time}, Status: ${apt.status}, Doctor: ${apt.doctor_id}`);
+        });
+        
+        const followupError = document.getElementById("followup-date-error");
+        followupError.textContent = "Patient already has appointment on this date. Please choose another followup date.";
+        followupError.classList.remove("hidden");
+        return;
+      }
+    }
   }
 
   const btn = document.getElementById("complete-consultation-btn");
@@ -1322,12 +1507,12 @@ async function loadPatientHistory(patientId) {
                 <p class="font-semibold text-gray-900 text-xs">${apt.doctor_name || '-'}</p>
                 <p class="text-[10px] text-gray-500">${apt.specialization || 'Consultation'}</p>
               </div>
-              <span class="text-[10px] bg-green-100 text-green-800 px-2 py-1 rounded">Completed</span>
+              <span class="text-[10px] bg-[#007E85]/15 text-[#007E85] px-2 py-1 rounded">Completed</span>
             </div>
             <p class="text-[10px] text-gray-600 mb-2">📅 ${new Date(apt.app_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${apt.app_time}</p>
             ${apt.reason_for_visit ? `<p class="text-[10px] text-gray-600 mb-2"><strong>Visit:</strong> ${apt.reason_for_visit}</p>` : ''}
             ${apt.doctor_comments ? `<p class="text-[10px] text-gray-700 mb-2 p-2 bg-white rounded border-l-2 border-blue-400"><strong>Notes:</strong> ${apt.doctor_comments}</p>` : ''}
-            ${apt.prescribed_medicines ? `<p class="text-[10px] text-gray-700 p-2 bg-white rounded border-l-2 border-green-400"><strong>Medicines:</strong> ${apt.prescribed_medicines}</p>` : ''}
+            ${apt.prescribed_medicines ? `<p class="text-[10px] text-gray-700 p-2 bg-white rounded border-l-2 border-[#007E85]/30"><strong>Medicines:</strong> ${apt.prescribed_medicines}</p>` : ''}
           </div>
         </div>
       `).join('');
@@ -1421,6 +1606,122 @@ document.addEventListener('visibilitychange', async () => {
 // ===== MEDICAL REPORT FUNCTIONS =====
 let medicineFieldCount = 0;
 let currentAppointmentForReport = null;
+const MEDICAL_REPORT_TEXT_SANITIZE_PATTERN = /[^A-Za-z0-9\s]/g;
+const MEDICAL_REPORT_BP_SANITIZE_PATTERN = /[^0-9/]/g;
+const MEDICAL_REPORT_WEIGHT_SANITIZE_PATTERN = /[^0-9.]/g;
+
+function sanitizeMedicalReportText(value) {
+  return (value || '').replace(MEDICAL_REPORT_TEXT_SANITIZE_PATTERN, '');
+}
+
+function sanitizeMedicalReportBloodPressure(value) {
+  return (value || '').replace(MEDICAL_REPORT_BP_SANITIZE_PATTERN, '');
+}
+
+function sanitizeMedicalReportWeight(value) {
+  const cleaned = (value || '').replace(MEDICAL_REPORT_WEIGHT_SANITIZE_PATTERN, '');
+  const firstDotIndex = cleaned.indexOf('.');
+  if (firstDotIndex === -1) {
+    return cleaned;
+  }
+  return cleaned.slice(0, firstDotIndex + 1) + cleaned.slice(firstDotIndex + 1).replace(/\./g, '');
+}
+
+function bindMedicalReportSanitizer(element, sanitizeFn, errorId, errorMessage) {
+  if (!element || element.dataset.forbiddenFilterBound === 'true') {
+    return;
+  }
+
+  element.dataset.forbiddenFilterBound = 'true';
+  element.addEventListener('input', () => {
+    const originalValue = element.value;
+    const cleanedValue = sanitizeFn(originalValue);
+
+    if (cleanedValue !== originalValue) {
+      element.value = cleanedValue;
+      setMedicalReportFieldError(errorId, errorMessage);
+      return;
+    }
+
+    const errorEl = document.getElementById(errorId);
+    if (errorEl && errorEl.textContent === errorMessage) {
+      errorEl.textContent = '';
+      errorEl.classList.add('hidden');
+    }
+  });
+}
+
+function bindMedicalReportFieldFilters() {
+  bindMedicalReportSanitizer(
+    document.getElementById('report-symptoms'),
+    sanitizeMedicalReportText,
+    'report-symptoms-error',
+    'Special characters are not allowed in symptoms.'
+  );
+  bindMedicalReportSanitizer(
+    document.getElementById('report-diagnosis'),
+    sanitizeMedicalReportText,
+    'report-diagnosis-error',
+    'Special characters are not allowed in diagnosis.'
+  );
+  bindMedicalReportSanitizer(
+    document.getElementById('report-notes'),
+    sanitizeMedicalReportText,
+    'report-notes-error',
+    'Special characters are not allowed in additional notes.'
+  );
+  bindMedicalReportSanitizer(
+    document.getElementById('report-bp'),
+    sanitizeMedicalReportBloodPressure,
+    'report-bp-error',
+    'Blood pressure allows only digits and /.'
+  );
+  bindMedicalReportSanitizer(
+    document.getElementById('report-weight'),
+    sanitizeMedicalReportWeight,
+    'report-weight-error',
+    'Weight allows only numbers and one decimal point.'
+  );
+
+  document.querySelectorAll('.medicine-name, .medicine-dosage, .medicine-frequency').forEach((field) => {
+    bindMedicalReportSanitizer(
+      field,
+      sanitizeMedicalReportText,
+      'report-medicines-error',
+      'Special characters are not allowed in medicine fields.'
+    );
+  });
+}
+
+function clearMedicalReportErrors() {
+  const errorIds = [
+    'report-symptoms-error',
+    'report-diagnosis-error',
+    'report-bp-error',
+    'report-weight-error',
+    'report-medicines-error',
+    'report-notes-error',
+    'report-form-error',
+  ];
+
+  errorIds.forEach((id) => {
+    const errorEl = document.getElementById(id);
+    if (errorEl) {
+      errorEl.textContent = '';
+      errorEl.classList.add('hidden');
+    }
+  });
+}
+
+function setMedicalReportFieldError(errorId, message) {
+  const errorEl = document.getElementById(errorId);
+  if (!errorEl) {
+    return;
+  }
+
+  errorEl.textContent = message;
+  errorEl.classList.remove('hidden');
+}
 
 function generateReportForCurrentAppointment() {
   if (!currentAppointmentForReport) {
@@ -1458,6 +1759,8 @@ function openMedicalReportModal(appointmentData) {
   document.getElementById('medical-report-form').reset();
   document.getElementById('medicines-list').innerHTML = '';
   medicineFieldCount = 0;
+  clearMedicalReportErrors();
+  bindMedicalReportFieldFilters();
 
   // Check if report already exists
   loadExistingReport(appointmentData.apt_id);
@@ -1602,9 +1905,9 @@ async function loadDoctorViewReport(appointmentId) {
       document.getElementById('view-report-chief-complaint').textContent = currentAppointmentForReport.reason_for_visit;
       
       // Medical Findings
-      document.getElementById('view-report-symptoms').textContent = report.symptoms || '';
-      document.getElementById('view-report-diagnosis').textContent = report.diagnosis || '';
-      document.getElementById('view-report-bp').textContent = report.blood_pressure || 'Not recorded';
+      document.getElementById('view-report-symptoms').textContent = sanitizeMedicalReportText(report.symptoms || '');
+      document.getElementById('view-report-diagnosis').textContent = sanitizeMedicalReportText(report.diagnosis || '');
+      document.getElementById('view-report-bp').textContent = sanitizeMedicalReportBloodPressure(report.blood_pressure || '') || 'Not recorded';
       document.getElementById('view-report-weight').textContent = report.weight ? `${report.weight} kg` : 'Not recorded';
       document.getElementById('view-report-room-no').textContent = report.room_num || '--';
       
@@ -1621,9 +1924,9 @@ async function loadDoctorViewReport(appointmentId) {
           const row = document.createElement('tr');
           row.className = idx % 2 === 0 ? 'bg-gray-50' : 'bg-white';
           row.innerHTML = `
-            <td class="p-3 border-b border-gray-200 text-gray-900 font-medium">${medicine.name || 'N/A'}</td>
-            <td class="p-3 border-b border-gray-200 text-gray-700">${medicine.dosage || 'N/A'}</td>
-            <td class="p-3 border-b border-gray-200 text-gray-700">${medicine.frequency || 'N/A'}</td>
+            <td class="p-3 border-b border-gray-200 text-gray-900 font-medium">${sanitizeMedicalReportText(medicine.name || 'N/A')}</td>
+            <td class="p-3 border-b border-gray-200 text-gray-700">${sanitizeMedicalReportText(medicine.dosage || 'N/A')}</td>
+            <td class="p-3 border-b border-gray-200 text-gray-700">${sanitizeMedicalReportText(medicine.frequency || 'N/A')}</td>
           `;
           medicinesList.appendChild(row);
         });
@@ -1634,7 +1937,7 @@ async function loadDoctorViewReport(appointmentId) {
       
       // Notes
       if (report.additional_notes) {
-        document.getElementById('view-report-notes').textContent = report.additional_notes;
+        document.getElementById('view-report-notes').textContent = sanitizeMedicalReportText(report.additional_notes);
         document.getElementById('view-notes-section').classList.remove('hidden');
       } else {
         document.getElementById('view-notes-section').classList.add('hidden');
@@ -1711,7 +2014,7 @@ async function downloadDoctorReportPDF() {
       return 0;
     };
     
-    const addLine = (x1, y1, x2, y2, color = '#00A3AC', width = 0.5) => {
+    const addLine = (x1, y1, x2, y2, color = '#007E85', width = 0.5) => {
       doc.setDrawColor(...hexToRgb(color));
       doc.setLineWidth(width);
       doc.line(x1, y1, x2, y2);
@@ -1722,7 +2025,7 @@ async function downloadDoctorReportPDF() {
     // ===== HEADER =====
     doc.setFont(undefined, 'bold');
     doc.setFontSize(14);
-    doc.setTextColor(...hexToRgb('#00A3AC'));
+    doc.setTextColor(...hexToRgb('#007E85'));
     doc.text('HEALTH CARE', pageWidth / 2, yPos, { align: 'center' });
     yPos += 6;
     
@@ -1734,13 +2037,13 @@ async function downloadDoctorReportPDF() {
     doc.text('Phone: +1-800-HOSPITAL | Email: info@healthcare.com', pageWidth / 2, yPos, { align: 'center' });
     yPos += 6;
     
-    addLine(10, yPos, pageWidth - 10, yPos, '#00A3AC', 1);
+    addLine(10, yPos, pageWidth - 10, yPos, '#007E85', 1);
     yPos += 8;
     
     // Title
     doc.setFont(undefined, 'bold');
     doc.setFontSize(13);
-    doc.setTextColor(...hexToRgb('#00A3AC'));
+    doc.setTextColor(...hexToRgb('#007E85'));
     doc.text('MEDICAL REPORT', pageWidth / 2, yPos, { align: 'center' });
     yPos += 7;
     
@@ -1757,7 +2060,7 @@ async function downloadDoctorReportPDF() {
     // Left Column - Patient Info
     doc.setFont(undefined, 'bold');
     doc.setFontSize(10);
-    doc.setTextColor(...hexToRgb('#00A3AC'));
+    doc.setTextColor(...hexToRgb('#007E85'));
     doc.text('PATIENT INFORMATION', 12, yPos);
     yPos += 6;
     
@@ -1775,7 +2078,7 @@ async function downloadDoctorReportPDF() {
     yPos = sectionStartY;
     doc.setFont(undefined, 'bold');
     doc.setFontSize(10);
-    doc.setTextColor(...hexToRgb('#00A3AC'));
+    doc.setTextColor(...hexToRgb('#007E85'));
     doc.text('CONSULTATION DETAILS', pageWidth / 2 + 10, yPos);
     yPos = sectionStartY + 6;
     
@@ -1796,7 +2099,7 @@ async function downloadDoctorReportPDF() {
     // ===== CHIEF COMPLAINT =====
     doc.setFont(undefined, 'bold');
     doc.setFontSize(10);
-    doc.setTextColor(...hexToRgb('#00A3AC'));
+    doc.setTextColor(...hexToRgb('#007E85'));
     doc.text('CHIEF COMPLAINT', 12, yPos);
     yPos += 5;
     
@@ -1810,7 +2113,7 @@ async function downloadDoctorReportPDF() {
     // ===== CLINICAL FINDINGS =====
     doc.setFont(undefined, 'bold');
     doc.setFontSize(10);
-    doc.setTextColor(...hexToRgb('#00A3AC'));
+    doc.setTextColor(...hexToRgb('#007E85'));
     doc.text('CLINICAL FINDINGS', 12, yPos);
     yPos += 6;
     
@@ -1865,14 +2168,14 @@ async function downloadDoctorReportPDF() {
     if (data.report.medicines && data.report.medicines.length > 0) {
       doc.setFont(undefined, 'bold');
       doc.setFontSize(10);
-      doc.setTextColor(...hexToRgb('#00A3AC'));
+      doc.setTextColor(...hexToRgb('#007E85'));
       doc.text('PRESCRIBED MEDICINES', 12, yPos);
       yPos += 6;
       
       doc.setFont(undefined, 'bold');
       doc.setFontSize(8);
       doc.setTextColor(...hexToRgb('#FFFFFF'));
-      doc.setFillColor(...hexToRgb('#00A3AC'));
+      doc.setFillColor(...hexToRgb('#007E85'));
       doc.rect(12, yPos - 2, 180, 5, 'F');
       doc.text('Medicine Name', 14, yPos + 1);
       doc.text('Dosage', 85, yPos + 1);
@@ -1905,7 +2208,7 @@ async function downloadDoctorReportPDF() {
     if (data.report.notes) {
       doc.setFont(undefined, 'bold');
       doc.setFontSize(10);
-      doc.setTextColor(...hexToRgb('#00A3AC'));
+      doc.setTextColor(...hexToRgb('#007E85'));
       doc.text('ADDITIONAL NOTES', 12, yPos);
       yPos += 5;
       
@@ -1959,17 +2262,20 @@ function addMedicineField() {
     <input
       type="text"
       placeholder="Medicine name"
-      class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#00A3AC] outline-none medicine-name"
+      oninput="this.value = sanitizeMedicalReportText(this.value)"
+      class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#007E85] outline-none medicine-name"
     />
     <input
       type="text"
       placeholder="Dosage (e.g., 500mg)"
-      class="w-24 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#00A3AC] outline-none medicine-dosage"
+      oninput="this.value = sanitizeMedicalReportText(this.value)"
+      class="w-24 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#007E85] outline-none medicine-dosage"
     />
     <input
       type="text"
       placeholder="Frequency (e.g., 2x daily)"
-      class="w-28 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#00A3AC] outline-none medicine-frequency"
+      oninput="this.value = sanitizeMedicalReportText(this.value)"
+      class="w-28 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#007E85] outline-none medicine-frequency"
     />
     <button
       type="button"
@@ -1980,6 +2286,24 @@ function addMedicineField() {
     </button>
   `;
   medicinesList.appendChild(medicineDiv);
+  bindMedicalReportSanitizer(
+    medicineDiv.querySelector('.medicine-name'),
+    sanitizeMedicalReportText,
+    'report-medicines-error',
+    'Special characters are not allowed in medicine fields.'
+  );
+  bindMedicalReportSanitizer(
+    medicineDiv.querySelector('.medicine-dosage'),
+    sanitizeMedicalReportText,
+    'report-medicines-error',
+    'Special characters are not allowed in medicine fields.'
+  );
+  bindMedicalReportSanitizer(
+    medicineDiv.querySelector('.medicine-frequency'),
+    sanitizeMedicalReportText,
+    'report-medicines-error',
+    'Special characters are not allowed in medicine fields.'
+  );
   lucide.createIcons();
 }
 
@@ -2006,11 +2330,11 @@ async function loadExistingReport(appointmentId) {
 
     if (result.status === 'success' && result.data) {
       const report = result.data;
-      document.getElementById('report-symptoms').value = report.symptoms || '';
-      document.getElementById('report-diagnosis').value = report.diagnosis || '';
-      document.getElementById('report-bp').value = report.blood_pressure || '';
-      document.getElementById('report-weight').value = report.weight || '';
-      document.getElementById('report-notes').value = report.additional_notes || '';
+      document.getElementById('report-symptoms').value = sanitizeMedicalReportText(report.symptoms || '');
+      document.getElementById('report-diagnosis').value = sanitizeMedicalReportText(report.diagnosis || '');
+      document.getElementById('report-bp').value = sanitizeMedicalReportBloodPressure(report.blood_pressure || '');
+      document.getElementById('report-weight').value = sanitizeMedicalReportWeight(String(report.weight || ''));
+      document.getElementById('report-notes').value = sanitizeMedicalReportText(report.additional_notes || '');
 
       // Load medicines
       if (report.prescribed_medicines && Array.isArray(report.prescribed_medicines)) {
@@ -2019,9 +2343,9 @@ async function loadExistingReport(appointmentId) {
           const lastIndex = medicineFieldCount;
           const medicineField = document.querySelector(`#medicine-${lastIndex}`);
           if (medicineField) {
-            medicineField.querySelector('.medicine-name').value = medicine.name || '';
-            medicineField.querySelector('.medicine-dosage').value = medicine.dosage || '';
-            medicineField.querySelector('.medicine-frequency').value = medicine.frequency || '';
+            medicineField.querySelector('.medicine-name').value = sanitizeMedicalReportText(medicine.name || '');
+            medicineField.querySelector('.medicine-dosage').value = sanitizeMedicalReportText(medicine.dosage || '');
+            medicineField.querySelector('.medicine-frequency').value = sanitizeMedicalReportText(medicine.frequency || '');
           }
         });
       }
@@ -2033,36 +2357,38 @@ async function loadExistingReport(appointmentId) {
 }
 
 async function saveMedicalReport() {
+  clearMedicalReportErrors();
+
   const appointmentId = document.getElementById('report-apt-id').value;
-  const symptoms = document.getElementById('report-symptoms').value.trim();
-  const diagnosis = document.getElementById('report-diagnosis').value.trim();
-  const bloodPressure = document.getElementById('report-bp').value.trim();
-  const weight = document.getElementById('report-weight').value.trim();
-  const additionalNotes = document.getElementById('report-notes').value.trim();
+  const symptoms = sanitizeMedicalReportText(document.getElementById('report-symptoms').value.trim());
+  const diagnosis = sanitizeMedicalReportText(document.getElementById('report-diagnosis').value.trim());
+  const bloodPressure = sanitizeMedicalReportBloodPressure(document.getElementById('report-bp').value.trim());
+  const weight = sanitizeMedicalReportWeight(document.getElementById('report-weight').value.trim());
+  const additionalNotes = sanitizeMedicalReportText(document.getElementById('report-notes').value.trim());
 
   // Validate ALL required fields with specific error messages
   if (!symptoms) {
-    alert('Symptoms field is required');
+    setMedicalReportFieldError('report-symptoms-error', 'Symptoms field is required');
     document.getElementById('report-symptoms').focus();
     return;
   }
   if (!diagnosis) {
-    alert('Diagnosis field is required');
+    setMedicalReportFieldError('report-diagnosis-error', 'Diagnosis field is required');
     document.getElementById('report-diagnosis').focus();
     return;
   }
   if (!bloodPressure) {
-    alert('Blood Pressure field is required');
+    setMedicalReportFieldError('report-bp-error', 'Blood pressure field is required');
     document.getElementById('report-bp').focus();
     return;
   }
   if (!weight) {
-    alert('Weight field is required');
+    setMedicalReportFieldError('report-weight-error', 'Weight field is required');
     document.getElementById('report-weight').focus();
     return;
   }
   if (!additionalNotes) {
-    alert('Additional Notes field is required');
+    setMedicalReportFieldError('report-notes-error', 'Additional notes field is required');
     document.getElementById('report-notes').focus();
     return;
   }
@@ -2070,15 +2396,15 @@ async function saveMedicalReport() {
   // Collect medicines
   const medicines = [];
   document.querySelectorAll('.medicine-field').forEach(field => {
-    const name = field.querySelector('.medicine-name').value.trim();
-    const dosage = field.querySelector('.medicine-dosage').value.trim();
-    const frequency = field.querySelector('.medicine-frequency').value.trim();
+    const name = sanitizeMedicalReportText(field.querySelector('.medicine-name').value.trim());
+    const dosage = sanitizeMedicalReportText(field.querySelector('.medicine-dosage').value.trim());
+    const frequency = sanitizeMedicalReportText(field.querySelector('.medicine-frequency').value.trim());
     if (name) {
       medicines.push({ name, dosage, frequency });
     }
   });
   if (medicines.length === 0) {
-    alert('Please add at least one medicine');
+    setMedicalReportFieldError('report-medicines-error', 'Please add at least one medicine');
     return;
   }
 
@@ -2107,9 +2433,9 @@ async function saveMedicalReport() {
       // Reload the schedule
       if (selectedScheduleDate) loadScheduleForDate(selectedScheduleDate);
     } else {
-      alert('Error: ' + result.message);
+      setMedicalReportFieldError('report-form-error', result.message || 'Unable to save medical report.');
     }
   } catch (error) {
-    alert('Error saving report: ' + error.message);
+    setMedicalReportFieldError('report-form-error', 'Error saving report: ' + error.message);
   }
 }

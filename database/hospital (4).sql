@@ -885,7 +885,7 @@ INSERT INTO `notifications` (`notification_id`, `user_id`, `title`, `message`, `
 
 CREATE TABLE `patient_profiles` (
   `user_id` varchar(20) NOT NULL,
-  `blood_group` varchar(5) DEFAULT NULL,
+  `blood_group` varchar(20) DEFAULT NULL,
   `gender` varchar(20) DEFAULT NULL,
   `contact_number` varchar(15) DEFAULT NULL,
   `address` text DEFAULT NULL,

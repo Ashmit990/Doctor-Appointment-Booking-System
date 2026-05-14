@@ -92,14 +92,24 @@ try {
             exit;
         }
 
+        // Use prepared statements to prevent SQL injection
         // Delete from appointments
-        $conn->query("DELETE FROM appointments WHERE patient_id = '$patient_id'");
+        $delAppointments = $conn->prepare("DELETE FROM appointments WHERE patient_id = ?");
+        $delAppointments->bind_param("s", $patient_id);
+        $delAppointments->execute();
+        $delAppointments->close();
         
         // Delete from patient_profiles
-        $conn->query("DELETE FROM patient_profiles WHERE user_id = '$patient_id'");
+        $delProfiles = $conn->prepare("DELETE FROM patient_profiles WHERE user_id = ?");
+        $delProfiles->bind_param("s", $patient_id);
+        $delProfiles->execute();
+        $delProfiles->close();
         
         // Delete from users
-        $conn->query("DELETE FROM users WHERE user_id = '$patient_id' AND role = 'Patient'");
+        $delUsers = $conn->prepare("DELETE FROM users WHERE user_id = ? AND role = 'Patient'");
+        $delUsers->bind_param("s", $patient_id);
+        $delUsers->execute();
+        $delUsers->close();
         
         echo json_encode([
             'status' => 'success',

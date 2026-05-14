@@ -37,13 +37,13 @@
         animation: pageFadeIn 0.4s ease-out forwards;
       }
       .primary-color {
-        color: #0d7377;
+        color: #007E85;
       }
       .bg-primary {
-        background: linear-gradient(135deg, #0d7377 0%, #0a5a5d 100%);
+        background: linear-gradient(135deg, #007E85 0%, #007E85 100%);
       }
       .bg-primary-light {
-        background-color: rgba(13, 115, 119, 0.08);
+        background-color: rgba(0, 126, 133, 0.08);
       }
       .card-shadow {
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
@@ -53,45 +53,278 @@
       }
       .card-hover:hover {
         transform: translateY(-8px);
-        box-shadow: 0 25px 60px rgba(13, 115, 119, 0.12);
+        box-shadow: 0 25px 60px rgba(0, 126, 133, 0.12);
       }
       .sidebar {
-        background: linear-gradient(180deg, #0d7377 0%, #0a5a5d 100%);
-        box-shadow: 4px 0 30px rgba(0, 0, 0, 0.15);
-      }
-      .nav-link {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        color: white;
+        background: linear-gradient(180deg, #007E85 0%, #00556B 100%);
+        box-shadow: 8px 0 40px rgba(0, 0, 0, 0.25), inset -1px 0 2px rgba(255, 255, 255, 0.1);
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
         position: relative;
         overflow: hidden;
       }
-      .nav-link::before {
+
+      .sidebar::before {
         content: '';
         position: absolute;
         top: 0;
-        left: -100%;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(ellipse 100% 80% at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 70%);
+        pointer-events: none;
+      }
+
+      .nav-link {
+        transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        color: rgba(255, 255, 255, 0.9);
+        position: relative;
+        overflow: visible;
+        display: flex;
+        align-items: center;
+        gap: inherit;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+      }
+
+      .nav-link::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: -8px;
+        width: 4px;
+        height: 0%;
+        background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0) 100%);
+        transform: translateY(-50%);
+        border-radius: 2px;
+        transition: height 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: 1;
+      }
+
+      .nav-link::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 100%);
+        border-radius: 10px;
+        opacity: 0;
+        transition: opacity 0.35s ease;
+        z-index: 0;
+      }
+
+      .nav-link:hover::before {
+        height: 100%;
+      }
+
+      .nav-link:hover::after {
+        opacity: 1;
+      }
+
+      .nav-link:hover {
+        background: linear-gradient(90deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%);
+        color: rgba(255, 255, 255, 1);
+        transform: translateX(4px);
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .nav-link i {
+        transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+
+      .nav-link:hover i {
+        transform: scale(1.15) rotate(5deg);
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+      }
+
+      .nav-link.active {
+        background: linear-gradient(90deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 100%);
+        color: #ffffff;
+        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.15);
+        border-radius: 10px;
+        font-weight: 600;
+      }
+
+      .nav-link.active::before {
+        height: 100%;
+        background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.3) 100%);
+      }
+
+      .nav-link.active i {
+        transform: scale(1.2);
+        filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+      }
+
+      /* Premium Design Elements */
+      .topbar-premium {
+        background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(250,252,253,0.95) 100%);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(0, 126, 133, 0.06);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      }
+
+      .premium-card {
+        background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.92) 100%);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(0, 126, 133, 0.08);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .premium-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
         width: 100%;
         height: 100%;
-        background: rgba(255, 255, 255, 0.15);
-        transition: left 0.3s ease;
-        z-index: -1;
+        background: radial-gradient(circle, rgba(0, 126, 133, 0.05) 0%, transparent 70%);
+        pointer-events: none;
       }
-      .nav-link:hover::before {
+
+      .premium-card:hover {
+        box-shadow: 0 20px 50px rgba(0, 126, 133, 0.12);
+        border-color: rgba(0, 126, 133, 0.15);
+      }
+
+      .premium-card-header {
+        background: linear-gradient(135deg, rgba(0, 126, 133, 0.05) 0%, rgba(0, 126, 133, 0.02) 100%);
+        border-bottom: 1px solid rgba(0, 126, 133, 0.08);
+      }
+
+      .hero-premium {
+        background: linear-gradient(135deg, #007E85 0%, #007E85 50%, #00556B 100%);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero-premium::before {
+        content: '';
+        position: absolute;
+        top: -40%;
+        right: -20%;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+        border-radius: 50%;
+      }
+
+      .hero-premium::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -30%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+        border-radius: 50%;
+      }
+
+      .stat-item-premium {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .stat-item-premium:hover {
+        background: rgba(255, 255, 255, 0.18);
+        border-color: rgba(255, 255, 255, 0.35);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      }
+
+      .form-input-premium {
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(0, 126, 133, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .form-input-premium:focus {
+        background: rgba(255, 255, 255, 0.95);
+        border-color: #007E85;
+        box-shadow: 0 0 0 4px rgba(0, 126, 133, 0.15), inset 0 0 0 1px rgba(0, 126, 133, 0.05);
+        outline: none;
+      }
+
+      .section-title-premium {
+        position: relative;
+        padding-bottom: 12px;
+        color: #1a3a3d;
+        font-weight: 600;
+      }
+
+      .section-title-premium::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
         left: 0;
+        width: 50px;
+        height: 3px;
+        background: linear-gradient(90deg, #007E85, #00556B);
+        border-radius: 2px;
+        box-shadow: 0 2px 8px rgba(0, 126, 133, 0.2);
       }
-      .nav-link:hover {
-        background-color: rgba(255, 255, 255, 0.15);
-        transform: translateX(4px);
+
+      .btn-primary-premium {
+        background: linear-gradient(135deg, #007E85 0%, #00556B 100%);
+        box-shadow: 0 8px 20px rgba(0, 126, 133, 0.3);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
-      .nav-link.active {
-        background: rgba(255, 255, 255, 0.25);
-        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+
+      .btn-primary-premium:hover {
+        box-shadow: 0 12px 30px rgba(0, 126, 133, 0.4);
+        transform: translateY(-2px);
       }
+
+      .profile-avatar-premium {
+        background: linear-gradient(135deg, #007E85 0%, #00556B 100%);
+        box-shadow: 0 10px 30px rgba(0, 126, 133, 0.3);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+      }
+
+      .profile-avatar-premium:hover {
+        transform: scale(1.05);
+        box-shadow: 0 15px 40px rgba(0, 126, 133, 0.4);
+      }
+
+      .info-row-premium {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(0, 126, 133, 0.05);
+        transition: all 0.2s ease;
+      }
+
+      .info-row-premium:hover {
+        background: rgba(0, 126, 133, 0.02);
+        padding-left: 8px;
+      }
+
+      .info-row-premium:last-child {
+        border-bottom: none;
+      }
+
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .premium-card {
+        animation: slideInUp 0.5s ease forwards;
+      }
+
       .toast-message {
         animation:
           slideInDown 0.3s ease,
           fadeOut 0.3s ease 2.7s forwards;
-        background: linear-gradient(135deg, #10b981, #059669);
+        background: linear-gradient(135deg, #007E85, #007E85);
         box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
       }
       @keyframes slideInDown {
@@ -114,8 +347,8 @@
       textarea:focus,
       select:focus {
         outline: none;
-        border-color: #0d7377;
-        box-shadow: 0 0 0 3px rgba(13, 115, 119, 0.1);
+        border-color: #007E85;
+        box-shadow: 0 0 0 3px rgba(0, 126, 133, 0.1);
       }
       @keyframes fadeInUp {
         from {
@@ -140,53 +373,52 @@
       <aside
         class="sidebar w-full md:w-64 text-white shadow-lg fixed bottom-0 md:top-0 h-auto md:h-full overflow-x-auto md:overflow-y-auto z-40"
       >
-        <div class="hidden md:block p-8 border-b border-gray-700">
-          <div class="flex items-center gap-3">
-            <div
-              class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center"
-            >
-              <img src="../../src/assets/Logo.svg" alt="">
-            </div>
-            <h1 class="text-xl font-bold">Healthcare</h1>
+        <div class="hidden md:flex items-center gap-3 p-8 border-b border-b-white/10 bg-gradient-to-r from-white/5 to-transparent">
+          <div class="w-12 h-12 bg-gradient-to-br from-white/30 to-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-lg">
+            <img src="../../src/assets/Logo.svg" alt="Healthcare" class="w-7 h-7">
+          </div>
+          <div>
+            <h1 class="text-lg font-bold tracking-tight">Healthcare</h1>
+            <p class="text-xs text-white/60">Doctor Portal</p>
           </div>
         </div>
 
-        <nav class="p-2 md:p-6 flex flex-row md:flex-col gap-2 md:gap-0 space-y-0 md:space-y-2 justify-around md:justify-start md:flex-1">
+        <nav class="p-2 md:p-4 flex flex-row md:flex-col gap-2 md:gap-2 space-y-0 md:space-y-1 justify-around md:justify-start md:flex-1">
           <a
             href="home.html"
-            class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base"
+            class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-[10px] md:text-sm whitespace-nowrap"
           >
-            <i data-lucide="home" class="w-5 h-5"></i>
-            <span>Home</span>
+            <i data-lucide="home" class="w-5 h-5 flex-shrink-0"></i>
+            <span class="hidden md:inline">Home</span>
           </a>
           <a
             href="schedules.html"
-            class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base"
+            class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-[10px] md:text-sm whitespace-nowrap"
           >
-            <i data-lucide="calendar" class="w-5 h-5"></i>
-            <span>Schedules</span>
+            <i data-lucide="calendar" class="w-5 h-5 flex-shrink-0"></i>
+            <span class="hidden md:inline">Schedules</span>
           </a>
           <a
             href="earnings.html"
-            class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base"
+            class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-[10px] md:text-sm whitespace-nowrap"
           >
-            <i data-lucide="dollar-sign" class="w-5 h-5"></i>
-            <span>Earnings</span>
+            <i data-lucide="dollar-sign" class="w-5 h-5 flex-shrink-0"></i>
+            <span class="hidden md:inline">Earnings</span>
           </a>
           <a
             href="profile.html"
-            class="nav-link active flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:opacity-80 transition text-[10px] md:text-base"
+            class="nav-link active flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-[10px] md:text-sm whitespace-nowrap"
           >
-            <i data-lucide="user" class="w-5 h-5"></i>
-            <span>Profile</span>
+            <i data-lucide="user" class="w-5 h-5 flex-shrink-0"></i>
+            <span class="hidden md:inline">Profile</span>
           </a>
-          <div class="hidden md:block mt-auto border-t border-gray-600 pt-3"></div>
+          <div class="hidden md:block mt-auto border-t border-white/10 pt-3"></div>
           <a
             href="../../api/auth/logout.php"
-            class="flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg hover:bg-red-600 transition text-red-300 hover:text-white text-[10px] md:text-base"
+            class="flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition-all duration-300 text-red-300 hover:text-red-50 hover:bg-red-500/20 text-[10px] md:text-sm whitespace-nowrap"
           >
-            <i data-lucide="log-out" class="w-5 h-5"></i>
-            <span>Logout</span>
+            <i data-lucide="log-out" class="w-5 h-5 flex-shrink-0"></i>
+            <span class="hidden md:inline">Logout</span>
           </a>
         </nav>
       </aside>
@@ -194,14 +426,14 @@
       <!-- MAIN CONTENT -->
       <main class="ml-0 md:ml-64 flex-1 overflow-y-auto pb-20 md:pb-0">
         <!-- TOP BAR -->
-        <div
-          class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm"
-        >
-          <div class="px-6 py-3 h-[70px]">
-            <h2 class="text-xl md:text-2xl font-bold text-gray-800">
-              Profile Management
-            </h2>
-            <p id="current-date" class="text-sm text-gray-500 mt-1"></p>
+        <div class="topbar-premium sticky top-0 z-30">
+          <div class="px-6 py-3 h-[70px] flex justify-between items-center">
+            <div>
+              <h2 class="text-xl md:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                Profile Management
+              </h2>
+              <p id="current-date" class="text-sm text-gray-500 mt-0.5"></p>
+            </div>
           </div>
         </div>
 
@@ -209,174 +441,175 @@
         <div class="p-6 md:p-7">
           <div class="w-full mx-auto">
             <!-- HERO SECTION WITH STATS -->
-            <div class="bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] rounded-md p-4 md:p-5 mb-5 text-white shadow-lg">
-              <div class="flex items-start justify-between flex-col md:flex-row gap-4 mb-4">
+            <div class="hero-premium rounded-xl p-6 md:p-8 mb-6 text-white shadow-lg relative z-10">
+              <div class="flex items-start justify-between flex-col md:flex-row gap-4 mb-6">
                 <div>
-                  <p class="text-xs font-medium opacity-90 mb-0.5">Manage your details</p>
-                  <h2 class="text-lg md:text-xl font-bold">Keep your profile information updated</h2>
-                  <p class="text-xs opacity-85 mt-1.5">Edit your professional details so your information stays accurate and easy to manage.</p>
+                  <p class="text-sm font-semibold opacity-90 mb-1">Manage your details</p>
+                  <h2 class="text-2xl md:text-3xl font-bold">Keep your profile information updated</h2>
+                  <p class="text-sm opacity-85 mt-2">Edit your professional details so your information stays accurate and easy to manage.</p>
                 </div>
               </div>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div class="bg-white/20 backdrop-blur-md rounded-md p-3 border border-white/20">
-                  <p class="text-[10px] opacity-90 mb-0.5">Profile Completion</p>
-                  <p class="text-2xl font-bold" id="profileCompletion">100%</p>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="stat-item-premium rounded-xl p-4">
+                  <p class="text-xs opacity-90 mb-1">Profile Completion</p>
+                  <p class="text-3xl font-bold" id="profileCompletion">100%</p>
                 </div>
-                <div class="bg-white/20 backdrop-blur-md rounded-md p-3 border border-white/20">
-                  <p class="text-[10px] opacity-90 mb-0.5">Verified Fields</p>
-                  <p class="text-2xl font-bold" id="verifiedFields">9</p>
+                <div class="stat-item-premium rounded-xl p-4">
+                  <p class="text-xs opacity-90 mb-1">Verified Fields</p>
+                  <p class="text-3xl font-bold" id="verifiedFields">9</p>
                 </div>
-                <div class="bg-white/20 backdrop-blur-md rounded-md p-3 border border-white/20">
-                  <p class="text-[10px] opacity-90 mb-0.5">Last Updated</p>
-                  <p class="text-2xl font-bold" id="lastUpdated">Today</p>
+                <div class="stat-item-premium rounded-xl p-4">
+                  <p class="text-xs opacity-90 mb-1">Last Updated</p>
+                  <p class="text-3xl font-bold" id="lastUpdated">Today</p>
                 </div>
               </div>
             </div>
 
             <!-- TWO COLUMN LAYOUT -->
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
               <!-- MAIN FORM SECTION (3 columns) -->
-              <div class="lg:col-span-3 bg-white rounded-md card-shadow overflow-hidden">
+              <div class="lg:col-span-3 premium-card rounded-xl overflow-hidden">
                 <!-- CARD HEADER WITH EDIT BUTTON -->
-                <div class="flex justify-between items-center p-4 md:p-5 border-b border-gray-100 bg-gray-50">
-                  <h3 class="text-sm font-semibold text-gray-800" id="cardTitle">Profile Information</h3>
-                  <button id="cardEditBtn"
-                    class="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm hover:opacity-90 transition flex items-center gap-2">
-                    <i data-lucide="edit" class="w-4 h-4"></i> Edit
-                  </button>
-                  <button id="cardCancelBtn"
-                    class="border border-gray-300 bg-white text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50 transition hidden">
-                    Cancel
-                  </button>
+                <div class="flex justify-between items-center p-5 md:p-6 premium-card-header">
+                  <h3 class="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent" id="cardTitle">Profile Information</h3>
+                  <div class="flex gap-2">
+                    <button id="cardEditBtn"
+                      class="btn-primary-premium text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md hover:opacity-95 transition flex items-center gap-2">
+                      <i data-lucide="edit" class="w-4 h-4"></i> Edit
+                    </button>
+                    <button id="cardCancelBtn"
+                      class="border border-gray-300 bg-white text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50 transition hidden flex items-center gap-2">
+                      <i data-lucide="x" class="w-4 h-4"></i> Cancel
+                    </button>
+                  </div>
                 </div>
 
               <!-- VIEW MODE -->
-              <div id="viewMode" class="p-4 md:p-5">
+              <div id="viewMode" class="p-5 md:p-6">
                 <!-- Personal Information Section -->
-                <div class="border-b border-gray-100 pb-4 mb-4">
-                  <h4 class="text-xs font-semibold text-gray-700 mb-3">Personal Information</h4>
-                  <div class="space-y-3">
-                    <div class="flex justify-between items-center py-2 border-b border-gray-50">
-                      <span class="text-gray-600 text-xs">Medical ID</span>
-                      <span class="text-gray-800 font-medium text-xs" id="viewMedicalId">-</span>
+                <div class="pb-6 mb-6 border-b border-gray-100">
+                  <h4 class="section-title-premium text-gray-800">Personal Information</h4>
+                  <div class="space-y-0 mt-4">
+                    <div class="info-row-premium">
+                      <span class="text-gray-600 text-sm font-medium">Medical ID</span>
+                      <span class="text-gray-900 font-semibold text-sm" id="viewMedicalId">-</span>
                     </div>
-                    <div class="flex justify-between items-center py-2 border-b border-gray-50">
-                      <span class="text-gray-600 text-xs">Doctor ID</span>
-                      <span class="text-gray-800 font-medium text-xs" id="viewDoctorId">-</span>
+                    <div class="info-row-premium">
+                      <span class="text-gray-600 text-sm font-medium">Doctor ID</span>
+                      <span class="text-gray-900 font-semibold text-sm" id="viewDoctorId">-</span>
                     </div>
-                    <div class="flex justify-between items-center py-2 border-b border-gray-50">
-                      <span class="text-gray-600 text-xs">Full Name</span>
-                      <span class="text-gray-800 font-medium text-xs" id="viewName">-</span>
+                    <div class="info-row-premium">
+                      <span class="text-gray-600 text-sm font-medium">Full Name</span>
+                      <span class="text-gray-900 font-semibold text-sm" id="viewName">-</span>
                     </div>
-                    <div class="flex justify-between items-center py-2 border-b border-gray-50">
-                      <span class="text-gray-600 text-xs">Email Address</span>
-                      <span class="text-gray-800 font-medium text-xs" id="viewEmail">-</span>
+                    <div class="info-row-premium">
+                      <span class="text-gray-600 text-sm font-medium">Email Address</span>
+                      <span class="text-gray-900 font-semibold text-sm" id="viewEmail">-</span>
                     </div>
-                    <div class="flex justify-between items-center py-2 border-b border-gray-50">
-                      <span class="text-gray-600 text-xs">Phone Number</span>
-                      <span class="text-gray-800 font-medium text-xs" id="viewPhone">-</span>
+                    <div class="info-row-premium">
+                      <span class="text-gray-600 text-sm font-medium">Phone Number</span>
+                      <span class="text-gray-900 font-semibold text-sm" id="viewPhone">-</span>
                     </div>
-                    <div class="flex justify-between items-center py-2 border-b border-gray-50">
-                      <span class="text-gray-600 text-xs">Age</span>
-                      <span class="text-gray-800 font-medium text-xs" id="viewAge">-</span>
+                    <div class="info-row-premium">
+                      <span class="text-gray-600 text-sm font-medium">Age</span>
+                      <span class="text-gray-900 font-semibold text-sm" id="viewAge">-</span>
                     </div>
-                    <div class="flex justify-between items-center py-2">
-                      <span class="text-gray-600 text-xs">Specialization</span>
-                      <span class="text-gray-800 font-medium text-xs" id="viewSpecialization">-</span>
+                    <div class="info-row-premium">
+                      <span class="text-gray-600 text-sm font-medium">Specialization</span>
+                      <span class="text-gray-900 font-semibold text-sm" id="viewSpecialization">-</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- Professional Details -->
-                <div class="border-b border-gray-100 pb-4 mb-4">
-                  <h4 class="text-xs font-semibold text-gray-700 mb-3">Professional Details</h4>
-                  <div class="space-y-3">
-                    <div class="flex justify-between items-start py-2 border-b border-gray-50">
-                      <span class="text-gray-600 text-xs">Experience</span>
-                      <span class="text-gray-800 font-medium text-xs" id="viewExperience">-</span>
+                <div class="pb-6 mb-6 border-b border-gray-100">
+                  <h4 class="section-title-premium text-gray-800">Professional Details</h4>
+                  <div class="space-y-0 mt-4">
+                    <div class="info-row-premium">
+                      <span class="text-gray-600 text-sm font-medium">Experience</span>
+                      <span class="text-gray-900 font-semibold text-sm" id="viewExperience">-</span>
                     </div>
-                    <div class="flex justify-between items-start py-2">
-                      <span class="text-gray-600 text-xs">Qualification</span>
-                      <span class="text-gray-800 font-medium text-xs" id="viewQualification">-</span>
+                    <div class="info-row-premium">
+                      <span class="text-gray-600 text-sm font-medium">Qualification</span>
+                      <span class="text-gray-900 font-semibold text-sm" id="viewQualification">-</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- Professional Bio -->
                 <div>
-                  <h4 class="text-xs font-semibold text-gray-700 mb-3">Professional Bio</h4>
-                  <p class="text-gray-700 text-xs bg-gray-50 p-2.5 rounded-lg" id="viewDescription">-</p>
+                  <h4 class="section-title-premium text-gray-800">Professional Bio</h4>
+                  <p class="text-gray-700 text-sm bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-lg mt-4 border border-gray-200" id="viewDescription">-</p>
                 </div>
               </div>
 
               <!-- EDIT MODE (hidden initially) -->
-              <div id="editMode" class="hidden p-4 md:p-5">
+              <div id="editMode" class="hidden p-5 md:p-6">
                 <form id="profileForm" novalidate>
                   <!-- Personal Information -->
-                  <div class="border-b border-gray-100 pb-4 mb-4">
-                    <h4 class="text-xs font-semibold text-gray-700 mb-3">Personal Information</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div class="pb-6 mb-6 border-b border-gray-100">
+                    <h4 class="section-title-premium text-gray-800">Personal Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                       <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Medical ID <span class="text-red-500">*</span></label>
-                        <input type="text" id="editMedicalId" required
-                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-xs" />
-                        <p class="text-[10px] text-red-500 hidden mt-0.5" id="medicalIdError">Medical ID is required</p>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">Medical ID <span class="text-red-500">*</span></label>
+                        <input type="text" id="editMedicalId" required pattern="[A-Za-z0-9]+"
+                          class="form-input-premium w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-sm" placeholder="Enter Medical ID" />
+                        <p class="text-xs text-red-500 hidden mt-1.5" id="medicalIdError">Medical ID must be letters/numbers only, no spaces</p>
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
-                        <input type="text" id="editName" required
-                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-xs" />
-                        <p class="text-[10px] text-red-500 hidden mt-0.5" id="nameError">Full name is required</p>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">Full Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="editName" required pattern="[A-Za-z0-9 ]+"
+                          class="form-input-premium w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-sm" placeholder="Enter Full Name" />
+                        <p class="text-xs text-red-500 hidden mt-1.5" id="nameError">Name must be letters/numbers only</p>
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
-                        <input type="email" id="editEmail" required
-                          oninput="this.value = this.value.toLowerCase()"
-                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-xs" />
-                        <p class="text-xs text-red-500 hidden mt-1" id="emailError">Valid email is required</p>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">Email <span class="text-red-500">*</span></label>
+                        <input type="text" id="editEmail" required autocomplete="email" inputmode="email"
+                          class="form-input-premium w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-sm" placeholder="Enter Email Address" />
+                        <p class="text-xs text-red-500 hidden mt-1.5" id="emailError">Email can contain only letters, numbers, dot and @</p>
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Phone Number <span class="text-red-500">*</span></label>
-                        <input type="tel" id="editPhone" required
-                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-xs" />
-                        <p class="text-xs text-red-500 hidden mt-1" id="phoneError">Valid phone number required (min 8 digits)</p>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">Phone Number <span class="text-red-500">*</span></label>
+                        <input type="tel" id="editPhone" required maxlength="10" inputmode="numeric" pattern="\\d{10}"
+                          class="form-input-premium w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-sm" placeholder="Enter 10 digit phone" />
+                        <p class="text-xs text-red-500 hidden mt-1.5" id="phoneError">Mobile number must be exactly 10 digits</p>
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Age <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">Age <span class="text-red-500">*</span></label>
                         <input type="number" id="editAge" required min="18" max="100"
-                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-xs" />
-                        <p class="text-xs text-red-500 hidden mt-1" id="ageError">Age must be between 18 and 100</p>
+                          class="form-input-premium w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-sm" placeholder="Enter Age" />
+                        <p class="text-xs text-red-500 hidden mt-1.5" id="ageError">Age must be between 18 and 100</p>
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Specialization <span class="text-red-500">*</span></label>
-                        <input type="text" id="editSpecialization" required
-                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-xs" />
-                        <p class="text-xs text-red-500 hidden mt-1" id="specError">Specialization is required</p>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">Specialization <span class="text-red-500">*</span></label>
+                        <input type="text" id="editSpecialization" required pattern="[A-Za-z0-9 ]+"
+                          class="form-input-premium w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-sm" placeholder="Enter Specialization" />
+                        <p class="text-xs text-red-500 hidden mt-1.5" id="specError">Specialization must be letters/numbers only</p>
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Experience <span class="text-red-500">*</span></label>
-                        <input type="number" id="editExperience" required min="0" step="1"
-                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-xs" />
-                        <p class="text-xs text-red-500 hidden mt-1" id="expError">Experience is required</p>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">Experience (Years) <span class="text-red-500">*</span></label>
+                        <input type="number" id="editExperience" required min="0" step="1" inputmode="numeric" pattern="\\d+"
+                          class="form-input-premium w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-sm" placeholder="Enter Years of Experience" />
+                        <p class="text-xs text-red-500 hidden mt-1.5" id="expError">Experience must be a number only</p>
                       </div>
                     </div>
                   </div>
 
                   <!-- Professional Details -->
-                  <div class="border-b border-gray-100 pb-4 mb-4">
-                    <h4 class="text-xs font-semibold text-gray-700 mb-3">Professional Details</h4>
-                    <div class="space-y-3">
+                  <div class="pb-6 mb-6 border-b border-gray-100">
+                    <h4 class="section-title-premium text-gray-800">Professional Details</h4>
+                    <div class="space-y-4 mt-4">
                       <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Qualification <span class="text-red-500">*</span></label>
-                        <input type="text" id="editQualification" required
-                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-xs" />
-                        <p class="text-xs text-red-500 hidden mt-1" id="qualError">Qualification is required</p>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">Qualification <span class="text-red-500">*</span></label>
+                        <input type="text" id="editQualification" required pattern="[A-Za-z0-9 ]+"
+                          class="form-input-premium w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-sm" placeholder="Enter Qualification" />
+                        <p class="text-xs text-red-500 hidden mt-1.5" id="qualError">Qualification must be letters/numbers only</p>
                       </div>
                       <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Professional Bio <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">Professional Bio <span class="text-red-500">*</span></label>
                         <textarea id="editDescription" required rows="4"
-                          class="w-full border border-gray-300 rounded-lg px-3 py-2 resize-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-xs"></textarea>
-                        <p class="text-xs text-red-500 hidden mt-1" id="descError">Professional bio is required</p>
+                          class="form-input-premium w-full border border-gray-300 rounded-lg px-4 py-2.5 resize-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-sm" placeholder="Enter your professional bio..."></textarea>
+                        <p class="text-xs text-red-500 hidden mt-1.5" id="descError">Professional bio must be letters/numbers only</p>
                       </div>
                     </div>
                   </div>
@@ -384,12 +617,12 @@
                   <!-- Form Actions -->
                   <div class="flex gap-3 pt-6 border-t border-gray-100">
                     <button type="submit"
-                      class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-90 transition flex items-center gap-2">
+                      class="btn-primary-premium text-white px-6 py-2.5 rounded-lg text-sm font-semibold shadow-md hover:opacity-95 transition flex items-center gap-2">
                       <i data-lucide="save" class="w-4 h-4"></i> Save Profile
                     </button>
                     <button type="button" id="resetBtn"
-                      class="border border-gray-300 bg-white text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
-                      Reset
+                      class="border border-gray-300 bg-white text-gray-700 px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-50 transition flex items-center gap-2">
+                      <i data-lucide="refresh-cw" class="w-4 h-4"></i> Reset
                     </button>
                   </div>
                 </form>
@@ -397,42 +630,43 @@
               </div>
 
               <!-- PROFILE SUMMARY SIDEBAR (1 column) -->
-              <div class="lg:col-span-1 space-y-4">
+              <div class="lg:col-span-1 space-y-6">
                 <!-- Profile Card -->
-                <div class="bg-white rounded-md card-shadow p-4">
-                  <div class="flex flex-col items-center">
-                    <div class="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-teal-600 flex items-center justify-center text-white font-bold text-2xl mb-3" id="userInitialsLarge">
+                <div class="premium-card rounded-xl p-6">
+                  <div class="flex flex-col items-center text-center">
+                    <div class="profile-avatar-premium h-20 w-20 rounded-full flex items-center justify-center text-white font-bold text-3xl mb-4 flex-shrink-0" id="userInitialsLarge">
                       -
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-800 text-center" id="profileName">Loading...</h3>
-                    <p class="text-sm text-gray-500 text-center mt-1" id="profileEmail">-</p>
+                    <h3 class="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent" id="profileName">Loading...</h3>
+                    <p class="text-sm text-gray-500 mt-1" id="profileEmail">-</p>
                   </div>
-                  <div class="border-t border-gray-100 mt-3 pt-3 space-y-3 text-sm">
-                    <div class="flex justify-between">
-                      <span class="text-gray-600">Phone</span>
-                      <span class="text-gray-800 font-medium" id="sidebarPhone">-</span>
+                  <div class="border-t border-gray-100 mt-4 pt-4 space-y-0">
+                    <div class="info-row-premium">
+                      <span class="text-gray-600 text-sm font-medium">Phone</span>
+                      <span class="text-gray-900 font-semibold text-sm" id="sidebarPhone">-</span>
                     </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-600">Specialization</span>
-                      <span class="text-gray-800 font-medium" id="sidebarSpec">-</span>
+                    <div class="info-row-premium">
+                      <span class="text-gray-600 text-sm font-medium">Specialization</span>
+                      <span class="text-gray-900 font-semibold text-sm" id="sidebarSpec">-</span>
                     </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-600">Experience</span>
-                      <span class="text-gray-800 font-medium" id="sidebarExp">-</span>
+                    <div class="info-row-premium">
+                      <span class="text-gray-600 text-sm font-medium">Experience</span>
+                      <span class="text-gray-900 font-semibold text-sm" id="sidebarExp">-</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- Account Details -->
-                <div class="bg-white rounded-md card-shadow p-4">
-                  <div class="text-sm text-gray-600 space-y-3">
-                    <div class="flex justify-between items-center">
-                      <span>Last Updated</span>
-                      <span id="accountLastUpdated" class="text-gray-800 font-medium">Today</span>
+                <div class="premium-card rounded-xl p-6">
+                  <h4 class="section-title-premium text-gray-800 mb-4">Account Summary</h4>
+                  <div class="space-y-0">
+                    <div class="info-row-premium">
+                      <span class="text-gray-600 text-sm font-medium">Last Updated</span>
+                      <span id="accountLastUpdated" class="text-gray-900 font-semibold text-sm">Today</span>
                     </div>
-                    <div class="flex justify-between items-center">
-                      <span>Verified Fields</span>
-                      <span id="accountVerifiedFields" class="text-gray-800 font-medium">9/9</span>
+                    <div class="info-row-premium">
+                      <span class="text-gray-600 text-sm font-medium">Verified Fields</span>
+                      <span id="accountVerifiedFields" class="text-gray-900 font-semibold text-sm">9/9</span>
                     </div>
                   </div>
                 </div>

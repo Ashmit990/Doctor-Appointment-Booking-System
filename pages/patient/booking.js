@@ -663,7 +663,10 @@ bookingForm.addEventListener("submit", async (e) => {
       credentials: "include",
     }).then((r) => r.json());
     if (me.status === "success" && me.data) {
-      document.getElementById("patientName").value = me.data.full_name || "";
+      const nameField = document.getElementById("patientName");
+      nameField.value = me.data.full_name || "";
+      nameField.readOnly = true;
+      nameField.style.cssText += "background:#f8fafc;cursor:default;color:#475569;";
     }
     await loadDoctors();
     updatePrice();

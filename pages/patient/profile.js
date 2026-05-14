@@ -52,7 +52,7 @@ function attachEventListeners() {
     ageInput.addEventListener("input", () => {
       const age = parseInt(ageInput.value.trim(), 10);
       const dobField = document.getElementById("editDob");
-      if (dobField && !isNaN(age) && age >= 0 && age <= 150) {
+      if (dobField && !isNaN(age) && age >= 1 && age <= 80) {
         const birthYear = new Date().getFullYear() - age;
         dobField.value = `${birthYear}-01-01`;
       } else if (dobField) {
@@ -319,8 +319,8 @@ function validateForm() {
   } else {
     const ageNum = parseInt(age, 10);
     console.log("Age parsed to number:", ageNum);
-    if (isNaN(ageNum) || ageNum < 0 || ageNum > 150) {
-      setFieldError("editAge", "ageError", "Age must be between 0 and 150", true);
+    if (isNaN(ageNum) || ageNum < 1 || ageNum > 80) {
+      setFieldError("editAge", "ageError", "Age must be between 1 and 80", true);
       isValid = false;
     } else {
       // Clear age error if validation passes
@@ -359,6 +359,9 @@ function validateForm() {
   const emergencyName = getEditFieldValue("editEmergencyName");
   if (!emergencyName) {
     setFieldError("editEmergencyName", "emergencyNameError", "Emergency contact name is required", true);
+    isValid = false;
+  } else if (!/^[a-zA-Z\s]+$/.test(emergencyName)) {
+    setFieldError("editEmergencyName", "emergencyNameError", "Name must contain letters only", true);
     isValid = false;
   }
 

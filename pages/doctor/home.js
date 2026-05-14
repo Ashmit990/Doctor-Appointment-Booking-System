@@ -101,7 +101,7 @@ function renderDoctorNotificationList(rows) {
 
 function getStatusBadgeClass(status) {
     switch(status) {
-        case 'Completed': return 'bg-green-100 text-green-800';
+        case 'Completed': return 'bg-[#007E85]/15 text-[#007E85]';
         case 'Missed': return 'bg-red-100 text-red-800';
         case 'Cancelled': return 'bg-gray-100 text-gray-800';
         case 'Upcoming': return 'bg-blue-100 text-blue-800';
@@ -185,117 +185,117 @@ function renderCalendar() {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const daysInPrevMonth = new Date(year, month, 0).getDate();
     
-    // Fetch both availability dates and completed appointments
-    Promise.all([fetchAppointmentDates(), fetchCompletedAppointments()]).then(([appointmentDates, completedData]) => {
-        daysContainer.innerHTML = '';
-        
-        // Create a Set of dates for this month only for faster lookup
-        const targetYear = year;
-        const targetMonth = month + 1;
-        
-        const appointmentDatesThisMonth = new Set();
-        const completedDatesThisMonth = new Set();
-        
-        // Process appointment dates (red dots for both upcoming and completed)
-        appointmentDates.forEach(dateStr => {
-            const parts = dateStr.trim().split('-');
-            if (parts.length === 3) {
-                const dateYear = parseInt(parts[0]);
-                const dateMonth = parseInt(parts[1]);
-                const dateDay = parseInt(parts[2]);
+    // Fetch appointment dates with completion status
+    fetch('../../api/doctor/appointment_dates_completion_status.php?t=' + new Date().getTime())
+        .then(response => response.json())
+        .then(result => {
+            daysContainer.innerHTML = '';
+            
+            // Create Sets for this month only for faster lookup
+            const targetYear = year;
+            const targetMonth = month + 1;
+            
+            const allCompletedDatesThisMonth = new Set();
+            const hasPendingDatesThisMonth = new Set();
+            
+            // Process all_completed dates
+            if (result.status === 'success' && result.data && Array.isArray(result.data.all_completed)) {
+                result.data.all_completed.forEach(dateStr => {
+                    const parts = dateStr.trim().split('-');
+                    if (parts.length === 3) {
+                        const dateYear = parseInt(parts[0]);
+                        const dateMonth = parseInt(parts[1]);
+                        const dateDay = parseInt(parts[2]);
+                        
+                        if (dateYear === targetYear && dateMonth === targetMonth) {
+                            allCompletedDatesThisMonth.add(dateDay);
+                        }
+                    }
+                });
+            }
+            
+            // Process has_pending dates (dates with any pending appointments)
+            if (result.status === 'success' && result.data && Array.isArray(result.data.has_pending)) {
+                result.data.has_pending.forEach(dateStr => {
+                    const parts = dateStr.trim().split('-');
+                    if (parts.length === 3) {
+                        const dateYear = parseInt(parts[0]);
+                        const dateMonth = parseInt(parts[1]);
+                        const dateDay = parseInt(parts[2]);
+                        
+                        if (dateYear === targetYear && dateMonth === targetMonth) {
+                            hasPendingDatesThisMonth.add(dateDay);
+                        }
+                    }
+                });
+            }
+            
+            // Previous month's days
+            let prevMonthDayCounter = daysInPrevMonth - firstDay + 1;
+            for (let i = 0; i < firstDay; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day text-center p-2 rounded-md text-gray-400';
+                dayDiv.textContent = prevMonthDayCounter;
+                daysContainer.appendChild(dayDiv);
+                prevMonthDayCounter++;
+            }
+            
+            // Get today's date for comparison
+            const todayObj = new Date();
+            const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
+            
+            // Current month's days
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day-premium text-center p-2 rounded-md cursor-pointer transition text-gray-900 font-medium';
+                dayDiv.textContent = i;
                 
-                if (dateYear === targetYear && dateMonth === targetMonth) {
-                    appointmentDatesThisMonth.add(dateDay);
+                // Mark dates where ALL appointments are completed with checkmark
+                if (allCompletedDatesThisMonth.has(i)) {
+                    dayDiv.classList.add('has-completed');
+                } 
+                // Mark dates with any pending appointments with red dot
+                else if (hasPendingDatesThisMonth.has(i)) {
+                    dayDiv.classList.add('has-appointment');
                 }
+                
+                // Define date string for current day
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                
+                // Style dates based on selection and today
+                if (dateStr === todayStr) {
+                    // Highlight today's date (Teal gradient)
+                    dayDiv.classList.add('selected');
+                    dayDiv.style.backgroundColor = '#007E85';
+                    dayDiv.style.color = 'white';
+                    dayDiv.style.fontWeight = 'bold';
+                } else if (dateStr === currentSelectedDateStr) {
+                    // Highlight selected date (Teal with white text)
+                    dayDiv.classList.add('selected');
+                    dayDiv.style.backgroundColor = '#0a9db5';
+                    dayDiv.style.color = 'white';
+                    dayDiv.style.fontWeight = 'bold';
+                    dayDiv.style.boxShadow = '0 4px 12px rgba(0, 126, 133, 0.25)';
+                } else if (dateStr < todayStr) {
+                    // Past dates in gray
+                    dayDiv.style.color = '#d1d5db';
+                }
+                
+                dayDiv.onclick = () => loadAppointmentsForDate(dateStr);
+                
+                daysContainer.appendChild(dayDiv);
+            }
+            
+            // Next month's days
+            const totalCells = daysContainer.children.length;
+            const remainingCells = 42 - totalCells;
+            for (let i = 1; i <= remainingCells; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day text-center p-2 rounded-md text-gray-400';
+                dayDiv.textContent = i;
+                daysContainer.appendChild(dayDiv);
             }
         });
-        
-        // Process completed appointments (green checkmarks)
-        // Be defensive: completedData.dates may be undefined or not an array
-        const completedDatesList = Array.isArray(completedData && completedData.dates)
-            ? completedData.dates
-            : (Array.isArray(completedData) ? completedData : []);
-
-        completedDatesList.forEach(dateStr => {
-            if (!dateStr || typeof dateStr !== 'string') return;
-            const parts = dateStr.trim().split('-');
-            if (parts.length === 3) {
-                const dateYear = parseInt(parts[0]);
-                const dateMonth = parseInt(parts[1]);
-                const dateDay = parseInt(parts[2]);
-
-                if (dateYear === targetYear && dateMonth === targetMonth) {
-                    completedDatesThisMonth.add(dateDay);
-                }
-            }
-        });
-        
-        // Previous month's days
-        let prevMonthDayCounter = daysInPrevMonth - firstDay + 1;
-        for (let i = 0; i < firstDay; i++) {
-            const dayDiv = document.createElement('div');
-            dayDiv.className = 'calendar-day text-center p-2 rounded-md text-gray-400';
-            dayDiv.textContent = prevMonthDayCounter;
-            daysContainer.appendChild(dayDiv);
-            prevMonthDayCounter++;
-        }
-        
-        // Get today's date for comparison
-        const todayObj = new Date();
-        const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
-        
-        // Current month's days
-        for (let i = 1; i <= daysInMonth; i++) {
-            const dayDiv = document.createElement('div');
-            dayDiv.className = 'calendar-day-premium text-center p-2 rounded-md cursor-pointer transition text-gray-900 font-medium';
-            dayDiv.textContent = i;
-            
-            // Mark dates with completed appointments with checkmark
-            if (completedDatesThisMonth.has(i)) {
-                dayDiv.classList.add('has-completed');
-            } 
-            // Mark dates with upcoming appointments with red dot
-            else if (appointmentDatesThisMonth.has(i)) {
-                dayDiv.classList.add('has-appointment');
-            }
-            
-            // Define date string for current day
-            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-            
-            // Style dates based on selection and today
-            if (dateStr === todayStr) {
-                // Highlight today's date (Teal gradient)
-                dayDiv.classList.add('selected');
-                dayDiv.style.backgroundColor = '#0d7377';
-                dayDiv.style.color = 'white';
-                dayDiv.style.fontWeight = 'bold';
-            } else if (dateStr === currentSelectedDateStr) {
-                // Highlight selected date (Teal with white text)
-                dayDiv.classList.add('selected');
-                dayDiv.style.backgroundColor = '#0a9db5';
-                dayDiv.style.color = 'white';
-                dayDiv.style.fontWeight = 'bold';
-                dayDiv.style.boxShadow = '0 4px 12px rgba(13, 115, 119, 0.25)';
-            } else if (dateStr < todayStr) {
-                // Past dates in gray
-                dayDiv.style.color = '#d1d5db';
-            }
-            
-            dayDiv.onclick = () => loadAppointmentsForDate(dateStr);
-            
-            daysContainer.appendChild(dayDiv);
-        }
-        
-        // Next month's days
-        const totalCells = daysContainer.children.length;
-        const remainingCells = 42 - totalCells;
-        for (let i = 1; i <= remainingCells; i++) {
-            const dayDiv = document.createElement('div');
-            dayDiv.className = 'calendar-day text-center p-2 rounded-md text-gray-400';
-            dayDiv.textContent = i;
-            daysContainer.appendChild(dayDiv);
-        }
-    });
 }
 
 let currentSelectedDateStr = new Date().toISOString().split('T')[0];
@@ -316,13 +316,13 @@ async function loadAppointmentsForDate(date, isToday = false) {
     
     if (result.status === 'success' && Array.isArray(result.data) && result.data.length > 0) {
         container.innerHTML = result.data.map(apt => `
-            <div class="appointment-card-premium border border-gray-100/50 rounded-lg p-5 hover:shadow-elevated transition-all duration-300 cursor-pointer group hover:border-[#0d7377]/20" onclick="openAppointmentModal(${apt.apt_id})">
+            <div class="appointment-card-premium border border-gray-100/50 rounded-lg p-5 hover:shadow-elevated transition-all duration-300 cursor-pointer group hover:border-[#007E85]/20" onclick="openAppointmentModal(${apt.apt_id})">
                 <div class="flex justify-between items-start mb-4">
                     <div class="flex-1">
                         <p class="font-bold text-gray-900 text-base leading-tight">${apt.patient_name}</p>
                         <div class="flex items-center gap-2 mt-2">
-                            <div class="p-1.5 bg-[#0d7377]/10 rounded-md">
-                                <i data-lucide="clock" class="w-4 h-4 text-[#0d7377]"></i>
+                            <div class="p-1.5 bg-[#007E85]/10 rounded-md">
+                                <i data-lucide="clock" class="w-4 h-4 text-[#007E85]"></i>
                             </div>
                             <p class="text-sm text-gray-600 font-medium">${apt.appointment_time}</p>
                         </div>
@@ -787,21 +787,21 @@ function renderPendingStatusModal(appointmentsByDate) {
         const dateItem = document.createElement('div');
         dateItem.style.cssText = `
             border: 2px solid #e0f2f1;
-            background: linear-gradient(135deg, rgba(13, 115, 119, 0.05) 0%, rgba(13, 115, 119, 0.02) 100%);
+            background: linear-gradient(135deg, rgba(0, 126, 133, 0.05) 0%, rgba(0, 126, 133, 0.02) 100%);
             border-radius: 12px;
             padding: 16px;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         `;
         dateItem.onmouseover = function() {
-            this.style.borderColor = '#0d7377';
-            this.style.background = 'linear-gradient(135deg, rgba(13, 115, 119, 0.1) 0%, rgba(13, 115, 119, 0.05) 100%)';
+            this.style.borderColor = '#007E85';
+            this.style.background = 'linear-gradient(135deg, rgba(0, 126, 133, 0.1) 0%, rgba(0, 126, 133, 0.05) 100%)';
             this.style.transform = 'translateY(-2px)';
-            this.style.boxShadow = '0 8px 20px rgba(13, 115, 119, 0.15)';
+            this.style.boxShadow = '0 8px 20px rgba(0, 126, 133, 0.15)';
         };
         dateItem.onmouseout = function() {
             this.style.borderColor = '#e0f2f1';
-            this.style.background = 'linear-gradient(135deg, rgba(13, 115, 119, 0.05) 0%, rgba(13, 115, 119, 0.02) 100%)';
+            this.style.background = 'linear-gradient(135deg, rgba(0, 126, 133, 0.05) 0%, rgba(0, 126, 133, 0.02) 100%)';
             this.style.transform = 'translateY(0)';
             this.style.boxShadow = 'none';
         };
@@ -813,7 +813,7 @@ function renderPendingStatusModal(appointmentsByDate) {
         dateItem.innerHTML = `
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #0d7377 0%, #0a5a5d 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; box-shadow: 0 4px 12px rgba(13, 115, 119, 0.2);">
+                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #007E85 0%, #007E85 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; box-shadow: 0 4px 12px rgba(0, 126, 133, 0.2);">
                         <i data-lucide="calendar" class="w-5 h-5"></i>
                     </div>
                     <div>
@@ -821,13 +821,13 @@ function renderPendingStatusModal(appointmentsByDate) {
                         <p style="font-size: 13px; color: #6b7280; margin: 4px 0 0 0;">${appointmentCount} appointment${appointmentCount !== 1 ? 's' : ''} pending</p>
                     </div>
                 </div>
-                <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #0d7377 0%, #0a5a5d 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 13px; box-shadow: 0 4px 12px rgba(13, 115, 119, 0.2);">
+                <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #007E85 0%, #007E85 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 13px; box-shadow: 0 4px 12px rgba(0, 126, 133, 0.2);">
                     ${appointmentCount}
                 </div>
             </div>
             <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0f2f1; font-size: 13px; color: #6b7280;">
                 ${appointments.slice(0, 2).map(apt => `<div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">• ${apt.patient_name} at ${apt.appointment_time}</div>`).join('')}
-                ${appointmentCount > 2 ? `<div style="color: #0d7377; font-weight: 600; margin-top: 4px;">+${appointmentCount - 2} more</div>` : ''}
+                ${appointmentCount > 2 ? `<div style="color: #007E85; font-weight: 600; margin-top: 4px;">+${appointmentCount - 2} more</div>` : ''}
             </div>
         `;
         

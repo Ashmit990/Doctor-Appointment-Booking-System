@@ -1,6 +1,10 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
 
+function has_invalid_consultation_text_chars($value) {
+    return is_string($value) && preg_match('/[^A-Za-z0-9\s]/', $value);
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['status' => 'error', 'message' => 'Method not allowed']);
@@ -20,6 +24,18 @@ $doctor_id = $_SESSION['user_id'] ?? '';
 
 if ($apt_id < 1 || $doctor_id === '') {
     echo json_encode(['status' => 'error', 'message' => 'Valid appointment_id required']);
+    $conn->close();
+    exit;
+}
+
+if (has_invalid_consultation_text_chars($doctor_notes)) {
+    echo json_encode(['status' => 'error', 'message' => "Doctor's notes cannot contain special characters"]);
+    $conn->close();
+    exit;
+}
+
+if (has_invalid_consultation_text_chars($prescriptions)) {
+    echo json_encode(['status' => 'error', 'message' => 'Prescriptions cannot contain special characters']);
     $conn->close();
     exit;
 }

@@ -1,9 +1,17 @@
 <?php
+session_start();
 require_once '../config/db.php';
+require_once '../includes/csrf_protection.php';
 
 header('Content-Type: application/json');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // CSRF Token Validation
+    if (!CSRFProtection::validateToken()) {
+        echo json_encode(['success' => false, 'message' => 'Security token validation failed. Please try again.']);
+        exit;
+    }
+
     $full_name    = trim($_POST['full_name'] ?? '');
     $email        = strtolower(trim($_POST['email'] ?? ''));
     $phone        = trim($_POST['phone'] ?? '');

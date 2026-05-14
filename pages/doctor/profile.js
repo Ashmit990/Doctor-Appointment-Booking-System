@@ -7,6 +7,29 @@ let editMode;
 let doctorProfile = {};
 
 const API_BASE = '../../api';
+const PHONE_10_DIGIT_REGEX = /^\d{10}$/;
+const ALPHANUMERIC_NO_SPACE_REGEX = /^[A-Za-z0-9]+$/;
+const ALPHANUMERIC_WITH_SPACE_REGEX = /^[A-Za-z0-9 ]+$/;
+
+function normalizePhoneNumber(phone) {
+  return (phone || '').replace(/\D/g, '').slice(0, 10);
+}
+
+function normalizeExperienceValue(value) {
+  return (value || '').replace(/\D/g, '');
+}
+
+function normalizeAlphaNumericNoSpace(value) {
+  return (value || '').replace(/[^A-Za-z0-9]/g, '');
+}
+
+function normalizeAlphaNumericWithSpace(value) {
+  return (value || '').replace(/[^A-Za-z0-9 ]/g, '').replace(/\s+/g, ' ').trimStart();
+}
+
+function normalizeEmailValue(value) {
+  return (value || '').replace(/[^A-Za-z0-9.@]/g, '').toLowerCase();
+}
 
 function initializeElements() {
   profileForm = document.getElementById("profileForm");
@@ -44,6 +67,44 @@ function attachEventListeners() {
     e.preventDefault();
     saveProfile();
   });
+
+  const phoneInput = document.getElementById("editPhone");
+  if (phoneInput) {
+    phoneInput.addEventListener("input", () => {
+      phoneInput.value = normalizePhoneNumber(phoneInput.value);
+    });
+  }
+
+  const experienceInput = document.getElementById("editExperience");
+  if (experienceInput) {
+    experienceInput.addEventListener("input", () => {
+      experienceInput.value = normalizeExperienceValue(experienceInput.value);
+    });
+  }
+
+  ["editMedicalId"].forEach((id) => {
+    const field = document.getElementById(id);
+    if (!field) return;
+    field.addEventListener("input", () => {
+      field.value = normalizeAlphaNumericNoSpace(field.value);
+    });
+  });
+
+  ["editName", "editSpecialization", "editQualification", "editDescription"].forEach((id) => {
+    const field = document.getElementById(id);
+    if (!field) return;
+    field.addEventListener("input", () => {
+      field.value = normalizeAlphaNumericWithSpace(field.value);
+    });
+  });
+
+  const emailInput = document.getElementById("editEmail");
+  if (emailInput) {
+    emailInput.addEventListener("input", () => {
+      emailInput.value = normalizeEmailValue(emailInput.value);
+    });
+  }
+
   resetBtn.addEventListener("click", () => {
     fillEditForm();
   });
@@ -86,15 +147,15 @@ function toggleEditMode(isEdit) {
 }
 
 function fillEditForm() {
-  setEditFieldValue("editMedicalId", doctorProfile.medical_id);
-  setEditFieldValue("editName", doctorProfile.full_name);
-  setEditFieldValue("editEmail", doctorProfile.email);
-  setEditFieldValue("editPhone", doctorProfile.phone);
+  setEditFieldValue("editMedicalId", normalizeAlphaNumericNoSpace(doctorProfile.medical_id));
+  setEditFieldValue("editName", normalizeAlphaNumericWithSpace(doctorProfile.full_name));
+  setEditFieldValue("editEmail", normalizeEmailValue(doctorProfile.email));
+  setEditFieldValue("editPhone", normalizePhoneNumber(doctorProfile.phone));
   setEditFieldValue("editAge", doctorProfile.age);
-  setEditFieldValue("editSpecialization", doctorProfile.specialization);
-  setEditFieldValue("editExperience", doctorProfile.experience);
-  setEditFieldValue("editQualification", doctorProfile.qualification);
-  setEditFieldValue("editDescription", doctorProfile.description);
+  setEditFieldValue("editSpecialization", normalizeAlphaNumericWithSpace(doctorProfile.specialization));
+  setEditFieldValue("editExperience", normalizeExperienceValue(String(doctorProfile.experience || "")));
+  setEditFieldValue("editQualification", normalizeAlphaNumericWithSpace(doctorProfile.qualification));
+  setEditFieldValue("editDescription", normalizeAlphaNumericWithSpace(doctorProfile.description));
 }
 
 function updateViewMode() {
@@ -190,9 +251,15 @@ function isValidEmail(email) {
 }
 
 function isValidPhone(phone) {
-  if (!phone) return false;
-  const phoneDigits = phone.replace(/[\s\(\)\+-]/g, "");
-  return phoneDigits.length >= 8 && /^\d+$/.test(phoneDigits);
+  return PHONE_10_DIGIT_REGEX.test(normalizePhoneNumber(phone));
+}
+
+function isAlphaNumericNoSpace(value) {
+  return ALPHANUMERIC_NO_SPACE_REGEX.test(value || '');
+}
+
+function isAlphaNumericWithSpace(value) {
+  return ALPHANUMERIC_WITH_SPACE_REGEX.test(value || '');
 }
 
 function clearValidationErrors() {
@@ -239,6 +306,9 @@ function validateForm() {
   } else if (medicalId.length < 4) {
     setFieldError("editMedicalId", "medicalIdError", "Medical ID must be at least 4 characters", true);
     isValid = false;
+  } else if (!isAlphaNumericNoSpace(medicalId)) {
+    setFieldError("editMedicalId", "medicalIdError", "Medical ID must be letters/numbers only, no spaces", true);
+    isValid = false;
   }
 
   // Validate Full Name
@@ -249,6 +319,9 @@ function validateForm() {
   } else if (name.length < 2) {
     setFieldError("editName", "nameError", "Name must be at least 2 characters", true);
     isValid = false;
+  } else if (!isAlphaNumericWithSpace(name)) {
+    setFieldError("editName", "nameError", "Name must be letters/numbers only", true);
+    isValid = false;
   }
 
   // Validate Email
@@ -257,7 +330,10 @@ function validateForm() {
     setFieldError("editEmail", "emailError", "Email is required", true);
     isValid = false;
   } else if (!isValidEmail(email)) {
-    setFieldError("editEmail", "emailError", "Please enter a valid email address", true);
+    setFieldError("editEmail", "emailError", "Use only letters, numbers, dot and @ in the email", true);
+    isValid = false;
+  } else if (/[^A-Za-z0-9.@]/.test(email)) {
+    setFieldError("editEmail", "emailError", "Email can contain only letters, numbers, dot and @", true);
     isValid = false;
   }
 
@@ -267,7 +343,7 @@ function validateForm() {
     setFieldError("editPhone", "phoneError", "Phone number is required", true);
     isValid = false;
   } else if (!isValidPhone(phone)) {
-    setFieldError("editPhone", "phoneError", "Valid phone number required (min 8 digits)", true);
+    setFieldError("editPhone", "phoneError", "Mobile number must be exactly 10 digits", true);
     isValid = false;
   }
 
@@ -289,12 +365,18 @@ function validateForm() {
   if (!spec) {
     setFieldError("editSpecialization", "specError", "Specialization is required", true);
     isValid = false;
+  } else if (!isAlphaNumericWithSpace(spec)) {
+    setFieldError("editSpecialization", "specError", "Specialization must be letters/numbers only", true);
+    isValid = false;
   }
 
   // Validate Experience
   const exp = getEditFieldValue("editExperience");
   if (!exp) {
     setFieldError("editExperience", "expError", "Experience is required", true);
+    isValid = false;
+  } else if (!/^\d+$/.test(exp)) {
+    setFieldError("editExperience", "expError", "Experience must be a number only", true);
     isValid = false;
   }
 
@@ -303,6 +385,9 @@ function validateForm() {
   if (!qual) {
     setFieldError("editQualification", "qualError", "Qualification is required", true);
     isValid = false;
+  } else if (!isAlphaNumericWithSpace(qual)) {
+    setFieldError("editQualification", "qualError", "Qualification must be letters/numbers only", true);
+    isValid = false;
   }
 
   // Validate Description (Bio)
@@ -310,12 +395,12 @@ function validateForm() {
   if (!desc) {
     setFieldError("editDescription", "descError", "Professional bio is required", true);
     isValid = false;
-  } else {
-    const wordCount = desc.trim().split(/\s+/).length;
-    if (wordCount < 15) {
-      setFieldError("editDescription", "descError", "Professional bio must contain at least 15 words (2-3 sentences)", true);
-      isValid = false;
-    }
+  } else if (!isAlphaNumericWithSpace(desc)) {
+    setFieldError("editDescription", "descError", "Professional bio must be letters/numbers only", true);
+    isValid = false;
+  } else if (desc.length < 15) {
+    setFieldError("editDescription", "descError", "Professional bio must be at least 15 characters", true);
+    isValid = false;
   }
 
   return isValid;
@@ -426,15 +511,15 @@ async function saveProfile() {
   }
 
   const payload = {
-    medical_id: getEditFieldValue("editMedicalId"),
-    full_name: getEditFieldValue("editName"),
-    email: getEditFieldValue("editEmail"),
-    specialization: getEditFieldValue("editSpecialization"),
-    phone: getEditFieldValue("editPhone"),
-    experience: getEditFieldValue("editExperience"),
+    medical_id: normalizeAlphaNumericNoSpace(getEditFieldValue("editMedicalId")),
+    full_name: normalizeAlphaNumericWithSpace(getEditFieldValue("editName")),
+    email: normalizeEmailValue(getEditFieldValue("editEmail")),
+    specialization: normalizeAlphaNumericWithSpace(getEditFieldValue("editSpecialization")),
+    phone: normalizePhoneNumber(getEditFieldValue("editPhone")),
+    experience: normalizeExperienceValue(getEditFieldValue("editExperience")),
     age: getEditFieldValue("editAge") ? parseInt(getEditFieldValue("editAge")) : null,
-    qualification: getEditFieldValue("editQualification"),
-    description: getEditFieldValue("editDescription")
+    qualification: normalizeAlphaNumericWithSpace(getEditFieldValue("editQualification")),
+    description: normalizeAlphaNumericWithSpace(getEditFieldValue("editDescription"))
   };
 
   try {
@@ -463,7 +548,7 @@ async function saveProfile() {
 function showSuccessToast() {
   const toast = document.createElement("div");
   toast.className =
-    "fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg z-50 toast-message";
+    "fixed bottom-4 right-4 bg-[#007E85]/100 text-white px-6 py-3 rounded-xl shadow-lg z-50 toast-message";
   toast.textContent = "Profile updated successfully!";
   document.body.appendChild(toast);
   

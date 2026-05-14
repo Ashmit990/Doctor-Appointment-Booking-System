@@ -101,7 +101,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     $inserted_times[] = $time_key;
                     
-                    $stmt->bind_param("ssss", $user_id, $target_date, $time_slot['start_time'], $time_slot['end_time']);
+                    // Extract to variables - bind_param requires actual variables, not array elements
+                    $start_time = $time_slot['start_time'];
+                    $end_time = $time_slot['end_time'];
+                    
+                    $stmt->bind_param("ssss", $user_id, $target_date, $start_time, $end_time);
                     if ($stmt->execute()) {
                         $inserted_count++;
                     } else {

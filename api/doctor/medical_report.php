@@ -4,6 +4,112 @@ require_once '../config/db.php';
 
 header('Content-Type: application/json');
 
+function has_invalid_medical_report_text_chars($value) {
+    return is_string($value) && preg_match('/[^A-Za-z0-9\s]/', $value);
+}
+
+function has_invalid_blood_pressure_chars($value) {
+    return is_string($value) && $value !== '' && preg_match('/[^0-9\/]/', $value);
+}
+
+function reject_invalid_medical_report_text_chars($label, $value) {
+    if (has_invalid_medical_report_text_chars($value)) {
+        echo json_encode(['status' => 'error', 'message' => $label . ' cannot contain special characters.']);
+        exit;
+    }
+}
+
+function reject_invalid_blood_pressure_chars($value) {
+    if (has_invalid_blood_pressure_chars($value)) {
+        echo json_encode(['status' => 'error', 'message' => 'Blood pressure can contain only digits and /.']);
+        exit;
+    }
+}
+
+function validate_blood_pressure_format($value) {
+    if ($value === '') {
+        return true; // Optional field
+    }
+    
+    // Check format: must be num/num
+    if (!preg_match('/^\d+\/\d+$/', $value)) {
+        echo json_encode(['status' => 'error', 'message' => 'Blood pressure format must be num/num (e.g., 120/80). No other format accepted.']);
+        exit;
+    }
+    
+    // Extract systolic and diastolic values
+    list($systolic, $diastolic) = explode('/', $value);
+    $systolic = (int)$systolic;
+    $diastolic = (int)$diastolic;
+    
+    // Validate systolic range (typical range: 40-300)
+    if ($systolic < 40 || $systolic > 300) {
+        echo json_encode(['status' => 'error', 'message' => 'Systolic blood pressure must be between 40-300 mmHg.']);
+        exit;
+    }
+    
+    // Validate diastolic range (typical range: 30-200)
+    if ($diastolic < 30 || $diastolic > 200) {
+        echo json_encode(['status' => 'error', 'message' => 'Diastolic blood pressure must be between 30-200 mmHg.']);
+        exit;
+    }
+    
+    return true;
+}
+
+function validate_weight($value) {
+    if ($value === null || $value === '') {
+        return true; // Optional field
+    }
+    
+    $weight = (float)$value;
+    
+    // Validate weight range (0-200 kg)
+    if ($weight < 0 || $weight > 200) {
+        echo json_encode(['status' => 'error', 'message' => 'Weight must be between 0-200 kg.']);
+        exit;
+    }
+    
+    return true;
+}
+
+function validate_medicine_dosage($value) {
+    if ($value === null || $value === '') {
+        return true; // Optional field
+    }
+    
+    // Extract numeric value from dosage string (e.g., "500mg" -> 500)
+    $dosage_str = trim($value);
+    if (empty($dosage_str)) {
+        return true;
+    }
+    
+    // Check that dosage only contains numbers, letters, m, and g
+    if (!preg_match('/^[0-9a-zA-Zmg.]+$/', $dosage_str)) {
+        echo json_encode(['status' => 'error', 'message' => 'Medicine dosage can only contain numbers, letters, m, and g.']);
+        exit;
+    }
+    
+    // Check that dosage contains at least one number
+    if (!preg_match('/\d/', $dosage_str)) {
+        echo json_encode(['status' => 'error', 'message' => 'Medicine dosage must contain numbers (e.g., 500mg).']);
+        exit;
+    }
+    
+    // Try to parse the numeric part
+    if (preg_match('/^([\d.]+)/', $dosage_str, $matches)) {
+        $dosage_num = (float)$matches[1];
+        
+        // Validate dosage range (0.1 - 500 mg)
+        if ($dosage_num < 0.1 || $dosage_num > 500) {
+            echo json_encode(['status' => 'error', 'message' => 'Medicine dosage must be between 0.1 and 500 mg.']);
+            exit;
+        }
+    }
+    
+    return true;
+}
+
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['status' => 'error', 'message' => 'Not authorized']);
     exit;
@@ -17,17 +123,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data = json_decode(file_get_contents('php://input'), true);
         
         $appointment_id = isset($data['appointment_id']) ? (int)$data['appointment_id'] : null;
-        $symptoms = $data['symptoms'] ?? '';
-        $diagnosis = $data['diagnosis'] ?? '';
-        $blood_pressure = $data['blood_pressure'] ?? null;
+        $symptoms = trim($data['symptoms'] ?? '');
+        $diagnosis = trim($data['diagnosis'] ?? '');
+        $blood_pressure = trim($data['blood_pressure'] ?? '');
         $weight = isset($data['weight']) ? (float)$data['weight'] : null;
-        $prescribed_medicines = json_encode($data['prescribed_medicines'] ?? []);
-        $additional_notes = $data['additional_notes'] ?? '';
+        $prescribed_medicines_input = $data['prescribed_medicines'] ?? [];
+        $additional_notes = trim($data['additional_notes'] ?? '');
         
         if (!$appointment_id) {
             echo json_encode(['status' => 'error', 'message' => 'Appointment ID is required']);
             exit;
         }
+
+        if ($symptoms === '') {
+            echo json_encode(['status' => 'error', 'message' => 'Symptoms are required']);
+            exit;
+        }
+
+        if ($diagnosis === '') {
+            echo json_encode(['status' => 'error', 'message' => 'Diagnosis is required']);
+            exit;
+        }
+
+        reject_invalid_medical_report_text_chars('Symptoms', $symptoms);
+        reject_invalid_medical_report_text_chars('Diagnosis', $diagnosis);
+        reject_invalid_medical_report_text_chars('Additional notes', $additional_notes);
+        reject_invalid_blood_pressure_chars($blood_pressure);
+        validate_blood_pressure_format($blood_pressure);
+        validate_weight($weight);
+
+        if (!is_array($prescribed_medicines_input)) {
+            echo json_encode(['status' => 'error', 'message' => 'Prescribed medicines must be an array']);
+            exit;
+        }
+
+        $clean_prescribed_medicines = [];
+        foreach ($prescribed_medicines_input as $index => $medicine) {
+            $medicine_name = trim($medicine['name'] ?? '');
+            $medicine_dosage = trim($medicine['dosage'] ?? '');
+            $medicine_frequency = trim($medicine['frequency'] ?? '');
+
+            if ($medicine_name === '') {
+                continue;
+            }
+
+            reject_invalid_medical_report_text_chars('Medicine name', $medicine_name);
+            reject_invalid_medical_report_text_chars('Medicine dosage', $medicine_dosage);
+            reject_invalid_medical_report_text_chars('Medicine frequency', $medicine_frequency);
+            validate_medicine_dosage($medicine_dosage);
+
+            $clean_prescribed_medicines[] = [
+                'name' => $medicine_name,
+                'dosage' => $medicine_dosage,
+                'frequency' => $medicine_frequency,
+            ];
+        }
+
+        $prescribed_medicines = json_encode($clean_prescribed_medicines);
         
         // First, verify the appointment belongs to this doctor and get patient_id
         $verify_stmt = $conn->prepare("
