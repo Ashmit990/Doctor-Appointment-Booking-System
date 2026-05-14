@@ -12,208 +12,185 @@
     <link rel="stylesheet" href="booking.css" />
     <style>
       /* PREMIUM PATIENT THEME START */
-      html {
-        font-size: clamp(15px, 1vw, 17px);
+      html { font-size: clamp(15px, 1vw, 17px); }
+      * { font-family: "Poppins", sans-serif; transition: color .18s ease, background-color .18s ease, transform .18s ease; }
+      body { background: transparent; } /* Prevent iframe scrolling, handled by parent */
+      
+      /* Input Field Premium Styling */
+      input, select, textarea {
+        transition: all 0.2s ease;
+        border: 1px solid rgba(203, 213, 225, 0.6);
+        background: rgba(255, 255, 255, 0.8);
       }
-      * {
-        font-family: "Poppins", sans-serif;
-        transition:
-          color 0.18s ease,
-          background-color 0.18s ease,
-          transform 0.18s ease;
+      input:focus, select:focus, textarea:focus {
+        border-color: #007E85;
+        box-shadow: inset 0 0 0 1px rgba(0, 126, 133, 0.2), 0 0 0 3px rgba(0, 126, 133, 0.1);
+        background-color: rgba(255, 255, 255, 1);
+        outline: none;
       }
-      main {
-        overflow-y: auto;
-        overflow-x: hidden;
-        transition:
-          transform 0.25s ease,
-          opacity 0.25s ease;
+      
+      /* Button Premium Styling */
+      .btn-primary {
+        background: linear-gradient(135deg, #007E85 0%, #00556B 100%);
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
-      .primary-color {
-        color: #0d7377;
-      }
-      .bg-primary {
-        background: linear-gradient(135deg, #0d7377 0%, #0a5a5d 100%);
-      }
-      .bg-primary-light {
-        background-color: rgba(13, 115, 119, 0.08);
-      }
-      .card-shadow {
-        box-shadow:
-          0 20px 50px rgba(0, 0, 0, 0.08),
-          0 1px 3px rgba(0, 0, 0, 0.06);
-      }
-      .sidebar {
-        background: linear-gradient(180deg, #0d7377 0%, #0a5a5d 100%);
-        box-shadow: 4px 0 30px rgba(0, 0, 0, 0.15);
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 20px rgba(0, 126, 133, 0.25) !important;
       }
       /* PREMIUM PATIENT THEME END */
     </style>
   </head>
-  <body class="bg-white font-sans">
-    <div class="p-3 md:p-4">
-      <div class="mb-2">
-        <h2 class="text-lg font-semibold text-slate-800">Book Appointment</h2>
-        <p class="text-xs text-slate-500 mt-0.5">
-          Fill in details to schedule a new appointment
-        </p>
+  <body class="bg-transparent font-sans">
+    <div class="w-full p-4 md:p-6 pb-12">
+      <!-- Premium Header -->
+      <div class="bg-gradient-to-r from-[#007E85] to-[#00556B] p-6 md:p-8 text-white relative overflow-hidden rounded-t-[20px] -mt-4 md:-mt-6 -mx-4 md:-mx-6 mb-6">
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] opacity-50"></div>
+        <div class="relative z-10 flex justify-between items-center">
+          <div>
+            <span class="px-3 py-1 bg-white/20 rounded-full text-[10px] md:text-xs font-medium backdrop-blur-sm mb-3 inline-block tracking-wider uppercase">New Appointment</span>
+            <h2 class="text-xl md:text-2xl font-bold tracking-tight">Book a Consultation</h2>
+            <p class="text-xs md:text-sm text-white/80 mt-1">Fill in the details below to schedule your visit.</p>
+          </div>
+          <div class="hidden sm:flex w-14 h-14 bg-white/10 rounded-2xl items-center justify-center backdrop-blur-md border border-white/20 shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          </div>
+        </div>
       </div>
 
-      <form id="bookingForm" class="space-y-2.5">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1.5">
-              Patient Name
-            </label>
-            <input
-              id="patientName"
-              type="text"
-              placeholder="Enter your name"
-              class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#0d7377]"
-              required
-            />
-          </div>
+      <form id="bookingForm" class="space-y-4">
+        
+        <!-- Section: Personal & Doctor -->
+        <div class="p-5 rounded-2xl bg-white border border-gray-100 shadow-sm relative overflow-hidden">
+          <div class="absolute top-0 left-0 w-1 h-full bg-[#007E85]"></div>
+          <h3 class="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#007E85]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            Patient & Doctor Selection
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1.5">Patient Name <span class="text-red-500">*</span></label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </div>
+                <input id="patientName" type="text" placeholder="Enter your full name" class="pl-9 w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#007E85]/30 focus:border-[#007E85] transition-all bg-slate-50 focus:bg-white" required />
+              </div>
+            </div>
 
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1.5">
-              Doctor
-            </label>
-            <select
-              id="doctor"
-              class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#0d7377]"
-              required
-            >
-              <option value="">Loading doctors…</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1.5">
-              Date
-            </label>
-            <select
-              id="date"
-              class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#0d7377]"
-              required
-            >
-              <option value="">Select doctor first</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1.5">
-              Time
-            </label>
-            <select
-              id="time"
-              class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#0d7377]"
-              required
-            >
-              <option value="">Select date first</option>
-            </select>
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1.5">Select Doctor <span class="text-red-500">*</span></label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <select id="doctor" class="pl-9 w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#007E85]/30 focus:border-[#007E85] transition-all bg-slate-50 focus:bg-white appearance-none" required>
+                  <option value="">Loading doctors…</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <input type="hidden" id="availId" value="" />
+        <!-- Section: Schedule -->
+        <div class="p-5 rounded-2xl bg-white border border-gray-100 shadow-sm relative overflow-hidden">
+          <div class="absolute top-0 left-0 w-1 h-full bg-[#007E85]"></div>
+          <h3 class="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#007E85]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            Schedule & Details
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1.5">Appointment Date <span class="text-red-500">*</span></label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+                <select id="date" class="pl-9 w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#007E85]/30 focus:border-[#007E85] transition-all bg-slate-50 focus:bg-white appearance-none" required>
+                  <option value="">Select doctor first</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+              </div>
+            </div>
 
-        <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1.5">
-            Description
-          </label>
-          <textarea
-            id="description"
-            rows="2"
-            placeholder="e.g., follow-up, fever, checkup"
-            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-[#0d7377] resize-none"
-            required
-          ></textarea>
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1.5">Appointment Time <span class="text-red-500">*</span></label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <select id="time" class="pl-9 w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#007E85]/30 focus:border-[#007E85] transition-all bg-slate-50 focus:bg-white appearance-none" required>
+                  <option value="">Select date first</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <input type="hidden" id="availId" value="" />
+
+          <div class="mt-4">
+            <label class="block text-xs font-medium text-slate-700 mb-1.5">Symptoms / Description <span class="text-red-500">*</span></label>
+            <div class="relative">
+              <div class="absolute top-3 left-3 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              </div>
+              <textarea id="description" rows="2" placeholder="e.g., follow-up, fever, checkup" class="pl-9 w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#007E85]/30 focus:border-[#007E85] transition-all bg-slate-50 focus:bg-white resize-none" required></textarea>
+            </div>
+          </div>
         </div>
 
-        <div
-          class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 pt-1.5 border-t border-slate-100 mt-2 pb-1"
-        >
-          <div>
-            <span class="text-xs text-slate-500">Total: </span>
-            <span id="totalPrice" class="text-base font-bold text-[#0d7377]"
-              >—</span
-            >
+        <!-- Checkout Section -->
+        <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-2">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+              <span class="text-xs text-slate-500 block">Total Consultation Fee</span>
+              <span id="totalPrice" class="text-xl font-bold text-gray-900">—</span>
+            </div>
           </div>
-          <div class="flex gap-2 w-full sm:w-auto">
-            <button
-              type="submit"
-              id="confirmBtn"
-              class="bg-[#0d7377] hover:bg-[#0a5a5d] text-white flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-medium transition"
-            >
-              Confirm Booking
+          <div class="w-full sm:w-auto">
+            <button type="submit" id="confirmBtn" class="btn-primary text-white w-full sm:w-auto px-8 py-3 rounded-xl text-sm font-bold shadow-lg shadow-[#007E85]/30 flex items-center justify-center gap-2">
+              Proceed to Book
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </button>
           </div>
         </div>
 
-        <div
-          id="bookingConflictMessage"
-          class="hidden mt-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium leading-6 text-amber-800"
-        ></div>
+        <div id="bookingConflictMessage" class="hidden mt-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium leading-6 text-amber-800 shadow-sm flex items-start gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 mt-0.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <span></span>
+        </div>
       </form>
 
-      <!-- Payment panel removed - replaced by dedicated payment page -->
-
-      <div
-        id="bookingSuccess"
-        class="hidden mt-2 rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2 text-emerald-700 text-xs"
-      >
+      <div id="bookingSuccess" class="hidden mt-4 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-emerald-700 text-sm shadow-sm flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         Appointment booked successfully.
       </div>
     </div>
 
     <!-- Success Modal -->
-    <div
-      id="successModal"
-      class="hidden fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-    >
-      <div
-        class="bg-white rounded-[20px] shadow-lg border border-slate-100 max-w-sm w-full overflow-hidden"
-      >
-        <div
-          class="flex items-center justify-between px-5 py-4 border-b border-slate-100"
-        >
-          <h3 class="text-lg font-semibold text-slate-800">
-            Booking Successful
-          </h3>
-          <button
-            id="closeSuccessModal"
-            class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition"
-          >
-            ✕
-          </button>
-        </div>
-        <div class="p-5">
-          <div class="flex flex-col items-center text-center">
-            <div
-              class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mb-4"
-            >
-              <svg
-                class="w-8 h-8 text-emerald-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M5 13l4 4L19 7"
-                ></path>
-              </svg>
-            </div>
-            <p class="text-base font-semibold text-slate-800 mb-1">
-              Booking Succeed
-            </p>
-            <p class="text-sm text-slate-500">
-              Your appointment has been booked successfully.
-            </p>
+    <div id="successModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-sm w-full overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="successModalPanel">
+        <div class="p-8 text-center relative overflow-hidden">
+          <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-emerald-50 to-white -z-10"></div>
+          <div class="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-5 shadow-inner border-4 border-white">
+            <svg class="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
           </div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-2">Booking Confirmed!</h3>
+          <p class="text-slate-500 text-sm mb-8">Your appointment details have been successfully recorded in the system.</p>
+          <button id="closeSuccessModal" class="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-xl py-3.5 transition shadow-lg shadow-gray-200">
+            View My Dashboard
+          </button>
         </div>
       </div>
     </div>

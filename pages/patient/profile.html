@@ -9,101 +9,356 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    body {
-      background: #f9fafb;
-    }
-    .primary-color {
-      color: #0d7377;
-    }
-    .bg-primary {
-      background-color: #0d7377;
-    }
-    .bg-primary-light {
-      background-color: rgba(13, 115, 119, 0.08);
-    }
-    .card-shadow {
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    }
-    .sidebar {
-      background: #0d7377;
-    }
-    .nav-link {
-      transition: all 0.3s ease;
-      color: white;
-    }
-    .nav-link:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-    .nav-link.active {
-      background-color: rgba(255, 255, 255, 0.3);
-    }
-    .toast-message {
-      animation:
-        slideInRight 0.3s ease,
-        fadeOut 0.3s ease 2.7s forwards;
-    }
-    @keyframes slideInRight {
-      from {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-    @keyframes fadeOut {
-      to {
-        opacity: 0;
-        visibility: hidden;
-      }
-    }
-    input:focus,
-    textarea:focus,
-    select:focus {
-      outline: none;
-      ring: 2px solid #0d7377;
-      border-color: #0d7377;
-    }
-    /* PREMIUM PATIENT THEME START */
-    html { font-size: clamp(15px, 1vw, 17px); }
-    * { font-family: "Poppins", sans-serif; transition: color .18s ease, background-color .18s ease, transform .18s ease; }
-    main { overflow-y: auto; overflow-x: hidden; transition: transform .25s ease, opacity .25s ease; }
-    .primary-color { color: #0d7377; }
-    .bg-primary { background: linear-gradient(135deg,#0d7377 0%,#0a5a5d 100%); }
-    .bg-primary-light { background-color: rgba(13,115,119,0.08); }
-    .card-shadow { box-shadow: 0 20px 50px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06); }
-    .topbar-premium { background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(250,252,253,0.95) 100%); backdrop-filter: blur(10px); border-bottom:1px solid rgba(13,115,119,0.06); }
-    .sidebar { background: linear-gradient(180deg,#0d7377 0%,#0a5a5d 100%); box-shadow:4px 0 30px rgba(0,0,0,0.15); }
-    .nav-link{transition:all .3s; color:white; letter-spacing:0.3px; font-weight:500;}
-    .nav-link:hover{background-color:rgba(255,255,255,0.12); transform:translateX(4px);} 
-    .nav-link.active{background:rgba(255,255,255,0.18); font-weight:600;}
-    
-    /* Premium Card Hover Effects */
-    .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 50px rgba(13, 115, 119, 0.12) !important; }
-    
-    /* Button Premium Styling */
-    .btn-primary {
-      background: linear-gradient(135deg, #0d7377 0%, #0a5a5d 100%);
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 20px rgba(13, 115, 119, 0.25) !important;
-    }
-    
-    /* Input Field Premium Styling */
-    input, select, textarea {
-      transition: all 0.2s ease;
-      border: 1px solid rgba(203, 213, 225, 0.6);
-    }
-    input:focus, select:focus, textarea:focus {
-      border-color: #0d7377;
-      box-shadow: inset 0 0 0 1px rgba(13, 115, 119, 0.2), 0 0 0 3px rgba(13, 115, 119, 0.1);
-      background-color: rgba(13, 115, 119, 0.02);
-    } 
-    /* PREMIUM PATIENT THEME END */
+      /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        #appointment-modal .overflow-y-auto::-webkit-scrollbar {
+            width: 0px;
+            display: none;
+        }
+
+        #appointment-modal .appointment-console-scroll {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        #appointment-modal .appointment-console-scroll::-webkit-scrollbar {
+            width: 0px;
+            height: 0px;
+            display: none;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        * {
+            font-family: 'Poppins', sans-serif;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
+
+        :root {
+            --calendar-selected: #007E85; /* primary selected background */
+            --calendar-selected-foreground: #ffffff; /* selected text color */
+        }
+
+        @keyframes pageFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        body {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        }
+
+        main {
+            animation: pageFadeIn 0.4s ease-out forwards;
+        }
+
+        .primary-color {
+            color: #007E85;
+        }
+
+        .bg-primary {
+            background: linear-gradient(135deg, #007E85 0%, #007E85 100%);
+        }
+
+        .bg-primary-light {
+            background-color: rgba(0, 126, 133, 0.08);
+        }
+
+        .card-shadow {
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-hover:hover {
+            box-shadow: 0 20px 50px rgba(0, 126, 133, 0.12);
+            transform: translateY(-4px);
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, #007E85 0%, #00556B 100%);
+            box-shadow: 8px 0 40px rgba(0, 0, 0, 0.25), inset -1px 0 2px rgba(255, 255, 255, 0.1);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse 100% 80% at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .nav-link {
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            color: rgba(255, 255, 255, 0.9);
+            position: relative;
+            overflow: visible;
+            display: flex;
+            align-items: center;
+            gap: inherit;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -8px;
+            width: 4px;
+            height: 0%;
+            background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0) 100%);
+            transform: translateY(-50%);
+            border-radius: 2px;
+            transition: height 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 1;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 100%);
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            z-index: 0;
+        }
+
+        .nav-link:hover::before {
+            height: 100%;
+        }
+
+        .nav-link:hover::after {
+            opacity: 1;
+        }
+
+        .nav-link:hover {
+            background: linear-gradient(90deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%);
+            color: rgba(255, 255, 255, 1);
+            transform: translateX(4px);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-link i {
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .nav-link:hover i {
+            transform: scale(1.15) rotate(5deg);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
+
+        .nav-link.active {
+            background: linear-gradient(90deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 100%);
+            color: #ffffff;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .nav-link.active::before {
+            height: 100%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.3) 100%);
+        }
+
+        .nav-link.active i {
+            transform: scale(1.2);
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+        }
+
+        .badge {
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-info {
+            background: linear-gradient(135deg, #007E85, #007E85);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 126, 133, 0.3);
+        }
+
+        .badge-success {
+            background: linear-gradient(135deg, #007E85, #007E85);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .badge-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes floatIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        /* Premium Card Enhancements */
+        .premium-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 126, 133, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .premium-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0, 126, 133, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Top Bar Premium */
+        .topbar-premium {
+            background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(250,252,253,0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 126, 133, 0.06);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Elevated Shadow Variations */
+        .shadow-elevated {
+            box-shadow: 
+                0 1px 3px rgba(0, 0, 0, 0.08),
+                0 4px 12px rgba(0, 0, 0, 0.08),
+                0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .shadow-soft {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Button Premium Styling */
+        .btn-primary {
+          background: linear-gradient(135deg, #007E85 0%, #00556B 100%);
+          transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .btn-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 20px rgba(0, 126, 133, 0.25) !important;
+        }
+        
+        /* Input Field Premium Styling */
+        input, select, textarea {
+          transition: all 0.2s ease;
+          border: 1px solid rgba(203, 213, 225, 0.6);
+        }
+        input:focus, select:focus, textarea:focus {
+          border-color: #007E85;
+          box-shadow: inset 0 0 0 1px rgba(0, 126, 133, 0.2), 0 0 0 3px rgba(0, 126, 133, 0.1);
+          background-color: rgba(0, 126, 133, 0.02);
+          outline: none;
+        }
+
+        html { font-size: clamp(15px, 1vw, 17px); }
+        main { overflow-y: auto; overflow-x: hidden; }
+
+        .toast-message {
+            animation:
+                slideInRight 0.3s ease,
+                fadeOut 0.3s ease 2.7s forwards;
+        }
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
   </style>
 </head>
 
@@ -111,55 +366,64 @@
   <div class="flex flex-col md:flex-row h-screen overflow-hidden">
     <!-- SIDEBAR -->
     <aside
-      class="w-full md:w-60 bg-[#0d7377] text-white flex flex-row md:flex-col items-center justify-around md:justify-start py-2 md:py-0 px-2 md:px-0 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] md:shadow-xl fixed bottom-0 md:sticky md:top-0 left-0 h-auto md:h-screen z-[100] overflow-x-auto md:overflow-y-auto">
-
-      <div class="hidden md:flex w-full px-6 py-7 items-center gap-3 border-b border-white/10 shrink-0 mb-2">
-        <img src="../../src/assets/Logo.svg" alt="Logo" class="w-8 h-8">
-        <span class="text-white font-bold text-lg">Healthcare</span>
+      class="sidebar w-full md:w-64 text-white shadow-lg fixed bottom-0 md:top-0 h-auto md:h-full overflow-x-auto md:overflow-y-auto z-[100]">
+      <div
+        class="hidden md:flex items-center gap-3 p-8 border-b border-b-white/10 bg-gradient-to-r from-white/5 to-transparent">
+        <div
+          class="w-12 h-12 bg-gradient-to-br from-white/30 to-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-lg">
+          <img src="../../src/assets/Logo.svg" alt="Healthcare" class="w-7 h-7">
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight">Healthcare</h1>
+          <p class="text-xs text-white/60">Patient Portal</p>
+        </div>
       </div>
 
-      <nav class="flex flex-row md:flex-col justify-around md:justify-start w-full md:flex-1 md:px-3 md:gap-1 md:pb-3">
+      <nav
+        class="p-2 md:p-4 flex flex-row md:flex-col gap-2 md:gap-2 space-y-0 md:space-y-1 justify-around md:justify-start md:flex-1">
         <button onclick="goToHomePage()"
-          class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left"
+          class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-[10px] md:text-sm whitespace-nowrap"
           title="Home">
-          <i data-lucide="house" class="w-6 h-6 md:w-5 md:h-5 shrink-0"></i>
-          <span class="mt-1 md:mt-0 font-medium whitespace-nowrap">Home</span>
+          <i data-lucide="house" class="w-5 h-5 flex-shrink-0"></i>
+          <span class="hidden md:inline">Home</span>
         </button>
 
         <button onclick="goToDashboard()"
-          class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left"
+          class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-[10px] md:text-sm whitespace-nowrap"
           title="My Appointments">
-          <i data-lucide="calendar-days" class="w-6 h-6 md:w-5 md:h-5 shrink-0"></i>
-          <span class="mt-1 md:mt-0 font-medium whitespace-nowrap">Appointments</span>
+          <i data-lucide="calendar-days" class="w-5 h-5 flex-shrink-0"></i>
+          <span class="hidden md:inline">Appointments</span>
         </button>
 
-        <button
-          class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl bg-white/20 text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left"
+        <button onclick="goToProfile()"
+          class="nav-link active flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-[10px] md:text-sm whitespace-nowrap"
           title="Profile">
-          <i data-lucide="user" class="w-6 h-6 md:w-5 md:h-5 text-white shrink-0"></i>
-          <span class="mt-1 md:mt-0 font-medium whitespace-nowrap">Profile</span>
+          <i data-lucide="user" class="w-5 h-5 flex-shrink-0"></i>
+          <span class="hidden md:inline">Profile</span>
         </button>
 
         <div class="hidden md:block mt-auto border-t border-white/10 pt-3"></div>
 
         <button type="button" onclick="logoutPatient()"
-          class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl text-white/65 hover:bg-white/10 hover:text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left md:justify-start"
+          class="flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition-all duration-300 text-red-300 hover:text-red-50 hover:bg-red-500/20 text-[10px] md:text-sm whitespace-nowrap text-left justify-start"
           title="Logout">
-          <i data-lucide="log-out" class="w-6 h-6 md:w-5 md:h-5 shrink-0"></i>
-          <span class="mt-1 md:mt-0 font-medium whitespace-nowrap">Logout</span>
+          <i data-lucide="log-out" class="w-5 h-5 flex-shrink-0"></i>
+          <span class="hidden md:inline">Logout</span>
         </button>
       </nav>
     </aside>
 
     <!-- MAIN CONTENT -->
-    <main class="ml-0 flex-1 overflow-y-auto pb-16 md:pb-0">
+    <main class="ml-0 md:ml-64 flex-1 overflow-y-auto pb-20 md:pb-0">
       <!-- TOP BAR -->
-      <div class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
-        <div class="px-3 md:p-6 py-3">
-          <h2 class="text-lg md:text-xl font-bold text-gray-800">
-            Profile
-          </h2>
-          <p id="current-date" class="text-xs text-gray-500 mt-0.5"></p>
+      <div class="sticky top-0 z-30 topbar-premium">
+        <div class="px-6 py-3 h-[70px] flex justify-between items-center gap-4 overflow-visible flex-wrap">
+          <div class="min-w-0 flex-1">
+            <h2 class="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              Profile
+            </h2>
+            <p id="current-date" class="text-sm text-gray-500 mt-0.5"></p>
+          </div>
         </div>
       </div>
 
@@ -167,8 +431,9 @@
       <div class="p-3 md:p-6">
         <div class="w-full">
           <!-- HERO SECTION WITH STATS -->
-          <div class="bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] rounded-2xl p-5 md:p-8 mb-5 text-white shadow-lg">
-            <div class="flex items-start justify-between flex-col md:flex-row gap-3 mb-4">
+          <div class="bg-gradient-to-r from-[#007E85] to-[#00556B] rounded-2xl p-5 md:p-8 mb-5 text-white shadow-lg relative overflow-hidden">
+            <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] opacity-50"></div>
+            <div class="relative flex items-start justify-between flex-col md:flex-row gap-3 mb-4">
               <div>
                 <p class="text-xs font-medium opacity-90 mb-1">Manage your details</p>
                 <h2 class="text-xl md:text-2xl font-bold">Keep your profile updated</h2>
@@ -194,8 +459,8 @@
           <!-- TWO COLUMN LAYOUT -->
           <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
             <!-- MAIN FORM SECTION (3 columns) -->
-            <div class="lg:col-span-3 card-hover bg-white rounded-lg card-shadow overflow-hidden">                <!-- CARD HEADER WITH EDIT BUTTON -->
-                <div class="flex justify-between items-center p-4 md:p-5 border-b border-gray-100 bg-gray-50 flex-wrap gap-2">
+            <div class="lg:col-span-3 premium-card rounded-2xl shadow-elevated border border-gray-100/50 overflow-hidden">                <!-- CARD HEADER WITH EDIT BUTTON -->
+                <div class="flex justify-between items-center p-4 md:p-5 border-b border-gray-100 bg-gray-50/50 flex-wrap gap-2">
                   <h3 class="text-sm font-semibold text-gray-800" id="cardTitle">Profile Information</h3>
                   <button id="cardEditBtn"
                     class="btn-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm flex items-center gap-1.5">
@@ -369,9 +634,9 @@
             <!-- PROFILE SUMMARY SIDEBAR (1 column) -->
             <div class="lg:col-span-1 space-y-6">
               <!-- Profile Card -->
-              <div class="card-hover bg-white rounded-2xl card-shadow p-6">
+              <div class="premium-card rounded-2xl shadow-elevated border border-gray-100/50 p-6 h-fit">
                 <div class="flex flex-col items-center">
-                  <div class="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-teal-600 flex items-center justify-center text-white font-bold text-2xl mb-3" id="userInitialsLarge">
+                  <div class="h-16 w-16 rounded-full bg-gradient-to-br from-[#007E85] to-[#00556B] flex items-center justify-center text-white font-bold text-2xl mb-3" id="userInitialsLarge">
                     -
                   </div>
                   <h3 class="text-lg font-semibold text-gray-800 text-center" id="profileName">Loading...</h3>
@@ -394,7 +659,7 @@
               </div>
 
               <!-- Account Details -->
-              <div class="card-hover bg-white rounded-2xl card-shadow p-6">
+              <div class="premium-card rounded-2xl shadow-elevated border border-gray-100/50 p-6 h-fit">
                 <div class="text-sm text-gray-600 space-y-3">
                   <div class="flex justify-between items-center">
                     <span>Last Updated</span>
