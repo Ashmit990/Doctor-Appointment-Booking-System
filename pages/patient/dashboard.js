@@ -173,6 +173,7 @@ function getPaymentStatusClasses(status) {
     return "bg-amber-100 text-amber-700";
   if (s === "failed" || s === "expired" || s === "cancelled")
     return "bg-rose-100 text-rose-700";
+  if (s === "followup") return "bg-violet-100 text-violet-700";
   return "bg-slate-100 text-slate-600";
 }
 

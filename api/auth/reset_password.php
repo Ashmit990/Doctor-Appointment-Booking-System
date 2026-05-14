@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../config/db.php';
+require_once '../includes/password_helper.php';
 
 header('Content-Type: application/json');
 
@@ -48,9 +49,10 @@ if ($password !== $confirm) {
     exit;
 }
 
-// Update password in users table
+// Update password in users table (bcrypt hash)
+$password_hash = app_hash_password($password);
 $stmt = $conn->prepare("UPDATE users SET password_hash = ? WHERE email = ?");
-$stmt->bind_param("ss", $password, $email);
+$stmt->bind_param("ss", $password_hash, $email);
 $stmt->execute();
 
 if ($stmt->affected_rows === 0) {

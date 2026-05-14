@@ -374,6 +374,10 @@ async function loadScheduleForDate(date) {
         const apt = appointments.find((a) => a.appointment_time === slot.start_time);
         
         if (apt) {
+          const followupBadge =
+            apt.status === "Upcoming" && Number(apt.is_followup_visit) === 1
+              ? `<span class="opacity-90 font-normal ml-1 bg-violet-100 text-violet-800 px-1.5 py-0.5 rounded-full text-[9px]">Followup</span>`
+              : "";
           // Slot has an appointment
           if (apt.status === "Completed") {
             gridContainer.innerHTML += `
@@ -396,7 +400,7 @@ async function loadScheduleForDate(date) {
                   </div>
                   <div>
                     <span class="font-bold text-blue-900 text-sm">${formatTime12h(slot.start_time)} - ${formatTime12h(slot.end_time)}</span>
-                    <p class="text-xs font-semibold text-blue-800 mt-0.5">${apt.patient_name} <span class="opacity-80 font-normal ml-1 bg-blue-200 px-1.5 py-0.5 rounded-full text-[9px]">${apt.status}</span></p>
+                    <p class="text-xs font-semibold text-blue-800 mt-0.5">${apt.patient_name} <span class="opacity-80 font-normal ml-1 bg-blue-200 px-1.5 py-0.5 rounded-full text-[9px]">${apt.status}</span>${followupBadge}</p>
                   </div>
                 </div>
                 <button class="bg-blue-50 hover:bg-blue-100 border border-blue-200 hover:border-blue-300 text-blue-700 px-3 py-1.5 rounded-md text-xs font-semibold transition-all shadow-none whitespace-nowrap ml-2">View Details</button>

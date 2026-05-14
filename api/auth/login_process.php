@@ -2,6 +2,7 @@
 session_start();
 require_once '../config/db.php';
 require_once '../includes/csrf_protection.php';
+require_once '../includes/password_helper.php';
 
 header('Content-Type: application/json');
 
@@ -28,7 +29,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
 
-        if ($password === $user['password_hash']) {
+        if (app_verify_password($password, $user['password_hash'])) {
+            if (!app_password_is_hashed($user['password_hash'])) {
+                $newHash = app_hash_password($password);
+                $up = $conn->prepare('UPDATE users SET password_hash = ? WHERE user_id = ?');
+                if ($up) {
+                    $up->bind_param('ss', $newHash, $user['user_id']);
+                    $up->execute();
+                    $up->close();
+                }
+            }
             $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['full_name'] = $user['full_name'];
             $_SESSION['role'] = $user['role'];

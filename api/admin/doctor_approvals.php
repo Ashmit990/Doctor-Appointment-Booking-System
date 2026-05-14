@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../config/db.php';
+require_once '../includes/password_helper.php';
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
@@ -117,7 +118,8 @@ if ($method === 'POST') {
             // 3. Generate a unique doctor user ID
             $user_id = 'DOC_' . strtoupper(substr(uniqid(), -6));
 
-            // 4. Insert into users table
+            // 4. Insert into users table (password: bcrypt from signup, or hash legacy plaintext rows)
+            $password_for_user = app_normalize_password_for_storage((string) $data['password_hash']);
             $stmt = $conn->prepare(
                 "INSERT INTO users (user_id, full_name, email, password_hash, role)
                  VALUES (?, ?, ?, ?, 'Doctor')"
@@ -127,7 +129,7 @@ if ($method === 'POST') {
                 $user_id,
                 $data['full_name'],
                 $data['email'],
-                $data['password_hash']
+                $password_for_user
             );
             $stmt->execute();
             $stmt->close();

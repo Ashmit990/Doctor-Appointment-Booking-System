@@ -41,6 +41,7 @@ try {
             a.status,
             a.next_followup_date,
             a.next_followup_time,
+            IF(EXISTS (SELECT 1 FROM appointments fu_parent WHERE fu_parent.next_followup_id = a.appointment_id), 1, 0) AS is_followup_visit,
             u.full_name as patient_name,
             pp.contact_number,
             pp.blood_group

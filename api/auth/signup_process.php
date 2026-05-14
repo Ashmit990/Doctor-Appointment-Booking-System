@@ -2,6 +2,7 @@
 session_start();
 require_once '../config/db.php';
 require_once '../includes/csrf_protection.php';
+require_once '../includes/password_helper.php';
 
 header('Content-Type: application/json');
 
@@ -60,13 +61,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $conn->begin_transaction();
         try {
+            $password_hash = app_hash_password($password);
             // Insert into users
             $stmt = $conn->prepare(
                 "INSERT INTO users (user_id, full_name, email, password_hash, role)
                  VALUES (?, ?, ?, ?, 'Patient')"
             );
             if (!$stmt) throw new Exception("Prepare failed: " . $conn->error);
-            $stmt->bind_param("ssss", $user_id, $full_name, $email, $password);
+            $stmt->bind_param("ssss", $user_id, $full_name, $email, $password_hash);
             if (!$stmt->execute()) throw new Exception("Execute failed: " . $stmt->error);
             $stmt->close();
 
@@ -152,6 +154,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
             }
 
+            $approval_password_hash = app_hash_password($password);
             if (isset($approvalCols['medical_id'])) {
                 $stmt = $conn->prepare(
                     "INSERT INTO doctor_approvals
@@ -160,7 +163,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 );
                 if (!$stmt) throw new Exception("Prepare failed: " . $conn->error);
                 $stmt->bind_param("ssssss",
-                    $full_name, $email, $password,
+                    $full_name, $email, $approval_password_hash,
                     $medical_id, $specialization, $bio_data
                 );
             } else {
@@ -171,7 +174,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 );
                 if (!$stmt) throw new Exception("Prepare failed: " . $conn->error);
                 $stmt->bind_param("sssss",
-                    $full_name, $email, $password,
+                    $full_name, $email, $approval_password_hash,
                     $specialization, $bio_data
                 );
             }

@@ -34,6 +34,7 @@ $stmt = $conn->prepare("
         ap.amount_rupees AS payment_amount,
         ap.payment_status,
         ap.verified_at AS payment_verified_at,
+        IF(EXISTS (SELECT 1 FROM appointments fu_parent WHERE fu_parent.next_followup_id = a.appointment_id), 1, 0) AS is_followup_visit,
         (SELECT estimated_cost FROM treatment_categories
          WHERE name = CASE
              WHEN LOWER(dp.specialization) LIKE '%cardio%'  THEN 'Cardiology'
@@ -65,7 +66,8 @@ if (!$row) {
 }
 
 $row['status_key'] = strtolower($row['status']);
-$row['payment_status_key'] = strtolower($row['payment_status'] ?? 'unpaid');
-$row['payment_status_label'] = $row['payment_status'] ? ucfirst(strtolower($row['payment_status'])) : 'Unpaid';
+$isFollowupVisit = !empty($row['is_followup_visit']);
+unset($row['is_followup_visit']);
+patient_apply_payment_display_fields($row, $isFollowupVisit);
 echo json_encode(['status' => 'success', 'data' => $row]);
 $conn->close();

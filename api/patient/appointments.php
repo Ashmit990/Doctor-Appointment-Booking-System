@@ -61,7 +61,8 @@ $sql = "
         ap.transaction_id AS payment_transaction_id,
         ap.amount_rupees AS payment_amount,
         ap.payment_status,
-        ap.verified_at AS payment_verified_at
+        ap.verified_at AS payment_verified_at,
+        IF(EXISTS (SELECT 1 FROM appointments fu_parent WHERE fu_parent.next_followup_id = a.appointment_id), 1, 0) AS is_followup_visit
     FROM appointments a
     INNER JOIN users u ON a.doctor_id = u.user_id
     LEFT JOIN doctor_profiles dp ON a.doctor_id = dp.user_id
@@ -97,8 +98,9 @@ $stmt->close();
 
 foreach ($rows as &$row) {
     $row['status_key'] = strtolower($row['status']);
-    $row['payment_status_key'] = strtolower($row['payment_status'] ?? 'unpaid');
-    $row['payment_status_label'] = $row['payment_status'] ? ucfirst(strtolower($row['payment_status'])) : 'Unpaid';
+    $isFollowupVisit = !empty($row['is_followup_visit']);
+    unset($row['is_followup_visit']);
+    patient_apply_payment_display_fields($row, $isFollowupVisit);
 }
 unset($row);
 

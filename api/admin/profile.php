@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../config/db.php';
+require_once '../includes/password_helper.php';
 
 header('Content-Type: application/json');
 
@@ -93,17 +94,7 @@ try {
 
         $stored = $result['password_hash'];
 
-        // ✅ FIX: Support both plain text passwords AND properly hashed passwords
-        $passwordValid = false;
-        if (password_get_info($stored)['algo'] !== null && password_get_info($stored)['algo'] !== 0) {
-            // Properly hashed — use password_verify
-            $passwordValid = password_verify($current_password, $stored);
-        } else {
-            // Plain text stored (like admin_hash_123) — direct compare
-            $passwordValid = ($current_password === $stored);
-        }
-
-        if (!$passwordValid) {
+        if (!app_verify_password($current_password, $stored)) {
             throw new Exception('Current password is incorrect');
         }
 
@@ -120,9 +111,7 @@ try {
 
         // Build update query
         if (!empty($new_password)) {
-            // ✅ Store new password as plain text to match your current DB style
-            // If you want hashing in future, replace $new_password with password_hash($new_password, PASSWORD_DEFAULT)
-            $update_password = $new_password;
+            $update_password = app_hash_password($new_password);
 
             $stmt = $conn->prepare("
                 UPDATE users 

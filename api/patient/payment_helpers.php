@@ -154,3 +154,27 @@ if (!function_exists('ensure_appointment_payments_table')) {
         $conn->query("\n            CREATE TABLE IF NOT EXISTS appointment_payments (\n              payment_id int(11) NOT NULL AUTO_INCREMENT,\n              appointment_id int(11) DEFAULT NULL,\n              patient_id varchar(20) NOT NULL,\n              doctor_id varchar(20) NOT NULL,\n              avail_id int(11) NOT NULL,\n              payment_method varchar(30) NOT NULL DEFAULT 'Khalti',\n              pidx varchar(100) DEFAULT NULL,\n              transaction_id varchar(100) DEFAULT NULL,\n              amount_paisa int(11) NOT NULL,\n              amount_rupees decimal(10,2) NOT NULL,\n              payment_status enum('Initiated','Pending','Completed','Failed','Expired','Cancelled','Refunded') NOT NULL DEFAULT 'Initiated',\n              booking_payload longtext NOT NULL,\n              gateway_response longtext DEFAULT NULL,\n              callback_status varchar(40) DEFAULT NULL,\n              expires_at timestamp NOT NULL,\n              verified_at timestamp NULL DEFAULT NULL,\n              created_at timestamp NOT NULL DEFAULT current_timestamp(),\n              updated_at timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n              PRIMARY KEY (payment_id),\n              UNIQUE KEY uq_appointment_payments_pidx (pidx),\n              KEY idx_appointment_payments_appointment_id (appointment_id),\n              KEY idx_appointment_payments_patient_id (patient_id),\n              KEY idx_appointment_payments_avail_id (avail_id)\n            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci\n        ");
     }
 }
+
+if (!function_exists('patient_apply_payment_display_fields')) {
+    /**
+     * Sets payment_status_key and payment_status_label for patient-facing appointment rows.
+     * Doctor-scheduled follow-ups (parent row has next_followup_id = this appointment) show
+     * "Followup" instead of "Unpaid" when there is no completed payment yet.
+     */
+    function patient_apply_payment_display_fields(array &$row, bool $isFollowupVisit): void
+    {
+        $raw = $row['payment_status'] ?? null;
+        $psKey = is_string($raw) && $raw !== '' ? strtolower($raw) : 'unpaid';
+        $row['payment_status_key'] = $psKey;
+
+        if ($isFollowupVisit && $psKey === 'unpaid') {
+            $row['payment_status_label'] = 'Followup';
+            $row['payment_status_key'] = 'followup';
+            return;
+        }
+
+        $row['payment_status_label'] = is_string($raw) && $raw !== ''
+            ? ucfirst(strtolower($raw))
+            : 'Unpaid';
+    }
+}
