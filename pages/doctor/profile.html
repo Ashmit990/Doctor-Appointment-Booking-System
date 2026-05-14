@@ -552,7 +552,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                       <div>
                         <label class="block text-sm font-semibold text-gray-800 mb-2">Medical ID <span class="text-red-500">*</span></label>
-                        <input type="text" id="editMedicalId" required pattern="[A-Za-z0-9]+"
+                        <input type="number" maxlength="4" id="editMedicalId" required pattern="[0-9]+"
                           class="form-input-premium w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition text-sm" placeholder="Enter Medical ID" />
                         <p class="text-xs text-red-500 hidden mt-1.5" id="medicalIdError">Medical ID must be letters/numbers only, no spaces</p>
                       </div>

@@ -15,11 +15,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
  */
 function parseBio($bioRaw) {
     $result = [
-        'phone'            => 'N/A',
-        'age'              => 'N/A',
-        'medical_id'       => 'N/A',
+        'phone'            => '-',
+        'age'              => '-',
+        'medical_id'       => '-',
         'experience'       => '0',
-        'qualification'    => 'N/A',
+        'qualification'    => '-',
         'bio_text'         => '',
         'consultation_fee' => '0.00'
     ];
@@ -32,11 +32,11 @@ function parseBio($bioRaw) {
     if (isset($trimmed[0]) && ($trimmed[0] === '{' || $trimmed[0] === '[')) {
         $decoded = json_decode($trimmed, true);
         if (is_array($decoded)) {
-            $result['phone']            = $decoded['phone']            ?? $decoded['contact']      ?? 'N/A';
-            $result['age']              = $decoded['age']              ?? 'N/A';
-            $result['medical_id']       = $decoded['medical_id']       ?? $decoded['medicalId']    ?? 'N/A';
+            $result['phone']            = $decoded['phone']            ?? $decoded['contact']      ?? '-';
+            $result['age']              = $decoded['age']              ?? '-';
+            $result['medical_id']       = $decoded['medical_id']       ?? $decoded['medicalId']    ?? '-';
             $result['experience']       = $decoded['experience']       ?? $decoded['exp']           ?? '0';
-            $result['qualification']    = $decoded['qualification']    ?? $decoded['qualifications'] ?? 'N/A';
+            $result['qualification']    = $decoded['qualification']    ?? $decoded['qualifications'] ?? '-';
             $result['bio_text']         = $decoded['bio']              ?? $decoded['description']  ?? '';
             $result['consultation_fee'] = $decoded['consultation_fee'] ?? $decoded['fee']          ?? '0.00';
             return $result;
