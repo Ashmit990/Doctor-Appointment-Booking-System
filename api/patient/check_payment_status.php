@@ -75,6 +75,15 @@ if (!empty($payment['pidx'])) {
                 $updateStmt->execute();
                 $updateStmt->close();
 
+                // Record earnings for the completed booking
+                $earnAmount = isset($payment['amount_paisa']) ? floatval($payment['amount_paisa']) / 100.0 : 0.0;
+                if ($earnAmount > 0) {
+                    $earnStmt = $conn->prepare("INSERT INTO earnings (doctor_id, appointment_id, amount, payment_date) VALUES (?, ?, ?, NOW())");
+                    $earnStmt->bind_param('sid', $payment['doctor_id'], $appointment_id, $earnAmount);
+                    $earnStmt->execute();
+                    $earnStmt->close();
+                }
+
                 // Notify doctor
                 $notif_title = 'New Appointment Booking';
                 $notif_msg = 'A new patient has successfully booked an appointment with you.';

@@ -91,20 +91,28 @@ try {
         $n1->execute();
         $n1->close();
 
-        // 2. Record Earnings for Doctor
-        // Get doctor's consultation fee from profile
-        $feeStmt = $conn->prepare("SELECT consultation_fee FROM doctor_profiles WHERE user_id = ?");
-        $feeStmt->bind_param("s", $doctor_id);
-        $feeStmt->execute();
-        $feeRes = $feeStmt->get_result()->fetch_assoc();
-        $amount = $feeRes ? $feeRes['consultation_fee'] : 500.00; // Fallback to 500 if profile not found
-        $feeStmt->close();
+        // 2. Record Earnings for Doctor if not already recorded
+        $checkEarn = $conn->prepare("SELECT earning_id FROM earnings WHERE appointment_id = ? LIMIT 1");
+        $checkEarn->bind_param("i", $apt_id);
+        $checkEarn->execute();
+        $existingEarning = $checkEarn->get_result()->fetch_assoc();
+        $checkEarn->close();
 
-        // Insert into earnings table
-        $earnStmt = $conn->prepare("INSERT INTO earnings (doctor_id, appointment_id, amount, payment_date) VALUES (?, ?, ?, NOW())");
-        $earnStmt->bind_param("sid", $doctor_id, $apt_id, $amount);
-        $earnStmt->execute();
-        $earnStmt->close();
+        if (!$existingEarning) {
+            // Get doctor's consultation fee from profile
+            $feeStmt = $conn->prepare("SELECT consultation_fee FROM doctor_profiles WHERE user_id = ?");
+            $feeStmt->bind_param("s", $doctor_id);
+            $feeStmt->execute();
+            $feeRes = $feeStmt->get_result()->fetch_assoc();
+            $amount = $feeRes ? $feeRes['consultation_fee'] : 500.00; // Fallback to 500 if profile not found
+            $feeStmt->close();
+
+            // Insert into earnings table
+            $earnStmt = $conn->prepare("INSERT INTO earnings (doctor_id, appointment_id, amount, payment_date) VALUES (?, ?, ?, NOW())");
+            $earnStmt->bind_param("sid", $doctor_id, $apt_id, $amount);
+            $earnStmt->execute();
+            $earnStmt->close();
+        }
     }
 
     // Follow-up logic

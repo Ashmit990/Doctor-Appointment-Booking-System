@@ -328,13 +328,19 @@ try {
     $updateStmt->execute();
     $updateStmt->close();
 
+    // Record earnings for the booked appointment
+    $earnAmount = isset($payment['amount_rupees']) ? floatval($payment['amount_rupees']) : 0.0;
+    if ($earnAmount > 0) {
+        $earnStmt = $conn->prepare("INSERT INTO earnings (doctor_id, appointment_id, amount, payment_date) VALUES (?, ?, ?, NOW())");
+        $earnStmt->bind_param('sid', $payment['doctor_id'], $appointment_id, $earnAmount);
+        $earnStmt->execute();
+        $earnStmt->close();
+    }
+
     // Send notification to doctor
     $notif_title = 'New Appointment Booking';
     $notif_msg = 'A new patient has successfully booked an appointment with you.';
-    $notifStmt = $conn->prepare("
-        INSERT INTO notifications (user_id, title, message, is_read, created_at)
-        VALUES (?, ?, ?, 0, NOW())
-    ");
+    $notifStmt = $conn->prepare("INSERT INTO notifications (user_id, title, message, is_read, created_at) VALUES (?, ?, ?, 0, NOW())");
     @$notifStmt->bind_param('sss', $payment['doctor_id'], $notif_title, $notif_msg);
     @$notifStmt->execute();
     @$notifStmt->close();
@@ -342,7 +348,7 @@ try {
     $conn->commit();
 
     http_response_code(200);
-    $render_response(true, 'Payment Successful', 
+    $render_response(true, 'Payment Successful',
         'Your appointment has been booked successfully! Check your dashboard for details.',
         $pidx, $verified_txn_id, $appointment_id);
     exit;
