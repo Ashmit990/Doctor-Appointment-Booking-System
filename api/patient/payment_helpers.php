@@ -46,6 +46,14 @@ if (!function_exists('khalti_payment_config')) {
         $websiteUrl = rtrim(getenv('KHALTI_WEBSITE_URL') ?: patient_app_base_url(), '/');
         $returnUrl = trim(getenv('KHALTI_RETURN_URL') ?: patient_app_base_url() . '/api/patient/khalti_payment_callback.php');
 
+        // Fix for local testing: Browsers block redirects from public sites (Khalti) to local networks (localhost/LAN).
+        // To prevent the scary "Connection Blocked" error page, we redirect back to Khalti's site for local testing.
+        // The actual payment verification is safely handled by the dashboard's background polling.
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        if (preg_match('/localhost|127\.0\.0\.1|^192\.168\.|^10\.|^172\.(1[6-9]|2[0-9]|3[0-1])\./', $host)) {
+            $returnUrl = 'https://khalti.com/';
+        }
+
         return [
             'api_base' => $apiBase,
             'secret_key' => $secretKey,

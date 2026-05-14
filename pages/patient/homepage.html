@@ -595,12 +595,12 @@
           id="bookingModalPanel"
           class="bg-white w-full rounded-[20px] shadow-2xl overflow-hidden transition-all duration-300"
         >
-          <div id="bookingScrollInner" class="overflow-y-scroll max-h-[85vh] p-4">
+          <div id="bookingScrollInner" class="overflow-y-auto max-h-[95vh] p-4">
             <iframe
               id="bookingIframeHome"
               src="booking.html"
-              class="w-full border-0 block"
-              scrolling="no"
+              class="w-full border-0 block min-h-[750px]"
+              scrolling="yes"
               onload="fitHomeBookingIframe(this)"
             ></iframe>
           </div>
@@ -801,9 +801,9 @@
         try {
           const doc = iframe.contentDocument || iframe.contentWindow.document;
           const height = doc.documentElement.scrollHeight || doc.body.scrollHeight;
-          iframe.style.height = height + "px";
+          iframe.style.height = (height + 20) + "px";
         } catch (e) {
-          iframe.style.height = "380px";
+          iframe.style.height = "800px";
         }
       }
 

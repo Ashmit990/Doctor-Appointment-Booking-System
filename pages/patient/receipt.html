@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Receipt | Healthcare Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      @media print {
+        .no-print {
+          display: none;
+        }
+        body {
+          background: white;
+        }
+        .receipt-container {
+          box-shadow: none !important;
+          border: none !important;
+          margin: 0 !important;
+          width: 100% !important;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 min-h-screen py-10 px-4">
+    <!-- Loading State -->
+    <div
+      id="loadingOverlay"
+      class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center"
+    >
+      <div
+        class="w-12 h-12 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mb-4"
+      ></div>
+      <p class="text-slate-600 font-medium">Generating your receipt...</p>
+    </div>
+
+    <!-- Receipt Container -->
+    <div
+      id="receiptContent"
+      class="hidden max-w-2xl mx-auto receipt-container bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100"
+    >
+      <!-- Header -->
+      <div class="bg-gradient-to-br from-[#0d7377] to-[#0a5a5d] p-8 text-white">
+        <div class="flex justify-between items-start">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <div
+                class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"
+              >
+                <i data-lucide="hospital" class="w-6 h-6"></i>
+              </div>
+              <h1 class="text-2xl font-bold tracking-tight">Healthcare</h1>
+            </div>
+            <p class="text-white/80 text-sm">Official Payment Receipt</p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs uppercase tracking-widest text-white/60 mb-1">
+              Receipt No
+            </p>
+            <p id="billNo" class="text-xl font-mono font-bold">---</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="p-8 space-y-8">
+        <!-- Status & Date -->
+        <div
+          class="flex justify-between items-center pb-6 border-b border-slate-100"
+        >
+          <div>
+            <p class="text-xs text-slate-400 uppercase font-semibold mb-1">
+              Payment Date
+            </p>
+            <p id="paymentDate" class="text-slate-700 font-medium">---</p>
+          </div>
+          <div class="text-right">
+            <span
+              class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold uppercase"
+            >
+              <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+              Paid Successfully
+            </span>
+          </div>
+        </div>
+
+        <!-- Details Grid -->
+        <div class="grid grid-cols-2 gap-8">
+          <div>
+            <p
+              class="text-xs text-slate-400 uppercase font-semibold mb-2 tracking-wider"
+            >
+              Patient Details
+            </p>
+            <p
+              id="patientName"
+              class="text-slate-800 font-bold text-lg leading-tight"
+            >
+              ---
+            </p>
+            <p id="patientEmail" class="text-slate-500 text-sm">---</p>
+          </div>
+          <div class="text-right">
+            <p
+              class="text-xs text-slate-400 uppercase font-semibold mb-2 tracking-wider"
+            >
+              Doctor Details
+            </p>
+            <p
+              id="doctorName"
+              class="text-slate-800 font-bold text-lg leading-tight"
+            >
+              ---
+            </p>
+            <p id="specialization" class="text-slate-500 text-sm uppercase">
+              ---
+            </p>
+          </div>
+        </div>
+
+        <!-- Service Table -->
+        <div class="bg-slate-50 rounded-2xl p-6">
+          <table class="w-full text-left">
+            <thead>
+              <tr
+                class="text-xs text-slate-400 uppercase tracking-wider font-bold"
+              >
+                <th class="pb-4">Service Description</th>
+                <th class="pb-4 text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody class="text-slate-700">
+              <tr>
+                <td class="py-4 border-t border-slate-200">
+                  <p class="font-bold">Medical Consultation</p>
+                  <p class="text-xs text-slate-400 mt-1" id="appointmentMeta">
+                    ---
+                  </p>
+                </td>
+                <td
+                  class="py-4 border-t border-slate-200 text-right font-bold"
+                  id="itemAmount"
+                >
+                  Rs. 0.00
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="text-slate-800 text-lg">
+                <td class="pt-6 border-t border-slate-300 font-bold">
+                  Total Paid
+                </td>
+                <td
+                  class="pt-6 border-t border-slate-300 text-right font-black text-[#0d7377]"
+                  id="totalAmount"
+                >
+                  Rs. 0.00
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- Payment Info -->
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div class="bg-slate-50 rounded-xl p-4">
+            <p class="text-xs text-slate-400 uppercase font-semibold mb-1">
+              Payment Method
+            </p>
+            <div class="flex items-center gap-2 font-medium text-slate-700">
+              <i data-lucide="wallet" class="w-4 h-4 text-slate-400"></i>
+              <span id="paymentMethod">Khalti e-Wallet</span>
+            </div>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-4">
+            <p class="text-xs text-slate-400 uppercase font-semibold mb-1">
+              Transaction ID
+            </p>
+            <div class="flex items-center gap-2 font-mono text-slate-700">
+              <i data-lucide="hash" class="w-4 h-4 text-slate-400"></i>
+              <span id="transactionId">---</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Note -->
+        <div class="text-center space-y-2 pt-4">
+          <p class="text-slate-400 text-xs italic">
+            This is a computer-generated receipt. No signature is required.
+          </p>
+          <div class="flex items-center justify-center gap-4 text-slate-300">
+            <div class="h-px w-12 bg-slate-200"></div>
+            <i data-lucide="heart" class="w-4 h-4 fill-slate-100"></i>
+            <div class="h-px w-12 bg-slate-200"></div>
+          </div>
+          <p class="text-[#0d7377] font-bold text-sm">
+            Thank you for choosing Healthcare!
+          </p>
+        </div>
+      </div>
+
+      <!-- Print Action -->
+      <div
+        class="no-print bg-slate-50 p-6 flex gap-3 justify-center border-t border-slate-100"
+      >
+        <button
+          onclick="window.print()"
+          class="flex items-center gap-2 px-6 py-2.5 bg-[#0d7377] text-white rounded-xl font-bold hover:bg-[#0a5a5d] transition shadow-lg shadow-teal-900/10"
+        >
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          Print Receipt
+        </button>
+        <button
+          id="closeBtn"
+          class="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold hover:bg-slate-50 transition"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="patient-common.js"></script>
+    <script src="receipt.js"></script>
+  </body>
+</html>

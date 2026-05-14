@@ -1,675 +1,1211 @@
 <!doctype html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Patient Dashboard - View Appointments</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- jsPDF Library for PDF Generation -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <link rel="stylesheet" href="dashboard.css" />
-  <style>
-    /* PREMIUM PATIENT THEME START */
-    html { font-size: clamp(15px, 1vw, 17px); }
-    * { font-family: "Poppins", sans-serif; transition: color .18s ease, background-color .18s ease, transform .18s ease; }
-    main { overflow-y: auto; overflow-x: hidden; transition: transform .25s ease, opacity .25s ease; }
-    .primary-color { color: #0d7377; }
-    .bg-primary { background: linear-gradient(135deg,#0d7377 0%,#0a5a5d 100%); }
-    .bg-primary-light { background-color: rgba(13,115,119,0.08); }
-    .card-shadow { box-shadow: 0 20px 50px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06); }
-    .topbar-premium { background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(250,252,253,0.95) 100%); backdrop-filter: blur(10px); border-bottom:1px solid rgba(13,115,119,0.06); }
-    .sidebar { background: linear-gradient(180deg,#0d7377 0%,#0a5a5d 100%); box-shadow:4px 0 30px rgba(0,0,0,0.15); }
-    .nav-link{transition:all .3s; color:white;}
-    .nav-link:hover{background-color:rgba(255,255,255,0.12); transform:translateX(4px);} 
-    .nav-link.active{background:rgba(255,255,255,0.18);} 
-    /* PREMIUM PATIENT THEME END */
-  </style>
-</head>
-
-<body class="bg-gray-50">
-  <div class="flex flex-col md:flex-row h-screen overflow-hidden">
-    <aside
-      class="w-full md:w-60 bg-[#0d7377] text-white flex flex-row md:flex-col items-center justify-around md:justify-start py-2 md:py-0 px-2 md:px-0 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] md:shadow-xl fixed bottom-0 md:sticky md:top-0 left-0 h-auto md:h-screen z-[100] overflow-x-auto md:overflow-y-auto">
-      
-      <div class="hidden md:flex w-full px-6 py-7 items-center gap-3 border-b border-white/10 shrink-0 mb-2">
-        <img src="../../src/assets/Logo.svg" alt="Logo" class="w-8 h-8">
-        <span class="text-white font-bold text-lg">Healthcare</span>
-      </div>
-
-      <nav class="flex flex-row md:flex-col justify-around md:justify-start w-full md:flex-1 md:px-3 md:gap-1 md:pb-3">
-        <button onclick="goToHomePage()"
-          class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left"
-          title="Home">
-          <i data-lucide="house" class="w-6 h-6 md:w-5 md:h-5 shrink-0"></i>
-          <span class="mt-1 md:mt-0 font-medium whitespace-nowrap">Home</span>
-        </button>
-
-        <button id="sidebarAppointments"
-          class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl bg-white/20 text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left"
-          title="My Appointments">
-          <i data-lucide="calendar-days" class="w-6 h-6 md:w-5 md:h-5 text-white shrink-0"></i>
-          <span class="mt-1 md:mt-0 font-medium whitespace-nowrap">Appointments</span>
-        </button>
-
-        <button onclick="goToProfile()"
-          class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left"
-          title="Profile">
-          <i data-lucide="user" class="w-6 h-6 md:w-5 md:h-5 shrink-0"></i>
-          <span class="mt-1 md:mt-0 font-medium whitespace-nowrap">Profile</span>
-        </button>
-
-        <div class="hidden md:block mt-auto border-t border-white/10 pt-3"></div>
-        
-        <button type="button" onclick="logoutPatient()"
-          class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl text-white/65 hover:bg-white/10 hover:text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left md:justify-start"
-          title="Logout">
-          <i data-lucide="log-out" class="w-6 h-6 md:w-5 md:h-5 shrink-0"></i>
-          <span class="mt-1 md:mt-0 font-medium whitespace-nowrap">Logout</span>
-        </button>
-      </nav>
-    </aside>
-
-    <main id="mainContent" class="ml-0 flex-1 overflow-y-auto pb-16 md:pb-0">
-      <div class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
-        <div class="px-3 md:p-6 py-3 flex items-center justify-between gap-4">
-          <div>
-            <h2 class="text-lg md:text-xl font-bold text-gray-800">Appointments</h2>
-            <p class="text-xs text-gray-500 mt-0.5">Your upcoming and past visits.</p>
-          </div>
-          <div class="relative">
-            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
-            </svg>
-            <input id="searchInput" type="text" placeholder="Search doctor or specialization..." class="pl-9 pr-4 py-2 w-64 md:w-80 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0d7377]/30 focus:border-[#0d7377] bg-slate-50 transition"/>
-          </div>
-        </div>
-      </div>
-      <div class="p-3 md:p-6">
-      <div id="appointmentsView">
-        <div class="mb-5">
-          <div class="hidden">
-            <p id="dashTotalCount"></p>
-            <p id="dashUpcomingCount"></p>
-            <p id="dashCompletedCount"></p>
-          </div>
-        </div>
-
-        <section id="bookingSection" class="bg-white rounded-[24px] p-0 mb-6 relative overflow-hidden shadow-[0_15px_40px_rgba(15,23,42,0.08)] border border-slate-100">
-          <iframe
-            id="bookingIframe"
-            src="booking.html"
-            class="w-full border-0 block"
-            title="Book Appointment"
-            scrolling="no"
-            onload="fitBookingIframe(this)"
-          ></iframe>
-        </section>
-
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          <div class="lg:col-span-2 bg-white rounded-[20px] p-5 border border-slate-100 shadow-sm">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
-              <div>
-                <h2 class="text-lg font-semibold text-slate-800">Appointments</h2>
-                <p class="text-xs text-slate-500 mt-1">Your upcoming and past visits</p>
-              </div>
-              <div class="flex flex-wrap gap-1.5">
-                <button class="filter-btn active-filter bg-[#0d7377] text-white px-3 py-2 rounded-xl text-xs font-medium" data-filter="all">All</button>
-                <button class="filter-btn bg-slate-100 text-slate-700 px-3 py-2 rounded-xl text-xs font-medium hover:bg-slate-200 transition" data-filter="upcoming">Upcoming</button>
-                <button class="filter-btn bg-slate-100 text-slate-700 px-3 py-2 rounded-xl text-xs font-medium hover:bg-slate-200 transition" data-filter="completed">Completed</button>
-                <button class="filter-btn bg-slate-100 text-slate-700 px-3 py-2 rounded-xl text-xs font-medium hover:bg-slate-200 transition" data-filter="missed">Missed</button>
-              </div>
-            </div>
-
-            <div id="appointmentList" class="space-y-3 min-h-[80px]"></div>
-            <div id="emptyState" class="hidden text-center py-10 text-slate-400 text-sm">
-              No appointments found.
-            </div>
-          </div>
-
-          <div class="bg-white rounded-[20px] p-5 border border-slate-100 shadow-sm h-fit">
-            <h3 class="text-base font-semibold text-slate-800 mb-4">
-              Summary
-            </h3>
-            <div class="space-y-4">
-              <div class="pb-4 border-b border-slate-100">
-                <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Total</p>
-                <p id="totalCount" class="text-2xl font-bold text-slate-800 mt-1">...</p>
-              </div>
-              <div>
-                <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Next Visit</p>
-                <p id="nextAppointment" class="text-xs font-semibold text-[#0d7377] mt-1">...</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <!-- ===== TREATMENTS VIEW ===== -->
-      <div id="treatmentsView" class="hidden max-w-7xl mx-auto bg-white rounded-[24px] shadow-[0_20px_60px_rgba(15,23,42,0.08)] p-4 md:p-6">
-        <div class="mb-6">
-          <h1 class="text-2xl font-bold text-slate-800">Treatment Tickets</h1>
-          <p class="text-sm text-slate-500 mt-1">Select a treatment category to generate a cost &amp; duration estimate ticket.</p>
-        </div>
-        <div class="flex gap-2 mb-6">
-          <button id="treatTabGenerate" onclick="treatSwitchTab('generate')"
-            class="px-5 py-2 rounded-xl text-sm font-semibold bg-[#0d7377] text-white shadow-sm transition">
-            Generate Ticket
-          </button>
-          <button id="treatTabHistory" onclick="treatSwitchTab('history')"
-            class="px-5 py-2 rounded-xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition">
-            My Tickets
-          </button>
-        </div>
-        <div id="treatPanelGenerate">
-          <p class="text-xs text-slate-400 mb-4">Click a category to select, then click <strong>Generate Ticket</strong>.</p>
-          <div id="treatCategoryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
-            <div class="col-span-full text-center py-10 text-slate-400 text-sm">Loading categories…</div>
-          </div>
-          <div id="treatSelectedSummary" class="hidden bg-white rounded-2xl border border-slate-100 shadow-sm px-5 py-4 mb-5 flex items-center justify-between gap-4">
-            <div>
-              <p class="text-xs text-slate-400">Selected</p>
-              <p id="treatSummaryName" class="text-base font-bold text-slate-800 mt-0.5"></p>
-            </div>
-            <div class="flex gap-6">
-              <div class="text-center">
-                <p class="text-xs text-slate-400">Estimated Cost</p>
-                <p id="treatSummaryCost" class="text-lg font-bold text-[#0d7377]"></p>
-              </div>
-              <div class="text-center">
-                <p class="text-xs text-slate-400">Duration</p>
-                <p id="treatSummaryDuration" class="text-lg font-bold text-slate-700"></p>
-              </div>
-            </div>
-          </div>
-          <button id="treatGenerateBtn" onclick="treatGenerateTicket()" disabled
-            class="w-full md:w-auto px-8 py-3 rounded-xl bg-[#0d7377] hover:bg-[#0a5a5d] text-white font-bold text-sm shadow-sm transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 justify-center">
-            <i data-lucide="ticket-plus" class="w-4 h-4"></i>
-            Generate Ticket
-          </button>
-        </div>
-        <div id="treatPanelHistory" class="hidden">
-          <div id="treatTicketHistoryList">
-            <div class="text-center py-10 text-slate-400 text-sm">Loading your tickets…</div>
-          </div>
-        </div>
-      </div>
-      </div>
-    </main>
-  </div>
-
-  <div id="bookingModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50 p-4">
-    <div id="bookingModalInner" class="bg-white w-full max-w-3xl max-h-[90vh] rounded-2xl shadow-2xl relative overflow-hidden">
-      <button onclick="closeBookingModal()"
-        class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white shadow flex items-center justify-center text-sm">
-        ✕
-      </button>
-
-      <iframe
-        id="bookingModalIframe"
-        src=""
-        class="w-full border-0 block"
-        scrolling="no"
-      ></iframe>
-    </div>
-  </div>
-
-  <div id="detailModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/40 p-4">
-    <div class="bg-white w-full max-w-md rounded-[20px] shadow-2xl p-5 relative max-h-[90vh] overflow-y-auto">
-      <button type="button" id="closeDetailModal"
-        class="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-xs flex items-center justify-center">
-        ✕
-      </button>
-      <h3 class="text-lg font-bold text-slate-800 mb-3 pr-8">
-        Appointment details
-      </h3>
-      <div id="detailModalBody" class="text-sm overflow-hidden" style="word-break:break-word;overflow-wrap:break-word;"></div>
-      <button type="button" id="detailRescheduleBtn"
-        class="hidden mt-4 w-full py-2.5 rounded-xl bg-[#0d7377] text-white text-sm font-medium hover:bg-[#0a5a5d]">
-        Reschedule visit
-      </button>
-    </div>
-  </div>
-
-  <!-- ===== FEEDBACK MODAL ===== -->
-  <div id="feedbackModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/40 backdrop-blur-sm">
-    <div class="bg-white w-full max-w-sm rounded-[24px] shadow-2xl relative overflow-hidden">
-
-      <!-- Close btn -->
-      <button type="button" onclick="closeFeedbackModal()"
-        class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition flex items-center justify-center">
-        <i data-lucide="x" class="w-4 h-4"></i>
-      </button>
-
-      <!-- ── VIEW PANEL ── -->
-      <div id="fbViewPanel" class="hidden p-6">
-        <!-- Header -->
-        <div class="flex items-center gap-3 mb-5">
-          <div class="w-11 h-11 rounded-full bg-teal-50 flex items-center justify-center shrink-0">
-            <i data-lucide="message-circle" class="w-5 h-5 text-[#0d7377]"></i>
-          </div>
-          <div>
-            <h3 class="text-base font-bold text-slate-800">My Feedback</h3>
-            <p class="text-xs text-slate-400 mt-0.5">For <span id="fb-view-doctor" class="font-semibold text-[#0d7377]"></span></p>
-          </div>
-        </div>
-
-        <!-- Stars removed: text-only feedback -->
-
-        <!-- Quote card -->
-        <div class="relative bg-slate-50 border border-slate-100 rounded-2xl px-4 py-4 mb-5">
-          <svg class="absolute top-3 left-3 w-5 h-5 text-slate-200" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
-          </svg>
-          <p id="fb-view-text" class="text-sm text-slate-600 leading-relaxed pl-6 break-words" style="overflow-wrap:anywhere;"></p>
-        </div>
-
-        <!-- Edit button -->
-        <button type="button" onclick="switchToEditMode()"
-          class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-white text-sm font-bold transition shadow-sm">
-          <i data-lucide="pencil" class="w-4 h-4"></i>
-          Edit Feedback
-        </button>
-      </div>
-
-      <!-- ── WRITE / EDIT PANEL ── -->
-      <div id="fbWritePanel" class="hidden p-6">
-        <!-- Header -->
-        <div class="flex items-center gap-3 mb-5">
-          <div class="w-11 h-11 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
-            <i data-lucide="star" class="w-5 h-5 text-amber-400"></i>
-          </div>
-          <div>
-            <h3 id="fb-write-title" class="text-base font-bold text-slate-800">Leave Feedback</h3>
-            <p class="text-xs text-slate-400 mt-0.5">For <span id="fb-write-doctor" class="font-semibold text-slate-700"></span></p>
-          </div>
-        </div>
-
-        <!-- Textarea -->
-        <div class="mb-5">
-          <p class="text-xs text-slate-500 mb-2">Your experience</p>
-          <textarea id="feedback-text" rows="4"
-            class="w-full border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:ring-2 focus:ring-[#0d7377]/30 focus:border-[#0d7377] outline-none transition resize-none"
-            placeholder="Share details about your experience..."></textarea>
-        </div>
-
-        <input type="hidden" id="feedback-apt-id" value="">
-        <input type="hidden" id="feedback-mode" value="new"> <!-- new | edit -->
-
-        <div class="flex gap-2">
-          <button type="button" id="fb-back-btn" onclick="switchToViewMode()" class="hidden px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition">
-            Cancel
-          </button>
-          <button type="button" onclick="submitFeedback()"
-            id="submitFeedbackBtn"
-            class="flex-1 py-2.5 rounded-xl bg-[#0d7377] hover:bg-[#0a5a5d] text-white text-sm font-bold transition shadow-sm disabled:opacity-50">
-            Submit Review
-          </button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-
-  <!-- ===== TREATMENT TICKET MODAL ===== -->
-  <div id="treatTicketModal" onclick="if(event.target===this)closeTreatTicketModal()" style="display:none;position:fixed;inset:0;z-index:9990;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);padding:1rem;">
-    <div class="bg-white w-full max-w-md rounded-[24px] shadow-2xl overflow-hidden">
-      <div id="treatTicketPrintArea">
-        <div class="bg-[#0d7377] px-6 py-5 flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-              <i data-lucide="ticket" class="w-5 h-5 text-white"></i>
-            </div>
-            <div>
-              <p class="text-white/70 text-xs">Healthcare System</p>
-              <p class="text-white font-bold text-base">Treatment Ticket</p>
-            </div>
-          </div>
-          <button onclick="closeTreatTicketModal()" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition">
-            <i data-lucide="x" class="w-4 h-4"></i>
-          </button>
-        </div>
-        <div class="border-b-2 border-dashed border-slate-200 mx-6"></div>
-        <div class="px-6 py-5 space-y-4">
-          <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Ticket No.</span>
-            <span id="treatTktNumber" class="text-sm font-mono font-bold text-slate-700"></span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Category</span>
-            <span id="treatTktCategory" class="text-sm font-semibold text-slate-800"></span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Estimated Cost</span>
-            <span id="treatTktCost" class="text-sm font-bold text-[#0d7377]"></span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Duration</span>
-            <span id="treatTktDuration" class="text-sm font-semibold text-slate-700"></span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Generated On</span>
-            <span id="treatTktDate" class="text-sm text-slate-600"></span>
-          </div>
-        </div>
-        <div class="border-b-2 border-dashed border-slate-200 mx-6"></div>
-        <div class="px-6 py-3 text-center">
-          <p class="text-[10px] text-slate-400">Present this ticket at the reception. Prices are estimates and may vary.</p>
-        </div>
-      </div>
-      <div class="px-6 pb-5 flex gap-2">
-        <button onclick="treatPrintTicket()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition flex items-center justify-center gap-2">
-          <i data-lucide="printer" class="w-4 h-4"></i> Print
-        </button>
-        <button onclick="closeTreatTicketModal()" class="flex-1 py-2.5 rounded-xl bg-[#0d7377] hover:bg-[#0a5a5d] text-white text-sm font-bold transition">Done</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== TICKET MODAL ===== -->
-  <div id="ticketModal" onclick="if(event.target===this)closeTicketModal()" style="display:none;position:fixed;inset:0;z-index:9990;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);padding:1rem;">
-    <div class="bg-white w-full max-w-md rounded-[24px] shadow-2xl overflow-hidden">
-      <div id="ticketPrintArea">
-        <div class="bg-[#0d7377] px-6 py-5 flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-              <i data-lucide="ticket" class="w-5 h-5 text-white"></i>
-            </div>
-            <div>
-              <p class="text-white/70 text-xs">Healthcare System</p>
-              <p class="text-white font-bold text-base">Treatment Ticket</p>
-            </div>
-          </div>
-          <button onclick="closeTicketModal()" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition">
-            <i data-lucide="x" class="w-4 h-4"></i>
-          </button>
-        </div>
-        <div class="border-b-2 border-dashed border-slate-200 mx-6"></div>
-        <div class="px-6 py-5 space-y-4">
-          <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Ticket No.</span>
-            <span id="tkt-number" class="text-sm font-mono font-bold text-slate-700"></span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Doctor</span>
-            <span id="tkt-doctor" class="text-sm font-semibold text-slate-800"></span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Treatment Category</span>
-            <span id="tkt-category" class="text-sm font-semibold text-slate-800"></span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Estimated Cost</span>
-            <span id="tkt-cost" class="text-sm font-bold text-[#0d7377]"></span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Generated On</span>
-            <span id="tkt-date" class="text-sm text-slate-600"></span>
-          </div>
-        </div>
-        <div class="border-b-2 border-dashed border-slate-200 mx-6"></div>
-        <div class="px-6 py-3 text-center">
-          <p class="text-[10px] text-slate-400">Present this ticket at the reception. Prices are estimates and may vary.</p>
-        </div>
-      </div>
-      <div class="px-6 pb-5 flex gap-2">
-        <button onclick="printTicket()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition flex items-center justify-center gap-2">
-          <i data-lucide="printer" class="w-4 h-4"></i> Print
-        </button>
-        <button onclick="closeTicketModal()" class="flex-1 py-2.5 rounded-xl bg-[#0d7377] hover:bg-[#0a5a5d] text-white text-sm font-bold transition">Done</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="patient-common.js"></script>
-  <script src="dashboard.js"></script>
-  <script>
-    lucide.createIcons();
-
-    function fitBookingIframe(iframe) {
-      try {
-        const doc = iframe.contentDocument || iframe.contentWindow.document;
-        const height = doc.documentElement.scrollHeight || doc.body.scrollHeight;
-        iframe.style.height = height + 'px';
-      } catch (e) {
-        iframe.style.height = '340px';
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patient Dashboard - View Appointments</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- jsPDF Library for PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="dashboard.css" />
+    <style>
+      /* PREMIUM PATIENT THEME START */
+      html {
+        font-size: clamp(15px, 1vw, 17px);
       }
-    }
-
-    function fitModalIframe(iframe) {
-      try {
-        const doc = iframe.contentDocument || iframe.contentWindow.document;
-        const height = doc.documentElement.scrollHeight || doc.body.scrollHeight;
-        iframe.style.height = height + 'px';
-      } catch (e) {
-        iframe.style.height = '500px';
+      * {
+        font-family: "Poppins", sans-serif;
+        transition:
+          color 0.18s ease,
+          background-color 0.18s ease,
+          transform 0.18s ease;
       }
-    }
-  </script>
+      main {
+        overflow-y: auto;
+        overflow-x: hidden;
+        transition:
+          transform 0.25s ease,
+          opacity 0.25s ease;
+      }
+      .primary-color {
+        color: #0d7377;
+      }
+      .bg-primary {
+        background: linear-gradient(135deg, #0d7377 0%, #0a5a5d 100%);
+      }
+      .bg-primary-light {
+        background-color: rgba(13, 115, 119, 0.08);
+      }
+      .card-shadow {
+        box-shadow:
+          0 20px 50px rgba(0, 0, 0, 0.08),
+          0 1px 3px rgba(0, 0, 0, 0.06);
+      }
+      .topbar-premium {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.98) 0%,
+          rgba(250, 252, 253, 0.95) 100%
+        );
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(13, 115, 119, 0.06);
+      }
+      .sidebar {
+        background: linear-gradient(180deg, #0d7377 0%, #0a5a5d 100%);
+        box-shadow: 4px 0 30px rgba(0, 0, 0, 0.15);
+      }
+      .nav-link {
+        transition: all 0.3s;
+        color: white;
+      }
+      .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.12);
+        transform: translateX(4px);
+      }
+      .nav-link.active {
+        background: rgba(255, 255, 255, 0.18);
+      }
+      /* PREMIUM PATIENT THEME END */
+    </style>
+  </head>
 
-  <div id="treatToast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] hidden items-center gap-3 bg-white rounded-2xl shadow-lg px-5 py-3 border border-slate-100 min-w-[240px]">
-    <div id="treatToastIcon" class="w-8 h-8 rounded-full flex items-center justify-center shrink-0"></div>
-    <div>
-      <p id="treatToastTitle" class="text-sm font-bold text-slate-800"></p>
-      <p id="treatToastMsg" class="text-xs text-slate-500"></p>
+  <body class="bg-gray-50">
+    <div class="flex flex-col md:flex-row h-screen overflow-hidden">
+      <aside
+        class="w-full md:w-60 bg-[#0d7377] text-white flex flex-row md:flex-col items-center justify-around md:justify-start py-2 md:py-0 px-2 md:px-0 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] md:shadow-xl fixed bottom-0 md:sticky md:top-0 left-0 h-auto md:h-screen z-[100] overflow-x-auto md:overflow-y-auto"
+      >
+        <div
+          class="hidden md:flex w-full px-6 py-7 items-center gap-3 border-b border-white/10 shrink-0 mb-2"
+        >
+          <img src="../../src/assets/Logo.svg" alt="Logo" class="w-8 h-8" />
+          <span class="text-white font-bold text-lg">Healthcare</span>
+        </div>
+
+        <nav
+          class="flex flex-row md:flex-col justify-around md:justify-start w-full md:flex-1 md:px-3 md:gap-1 md:pb-3"
+        >
+          <button
+            onclick="goToHomePage()"
+            class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left"
+            title="Home"
+          >
+            <i data-lucide="house" class="w-6 h-6 md:w-5 md:h-5 shrink-0"></i>
+            <span class="mt-1 md:mt-0 font-medium whitespace-nowrap">Home</span>
+          </button>
+
+          <button
+            id="sidebarAppointments"
+            class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl bg-white/20 text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left"
+            title="My Appointments"
+          >
+            <i
+              data-lucide="calendar-days"
+              class="w-6 h-6 md:w-5 md:h-5 text-white shrink-0"
+            ></i>
+            <span class="mt-1 md:mt-0 font-medium whitespace-nowrap"
+              >Appointments</span
+            >
+          </button>
+
+          <button
+            onclick="goToProfile()"
+            class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl text-white/75 hover:bg-white/10 hover:text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left"
+            title="Profile"
+          >
+            <i data-lucide="user" class="w-6 h-6 md:w-5 md:h-5 shrink-0"></i>
+            <span class="mt-1 md:mt-0 font-medium whitespace-nowrap"
+              >Profile</span
+            >
+          </button>
+
+          <div
+            class="hidden md:block mt-auto border-t border-white/10 pt-3"
+          ></div>
+
+          <button
+            type="button"
+            onclick="logoutPatient()"
+            class="flex flex-col md:flex-row items-center md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl text-white/65 hover:bg-white/10 hover:text-white text-[10px] md:text-sm font-medium transition-all w-auto md:w-full md:text-left md:justify-start"
+            title="Logout"
+          >
+            <i data-lucide="log-out" class="w-6 h-6 md:w-5 md:h-5 shrink-0"></i>
+            <span class="mt-1 md:mt-0 font-medium whitespace-nowrap"
+              >Logout</span
+            >
+          </button>
+        </nav>
+      </aside>
+
+      <main id="mainContent" class="ml-0 flex-1 overflow-y-auto pb-16 md:pb-0">
+        <div
+          class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm"
+        >
+          <div class="px-3 md:p-6 py-3 flex items-center justify-between gap-4">
+            <div>
+              <h2 class="text-lg md:text-xl font-bold text-gray-800">
+                Appointments
+              </h2>
+              <p class="text-xs text-gray-500 mt-0.5">
+                Your upcoming and past visits.
+              </p>
+            </div>
+            <div class="relative">
+              <svg
+                class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"
+                />
+              </svg>
+              <input
+                id="searchInput"
+                type="text"
+                placeholder="Search doctor or specialization..."
+                class="pl-9 pr-4 py-2 w-64 md:w-80 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0d7377]/30 focus:border-[#0d7377] bg-slate-50 transition"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="p-3 md:p-6">
+          <div id="appointmentsView">
+            <div class="mb-5">
+              <div class="hidden">
+                <p id="dashTotalCount"></p>
+                <p id="dashUpcomingCount"></p>
+                <p id="dashCompletedCount"></p>
+              </div>
+            </div>
+
+            <section
+              id="bookingSection"
+              class="bg-white rounded-[24px] p-0 mb-6 relative overflow-hidden shadow-[0_15px_40px_rgba(15,23,42,0.08)] border border-slate-100"
+            >
+              <iframe
+                id="bookingIframe"
+                src="booking.html"
+                class="w-full border-0 block"
+                title="Book Appointment"
+                scrolling="no"
+                onload="fitBookingIframe(this)"
+              ></iframe>
+            </section>
+
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+              <div
+                class="lg:col-span-2 bg-white rounded-[20px] p-5 border border-slate-100 shadow-sm"
+              >
+                <div
+                  class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5"
+                >
+                  <div>
+                    <h2 class="text-lg font-semibold text-slate-800">
+                      Appointments
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">
+                      Your upcoming and past visits
+                    </p>
+                  </div>
+                  <div class="flex flex-wrap gap-1.5">
+                    <button
+                      class="filter-btn active-filter bg-[#0d7377] text-white px-3 py-2 rounded-xl text-xs font-medium"
+                      data-filter="all"
+                    >
+                      All
+                    </button>
+                    <button
+                      class="filter-btn bg-slate-100 text-slate-700 px-3 py-2 rounded-xl text-xs font-medium hover:bg-slate-200 transition"
+                      data-filter="upcoming"
+                    >
+                      Upcoming
+                    </button>
+                    <button
+                      class="filter-btn bg-slate-100 text-slate-700 px-3 py-2 rounded-xl text-xs font-medium hover:bg-slate-200 transition"
+                      data-filter="completed"
+                    >
+                      Completed
+                    </button>
+                    <button
+                      class="filter-btn bg-slate-100 text-slate-700 px-3 py-2 rounded-xl text-xs font-medium hover:bg-slate-200 transition"
+                      data-filter="missed"
+                    >
+                      Missed
+                    </button>
+                  </div>
+                </div>
+
+                <div id="appointmentList" class="space-y-3 min-h-[80px]"></div>
+                <div
+                  id="emptyState"
+                  class="hidden text-center py-10 text-slate-400 text-sm"
+                >
+                  No appointments found.
+                </div>
+              </div>
+
+              <div
+                class="bg-white rounded-[20px] p-5 border border-slate-100 shadow-sm h-fit"
+              >
+                <h3 class="text-base font-semibold text-slate-800 mb-4">
+                  Summary
+                </h3>
+                <div class="space-y-4">
+                  <div class="pb-4 border-b border-slate-100">
+                    <p
+                      class="text-[11px] font-medium text-slate-500 uppercase tracking-wider"
+                    >
+                      Total
+                    </p>
+                    <p
+                      id="totalCount"
+                      class="text-2xl font-bold text-slate-800 mt-1"
+                    >
+                      ...
+                    </p>
+                  </div>
+                  <div>
+                    <p
+                      class="text-[11px] font-medium text-slate-500 uppercase tracking-wider"
+                    >
+                      Next Visit
+                    </p>
+                    <p
+                      id="nextAppointment"
+                      class="text-xs font-semibold text-[#0d7377] mt-1"
+                    >
+                      ...
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- ===== TREATMENTS VIEW ===== -->
+          <div
+            id="treatmentsView"
+            class="hidden max-w-7xl mx-auto bg-white rounded-[24px] shadow-[0_20px_60px_rgba(15,23,42,0.08)] p-4 md:p-6"
+          >
+            <div class="mb-6">
+              <h1 class="text-2xl font-bold text-slate-800">
+                Treatment Tickets
+              </h1>
+              <p class="text-sm text-slate-500 mt-1">
+                Select a treatment category to generate a cost &amp; duration
+                estimate ticket.
+              </p>
+            </div>
+            <div class="flex gap-2 mb-6">
+              <button
+                id="treatTabGenerate"
+                onclick="treatSwitchTab('generate')"
+                class="px-5 py-2 rounded-xl text-sm font-semibold bg-[#0d7377] text-white shadow-sm transition"
+              >
+                Generate Ticket
+              </button>
+              <button
+                id="treatTabHistory"
+                onclick="treatSwitchTab('history')"
+                class="px-5 py-2 rounded-xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition"
+              >
+                My Tickets
+              </button>
+            </div>
+            <div id="treatPanelGenerate">
+              <p class="text-xs text-slate-400 mb-4">
+                Click a category to select, then click
+                <strong>Generate Ticket</strong>.
+              </p>
+              <div
+                id="treatCategoryGrid"
+                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6"
+              >
+                <div
+                  class="col-span-full text-center py-10 text-slate-400 text-sm"
+                >
+                  Loading categories…
+                </div>
+              </div>
+              <div
+                id="treatSelectedSummary"
+                class="hidden bg-white rounded-2xl border border-slate-100 shadow-sm px-5 py-4 mb-5 flex items-center justify-between gap-4"
+              >
+                <div>
+                  <p class="text-xs text-slate-400">Selected</p>
+                  <p
+                    id="treatSummaryName"
+                    class="text-base font-bold text-slate-800 mt-0.5"
+                  ></p>
+                </div>
+                <div class="flex gap-6">
+                  <div class="text-center">
+                    <p class="text-xs text-slate-400">Estimated Cost</p>
+                    <p
+                      id="treatSummaryCost"
+                      class="text-lg font-bold text-[#0d7377]"
+                    ></p>
+                  </div>
+                  <div class="text-center">
+                    <p class="text-xs text-slate-400">Duration</p>
+                    <p
+                      id="treatSummaryDuration"
+                      class="text-lg font-bold text-slate-700"
+                    ></p>
+                  </div>
+                </div>
+              </div>
+              <button
+                id="treatGenerateBtn"
+                onclick="treatGenerateTicket()"
+                disabled
+                class="w-full md:w-auto px-8 py-3 rounded-xl bg-[#0d7377] hover:bg-[#0a5a5d] text-white font-bold text-sm shadow-sm transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+              >
+                <i data-lucide="ticket-plus" class="w-4 h-4"></i>
+                Generate Ticket
+              </button>
+            </div>
+            <div id="treatPanelHistory" class="hidden">
+              <div id="treatTicketHistoryList">
+                <div class="text-center py-10 text-slate-400 text-sm">
+                  Loading your tickets…
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
-  </div>
 
-  <div id="successToast" class="fixed inset-0 hidden items-center justify-center z-[70] bg-black/25 backdrop-blur-sm">
     <div
-      class="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(15,23,42,0.18)] px-6 py-5 w-[85%] max-w-xs text-center border border-emerald-100">
-      <div class="mx-auto mb-3 w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-        </svg>
-      </div>
-      <h3 class="toast-title text-lg font-bold text-slate-800 mb-1">
-        Success
-      </h3>
-      <p class="toast-text text-slate-500 text-xs">
-        Appointment booked successfully.
-      </p>
-    </div>
-  </div>
-  <!-- Security: Cache Prevention & Session Verification -->
-  <script src="../../src/js/cache-prevention.js"></script>
+      id="bookingModal"
+      class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50 p-4"
+    >
+      <div
+        id="bookingModalInner"
+        class="bg-white w-full max-w-3xl max-h-[95vh] rounded-2xl shadow-2xl relative overflow-y-auto"
+      >
+        <button
+          onclick="closeBookingModal()"
+          class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white shadow flex items-center justify-center text-sm"
+        >
+          ✕
+        </button>
 
-  <!-- Medical Report Viewer Modal -->
-  <div id="patient-medical-report-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[110] p-4 backdrop-blur-sm transition-all duration-300 ease-in-out opacity-0 patient-report-modal-backdrop" style="opacity: 0; pointer-events: none;">
-    <div class="bg-white rounded-lg shadow-2xl max-w-lg w-full max-h-[calc(100vh-72px)] overflow-hidden flex flex-col text-[11px] transform transition-all duration-300 ease-out scale-95 patient-report-modal-content" style="transform: scale(0.95);">
-      <!-- Header -->
-      <div class="bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
-        <div class="flex items-center gap-3">
-          <img src="../../src/assets/Logo.svg" alt="Logo" class="w-10 h-10 rounded-md bg-white p-1" />
-          <div>
-            <h1 id="patient-report-hospital-name" class="text-sm font-bold mb-0.5">Health Care</h1>
-            <p id="patient-report-hospital-address" class="text-[11px] opacity-90 mb-0.5"></p>
-            <p id="patient-report-hospital-contact" class="text-[11px] opacity-80"></p>
-          </div>
-        </div>
-        <button onclick="closePatientMedicalReportModal()" class="text-white hover:bg-white hover:bg-opacity-20 p-1 rounded-lg transition flex-shrink-0">
+        <iframe
+          id="bookingModalIframe"
+          src=""
+          class="w-full border-0 block min-h-[750px]"
+          scrolling="yes"
+        ></iframe>
+      </div>
+    </div>
+
+    <div
+      id="detailModal"
+      class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/40 p-4"
+    >
+      <div
+        class="bg-white w-full max-w-md rounded-[20px] shadow-2xl p-5 relative max-h-[90vh] overflow-y-auto"
+      >
+        <button
+          type="button"
+          id="closeDetailModal"
+          class="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-xs flex items-center justify-center"
+        >
+          ✕
+        </button>
+        <h3 class="text-lg font-bold text-slate-800 mb-3 pr-8">
+          Appointment details
+        </h3>
+        <div
+          id="detailModalBody"
+          class="text-sm overflow-hidden"
+          style="word-break: break-word; overflow-wrap: break-word"
+        ></div>
+        <button
+          type="button"
+          id="detailRescheduleBtn"
+          class="hidden mt-4 w-full py-2.5 rounded-xl bg-[#0d7377] text-white text-sm font-medium hover:bg-[#0a5a5d]"
+        >
+          Reschedule visit
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== FEEDBACK MODAL ===== -->
+    <div
+      id="feedbackModal"
+      class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/40 backdrop-blur-sm"
+    >
+      <div
+        class="bg-white w-full max-w-sm rounded-[24px] shadow-2xl relative overflow-hidden"
+      >
+        <!-- Close btn -->
+        <button
+          type="button"
+          onclick="closeFeedbackModal()"
+          class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition flex items-center justify-center"
+        >
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
-      </div>
 
-      <!-- Report Title -->
-      <div class="border-b border-gray-200 px-4 py-2 bg-gray-50 flex-shrink-0">
-        <div class="flex justify-between items-center gap-3">
-          <h2 class="text-base font-bold text-gray-900">MEDICAL REPORT</h2>
-          <div class="text-right text-[12px] text-gray-600">
-            <p>ID: <span id="patient-report-id" class="font-semibold"></span></p>
-            <p>Generated: <span id="patient-report-generated-date" class="font-semibold"></span></p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Content -->
-        <div class="px-4 py-3 space-y-3 overflow-auto flex-grow">
-        <!-- Patient & Doctor Info Grid -->
-        <div class="grid grid-cols-2 gap-3 items-start">
-          <!-- Patient Information -->
-          <div>
-            <h3 class="font-bold text-[#0d7377] text-xs mb-1 pb-0.5 border-b border-[#0d7377]">PATIENT</h3>
-            <div class="space-y-2">
-              <div>
-                <p class="text-[11px] text-gray-600 font-semibold">Name</p>
-                <p id="patient-report-patient-name" class="text-gray-900 font-semibold text-[11px]"></p>
-              </div>
-              <div>
-                <p class="text-[11px] text-gray-600 font-semibold">ID</p>
-                <p id="patient-report-patient-id" class="text-gray-900 font-semibold text-[11px]"></p>
-              </div>
-              <div>
-                <p class="text-[11px] text-gray-600 font-semibold">Age</p>
-                <p id="patient-report-patient-age" class="text-gray-900 font-semibold text-[11px]">35 years</p>
-              </div>
+        <!-- ── VIEW PANEL ── -->
+        <div id="fbViewPanel" class="hidden p-6">
+          <!-- Header -->
+          <div class="flex items-center gap-3 mb-5">
+            <div
+              class="w-11 h-11 rounded-full bg-teal-50 flex items-center justify-center shrink-0"
+            >
+              <i
+                data-lucide="message-circle"
+                class="w-5 h-5 text-[#0d7377]"
+              ></i>
             </div>
-          </div>
-
-          <!-- Doctor & Consultation Information -->
-          <div>
-            <h3 class="font-bold text-[#0d7377] text-xs mb-[2.5px] pb-0.5 border-b border-[#0d7377]">DOCTOR</h3>
-            <div class="space-y-2">
-              <div>
-                <p class="text-[11px] text-gray-600 font-semibold">Doctor</p>
-                <p id="patient-report-doctor-name" class="text-gray-900 font-semibold text-[11px]"></p>
-              </div>
-              <div>
-                <p class="text-[11px] text-gray-600 font-semibold">Doctor ID</p>
-                <p id="patient-report-doctor-id" class="text-gray-900 font-semibold text-[11px]"></p>
-              </div>
-              <div>
-                <p class="text-[11px] text-gray-600 font-semibold">Date</p>
-                <p id="patient-report-apt-datetime" class="text-gray-900 font-semibold text-[11px]"></p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Chief Complaint -->
-        <div>
-          <h3 class="font-bold text-[#0d7377] text-xs mb-1 pb-0.5 border-b border-[#0d7377]">COMPLAINT</h3>
-            <div class="bg-blue-50 border-l-4 border-blue-500 p-2 rounded-r-lg">
-            <p id="patient-report-chief-complaint" class="text-gray-900 text-[12px]"></p>
-          </div>
-        </div>
-
-        <!-- Clinical Findings -->
-        <div>
-          <h3 class="font-bold text-[#0d7377] text-xs mb-1 pb-0.5 border-b border-[#0d7377]">FINDINGS</h3>
-          
-          <div class="grid grid-cols-2 gap-1 mb-1">
-            <!-- Symptoms -->
             <div>
-              <h4 class="font-bold text-[#EF7300] mb-0.5 flex items-center gap-1 text-xs">
-                <span class="w-1 h-1 rounded-full bg-[#EF7300]"></span>
-                Symptoms
-              </h4>
-              <div class="bg-yellow-50 border border-yellow-200 p-2 rounded-lg">
-                <p id="patient-report-symptoms" class="text-gray-900 text-[12px] whitespace-pre-line"></p>
-              </div>
+              <h3 class="text-base font-bold text-slate-800">My Feedback</h3>
+              <p class="text-xs text-slate-400 mt-0.5">
+                For
+                <span
+                  id="fb-view-doctor"
+                  class="font-semibold text-[#0d7377]"
+                ></span>
+              </p>
             </div>
+          </div>
 
-            <!-- Diagnosis -->
+          <!-- Stars removed: text-only feedback -->
+
+          <!-- Quote card -->
+          <div
+            class="relative bg-slate-50 border border-slate-100 rounded-2xl px-4 py-4 mb-5"
+          >
+            <svg
+              class="absolute top-3 left-3 w-5 h-5 text-slate-200"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"
+              />
+            </svg>
+            <p
+              id="fb-view-text"
+              class="text-sm text-slate-600 leading-relaxed pl-6 break-words"
+              style="overflow-wrap: anywhere"
+            ></p>
+          </div>
+
+          <!-- Edit button -->
+          <button
+            type="button"
+            onclick="switchToEditMode()"
+            class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-white text-sm font-bold transition shadow-sm"
+          >
+            <i data-lucide="pencil" class="w-4 h-4"></i>
+            Edit Feedback
+          </button>
+        </div>
+
+        <!-- ── WRITE / EDIT PANEL ── -->
+        <div id="fbWritePanel" class="hidden p-6">
+          <!-- Header -->
+          <div class="flex items-center gap-3 mb-5">
+            <div
+              class="w-11 h-11 rounded-full bg-amber-50 flex items-center justify-center shrink-0"
+            >
+              <i data-lucide="star" class="w-5 h-5 text-amber-400"></i>
+            </div>
             <div>
-              <h4 class="font-bold text-[#DC2626] mb-0.5 flex items-center gap-1 text-xs">
-                <span class="w-1 h-1 rounded-full bg-[#DC2626]"></span>
-                Diagnosis
-              </h4>
-              <div class="bg-red-50 border border-red-200 p-2 rounded-lg">
-                <p id="patient-report-diagnosis" class="text-gray-900 text-[12px] whitespace-pre-line"></p>
-              </div>
+              <h3
+                id="fb-write-title"
+                class="text-base font-bold text-slate-800"
+              >
+                Leave Feedback
+              </h3>
+              <p class="text-xs text-slate-400 mt-0.5">
+                For
+                <span
+                  id="fb-write-doctor"
+                  class="font-semibold text-slate-700"
+                ></span>
+              </p>
             </div>
           </div>
 
-          <!-- Vital Signs -->
-          <div>
-            <h4 class="font-bold text-[#16A34A] mb-1 flex items-center gap-1 text-xs">
-              <span class="w-1 h-1 rounded-full bg-[#16A34A]"></span>
-              Vital Signs
-            </h4>
-            <div class="grid grid-cols-3 gap-1">
-              <div class="bg-green-50 border border-green-200 p-2 rounded-lg">
-                  <p class="text-[12px] text-gray-600 font-semibold mb-1">BP</p>
-                  <p id="patient-report-bp" class="text-gray-900 font-bold text-[12px]"></p>
-                </div>
-              <div class="bg-green-50 border border-green-200 p-2 rounded-lg">
-                <p class="text-[12px] text-gray-600 font-semibold mb-1">Weight</p>
-                <p id="patient-report-weight" class="text-gray-900 font-bold text-[12px]"></p>
-              </div>
-              <div class="bg-green-50 border border-green-200 p-2 rounded-lg">
-                <p class="text-[12px] text-gray-600 font-semibold mb-1">Room</p>
-                <p id="patient-report-room-no" class="text-gray-900 font-bold text-[12px]">--</p>
-              </div>
-            </div>
+          <!-- Textarea -->
+          <div class="mb-5">
+            <p class="text-xs text-slate-500 mb-2">Your experience</p>
+            <textarea
+              id="feedback-text"
+              rows="4"
+              class="w-full border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:ring-2 focus:ring-[#0d7377]/30 focus:border-[#0d7377] outline-none transition resize-none"
+              placeholder="Share details about your experience..."
+            ></textarea>
+          </div>
+
+          <input type="hidden" id="feedback-apt-id" value="" />
+          <input type="hidden" id="feedback-mode" value="new" />
+          <!-- new | edit -->
+
+          <div class="flex gap-2">
+            <button
+              type="button"
+              id="fb-back-btn"
+              onclick="switchToViewMode()"
+              class="hidden px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onclick="submitFeedback()"
+              id="submitFeedbackBtn"
+              class="flex-1 py-2.5 rounded-xl bg-[#0d7377] hover:bg-[#0a5a5d] text-white text-sm font-bold transition shadow-sm disabled:opacity-50"
+            >
+              Submit Review
+            </button>
           </div>
         </div>
-
-        <!-- Prescribed Medicines -->
-        <div id="patient-medicines-section" class="hidden">
-          <h3 class="font-bold text-[#0d7377] text-xs mb-1 pb-0.5 border-b border-[#0d7377]">MEDS</h3>
-          <div class="overflow-x-auto">
-            <table class="w-full text-xs">
-              <thead>
-                <tr class="bg-[#0d7377] text-white">
-                  <th class="p-2 text-left font-semibold">Medicine</th>
-                  <th class="p-2 text-left font-semibold">Dosage</th>
-                  <th class="p-2 text-left font-semibold">Frequency</th>
-                </tr>
-              </thead>
-              <tbody id="patient-medicines-list">
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Additional Notes -->
-        <div id="patient-notes-section" class="hidden">
-          <h3 class="font-bold text-[#0d7377] text-sm mb-2 pb-1 border-b-2 border-[#0d7377]">NOTES</h3>
-          <div class="bg-purple-50 border border-purple-200 p-2 rounded-lg">
-            <p id="patient-report-notes" class="text-gray-900 text-[12px] whitespace-pre-line"></p>
-          </div>
-        </div>
-
-        <!-- Signature removed per request -->
       </div>
+    </div>
 
-      <!-- Footer -->
-      <div class="bg-gray-50 border-t border-gray-200 px-4 py-2 flex gap-3 justify-end flex-shrink-0">
+    <!-- ===== TREATMENT TICKET MODAL ===== -->
+    <div
+      id="treatTicketModal"
+      onclick="if (event.target === this) closeTreatTicketModal();"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9990;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(4px);
+        padding: 1rem;
+      "
+    >
+      <div
+        class="bg-white w-full max-w-md rounded-[24px] shadow-2xl overflow-hidden"
+      >
+        <div id="treatTicketPrintArea">
+          <div class="bg-[#0d7377] px-6 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center"
+              >
+                <i data-lucide="ticket" class="w-5 h-5 text-white"></i>
+              </div>
+              <div>
+                <p class="text-white/70 text-xs">Healthcare System</p>
+                <p class="text-white font-bold text-base">Treatment Ticket</p>
+              </div>
+            </div>
+            <button
+              onclick="closeTreatTicketModal()"
+              class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition"
+            >
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <div class="border-b-2 border-dashed border-slate-200 mx-6"></div>
+          <div class="px-6 py-5 space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-slate-400">Ticket No.</span>
+              <span
+                id="treatTktNumber"
+                class="text-sm font-mono font-bold text-slate-700"
+              ></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-slate-400">Category</span>
+              <span
+                id="treatTktCategory"
+                class="text-sm font-semibold text-slate-800"
+              ></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-slate-400">Estimated Cost</span>
+              <span
+                id="treatTktCost"
+                class="text-sm font-bold text-[#0d7377]"
+              ></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-slate-400">Duration</span>
+              <span
+                id="treatTktDuration"
+                class="text-sm font-semibold text-slate-700"
+              ></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-slate-400">Generated On</span>
+              <span id="treatTktDate" class="text-sm text-slate-600"></span>
+            </div>
+          </div>
+          <div class="border-b-2 border-dashed border-slate-200 mx-6"></div>
+          <div class="px-6 py-3 text-center">
+            <p class="text-[10px] text-slate-400">
+              Present this ticket at the reception. Prices are estimates and may
+              vary.
+            </p>
+          </div>
+        </div>
+        <div class="px-6 pb-5 flex gap-2">
+          <button
+            onclick="treatPrintTicket()"
+            class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition flex items-center justify-center gap-2"
+          >
+            <i data-lucide="printer" class="w-4 h-4"></i> Print
+          </button>
+          <button
+            onclick="closeTreatTicketModal()"
+            class="flex-1 py-2.5 rounded-xl bg-[#0d7377] hover:bg-[#0a5a5d] text-white text-sm font-bold transition"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TICKET MODAL ===== -->
+    <div
+      id="ticketModal"
+      onclick="if (event.target === this) closeTicketModal();"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9990;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(4px);
+        padding: 1rem;
+      "
+    >
+      <div
+        class="bg-white w-full max-w-md rounded-[24px] shadow-2xl overflow-hidden"
+      >
+        <div id="ticketPrintArea">
+          <div class="bg-[#0d7377] px-6 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center"
+              >
+                <i data-lucide="ticket" class="w-5 h-5 text-white"></i>
+              </div>
+              <div>
+                <p class="text-white/70 text-xs">Healthcare System</p>
+                <p class="text-white font-bold text-base">Treatment Ticket</p>
+              </div>
+            </div>
+            <button
+              onclick="closeTicketModal()"
+              class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition"
+            >
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <div class="border-b-2 border-dashed border-slate-200 mx-6"></div>
+          <div class="px-6 py-5 space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-slate-400">Ticket No.</span>
+              <span
+                id="tkt-number"
+                class="text-sm font-mono font-bold text-slate-700"
+              ></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-slate-400">Doctor</span>
+              <span
+                id="tkt-doctor"
+                class="text-sm font-semibold text-slate-800"
+              ></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-slate-400">Treatment Category</span>
+              <span
+                id="tkt-category"
+                class="text-sm font-semibold text-slate-800"
+              ></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-slate-400">Estimated Cost</span>
+              <span
+                id="tkt-cost"
+                class="text-sm font-bold text-[#0d7377]"
+              ></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-slate-400">Generated On</span>
+              <span id="tkt-date" class="text-sm text-slate-600"></span>
+            </div>
+          </div>
+          <div class="border-b-2 border-dashed border-slate-200 mx-6"></div>
+          <div class="px-6 py-3 text-center">
+            <p class="text-[10px] text-slate-400">
+              Present this ticket at the reception. Prices are estimates and may
+              vary.
+            </p>
+          </div>
+        </div>
+        <div class="px-6 pb-5 flex gap-2">
+          <button
+            onclick="printTicket()"
+            class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition flex items-center justify-center gap-2"
+          >
+            <i data-lucide="printer" class="w-4 h-4"></i> Print
+          </button>
+          <button
+            onclick="closeTicketModal()"
+            class="flex-1 py-2.5 rounded-xl bg-[#0d7377] hover:bg-[#0a5a5d] text-white text-sm font-bold transition"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== RECEIPT MODAL ===== -->
+    <div
+      id="receiptModal"
+      class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[110] p-4 backdrop-blur-sm"
+    >
+      <div
+        id="receiptModalInner"
+        class="bg-white w-full max-w-2xl max-h-[90vh] rounded-[32px] shadow-2xl relative overflow-hidden transform scale-95 transition-all duration-300"
+      >
         <button
-          onclick="closePatientMedicalReportModal()"
-          class="px-3 py-1.5 border border-gray-300 rounded text-gray-700 font-semibold text-sm hover:bg-gray-100 transition"
+          onclick="closeReceiptModal()"
+          class="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center text-slate-500 hover:text-slate-800 transition-all hover:scale-110"
         >
-          Close
+          <i data-lucide="x" class="w-5 h-5"></i>
         </button>
 
+        <div class="overflow-y-auto max-h-[90vh]">
+          <iframe
+            id="receiptModalIframe"
+            src=""
+            class="w-full border-0 block min-h-[600px]"
+            scrolling="yes"
+          ></iframe>
+        </div>
       </div>
-
-      <input type="hidden" id="patient-report-apt-id" />
     </div>
-  </div>
+
+    <script src="patient-common.js"></script>
+    <script src="dashboard.js"></script>
+    <script>
+      lucide.createIcons();
+
+      function fitBookingIframe(iframe) {
+        try {
+          const doc = iframe.contentDocument || iframe.contentWindow.document;
+          const height =
+            doc.documentElement.scrollHeight || doc.body.scrollHeight;
+          iframe.style.height = height + "px";
+        } catch (e) {
+          iframe.style.height = "340px";
+        }
+      }
+
+      function fitModalIframe(iframe) {
+        try {
+          const doc = iframe.contentDocument || iframe.contentWindow.document;
+          const height =
+            doc.documentElement.scrollHeight || doc.body.scrollHeight;
+          iframe.style.height = height + 20 + "px";
+        } catch (e) {
+          iframe.style.height = "800px";
+        }
+      }
+    </script>
+
+    <div
+      id="treatToast"
+      class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] hidden items-center gap-3 bg-white rounded-2xl shadow-lg px-5 py-3 border border-slate-100 min-w-[240px]"
+    >
+      <div
+        id="treatToastIcon"
+        class="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+      ></div>
+      <div>
+        <p id="treatToastTitle" class="text-sm font-bold text-slate-800"></p>
+        <p id="treatToastMsg" class="text-xs text-slate-500"></p>
+      </div>
+    </div>
+
+    <div
+      id="successToast"
+      class="fixed inset-0 hidden items-center justify-center z-[70] bg-black/25 backdrop-blur-sm"
+    >
+      <div
+        class="bg-white rounded-[20px] shadow-[0_20px_60px_rgba(15,23,42,0.18)] px-6 py-5 w-[85%] max-w-xs text-center border border-emerald-100"
+      >
+        <div
+          class="mx-auto mb-3 w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-6 h-6 text-emerald-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        </div>
+        <h3 class="toast-title text-lg font-bold text-slate-800 mb-1">
+          Success
+        </h3>
+        <p class="toast-text text-slate-500 text-xs">
+          Appointment booked successfully.
+        </p>
+      </div>
+    </div>
+    <!-- Security: Cache Prevention & Session Verification -->
+    <script src="../../src/js/cache-prevention.js"></script>
+
+    <!-- Medical Report Viewer Modal -->
+    <div
+      id="patient-medical-report-modal"
+      class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[110] p-4 backdrop-blur-sm transition-all duration-300 ease-in-out opacity-0 patient-report-modal-backdrop"
+      style="opacity: 0; pointer-events: none"
+    >
+      <div
+        class="bg-white rounded-lg shadow-2xl max-w-lg w-full max-h-[calc(100vh-72px)] overflow-hidden flex flex-col text-[11px] transform transition-all duration-300 ease-out scale-95 patient-report-modal-content"
+        style="transform: scale(0.95)"
+      >
+        <!-- Header -->
+        <div
+          class="bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white px-4 py-3 flex items-center justify-between flex-shrink-0"
+        >
+          <div class="flex items-center gap-3">
+            <img
+              src="../../src/assets/Logo.svg"
+              alt="Logo"
+              class="w-10 h-10 rounded-md bg-white p-1"
+            />
+            <div>
+              <h1
+                id="patient-report-hospital-name"
+                class="text-sm font-bold mb-0.5"
+              >
+                Health Care
+              </h1>
+              <p
+                id="patient-report-hospital-address"
+                class="text-[11px] opacity-90 mb-0.5"
+              ></p>
+              <p
+                id="patient-report-hospital-contact"
+                class="text-[11px] opacity-80"
+              ></p>
+            </div>
+          </div>
+          <button
+            onclick="closePatientMedicalReportModal()"
+            class="text-white hover:bg-white hover:bg-opacity-20 p-1 rounded-lg transition flex-shrink-0"
+          >
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Report Title -->
+        <div
+          class="border-b border-gray-200 px-4 py-2 bg-gray-50 flex-shrink-0"
+        >
+          <div class="flex justify-between items-center gap-3">
+            <h2 class="text-base font-bold text-gray-900">MEDICAL REPORT</h2>
+            <div class="text-right text-[12px] text-gray-600">
+              <p>
+                ID: <span id="patient-report-id" class="font-semibold"></span>
+              </p>
+              <p>
+                Generated:
+                <span
+                  id="patient-report-generated-date"
+                  class="font-semibold"
+                ></span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="px-4 py-3 space-y-3 overflow-auto flex-grow">
+          <!-- Patient & Doctor Info Grid -->
+          <div class="grid grid-cols-2 gap-3 items-start">
+            <!-- Patient Information -->
+            <div>
+              <h3
+                class="font-bold text-[#0d7377] text-xs mb-1 pb-0.5 border-b border-[#0d7377]"
+              >
+                PATIENT
+              </h3>
+              <div class="space-y-2">
+                <div>
+                  <p class="text-[11px] text-gray-600 font-semibold">Name</p>
+                  <p
+                    id="patient-report-patient-name"
+                    class="text-gray-900 font-semibold text-[11px]"
+                  ></p>
+                </div>
+                <div>
+                  <p class="text-[11px] text-gray-600 font-semibold">ID</p>
+                  <p
+                    id="patient-report-patient-id"
+                    class="text-gray-900 font-semibold text-[11px]"
+                  ></p>
+                </div>
+                <div>
+                  <p class="text-[11px] text-gray-600 font-semibold">Age</p>
+                  <p
+                    id="patient-report-patient-age"
+                    class="text-gray-900 font-semibold text-[11px]"
+                  >
+                    35 years
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Doctor & Consultation Information -->
+            <div>
+              <h3
+                class="font-bold text-[#0d7377] text-xs mb-[2.5px] pb-0.5 border-b border-[#0d7377]"
+              >
+                DOCTOR
+              </h3>
+              <div class="space-y-2">
+                <div>
+                  <p class="text-[11px] text-gray-600 font-semibold">Doctor</p>
+                  <p
+                    id="patient-report-doctor-name"
+                    class="text-gray-900 font-semibold text-[11px]"
+                  ></p>
+                </div>
+                <div>
+                  <p class="text-[11px] text-gray-600 font-semibold">
+                    Doctor ID
+                  </p>
+                  <p
+                    id="patient-report-doctor-id"
+                    class="text-gray-900 font-semibold text-[11px]"
+                  ></p>
+                </div>
+                <div>
+                  <p class="text-[11px] text-gray-600 font-semibold">Date</p>
+                  <p
+                    id="patient-report-apt-datetime"
+                    class="text-gray-900 font-semibold text-[11px]"
+                  ></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chief Complaint -->
+          <div>
+            <h3
+              class="font-bold text-[#0d7377] text-xs mb-1 pb-0.5 border-b border-[#0d7377]"
+            >
+              COMPLAINT
+            </h3>
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-2 rounded-r-lg">
+              <p
+                id="patient-report-chief-complaint"
+                class="text-gray-900 text-[12px]"
+              ></p>
+            </div>
+          </div>
+
+          <!-- Clinical Findings -->
+          <div>
+            <h3
+              class="font-bold text-[#0d7377] text-xs mb-1 pb-0.5 border-b border-[#0d7377]"
+            >
+              FINDINGS
+            </h3>
+
+            <div class="grid grid-cols-2 gap-1 mb-1">
+              <!-- Symptoms -->
+              <div>
+                <h4
+                  class="font-bold text-[#EF7300] mb-0.5 flex items-center gap-1 text-xs"
+                >
+                  <span class="w-1 h-1 rounded-full bg-[#EF7300]"></span>
+                  Symptoms
+                </h4>
+                <div
+                  class="bg-yellow-50 border border-yellow-200 p-2 rounded-lg"
+                >
+                  <p
+                    id="patient-report-symptoms"
+                    class="text-gray-900 text-[12px] whitespace-pre-line"
+                  ></p>
+                </div>
+              </div>
+
+              <!-- Diagnosis -->
+              <div>
+                <h4
+                  class="font-bold text-[#DC2626] mb-0.5 flex items-center gap-1 text-xs"
+                >
+                  <span class="w-1 h-1 rounded-full bg-[#DC2626]"></span>
+                  Diagnosis
+                </h4>
+                <div class="bg-red-50 border border-red-200 p-2 rounded-lg">
+                  <p
+                    id="patient-report-diagnosis"
+                    class="text-gray-900 text-[12px] whitespace-pre-line"
+                  ></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Vital Signs -->
+            <div>
+              <h4
+                class="font-bold text-[#16A34A] mb-1 flex items-center gap-1 text-xs"
+              >
+                <span class="w-1 h-1 rounded-full bg-[#16A34A]"></span>
+                Vital Signs
+              </h4>
+              <div class="grid grid-cols-3 gap-1">
+                <div class="bg-green-50 border border-green-200 p-2 rounded-lg">
+                  <p class="text-[12px] text-gray-600 font-semibold mb-1">BP</p>
+                  <p
+                    id="patient-report-bp"
+                    class="text-gray-900 font-bold text-[12px]"
+                  ></p>
+                </div>
+                <div class="bg-green-50 border border-green-200 p-2 rounded-lg">
+                  <p class="text-[12px] text-gray-600 font-semibold mb-1">
+                    Weight
+                  </p>
+                  <p
+                    id="patient-report-weight"
+                    class="text-gray-900 font-bold text-[12px]"
+                  ></p>
+                </div>
+                <div class="bg-green-50 border border-green-200 p-2 rounded-lg">
+                  <p class="text-[12px] text-gray-600 font-semibold mb-1">
+                    Room
+                  </p>
+                  <p
+                    id="patient-report-room-no"
+                    class="text-gray-900 font-bold text-[12px]"
+                  >
+                    --
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Prescribed Medicines -->
+          <div id="patient-medicines-section" class="hidden">
+            <h3
+              class="font-bold text-[#0d7377] text-xs mb-1 pb-0.5 border-b border-[#0d7377]"
+            >
+              MEDS
+            </h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs">
+                <thead>
+                  <tr class="bg-[#0d7377] text-white">
+                    <th class="p-2 text-left font-semibold">Medicine</th>
+                    <th class="p-2 text-left font-semibold">Dosage</th>
+                    <th class="p-2 text-left font-semibold">Frequency</th>
+                  </tr>
+                </thead>
+                <tbody id="patient-medicines-list"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Additional Notes -->
+          <div id="patient-notes-section" class="hidden">
+            <h3
+              class="font-bold text-[#0d7377] text-sm mb-2 pb-1 border-b-2 border-[#0d7377]"
+            >
+              NOTES
+            </h3>
+            <div class="bg-purple-50 border border-purple-200 p-2 rounded-lg">
+              <p
+                id="patient-report-notes"
+                class="text-gray-900 text-[12px] whitespace-pre-line"
+              ></p>
+            </div>
+          </div>
+
+          <!-- Signature removed per request -->
+        </div>
+
+        <!-- Footer -->
+        <div
+          class="bg-gray-50 border-t border-gray-200 px-4 py-2 flex gap-3 justify-end flex-shrink-0"
+        >
+          <button
+            onclick="closePatientMedicalReportModal()"
+            class="px-3 py-1.5 border border-gray-300 rounded text-gray-700 font-semibold text-sm hover:bg-gray-100 transition"
+          >
+            Close
+          </button>
+        </div>
+
+        <input type="hidden" id="patient-report-apt-id" />
+      </div>
+    </div>
 
     <!-- Missing Report Popup -->
-    <div id="patient-report-missing-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[120] p-4 backdrop-blur-sm transition-all duration-300 ease-in-out opacity-0 patient-report-missing-backdrop" style="opacity: 0; pointer-events: none;">
-      <div class="bg-white rounded-lg shadow-2xl max-w-md w-full transform transition-all duration-300 ease-out scale-95 patient-report-missing-content" style="transform: scale(0.95);">
-        <div class="bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white px-5 py-4 rounded-t-lg flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+    <div
+      id="patient-report-missing-modal"
+      class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[120] p-4 backdrop-blur-sm transition-all duration-300 ease-in-out opacity-0 patient-report-missing-backdrop"
+      style="opacity: 0; pointer-events: none"
+    >
+      <div
+        class="bg-white rounded-lg shadow-2xl max-w-md w-full transform transition-all duration-300 ease-out scale-95 patient-report-missing-content"
+        style="transform: scale(0.95)"
+      >
+        <div
+          class="bg-gradient-to-r from-[#0d7377] to-[#0a5a5d] text-white px-5 py-4 rounded-t-lg flex items-center gap-3"
+        >
+          <div
+            class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center"
+          >
             <i data-lucide="file-x" class="w-5 h-5"></i>
           </div>
           <div>
             <h3 class="text-lg font-bold">Report Not Generated</h3>
-            <p class="text-xs text-teal-100">This appointment is completed, but the medical report is missing.</p>
+            <p class="text-xs text-teal-100">
+              This appointment is completed, but the medical report is missing.
+            </p>
           </div>
         </div>
 
         <div class="px-5 py-4 space-y-3">
           <div class="bg-teal-50 border border-teal-100 rounded-lg p-4">
             <p class="text-sm text-gray-700">
-              The medical report for this completed appointment has not been generated yet.
+              The medical report for this completed appointment has not been
+              generated yet.
             </p>
             <p class="text-sm text-gray-700 mt-2">
               Please ask your doctor to generate it.
@@ -687,135 +1223,169 @@
       </div>
     </div>
 
-  <!-- Medical Report Functions -->
-  <script src="medical_report_pdf_generator.js"></script>
-  <script>
-    function closePatientMedicalReportModal() {
-      smoothCloseModal('patient-medical-report-modal', {
-        mode: 'class',
-        panelSelector: '.patient-report-modal-content',
-      });
-    }
-
-    async function openPatientMedicalReportModal(appointmentId) {
-      document.getElementById('patient-report-apt-id').value = appointmentId;
-      const loaded = await loadPatientMedicalReport(appointmentId);
-      if (!loaded) {
-        showPatientReportMissingModal();
-        return;
+    <!-- Medical Report Functions -->
+    <script src="medical_report_pdf_generator.js"></script>
+    <script>
+      function closePatientMedicalReportModal() {
+        smoothCloseModal("patient-medical-report-modal", {
+          mode: "class",
+          panelSelector: ".patient-report-modal-content",
+        });
       }
-      
-      const modal = document.getElementById('patient-medical-report-modal');
-      smoothOpenModal(modal, {
-        mode: 'class',
-        panelSelector: '.patient-report-modal-content',
-      });
-    }
 
-    async function loadPatientMedicalReport(appointmentId) {
-      try {
-        const response = await fetch(
-          `../../api/doctor/medical_report.php?appointment_id=${appointmentId}`,
-          { credentials: 'include' }
-        );
+      async function openPatientMedicalReportModal(appointmentId) {
+        document.getElementById("patient-report-apt-id").value = appointmentId;
+        const loaded = await loadPatientMedicalReport(appointmentId);
+        if (!loaded) {
+          showPatientReportMissingModal();
+          return;
+        }
 
-        const result = await response.json();
+        const modal = document.getElementById("patient-medical-report-modal");
+        smoothOpenModal(modal, {
+          mode: "class",
+          panelSelector: ".patient-report-modal-content",
+        });
+      }
 
-        if (result.status !== 'success') {
+      async function loadPatientMedicalReport(appointmentId) {
+        try {
+          const response = await fetch(
+            `../../api/doctor/medical_report.php?appointment_id=${appointmentId}`,
+            { credentials: "include" },
+          );
+
+          const result = await response.json();
+
+          if (result.status !== "success") {
+            return false;
+          }
+
+          const report = result.data;
+
+          // Hospital Information
+          document.getElementById("patient-report-hospital-name").textContent =
+            "Health Care";
+          document.getElementById(
+            "patient-report-hospital-address",
+          ).textContent = "Address: 123 Medical Street, Healthcare City";
+          document.getElementById(
+            "patient-report-hospital-contact",
+          ).textContent = "Phone: +1-800-HOSPITAL | Email: info@healthcare.com";
+
+          // Report Metadata
+          document.getElementById("patient-report-id").textContent =
+            report.report_id;
+          document.getElementById("patient-report-generated-date").textContent =
+            new Date(report.created_at).toLocaleString();
+
+          // Patient Information
+          document.getElementById("patient-report-patient-name").textContent =
+            report.patient_name || "N/A";
+          document.getElementById("patient-report-patient-id").textContent =
+            report.patient_id || "N/A";
+          document.getElementById("patient-report-patient-age").textContent =
+            "35 years";
+
+          // Doctor & Appointment Information
+          document.getElementById("patient-report-doctor-name").textContent =
+            `Dr. ${report.doctor_name}`;
+          document.getElementById("patient-report-doctor-id").textContent =
+            report.doctor_id || "N/A";
+
+          const aptDate = new Date(report.app_date + " " + report.app_time);
+          document.getElementById("patient-report-apt-datetime").textContent =
+            aptDate.toLocaleString();
+
+          // Chief Complaint
+          document.getElementById(
+            "patient-report-chief-complaint",
+          ).textContent = report.reason_for_visit || "N/A";
+
+          // Populate medical findings
+          document.getElementById("patient-report-symptoms").textContent =
+            report.symptoms || "N/A";
+          document.getElementById("patient-report-diagnosis").textContent =
+            report.diagnosis || "N/A";
+          document.getElementById("patient-report-bp").textContent =
+            report.blood_pressure || "Not recorded";
+          document.getElementById("patient-report-weight").textContent =
+            report.weight ? `${report.weight} kg` : "Not recorded";
+          document.getElementById("patient-report-room-no").textContent =
+            report.room_num || "--";
+
+          // Populate medicines in table format
+          if (
+            report.prescribed_medicines &&
+            Array.isArray(report.prescribed_medicines) &&
+            report.prescribed_medicines.length > 0
+          ) {
+            const medicinesList = document.getElementById(
+              "patient-medicines-list",
+            );
+            medicinesList.innerHTML = "";
+            report.prescribed_medicines.forEach((medicine, idx) => {
+              const row = document.createElement("tr");
+              row.className = idx % 2 === 0 ? "bg-gray-50" : "bg-white";
+              row.innerHTML = `
+              <td class="p-3 border-b border-gray-200 text-gray-900 font-medium">${medicine.name || "N/A"}</td>
+              <td class="p-3 border-b border-gray-200 text-gray-700">${medicine.dosage || "N/A"}</td>
+              <td class="p-3 border-b border-gray-200 text-gray-700">${medicine.frequency || "N/A"}</td>
+            `;
+              medicinesList.appendChild(row);
+            });
+            document
+              .getElementById("patient-medicines-section")
+              .classList.remove("hidden");
+          } else {
+            document
+              .getElementById("patient-medicines-section")
+              .classList.add("hidden");
+          }
+
+          // Populate notes
+          if (report.additional_notes) {
+            document.getElementById("patient-report-notes").textContent =
+              report.additional_notes;
+            document
+              .getElementById("patient-notes-section")
+              .classList.remove("hidden");
+          } else {
+            document
+              .getElementById("patient-notes-section")
+              .classList.add("hidden");
+          }
+
+          // Store appointment ID for download
+          document.getElementById("patient-report-apt-id").value =
+            appointmentId;
+
+          lucide.createIcons();
+          return true;
+        } catch (error) {
+          console.error(error);
           return false;
         }
-
-        const report = result.data;
-
-        // Hospital Information
-        document.getElementById('patient-report-hospital-name').textContent = 'Health Care';
-        document.getElementById('patient-report-hospital-address').textContent = 'Address: 123 Medical Street, Healthcare City';
-        document.getElementById('patient-report-hospital-contact').textContent = 'Phone: +1-800-HOSPITAL | Email: info@healthcare.com';
-        
-        // Report Metadata
-        document.getElementById('patient-report-id').textContent = report.report_id;
-        document.getElementById('patient-report-generated-date').textContent = 
-          new Date(report.created_at).toLocaleString();
-
-        // Patient Information
-        document.getElementById('patient-report-patient-name').textContent = report.patient_name || 'N/A';
-        document.getElementById('patient-report-patient-id').textContent = report.patient_id || 'N/A';
-        document.getElementById('patient-report-patient-age').textContent = '35 years';
-        
-        // Doctor & Appointment Information
-        document.getElementById('patient-report-doctor-name').textContent = `Dr. ${report.doctor_name}`;
-        document.getElementById('patient-report-doctor-id').textContent = report.doctor_id || 'N/A';
-        
-        const aptDate = new Date(report.app_date + ' ' + report.app_time);
-        document.getElementById('patient-report-apt-datetime').textContent = aptDate.toLocaleString();
-        
-        // Chief Complaint
-        document.getElementById('patient-report-chief-complaint').textContent = report.reason_for_visit || 'N/A';
-
-        // Populate medical findings
-        document.getElementById('patient-report-symptoms').textContent = report.symptoms || 'N/A';
-        document.getElementById('patient-report-diagnosis').textContent = report.diagnosis || 'N/A';
-        document.getElementById('patient-report-bp').textContent = report.blood_pressure || 'Not recorded';
-        document.getElementById('patient-report-weight').textContent = report.weight ? `${report.weight} kg` : 'Not recorded';
-        document.getElementById('patient-report-room-no').textContent = report.room_num || '--';
-
-        // Populate medicines in table format
-        if (report.prescribed_medicines && Array.isArray(report.prescribed_medicines) && report.prescribed_medicines.length > 0) {
-          const medicinesList = document.getElementById('patient-medicines-list');
-          medicinesList.innerHTML = '';
-          report.prescribed_medicines.forEach((medicine, idx) => {
-            const row = document.createElement('tr');
-            row.className = idx % 2 === 0 ? 'bg-gray-50' : 'bg-white';
-            row.innerHTML = `
-              <td class="p-3 border-b border-gray-200 text-gray-900 font-medium">${medicine.name || 'N/A'}</td>
-              <td class="p-3 border-b border-gray-200 text-gray-700">${medicine.dosage || 'N/A'}</td>
-              <td class="p-3 border-b border-gray-200 text-gray-700">${medicine.frequency || 'N/A'}</td>
-            `;
-            medicinesList.appendChild(row);
-          });
-          document.getElementById('patient-medicines-section').classList.remove('hidden');
-        } else {
-          document.getElementById('patient-medicines-section').classList.add('hidden');
-        }
-
-        // Populate notes
-        if (report.additional_notes) {
-          document.getElementById('patient-report-notes').textContent = report.additional_notes;
-          document.getElementById('patient-notes-section').classList.remove('hidden');
-        } else {
-          document.getElementById('patient-notes-section').classList.add('hidden');
-        }
-
-        // Store appointment ID for download
-        document.getElementById('patient-report-apt-id').value = appointmentId;
-
-        lucide.createIcons();
-        return true;
-      } catch (error) {
-        console.error(error);
-        return false;
       }
-    }
 
-    function showPatientReportMissingModal() {
-      const modal = document.getElementById('patient-report-missing-modal');
-      smoothOpenModal(modal, {
-        mode: 'class',
-        panelSelector: '.patient-report-missing-content',
-      });
+      function showPatientReportMissingModal() {
+        const modal = document.getElementById("patient-report-missing-modal");
+        smoothOpenModal(modal, {
+          mode: "class",
+          panelSelector: ".patient-report-missing-content",
+        });
 
-      if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
+        if (typeof lucide !== "undefined") {
+          lucide.createIcons();
+        }
       }
-    }
 
-    function closePatientReportMissingModal() {
-      smoothCloseModal('patient-report-missing-modal', {
-        mode: 'class',
-        panelSelector: '.patient-report-missing-content',
-      });
-    }
-  </script>
-</body>
-
+      function closePatientReportMissingModal() {
+        smoothCloseModal("patient-report-missing-modal", {
+          mode: "class",
+          panelSelector: ".patient-report-missing-content",
+        });
+      }
+    </script>
+  </body>
 </html>
