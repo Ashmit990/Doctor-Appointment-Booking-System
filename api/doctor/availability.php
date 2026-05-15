@@ -11,6 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $doctor_id = $_SESSION['user_id'];
 $method = $_SERVER['REQUEST_METHOD'];
+date_default_timezone_set('Asia/Kathmandu');
 
 if ($method === 'GET') {
     //Get availability by date
