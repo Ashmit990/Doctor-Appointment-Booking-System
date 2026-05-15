@@ -43,7 +43,7 @@ if ($method === 'GET') {
                 WHERE doctor_id = ?
                   AND available_date = ?
                   AND status IN ('Available', 'Blocked', 'Booked')
-                  AND end_time <= ?
+                  AND start_time <= ?
             ");
             $close_stmt->bind_param("sss", $doctor_id, $today, $current_time);
             $close_stmt->execute();
