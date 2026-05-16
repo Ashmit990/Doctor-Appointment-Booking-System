@@ -21,7 +21,7 @@ $sql = "
     FROM users u
     INNER JOIN doctor_profiles dp ON u.user_id = dp.user_id
     WHERE u.role = 'Doctor'
-    ORDER BY total_appointments DESC
+    ORDER BY total_appointments DESC, consultation_fee DESC
 ";
 $result = $conn->query($sql);
 $rows = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];

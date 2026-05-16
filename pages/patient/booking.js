@@ -296,10 +296,8 @@ async function loadDoctors() {
 function onSpecializationChange() {
   const spec = document.getElementById("specialization").value;
   const wrap = document.getElementById("doctorSelectWrap");
-  const doctorSel = document.getElementById("doctor");
 
   // Reset
-  doctorSel.value = "";
   selectedDoctor = null;
   document.getElementById("totalPrice").textContent = "—";
   document.getElementById("date").innerHTML = '<option value="">Select doctor first</option>';
@@ -308,16 +306,44 @@ function onSpecializationChange() {
   if (!spec) { wrap.classList.add("hidden"); return; }
 
   const filtered = doctorsList.filter((d) => (d.specialization || "General") === spec);
-  doctorSel.innerHTML = '<option value="">Select doctor</option>';
+
+  // Reset custom dropdown
+  const hiddenInput = document.getElementById("doctor");
+  hiddenInput.value = "";
+  selectedDoctor = null;
+  document.getElementById("doctorDropdownLabel").textContent = "Select doctor";
+  document.getElementById("doctorDropdownLabel").classList.add("text-slate-400");
+  document.getElementById("doctorDropdownLabel").classList.remove("text-slate-700");
+
+  const list = document.getElementById("doctorDropdownList");
+  list.innerHTML = "";
   filtered.forEach((d) => {
-    const opt = document.createElement("option");
-    opt.value = d.doctor_id;
-    opt.textContent = d.full_name;
-    doctorSel.appendChild(opt);
+    const fee = d.consultation_fee ? `Rs. ${Number(d.consultation_fee).toFixed(0)}` : "Rs. 500";
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "w-full flex items-center justify-between px-4 py-2.5 text-sm hover:bg-teal-50 transition-colors border-b border-slate-100 last:border-0";
+    item.dataset.id = d.doctor_id;
+    item.innerHTML = `<span class="font-medium text-slate-700">${d.full_name}</span><span class="text-teal-700 font-semibold ml-4 shrink-0">${fee}</span>`;
+    item.addEventListener("click", () => selectDoctor(d.doctor_id, d.full_name));
+    list.appendChild(item);
   });
 
   wrap.classList.remove("hidden");
   notifyParentResize();
+}
+
+function selectDoctor(doctorId, doctorName) {
+  document.getElementById("doctor").value = doctorId;
+  const label = document.getElementById("doctorDropdownLabel");
+  label.textContent = doctorName;
+  label.classList.remove("text-slate-400");
+  label.classList.add("text-slate-700");
+  document.getElementById("doctorDropdownPanel").classList.add("hidden");
+  selectedDoctor = doctorsList.find((d) => d.doctor_id === doctorId) || null;
+  document.getElementById("totalPrice").textContent = selectedDoctor
+    ? formatMoney(selectedDoctor.consultation_fee)
+    : "—";
+  loadDates(doctorId).then(() => checkBookingConflicts());
 }
 
 async function loadDates(doctorId) {
@@ -504,19 +530,18 @@ document.getElementById("specialization").addEventListener("change", () => {
   onSpecializationChange();
 });
 
-document.getElementById("doctor").addEventListener("change", async () => {
-  const doctorSel = document.getElementById("doctor");
-  const doctorId = doctorSel.value;
-  if (doctorId) {
-    const placeholder = doctorSel.querySelector('option[value=""]');
-    if (placeholder) placeholder.remove();
+// Toggle custom doctor dropdown open/close
+document.getElementById("doctorDropdownBtn").addEventListener("click", () => {
+  const panel = document.getElementById("doctorDropdownPanel");
+  panel.classList.toggle("hidden");
+});
+
+// Close dropdown when clicking outside
+document.addEventListener("click", (e) => {
+  const container = document.getElementById("doctorDropdownContainer");
+  if (container && !container.contains(e.target)) {
+    document.getElementById("doctorDropdownPanel")?.classList.add("hidden");
   }
-  selectedDoctor = doctorsList.find((d) => d.doctor_id === doctorId) || null;
-  document.getElementById("totalPrice").textContent = selectedDoctor
-    ? formatMoney(selectedDoctor.consultation_fee)
-    : "—";
-  await loadDates(doctorId);
-  await checkBookingConflicts();
 });
 
 async function checkBookingConflicts() {

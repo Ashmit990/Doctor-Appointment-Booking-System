@@ -300,7 +300,7 @@ function renderAppointments(rows) {
         </div>
 
         <div class="flex flex-wrap gap-1.5 lg:flex-col w-28 shrink-0">
-          <button type="button" data-view="${item.appointment_id}" class="view-btn w-full px-3 py-2 rounded-lg bg-yellow-400 hover:bg-yellow-500 text-white text-xs font-semibold transition whitespace-nowrap text-center shadow-sm">
+          <button type="button" data-view="${item.appointment_id}" class="view-btn w-full px-3 py-2 rounded-lg border border-[#0d7377] text-[#0d7377] hover:bg-teal-50 text-xs font-medium transition whitespace-nowrap text-center">
             Details
           </button>
           ${showReschedule
@@ -782,7 +782,7 @@ function printTicket() {
     '<div class="row"><span class="lbl">Treatment Category</span><span class="val">' +
     category +
     "</span></div>" +
-    '<div class="row"><span class="lbl">Estimated Cost</span><span class="val cost">' +
+    '<div class="row"><span class="lbl">Consultation Fee</span><span class="val cost">' +
     cost +
     "</span></div>" +
     '<div class="row"><span class="lbl">Generated On</span><span class="val" style="font-size:12px;font-weight:500;color:#475569">' +
@@ -1539,7 +1539,7 @@ function treatPrintTicket() {
     '<div class="row"><span class="lbl">Category</span><span class="val">' +
     category +
     "</span></div>" +
-    '<div class="row"><span class="lbl">Estimated Cost</span><span class="val cost">' +
+    '<div class="row"><span class="lbl">Consultation Fee</span><span class="val cost">' +
     cost +
     "</span></div>" +
     '<div class="row"><span class="lbl">Duration</span><span class="val">' +

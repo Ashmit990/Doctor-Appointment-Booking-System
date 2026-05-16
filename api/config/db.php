@@ -2,7 +2,7 @@
 $host = "127.0.0.1";
 $username = "root";
 $password = ""; // Default for XAMPP is empty
-$dbname = "hospital_official(1)";
+$dbname = "hospital_official";
 
 // Create connection
 $conn = new mysqli($host, $username, $password, $dbname);
