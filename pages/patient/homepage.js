@@ -1,6 +1,7 @@
 let calViewYear = new Date().getFullYear();
 let calViewMonth = new Date().getMonth() + 1;
 let appointmentDatesInMonth = new Set();
+let completedDatesInMonth = new Set();
 let selectedCalendarDate = null;
 let miniCalYear = new Date().getFullYear();
 let miniCalMonth = new Date().getMonth() + 1;
@@ -240,8 +241,10 @@ async function refreshCalendarDots(year, month) {
   );
   const j = await r.json();
   appointmentDatesInMonth = new Set();
-  if (j.status === "success" && j.data && j.data.dates) {
-    j.data.dates.forEach((d) => appointmentDatesInMonth.add(d));
+  completedDatesInMonth = new Set();
+  if (j.status === "success" && j.data) {
+    if (j.data.dates) j.data.dates.forEach((d) => appointmentDatesInMonth.add(d));
+    if (j.data.completed_dates) j.data.completed_dates.forEach((d) => completedDatesInMonth.add(d));
   }
 }
 
@@ -319,7 +322,13 @@ function buildCalendarGrid(container, year, month, compact) {
     cell.dataset.date = ds;
 
     if (hasApt) {
-      cell.classList.add("has-appointment");
+      if (compact && completedDatesInMonth.has(ds)) {
+        cell.classList.add("has-completed");
+      } else if (!compact) {
+        cell.classList.add("has-appointment");
+      } else {
+        cell.classList.add("has-appointment");
+      }
     }
 
     cell.addEventListener("click", async (e) => {

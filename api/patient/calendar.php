@@ -27,5 +27,22 @@ while ($row = $res->fetch_assoc()) {
 }
 $stmt->close();
 
-echo json_encode(['status' => 'success', 'data' => ['dates' => $dates]]);
+$stmt2 = $conn->prepare("
+    SELECT DISTINCT app_date
+    FROM appointments
+    WHERE patient_id = ?
+      AND YEAR(app_date) = ?
+      AND MONTH(app_date) = ?
+      AND status = 'Completed'
+");
+$stmt2->bind_param("sii", $patient_id, $year, $month);
+$stmt2->execute();
+$res2 = $stmt2->get_result();
+$completed_dates = [];
+while ($row = $res2->fetch_assoc()) {
+    $completed_dates[] = $row['app_date'];
+}
+$stmt2->close();
+
+echo json_encode(['status' => 'success', 'data' => ['dates' => $dates, 'completed_dates' => $completed_dates]]);
 $conn->close();

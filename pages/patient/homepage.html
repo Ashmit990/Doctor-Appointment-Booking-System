@@ -158,12 +158,14 @@
         border-radius: 50%;
       }
 
-      /* Green dot for mini calendar cells with appointments */
-      span.mini-cal-cell.has-appointment {
+      /* Green dot for mini calendar cells with upcoming appointments */
+      span.mini-cal-cell.has-appointment,
+      .has-appointment[data-date] {
         position: relative;
         font-weight: bold;
       }
-      span.mini-cal-cell.has-appointment::after {
+      span.mini-cal-cell.has-appointment::after,
+      .has-appointment[data-date]::after {
         content: '';
         position: absolute;
         bottom: -3px;
@@ -171,8 +173,26 @@
         transform: translateX(-50%);
         width: 4px;
         height: 4px;
-        background: #007E85;
+        background: #22c55e;
         border-radius: 50%;
+      }
+
+      /* Green tick for mini calendar cells with completed appointments */
+      .has-completed {
+        position: relative;
+        font-weight: bold;
+        color: #16a34a !important;
+      }
+      .has-completed::after {
+        content: '✓';
+        position: absolute;
+        bottom: -3px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 7px;
+        font-weight: 900;
+        color: #16a34a;
+        line-height: 1;
       }
     /* PREMIUM PATIENT THEME START */
         html { font-size: clamp(15px, 1vw, 17px); }
