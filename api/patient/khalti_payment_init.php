@@ -107,20 +107,36 @@ try {
         exit;
     }
 
-    // Prevent double booking: one active appointment per patient per day.
-    $conf = $conn->prepare("SELECT appointment_id FROM appointments WHERE patient_id = ? AND app_date = ? AND status <> 'Cancelled' LIMIT 1");
-    $conf->bind_param('ss', $patient_id, $slot['available_date']);
+    // New Conflict Rules:
+    // 1. Cannot book the same doctor twice on the same day (regardless of time).
+    // 2. Cannot book any doctor at the same time (time conflict).
+    $dateStr = $slot['available_date'];
+    $timeStr = $slot['start_time'];
+    $docId   = $slot['doctor_id'];
+
+    $conf = $conn->prepare("
+        SELECT a.appointment_id, u.full_name AS doctor_name, a.doctor_id, a.app_time
+        FROM appointments a 
+        JOIN users u ON a.doctor_id = u.user_id
+        WHERE a.patient_id = ? 
+          AND a.app_date = ? 
+          AND (a.doctor_id = ? OR a.app_time = ?)
+          AND a.status <> 'Cancelled' 
+        LIMIT 1
+    ");
+    $conf->bind_param('ssss', $patient_id, $dateStr, $docId, $timeStr);
     $conf->execute();
-    $has_conflict = (bool) $conf->get_result()->fetch_assoc();
+    $conflict_row = $conf->get_result()->fetch_assoc();
     $conf->close();
 
-    if ($has_conflict) {
-        $conn->rollback();
-        http_response_code(409);
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'You already have an appointment on this date. Multiple bookings on the same day are not allowed.'
-        ]);
+    if ($conflict_row) {
+        if ($conflict_row['doctor_id'] == $docId) {
+            $msg = "You already have an appointment with " . $conflict_row['doctor_name'] . " on this date. Multiple bookings with the same doctor on the same day are not allowed.";
+        } else {
+            $msg = "You already have an appointment at " . date("h:i A", strtotime($timeStr)) . " with " . $conflict_row['doctor_name'] . " on this date.";
+        }
+        echo json_encode(['status' => 'error', 'message' => $msg]);
+        $conn->close();
         exit;
     }
 

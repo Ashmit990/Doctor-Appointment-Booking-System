@@ -302,7 +302,7 @@
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-gray-600 text-sm font-medium">
-                    Completed Appointments
+                    Total Appointments
                   </p>
                   <p
                     id="totalCompleted"
@@ -360,8 +360,7 @@
                     <th class="px-6 py-3">Appointment Date</th>
                     <th class="px-6 py-3">Patient Name</th>
                     <th class="px-6 py-3">Appointment ID</th>
-                    <th class="px-6 py-3">Remarks</th>
-                    <th class="px-6 py-3">Status</th>
+                    <th class="px-6 py-3">Appointment Status</th>
                   </tr>
                 </thead>
                 <tbody id="earningsTable" class="divide-y divide-gray-100">
@@ -437,7 +436,7 @@
         if (!earningsData || earningsData.length === 0) {
           tbody.innerHTML = `
           <tr>
-            <td colspan="5" class="px-6 py-16 text-center">
+            <td colspan="4" class="px-6 py-16 text-center">
               <div class="flex flex-col items-center justify-center">
                 <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-gray-100">
                     <i data-lucide="receipt" class="w-8 h-8 text-gray-400"></i>
@@ -454,15 +453,28 @@
 
         tbody.innerHTML = earningsData
           .map(
-            (item) => `
+            (item) => {
+              const status = item.status || "Unknown";
+              let statusClass = "bg-gray-100 text-gray-600";
+              
+              if (status === "Upcoming") statusClass = "bg-blue-100 text-blue-600";
+              else if (status === "Completed") statusClass = "bg-emerald-100 text-emerald-600";
+              else if (status === "Cancelled") statusClass = "bg-red-100 text-red-600";
+              else if (status === "In Progress") statusClass = "bg-amber-100 text-amber-600";
+
+              return `
                 <tr class="hover:bg-gray-50 border-b border-gray-100">
                     <td class="px-6 py-3 text-sm text-gray-700">${item.app_date || "-"}</td>
                     <td class="px-6 py-3 text-sm font-medium text-gray-800">${escapeHtml(item.patient_name || "Unknown Patient")}</td>
                     <td class="px-6 py-3 text-sm text-gray-500">#${item.appointment_id || "-"}</td>
-                    <td class="px-6 py-3 text-sm text-gray-500">${escapeHtml(item.remarks || "Appointment completed successfully")}</td>
-                    <td class="px-6 py-3"><span class="bg-[#007E85]/15 text-[#007E85] px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap">${item.status || "Appointment Complete"}</span></td>
+                    <td class="px-6 py-3">
+                        <span class="${statusClass} px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap">
+                            ${status}
+                        </span>
+                    </td>
                 </tr>
-            `,
+              `;
+            }
           )
           .join("");
       }

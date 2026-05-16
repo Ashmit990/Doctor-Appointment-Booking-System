@@ -11,6 +11,7 @@ if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $day)) {
 $stmt = $conn->prepare("
     SELECT
         a.appointment_id,
+        a.doctor_id,
         a.app_date,
         a.app_time,
         a.room_num,
