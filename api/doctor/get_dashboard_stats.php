@@ -46,18 +46,18 @@ try {
     $today_appts = $stmt->get_result()->fetch_assoc()['count'];
     $stmt->close();
 
-    // 3. Total Upcoming Appointments
-    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM appointments WHERE doctor_id = ? AND status = 'Upcoming'");
-    $stmt->bind_param("s", $doctor_id);
+    // 3. Today's Completed Appointments
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM appointments WHERE doctor_id = ? AND app_date = ? AND status = 'Completed'");
+    $stmt->bind_param("ss", $doctor_id, $today);
     $stmt->execute();
-    $upcoming = $stmt->get_result()->fetch_assoc()['count'];
+    $completed_today = $stmt->get_result()->fetch_assoc()['count'];
     $stmt->close();
 
-    // 4. Total Completed Appointments
-    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM appointments WHERE doctor_id = ? AND status = 'Completed'");
-    $stmt->bind_param("s", $doctor_id);
+    // 4. Today's Distinct Patients
+    $stmt = $conn->prepare("SELECT COUNT(DISTINCT patient_id) as count FROM appointments WHERE doctor_id = ? AND app_date = ? AND status != 'Cancelled'");
+    $stmt->bind_param("ss", $doctor_id, $today);
     $stmt->execute();
-    $completed = $stmt->get_result()->fetch_assoc()['count'];
+    $patients_today = $stmt->get_result()->fetch_assoc()['count'];
     $stmt->close();
 
     // 5. Total Earnings
@@ -138,8 +138,8 @@ try {
             'profile' => $profile,
             'stats' => [
                 'today_appointments' => $today_appts,
-                'upcoming_total' => $upcoming,
-                'completed_total' => $completed,
+                'patients_today' => $patients_today,
+                'completed_today' => $completed_today,
                 'total_earnings' => floatval($total_earnings),
                 'unread_notifications' => $notifications
             ],

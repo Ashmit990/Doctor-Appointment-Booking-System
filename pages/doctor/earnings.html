@@ -282,7 +282,7 @@
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-gray-600 text-sm font-medium">
-                    Non-taxable Earnings
+                    Gross Earnings
                   </p>
                   <p
                     id="totalEarnings"
@@ -325,25 +325,34 @@
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-gray-600 text-sm font-medium">
-                    Average Per Visit
+                    Completed Appointments
                   </p>
                   <p
-                    id="avgPerVisit"
+                    id="completedCount"
                     class="text-4xl font-bold text-gray-900 mt-2"
                   >
-                    $0
+                    0
                   </p>
                 </div>
                 <div
                   class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center"
                 >
                   <i
-                    data-lucide="trending-up"
+                    data-lucide="check-square"
                     class="w-7 h-7 primary-color"
                   ></i>
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- Net Income Info Line -->
+          <div class="bg-primary/5 border border-primary/10 rounded-xl p-4 mb-8 flex items-center gap-3">
+             <i data-lucide="info" class="w-5 h-5 primary-color"></i>
+             <p class="text-gray-700 font-medium">
+               Your net income is <span id="netIncomeText" class="primary-color font-bold">Rs. 0.00</span> 
+               <span class="text-xs text-gray-500 font-normal ml-1">(after 10% platform fee deduction)</span>
+             </p>
           </div>
 
           <!-- Transactions Table -->
@@ -413,18 +422,24 @@
       }
 
       function renderDashboard() {
-        const total = earningsData.reduce(
+        const totalGross = earningsData.reduce(
           (sum, item) => sum + parseFloat(item.amount || 0),
           0,
         );
-        const count = earningsData.length;
-        const avg = count > 0 ? total / count : 0;
+        const totalCount = earningsData.length;
+        const completedCount = earningsData.filter(item => item.status === 'Completed').length;
+        
+        // 10% platform fee deduction
+        const platformFeePercent = 10; 
+        const totalIncome = totalGross * (1 - platformFeePercent / 100);
 
         document.getElementById("totalEarnings").textContent =
-          `$${total.toFixed(2)}`;
-        document.getElementById("totalCompleted").textContent = count;
-        document.getElementById("avgPerVisit").textContent =
-          `$${avg.toFixed(2)}`;
+          `Rs. ${totalGross.toFixed(2)}`;
+        document.getElementById("totalCompleted").textContent = totalCount;
+        document.getElementById("completedCount").textContent = completedCount;
+        
+        document.getElementById("netIncomeText").textContent = 
+          `Rs. ${totalIncome.toFixed(2)}`;
 
         renderTable();
         lucide.createIcons();
