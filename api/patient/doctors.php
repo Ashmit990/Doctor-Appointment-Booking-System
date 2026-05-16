@@ -16,11 +16,12 @@ $sql = "
              LIMIT 1),
             500
         ) AS consultation_fee,
-        dp.contact_number, dp.experience_years, dp.qualifications, dp.bio, dp.age
+        dp.contact_number, dp.experience_years, dp.qualifications, dp.bio, dp.age,
+        (SELECT COUNT(*) FROM appointments a WHERE a.doctor_id = u.user_id) AS total_appointments
     FROM users u
     INNER JOIN doctor_profiles dp ON u.user_id = dp.user_id
     WHERE u.role = 'Doctor'
-    ORDER BY u.full_name ASC
+    ORDER BY total_appointments DESC
 ";
 $result = $conn->query($sql);
 $rows = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
