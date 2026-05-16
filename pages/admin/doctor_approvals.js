@@ -6,9 +6,11 @@ document.addEventListener("DOMContentLoaded", () => {
   loadApprovals();
 
   loadCategories();
+  loadAllTickets(); // New: Load global ticket list
   setupModal();
   setupDoctorDetailsModal();
   setupCategoryForm();
+  setupTicketFilters(); // New: Search & Filter for tickets
 });
 
 function updateCurrentDate() {
@@ -497,11 +499,6 @@ function renderCategories() {
       <td class="px-5 py-4 text-sm text-gray-600">${escapeHtml(cat.description)}</td>
       <td class="px-5 py-4">
         <div class="flex items-center gap-3">
-          <button onclick="showCategoryTickets('${escapeHtml(cat.name)}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal/5 text-teal text-xs font-bold hover:bg-teal hover:text-white transition-all">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-            Tickets
-          </button>
-          <div class="h-4 w-px bg-gray-200"></div>
           <button onclick="editCategory(${cat.id})" class="text-gray-400 hover:text-teal transition-colors p-1" title="Edit">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
           </button>
@@ -516,48 +513,6 @@ function renderCategories() {
     .join("");
 }
 
-async function showCategoryTickets(categoryName) {
-  const modal = document.getElementById("categoryTicketsModal");
-  const title = document.getElementById("modalCategoryName");
-  const tbody = document.getElementById("category-tickets-body");
-
-  title.textContent = `${categoryName} Treatment History`;
-  tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-500">Searching records...</td></tr>`;
-  modal.classList.remove("hidden");
-
-  try {
-    const response = await fetch(
-      `../../api/admin/treatment_tickets.php?category=${encodeURIComponent(categoryName)}`,
-    );
-    const result = await response.json();
-
-    if (result.status === "success" && result.data.length > 0) {
-      tbody.innerHTML = result.data
-        .map(
-          (t) => `
-        <tr class="border-b last:border-0 hover:bg-gray-50">
-          <td class="px-4 py-3 font-mono text-xs font-bold text-teal">${t.ticket_number}</td>
-          <td class="px-4 py-3">
-            <p class="text-sm font-medium text-gray-800">${t.patient_name}</p>
-          </td>
-          <td class="px-4 py-3 font-bold text-gray-700 text-sm">₹${parseFloat(t.cost).toLocaleString()}</td>
-          <td class="px-4 py-3 text-xs text-gray-500">
-            ${new Date(t.generated_at).toLocaleDateString()}<br>${new Date(t.generated_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-          </td>
-          <td class="px-4 py-3">
-            <button onclick="viewTicketFromDrillDown(${JSON.stringify(t).replace(/'/g, "&apos;")})" class="text-teal hover:underline text-xs font-bold">Details</button>
-          </td>
-        </tr>
-      `,
-        )
-        .join("");
-    } else {
-      tbody.innerHTML = `<tr><td colspan="5" class="text-center py-12 text-gray-400">No tickets generated for this category yet.</td></tr>`;
-    }
-  } catch (error) {
-    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-red-500">Error loading data.</td></tr>`;
-  }
-}
 
 function viewTicketFromDrillDown(ticket) {
   // Reuse the existing detail modal (we need to make sure it exists in the HTML)
@@ -572,9 +527,13 @@ function viewTicketFromDrillDown(ticket) {
   document.getElementById("detailTicketNum").textContent = ticket.ticket_number;
   document.getElementById("detailPatientName").textContent =
     ticket.patient_name;
+  document.getElementById("detailDoctorName").textContent =
+    ticket.doctor_name || "N/A";
   document.getElementById("detailCategory").textContent = ticket.category_name;
   document.getElementById("detailCost").textContent =
     `₹${parseFloat(ticket.cost).toLocaleString()}`;
+  document.getElementById("detailDuration").textContent =
+    ticket.duration || "30 Mins";
   document.getElementById("detailDate").textContent = new Date(
     ticket.generated_at,
   ).toLocaleString();
@@ -583,6 +542,98 @@ function viewTicketFromDrillDown(ticket) {
 
   detailModal.classList.remove("hidden");
   detailModal.style.zIndex = "60"; // Make sure it stays on top of the drill-down modal
+}
+
+// Global Tickets Management
+let allTickets = [];
+
+async function loadAllTickets() {
+  const tbody = document.getElementById("all-tickets-table-body");
+  const search = document.getElementById("ticketSearch")?.value || "";
+  const category = document.getElementById("ticketCategoryFilter")?.value || "";
+
+  if (!tbody) return;
+
+  try {
+    const url = `../../api/admin/treatment_tickets.php?search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}`;
+    const response = await fetch(url);
+    const result = await response.json();
+
+    if (result.status === "success") {
+      allTickets = result.data || [];
+      renderAllTickets();
+      if (result.categories) {
+        populateCategoryFilter(result.categories);
+      }
+    } else {
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-12 text-red-500">${result.message}</td></tr>`;
+    }
+  } catch (error) {
+    console.error("Error loading all tickets:", error);
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-12 text-red-500">Failed to load ticket data.</td></tr>`;
+  }
+}
+
+function renderAllTickets() {
+  const tbody = document.getElementById("all-tickets-table-body");
+  if (!tbody) return;
+
+  if (allTickets.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-12 text-gray-400">No matching tickets found.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = allTickets
+    .map(
+      (t) => `
+    <tr class="border-b last:border-0 hover:bg-gray-50 transition-colors">
+      <td class="px-5 py-4 font-mono text-xs font-bold text-teal">${t.ticket_number}</td>
+      <td class="px-5 py-4 text-sm font-medium text-gray-800">${escapeHtml(t.patient_name)}</td>
+      <td class="px-5 py-4 text-sm font-medium text-gray-600">Dr. ${escapeHtml(t.doctor_name)}</td>
+      <td class="px-5 py-4">
+        <span class="inline-block px-2 py-0.5 rounded bg-teal/5 text-teal text-[10px] font-bold border border-teal/10">${escapeHtml(t.category_name)}</span>
+      </td>
+      <td class="px-5 py-4 font-bold text-gray-700 text-sm">₹${parseFloat(t.cost).toLocaleString()}</td>
+      <td class="px-5 py-4 text-xs text-gray-500 font-medium">${escapeHtml(t.duration || "30 Mins")}</td>
+      <td class="px-5 py-4 text-xs text-gray-500">
+        ${new Date(t.generated_at).toLocaleDateString()}
+      </td>
+      <td class="px-5 py-4">
+        <button onclick='viewTicketFromDrillDown(${JSON.stringify(t).replace(/'/g, "&apos;")})' class="text-teal hover:underline text-xs font-bold">Details</button>
+      </td>
+    </tr>
+  `,
+    )
+    .join("");
+}
+
+function populateCategoryFilter(categories) {
+  const filter = document.getElementById("ticketCategoryFilter");
+  if (!filter || filter.options.length > 1) return; // Only populate once
+
+  categories.forEach((cat) => {
+    const opt = document.createElement("option");
+    opt.value = cat;
+    opt.textContent = cat;
+    filter.appendChild(opt);
+  });
+}
+
+function setupTicketFilters() {
+  const searchInput = document.getElementById("ticketSearch");
+  const filterSelect = document.getElementById("ticketCategoryFilter");
+
+  let timeout = null;
+  searchInput?.addEventListener("input", () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      loadAllTickets();
+    }, 500);
+  });
+
+  filterSelect?.addEventListener("change", () => {
+    loadAllTickets();
+  });
 }
 
 function closeCategoryTicketsModal() {

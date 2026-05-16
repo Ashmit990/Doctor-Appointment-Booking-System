@@ -26,13 +26,17 @@ try {
                 t.patient_id,
                 t.appointment_id,
                 t.cost,
+                t.duration,
                 t.generated_at,
                 u.full_name as patient_name,
+                u2.full_name as doctor_name,
                 c.name as category_name,
                 c.description as category_description
             FROM treatment_tickets t
             JOIN users u ON t.patient_id = u.user_id
             JOIN treatment_categories c ON t.category_id = c.id
+            JOIN appointments a ON t.appointment_id = a.appointment_id
+            JOIN users u2 ON a.doctor_id = u2.user_id
             WHERE 1=1
         ";
         

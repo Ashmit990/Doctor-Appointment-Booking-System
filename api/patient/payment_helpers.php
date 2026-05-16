@@ -109,19 +109,32 @@ if (!function_exists('complete_appointment_payment')) {
             $appt_insert->close();
 
             // 5. Generate Ticket (Optional but standard in this app)
-            // (Logic extracted from existing scripts)
+            // (Logic extracted from existing scripts - improved for better matching)
             $astmt = $conn->prepare("SELECT specialization FROM doctor_profiles WHERE user_id = ?");
             $astmt->bind_param("s", $payment['doctor_id']);
             $astmt->execute();
-            $spec = $astmt->get_result()->fetch_assoc()['specialization'] ?? 'General Consultation';
+            $spec = $astmt->get_result()->fetch_assoc()['specialization'] ?? '';
             $astmt->close();
 
-            $cstmt = $conn->prepare("SELECT id, estimated_cost FROM treatment_categories WHERE name LIKE ? LIMIT 1");
-            $likeSpec = "%$spec%";
-            $cstmt->bind_param("s", $likeSpec);
-            $cstmt->execute();
-            $cat = $cstmt->get_result()->fetch_assoc();
-            $cstmt->close();
+            $cat = null;
+            if (!empty($spec)) {
+                $cstmt = $conn->prepare("
+                    SELECT id, estimated_cost FROM treatment_categories 
+                    WHERE LOWER(name) = LOWER(?) 
+                       OR LOWER(name) LIKE CONCAT('%', LOWER(?), '%')
+                       OR LOWER(?) LIKE CONCAT('%', SUBSTRING(LOWER(name), 1, 5), '%')
+                    LIMIT 1
+                ");
+                $cstmt->bind_param("sss", $spec, $spec, $spec);
+                $cstmt->execute();
+                $cat = $cstmt->get_result()->fetch_assoc();
+                $cstmt->close();
+            }
+            
+            // Fallback to General Consultation if no specific match
+            if (!$cat) {
+                $cat = $conn->query("SELECT id, estimated_cost FROM treatment_categories WHERE name = 'General Consultation' LIMIT 1")->fetch_assoc();
+            }
             
             if ($cat && $appointment_id) {
                 $ticket_number = 'TKT-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
