@@ -26,46 +26,67 @@ function showToast(message, isError = false) {
   }
 }
 
-function updateCurrentDate() {
-  try {
-    const options = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    };
-    const dateElement = document.getElementById("current-date");
-    if (dateElement) {
-      dateElement.textContent = new Date().toLocaleDateString("en-US", options);
-    }
-  } catch (e) {
-    console.error("✗ Date error:", e);
-  }
-}
-
-function toggleSidebar() {
-  try {
-    document.getElementById("sidebar").classList.toggle("-translate-x-full");
-    document.getElementById("overlay").classList.toggle("hidden");
-  } catch (e) {
-    console.error("✗ Sidebar error:", e);
-  }
-}
-
-function closeSidebar() {
-  try {
-    document.getElementById("sidebar").classList.add("-translate-x-full");
-    document.getElementById("overlay").classList.add("hidden");
-  } catch (e) {
-    console.error("✗ Close sidebar error:", e);
-  }
-}
+// admin-common.js handles date, sidebar, etc.
 
 function closeDetailsModal() {
   try {
-    document.getElementById("detailsModal").classList.remove("active");
+    const modal = document.getElementById("detailsModal");
+    modal.classList.remove("active");
+    // Also re-enable scrolling on body if needed
+    document.body.style.overflow = "auto";
   } catch (e) {
     console.error("✗ Close details modal error:", e);
+  }
+}
+
+function viewPatientDetails(userId) {
+  try {
+    const patient = allPatients.find((p) => p.user_id === userId);
+    if (!patient) return;
+
+    // Populate modal
+    document.getElementById("modalName").textContent =
+      patient.full_name || "N/A";
+    document.getElementById("modalId").textContent = `UID-${patient.user_id}`;
+    document.getElementById("modalEmail").textContent = patient.email || "N/A";
+    document.getElementById("modalPhone").textContent =
+      patient.contact_number || "N/A";
+    document.getElementById("modalAge").textContent = patient.age
+      ? `${patient.age} Years`
+      : "N/A";
+    document.getElementById("modalGender").textContent =
+      patient.gender || "N/A";
+    document.getElementById("modalBlood").textContent =
+      patient.blood_group || "N/A";
+    document.getElementById("modalAppointments").textContent =
+      `${patient.total_appointments || 0} Total`;
+    document.getElementById("modalAddress").textContent =
+      patient.address || "N/A";
+
+    // Set initials
+    const initials = (patient.full_name || "U")
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+    document.getElementById("modalInitials").textContent = initials.substring(
+      0,
+      2,
+    );
+
+    // Setup delete button in modal
+    const deleteBtn = document.getElementById("modalDeleteBtn");
+    deleteBtn.onclick = () => {
+      closeDetailsModal();
+      deletePatient(userId);
+    };
+
+    // Show modal
+    const modal = document.getElementById("detailsModal");
+    modal.classList.add("active");
+    document.body.style.overflow = "hidden"; // Prevent background scroll
+  } catch (e) {
+    console.error("✗ View details error:", e);
   }
 }
 
@@ -159,15 +180,31 @@ function displayPatients() {
       const userId = patient.user_id;
 
       html += `
-        <tr class="border-b hover:bg-gray-50">
-          <td class="px-5 py-4 text-sm font-semibold">${fullName}</td>
-          <td class="px-5 py-4 text-sm">${email}</td>
-          <td class="px-5 py-4 text-sm hidden md:table-cell">${contactNumber}</td>
-          <td class="px-5 py-4 text-sm">${totalAppointments}</td>
+        <tr class="border-b hover:bg-gray-50 transition-colors">
           <td class="px-5 py-4">
-            <button onclick="deletePatient('${userId}')" class="text-xs px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 font-semibold">
-              Delete
-            </button>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 bg-teal/10 text-teal rounded-lg flex items-center justify-center text-xs font-bold">
+                ${(patient.full_name || "U")[0].toUpperCase()}
+              </div>
+              <span class="text-sm font-semibold text-gray-900">${fullName}</span>
+            </div>
+          </td>
+          <td class="px-5 py-4 text-sm text-gray-600">${email}</td>
+          <td class="px-5 py-4 text-sm text-gray-600 hidden md:table-cell font-medium">${contactNumber}</td>
+          <td class="px-5 py-4">
+            <span class="px-2 py-1 bg-teal/5 text-teal text-xs font-bold rounded-lg border border-teal/10">
+              ${totalAppointments} Appts
+            </span>
+          </td>
+          <td class="px-5 py-4">
+            <div class="flex items-center gap-2">
+              <button onclick="viewPatientDetails('${userId}')" class="text-xs px-3 py-1.5 bg-teal text-white rounded-lg hover:bg-teal-dark font-bold transition-all shadow-sm">
+                View
+              </button>
+              <button onclick="deletePatient('${userId}')" class="text-xs px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 font-bold transition-all">
+                Delete
+              </button>
+            </div>
           </td>
         </tr>
       `;
@@ -263,7 +300,7 @@ function initPage() {
     console.log("╔═══════════════════════════════════╗");
     console.log("║   USERS PAGE INITIALIZATION       ║");
     console.log("╚═══════════════════════════════════╝");
-    updateCurrentDate();
+    // admin-common.js handles updateCurrentDate
     loadPatients(1);
     console.log("✓ Page ready");
   } catch (err) {
