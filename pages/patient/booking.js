@@ -264,19 +264,50 @@ async function loadDoctors() {
   const j = await r.json();
   if (j.status !== "success") throw new Error(j.message || "Doctors failed");
   doctorsList = j.data || [];
-  const sel = document.getElementById("doctor");
-  sel.innerHTML = '<option value="">Select doctor</option>';
+
+  // Build unique specializations (preserving appointment-count order)
+  const specs = [];
+  const seen = new Set();
   doctorsList.forEach((d) => {
-    const opt = document.createElement("option");
-    opt.value = d.doctor_id;
-    opt.textContent = `${d.full_name} (${d.specialization})`;
-    sel.appendChild(opt);
+    const s = d.specialization || "General";
+    if (!seen.has(s)) { seen.add(s); specs.push(s); }
   });
 
-  // If a doctor is already selected (e.g., reschedule mode), update price
-  if (sel.value) {
-    updatePrice();
-  }
+  const specSel = document.getElementById("specialization");
+  specSel.innerHTML = '<option value="">Select specialization</option>';
+  specs.forEach((s) => {
+    const opt = document.createElement("option");
+    opt.value = s;
+    opt.textContent = s;
+    specSel.appendChild(opt);
+  });
+}
+
+function onSpecializationChange() {
+  const spec = document.getElementById("specialization").value;
+  const wrap = document.getElementById("doctorSelectWrap");
+  const doctorSel = document.getElementById("doctor");
+
+  // Reset
+  doctorSel.value = "";
+  selectedDoctor = null;
+  document.getElementById("totalPrice").textContent = "—";
+  document.getElementById("date").innerHTML = '<option value="">Select doctor first</option>';
+  document.getElementById("time").innerHTML = '<option value="">Select date first</option>';
+
+  if (!spec) { wrap.classList.add("hidden"); return; }
+
+  const filtered = doctorsList.filter((d) => (d.specialization || "General") === spec);
+  doctorSel.innerHTML = '<option value="">Select doctor</option>';
+  filtered.forEach((d) => {
+    const opt = document.createElement("option");
+    opt.value = d.doctor_id;
+    opt.textContent = d.full_name;
+    doctorSel.appendChild(opt);
+  });
+
+  wrap.classList.remove("hidden");
+  notifyParentResize();
 }
 
 async function loadDates(doctorId) {
@@ -459,18 +490,23 @@ backToFormBtn?.addEventListener("click", () => {
 
 proceedPaymentBtn?.addEventListener("click", startKhaltiPayment);
 
+document.getElementById("specialization").addEventListener("change", () => {
+  onSpecializationChange();
+});
+
 document.getElementById("doctor").addEventListener("change", async () => {
-  updatePrice();
-  const doctorId = document.getElementById("doctor").value;
+  const doctorSel = document.getElementById("doctor");
+  const doctorId = doctorSel.value;
+  if (doctorId) {
+    const placeholder = doctorSel.querySelector('option[value=""]');
+    if (placeholder) placeholder.remove();
+  }
+  selectedDoctor = doctorsList.find((d) => d.doctor_id === doctorId) || null;
+  document.getElementById("totalPrice").textContent = selectedDoctor
+    ? formatMoney(selectedDoctor.consultation_fee)
+    : "—";
   await loadDates(doctorId);
   setBookingConflictMessage("");
-
-  const confirmBtn = document.getElementById("confirmBtn");
-  if (confirmBtn) {
-    confirmBtn.disabled = false;
-    confirmBtn.classList.remove("opacity-60", "cursor-not-allowed");
-    confirmBtn.title = "";
-  }
 });
 
 document.getElementById("date").addEventListener("change", async () => {

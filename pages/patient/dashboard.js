@@ -300,7 +300,7 @@ function renderAppointments(rows) {
         </div>
 
         <div class="flex flex-wrap gap-1.5 lg:flex-col w-28 shrink-0">
-          <button type="button" data-view="${item.appointment_id}" class="view-btn w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-medium transition whitespace-nowrap text-center">
+          <button type="button" data-view="${item.appointment_id}" class="view-btn w-full px-3 py-2 rounded-lg bg-yellow-400 hover:bg-yellow-500 text-white text-xs font-semibold transition whitespace-nowrap text-center shadow-sm">
             Details
           </button>
           ${showReschedule
