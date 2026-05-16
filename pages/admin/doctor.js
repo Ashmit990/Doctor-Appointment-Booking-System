@@ -1,19 +1,21 @@
 // DOCTORS PAGE - MANAGE DOCTORS
+function showToast(message, isError = false) {
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = message;
+  if (isError) toast.style.background = "#ef4444";
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
 let currentPage = 1;
 let allDoctors = [];
 let filteredDoctors = [];
 
-console.log("=== DOCTOR.JS LOADED ===");
-
 // Utility Functions
-function showToast(message) {
-  const toast = document.createElement("div");
-  toast.className = "toast";
-  toast.textContent = message;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
-}
-
 function updateCurrentDate() {
   const options = {
     weekday: "long",
@@ -100,22 +102,22 @@ function viewDoctorDetails(doctorId) {
                     
                     <!-- Contact Information -->
                     <div>
-                        <h5 class="text-sm font-semibold text-teal-dark mb-3">📞 Contact Information</h5>
+                        <h5 class="text-sm font-semibold text-teal-dark mb-3">Contact Information</h5>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-gray-50 rounded-xl p-4">
                             <div>
                                 <p class="text-xs text-gray-400">Email</p>
                                 <p class="text-sm font-medium">${escapeHtml(doc.email || "N/A")}</p>
                             </div>
                             <div>
-                                <p class="text-xs text-gray-400">📞 Phone Number</p>
+                                <p class="text-xs text-gray-400">Phone Number</p>
                                 <p class="text-sm font-medium">${escapeHtml(doc.contact_number || "Not provided")}</p>
                             </div>
                             <div>
-                                <p class="text-xs text-gray-400">🎂 Age</p>
+                                <p class="text-xs text-gray-400">Age</p>
                                 <p class="text-sm font-medium">${doc.age || "Not provided"} ${doc.age ? "years" : ""}</p>
                             </div>
                             <div>
-                                <p class="text-xs text-gray-400">🆔 Medical ID</p>
+                                <p class="text-xs text-gray-400">Medical ID</p>
                                 <p class="text-sm font-medium">${escapeHtml(doc.medical_id || "Not provided")}</p>
                             </div>
                         </div>
@@ -123,30 +125,32 @@ function viewDoctorDetails(doctorId) {
                     
                     <!-- Professional Details -->
                     <div>
-                        <h5 class="text-sm font-semibold text-teal-dark mb-3">💼 Professional Details</h5>
+                        <h5 class="text-sm font-semibold text-teal-dark mb-3">Professional Details</h5>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-gray-50 rounded-xl p-4">
                             <div>
                                 <p class="text-xs text-gray-400">Specialization</p>
                                 <p class="text-sm font-medium">${escapeHtml(doc.specialization || "Not specified")}</p>
                             </div>
                             <div>
-                                <p class="text-xs text-gray-400">💰 Consultation Fee</p>
-                                <p class="text-sm font-medium">${doc.consultation_fee ? "₹" + doc.consultation_fee : "Not set"}</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-400">📅 Experience (Years)</p>
-                                <p class="text-sm font-medium">${doc.experience_years || "Not specified"} ${doc.experience_years ? "years" : ""}</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-400">🎓 Qualifications</p>
-                                <p class="text-sm font-medium">${escapeHtml(doc.qualifications || "Not specified")}</p>
+                                <p class="text-xs text-gray-400">Consultation Fee (₹)</p>
+                                <input type="number" id="edit_consultation_fee" 
+                                    class="w-full mt-1 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-teal focus:border-transparent outline-none transition-all font-semibold" 
+                                    value="${doc.consultation_fee || 0}">
                             </div>
                         </div>
                     </div>
                     
+                    <!-- Save Button -->
+                    <div class="pt-4 border-t flex justify-end">
+                        <button onclick="updateDoctorProfile('${doc.user_id}')" 
+                            class="px-6 py-2.5 bg-teal text-white rounded-xl font-semibold hover:bg-teal-dark transition-all shadow-md active:scale-95">
+                            Save Changes
+                        </button>
+                    </div>
+                    
                     <!-- Bio -->
                     <div>
-                        <h5 class="text-sm font-semibold text-teal-dark mb-3">📝 About / Bio</h5>
+                        <h5 class="text-sm font-semibold text-teal-dark mb-3">About / Bio</h5>
                         <div class="bg-gray-50 rounded-xl p-4">
                             <p class="text-sm text-gray-700 leading-relaxed">${escapeHtml(doc.bio || "No bio provided yet.")}</p>
                         </div>
@@ -154,7 +158,7 @@ function viewDoctorDetails(doctorId) {
                     
                     <!-- Statistics -->
                     <div>
-                        <h5 class="text-sm font-semibold text-teal-dark mb-3">📊 Statistics</h5>
+                        <h5 class="text-sm font-semibold text-teal-dark mb-3">Statistics</h5>
                         <div class="grid grid-cols-2 gap-3 bg-gray-50 rounded-xl p-4">
                             <div class="text-center">
                                 <p class="text-2xl font-bold text-teal-600">${doc.total_appointments || 0}</p>
@@ -188,6 +192,39 @@ function viewDoctorDetails(doctorId) {
                 <p class="text-sm mt-2">${error.message}</p>
             </div>
         `;
+    });
+}
+
+function updateDoctorProfile(doctorId) {
+  const fee = document.getElementById("edit_consultation_fee").value;
+
+  if (fee === "" || parseFloat(fee) < 0) {
+    showToast("Please enter a valid consultation fee", true);
+    return;
+  }
+
+  fetch("../../api/admin/doctors.php", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      doctor_id: doctorId,
+      consultation_fee: fee,
+    }),
+  })
+    .then((response) => response.json())
+    .then((result) => {
+      if (result.status === "success") {
+        showToast("✓ Profile updated successfully!");
+        loadDoctors(currentPage);
+        viewDoctorDetails(doctorId);
+      } else {
+        showToast(result.message || "Error updating profile", true);
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      showToast("Error updating profile", true);
     });
 }
 
