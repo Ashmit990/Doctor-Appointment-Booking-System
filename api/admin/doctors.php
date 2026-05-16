@@ -32,19 +32,7 @@ try {
                     dp.contact_number,
                     dp.experience_years,
                     dp.qualifications,
-                    (SELECT estimated_cost FROM treatment_categories
-                     WHERE name = CASE
-                         WHEN LOWER(dp.specialization) LIKE '%cardio%'  THEN 'Cardiology'
-                         WHEN LOWER(dp.specialization) LIKE '%ortho%'   THEN 'Orthopedics'
-                         WHEN LOWER(dp.specialization) LIKE '%derma%'   THEN 'Dermatology'
-                         WHEN LOWER(dp.specialization) LIKE '%neuro%'   THEN 'Neurology'
-                         WHEN LOWER(dp.specialization) LIKE '%ediatri%' THEN 'Pediatrics'
-                         WHEN LOWER(dp.specialization) LIKE '%gynec%'   THEN 'Gynecology'
-                         WHEN LOWER(dp.specialization) LIKE '%ophthal%' THEN 'Ophthalmology'
-                         WHEN LOWER(dp.specialization) LIKE '%physio%'  THEN 'Physiotherapy'
-                         WHEN LOWER(dp.specialization) LIKE '%dent%'    THEN 'Dentistry'
-                         ELSE 'General Consultation'
-                     END LIMIT 1) AS consultation_fee,
+                    dp.consultation_fee,
                     dp.bio,
                     dp.age,
                     (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id) as total_appointments,
@@ -76,19 +64,7 @@ try {
                     u.full_name,
                     u.email,
                     COALESCE(dp.specialization, 'Not Specified') as specialization,
-                    (SELECT estimated_cost FROM treatment_categories
-                     WHERE name = CASE
-                         WHEN LOWER(dp.specialization) LIKE '%cardio%'  THEN 'Cardiology'
-                         WHEN LOWER(dp.specialization) LIKE '%ortho%'   THEN 'Orthopedics'
-                         WHEN LOWER(dp.specialization) LIKE '%derma%'   THEN 'Dermatology'
-                         WHEN LOWER(dp.specialization) LIKE '%neuro%'   THEN 'Neurology'
-                         WHEN LOWER(dp.specialization) LIKE '%ediatri%' THEN 'Pediatrics'
-                         WHEN LOWER(dp.specialization) LIKE '%gynec%'   THEN 'Gynecology'
-                         WHEN LOWER(dp.specialization) LIKE '%ophthal%' THEN 'Ophthalmology'
-                         WHEN LOWER(dp.specialization) LIKE '%physio%'  THEN 'Physiotherapy'
-                         WHEN LOWER(dp.specialization) LIKE '%dent%'    THEN 'Dentistry'
-                         ELSE 'General Consultation'
-                     END LIMIT 1) AS consultation_fee,
+                    dp.consultation_fee,
                     (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id) as total_appointments
                 FROM users u
                 LEFT JOIN doctor_profiles dp ON u.user_id = dp.user_id
@@ -128,6 +104,7 @@ try {
         $qualifications = $input['qualifications']   ?? null;
         $bio            = $input['bio']              ?? null;
         $age            = $input['age']              ?? null;
+        $consultation_fee = $input['consultation_fee'] ?? null;
 
         if (!$doctor_id) throw new Exception('Doctor ID required');
 
@@ -138,25 +115,68 @@ try {
         $stmt->close();
         if (!$before) throw new Exception('Doctor not found');
 
-        $stmt = $conn->prepare('UPDATE users SET full_name = ?, email = ? WHERE user_id = ? AND role = \'Doctor\'');
-        $stmt->bind_param('sss', $full_name, $email, $doctor_id);
-        if (!$stmt->execute()) throw new Exception($stmt->error);
-        $stmt->close();
+        if ($full_name !== null || $email !== null) {
+            $userUpdates = [];
+            $userParams = [];
+            $userTypes = "";
+            
+            if ($full_name !== null) { $userUpdates[] = "full_name = ?"; $userParams[] = $full_name; $userTypes .= "s"; }
+            if ($email !== null) { $userUpdates[] = "email = ?"; $userParams[] = $email; $userTypes .= "s"; }
+            
+            $userParams[] = $doctor_id;
+            $userTypes .= "s";
+            
+            $stmt = $conn->prepare("UPDATE users SET " . implode(", ", $userUpdates) . " WHERE user_id = ? AND role = 'Doctor'");
+            $stmt->bind_param($userTypes, ...$userParams);
+            if (!$stmt->execute()) throw new Exception($stmt->error);
+            $stmt->close();
 
-        $nameChanged  = trim((string)$before['full_name']) !== trim((string)$full_name);
-        $emailChanged = strcasecmp(trim((string)$before['email']), trim((string)$email)) !== 0;
-        if ($nameChanged || $emailChanged) {
-            $msg = 'An administrator updated your account. Your display name is now: ' . $full_name . '. Your email is now: ' . $email . '.';
-            $n = $conn->prepare("INSERT INTO notifications (user_id, title, message, is_read, created_at) VALUES (?, 'Account updated by admin', ?, 0, NOW())");
-            $n->bind_param('ss', $doctor_id, $msg);
-            $n->execute();
-            $n->close();
+            $nameChanged  = $full_name !== null && trim((string)$before['full_name']) !== trim((string)$full_name);
+            $emailChanged = $email !== null && strcasecmp(trim((string)$before['email']), trim((string)$email)) !== 0;
+            
+            if ($nameChanged || $emailChanged) {
+                $newName = $full_name ?? $before['full_name'];
+                $newEmail = $email ?? $before['email'];
+                $msg = 'An administrator updated your account. Your display name is now: ' . $newName . '. Your email is now: ' . $newEmail . '.';
+                $n = $conn->prepare("INSERT INTO notifications (user_id, title, message, is_read, created_at) VALUES (?, 'Account updated by admin', ?, 0, NOW())");
+                $n->bind_param('ss', $doctor_id, $msg);
+                $n->execute();
+                $n->close();
+            }
         }
 
-        if ($specialization !== null || $contact_number !== null || $experience_years !== null || $qualifications !== null || $bio !== null || $age !== null) {
-            $stmt = $conn->prepare('UPDATE doctor_profiles SET specialization = COALESCE(?, specialization), contact_number = COALESCE(?, contact_number), experience_years = COALESCE(?, experience_years), qualifications = COALESCE(?, qualifications), bio = COALESCE(?, bio), age = COALESCE(?, age) WHERE user_id = ?');
-            $stmt->bind_param('ssissss', $specialization, $contact_number, $experience_years, $qualifications, $bio, $age, $doctor_id);
+        $profileUpdates = [];
+        $profileParams = [];
+        $profileTypes = "";
+
+        if ($specialization !== null) { $profileUpdates[] = "specialization = ?"; $profileParams[] = $specialization; $profileTypes .= "s"; }
+        if ($contact_number !== null) { $profileUpdates[] = "contact_number = ?"; $profileParams[] = $contact_number; $profileTypes .= "s"; }
+        if ($experience_years !== null) { $profileUpdates[] = "experience_years = ?"; $profileParams[] = (int)$experience_years; $profileTypes .= "i"; }
+        if ($qualifications !== null) { $profileUpdates[] = "qualifications = ?"; $profileParams[] = $qualifications; $profileTypes .= "s"; }
+        if ($bio !== null) { $profileUpdates[] = "bio = ?"; $profileParams[] = $bio; $profileTypes .= "s"; }
+        if ($age !== null) { $profileUpdates[] = "age = ?"; $profileParams[] = (int)$age; $profileTypes .= "i"; }
+        if ($consultation_fee !== null) { $profileUpdates[] = "consultation_fee = ?"; $profileParams[] = (float)$consultation_fee; $profileTypes .= "d"; }
+
+        if (!empty($profileUpdates)) {
+            $profileParams[] = $doctor_id;
+            $profileTypes .= "s";
+            
+            $stmt = $conn->prepare("UPDATE doctor_profiles SET " . implode(", ", $profileUpdates) . " WHERE user_id = ?");
+            $stmt->bind_param($profileTypes, ...$profileParams);
             if (!$stmt->execute()) throw new Exception($stmt->error);
+            
+            // If no rows were affected, maybe the profile doesn't exist? (Should not happen for approved doctors)
+            if ($stmt->affected_rows === 0) {
+                // Check if it exists at all
+                $check = $conn->prepare("SELECT 1 FROM doctor_profiles WHERE user_id = ?");
+                $check->bind_param("s", $doctor_id);
+                $check->execute();
+                if (!$check->get_result()->fetch_assoc()) {
+                    // Profile doesn't exist, this is unexpected for a doctor in the list, but we should handle it
+                    throw new Exception("Doctor profile not found in database.");
+                }
+                $check->close();
+            }
             $stmt->close();
         }
 

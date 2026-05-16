@@ -4,6 +4,8 @@ require_once '../config/db.php';
 require_once '../includes/csrf_protection.php';
 
 header('Content-Type: application/json');
+error_reporting(0);
+ini_set('display_errors', 0);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // CSRF Token Validation
@@ -20,7 +22,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // Check for user in database
+    // Note: The column name is 'password_hash' in this database
     $stmt = $conn->prepare("SELECT user_id, full_name, password_hash, role FROM users WHERE email = ?");
+    if (!$stmt) {
+        echo json_encode(['status' => 'error', 'message' => 'Database error.']);
+        exit;
+    }
+    
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -28,12 +37,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
 
-        if ($password === $user['password_hash']) {
+        if (password_verify($password, $user['password_hash'])) {
+            $is_valid = true;
+        } else if ($password === $user['password_hash']) {
+            $is_valid = true;
+        }
+
+        if ($is_valid) {
             $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['full_name'] = $user['full_name'];
             $_SESSION['role'] = $user['role'];
 
-            // FIX: Using paths relative to the project root
             $redirect = '';
             switch ($user['role']) {
                 case 'Doctor':
@@ -54,13 +68,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'role' => $user['role'],
                 'redirect' => $redirect
             ]);
+            exit;
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Invalid email or password.']);
+            exit;
         }
     } else {
         echo json_encode(['status' => 'error', 'message' => 'User not found.']);
+        exit;
     }
     $stmt->close();
 }
 $conn->close();
-?>

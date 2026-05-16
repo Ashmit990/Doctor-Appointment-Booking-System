@@ -166,6 +166,18 @@ function displayAppointments() {
     for (const apt of filteredAppointments) {
       const comments = (apt.doctor_comments || "").replace(/'/g, "\\'");
       const editable = isEditable(apt.app_date);
+
+      // Fix: If date has passed and status is still "Upcoming", show it as "Completed"
+      let displayStatus = apt.status;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const aptDate = new Date(apt.app_date);
+      aptDate.setHours(0, 0, 0, 0);
+
+      if (aptDate < today && displayStatus === "Upcoming") {
+        displayStatus = "Completed";
+      }
+
       const editButtonClass = editable
         ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
         : "bg-gray-100 text-gray-400 cursor-not-allowed";
@@ -176,12 +188,13 @@ function displayAppointments() {
 
       html += `
                 <tr class="border-b hover:bg-gray-50 transition-colors">
-                    <td class="px-5 py-4 text-sm">${apt.patient_name}</td>
-                    <td class="px-5 py-4 text-sm">${apt.doctor_name}</td>
-                    <td class="px-5 py-4 text-sm">${apt.app_date} ${apt.app_time}</td>
+                    <td class="px-5 py-4 text-sm font-medium text-gray-800">${apt.patient_name}</td>
+                    <td class="px-5 py-4 text-sm text-gray-600">${apt.doctor_name}</td>
+                    <td class="px-5 py-4 text-sm text-gray-600 font-mono">${apt.app_date} ${apt.app_time}</td>
                     <td class="px-5 py-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(apt.status)}">${apt.status}</span>
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${getStatusBadgeClass(displayStatus)}">${displayStatus}</span>
                     </td>
+
                     <td class="px-5 py-4">
                         <div class="flex gap-2">
                             <button 
@@ -213,11 +226,21 @@ function filterAppointments() {
   const statusFilter = document.getElementById("statusFilter")?.value || "";
 
   filteredAppointments = allAppointments.filter((apt) => {
+    // Dynamic status logic for filtering
+    let displayStatus = apt.status;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const aptDate = new Date(apt.app_date);
+    aptDate.setHours(0, 0, 0, 0);
+    if (aptDate < today && displayStatus === "Upcoming") {
+      displayStatus = "Completed";
+    }
+
     const matchesSearch =
       (apt.patient_name || "").toLowerCase().includes(searchText) ||
       (apt.doctor_name || "").toLowerCase().includes(searchText) ||
       (apt.app_date && apt.app_date.includes(searchText));
-    const matchesStatus = !statusFilter || apt.status === statusFilter;
+    const matchesStatus = !statusFilter || displayStatus === statusFilter;
     return matchesSearch && matchesStatus;
   });
 

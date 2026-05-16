@@ -84,6 +84,7 @@ if ($method === 'POST') {
     $input      = json_decode(file_get_contents("php://input"), true);
     $action     = $input['action']      ?? null;
     $approval_id = (int)($input['approval_id'] ?? 0);
+    $consultation_fee = $input['consultation_fee'] ?? '500.00'; // Default if not provided
 
     if (!$approval_id) {
         echo json_encode(['status' => 'error', 'message' => 'Invalid approval ID.']);
@@ -135,11 +136,11 @@ if ($method === 'POST') {
             // 5. Insert into doctor_profiles with clean individual columns
             $stmt = $conn->prepare(
                 "INSERT INTO doctor_profiles
-                    (user_id, medical_id, specialization, contact_number, experience_years, qualifications, bio, age)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                    (user_id, medical_id, specialization, contact_number, experience_years, qualifications, bio, age, consultation_fee)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
             $stmt->bind_param(
-                "ssssissi",
+                "ssssissid",
                 $user_id,
                 $medical_id,
                 $data['specialization'],
@@ -147,7 +148,8 @@ if ($method === 'POST') {
                 $experience,
                 $qualification,
                 $bio_text,
-                $age
+                $age,
+                $consultation_fee
             );
             $stmt->execute();
             $stmt->close();

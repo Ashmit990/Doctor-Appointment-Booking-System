@@ -1,30 +1,14 @@
 let currentRequests = [];
 let pendingAction = null;
 
-function fixSidebarActiveState() {
-  const currentPage = window.location.pathname.split("/").pop();
-  const allLinks = document.querySelectorAll(
-    "#sidebar nav a, #sidebar .border-t a",
-  );
-  allLinks.forEach((link) => {
-    const href = link.getAttribute("href");
-    if (href === currentPage) {
-      link.classList.add("bg-white/20", "text-white");
-      link.classList.remove("text-white/75");
-    } else {
-      link.classList.remove("bg-white/20");
-      link.classList.add("text-white/75");
-    }
-    link.style.minHeight = "48px";
-  });
-}
-
 document.addEventListener("DOMContentLoaded", () => {
   updateCurrentDate();
-  fixSidebarActiveState();
   loadApprovals();
+
+  loadCategories();
   setupModal();
   setupDoctorDetailsModal();
+  setupCategoryForm();
 });
 
 function updateCurrentDate() {
@@ -108,7 +92,6 @@ function renderApprovals() {
         ? req.full_name.charAt(0).toUpperCase()
         : "?";
       const submittedDate = new Date(req.submitted_at).toLocaleDateString();
-      const fee = parseFloat(req.consultation_fee || 0).toFixed(2);
 
       const bioText = req.parsed_bio_text || "No bio provided";
       const bioPreview =
@@ -133,7 +116,6 @@ function renderApprovals() {
         </td>
         <td class="px-5 py-4">
           <p class="font-medium text-gray-700 text-nowrap">${escapeHtml(req.specialization)}</p>
-          <p class="text-xs text-gray-500 mt-1">Fee: $${fee}</p>
         </td>
         <td class="px-5 py-4">
           <p class="text-sm text-gray-600 font-medium">${escapeHtml(req.parsed_phone)}</p>
@@ -143,14 +125,6 @@ function renderApprovals() {
         </td>
         <td class="px-5 py-4">
           <p class="text-sm text-teal font-semibold font-mono">${escapeHtml(req.parsed_medical_id)}</p>
-        </td>
-        <td class="px-5 py-4">
-          <p class="text-sm text-gray-600">${escapeHtml(req.parsed_experience)} yrs</p>
-        </td>
-        <td class="px-5 py-4">
-          <p class="text-sm text-gray-600 max-w-[150px] truncate" title="${escapeHtml(req.parsed_qualification)}">
-            ${escapeHtml(req.parsed_qualification)}
-          </p>
         </td>
         <td class="px-5 py-4 max-w-xs">
           <p class="text-sm text-gray-600 line-clamp-2" title="${escapeHtml(bioText)}">${escapeHtml(bioPreview)}</p>
@@ -198,12 +172,34 @@ function setupModal() {
     if (e.target === modal) closeModal();
   });
 
-  cancelBtn.addEventListener("click", () => closeModal());
+  const feeInput = document.getElementById("consultationFeeInput");
 
+  // Real-time validation for Consultation Fee
+  feeInput.addEventListener("input", () => {
+    if (pendingAction && pendingAction.action === "approve") {
+      const fee = feeInput.value;
+      confirmBtn.disabled = !fee || parseFloat(fee) < 0;
+    } else {
+      confirmBtn.disabled = false;
+    }
+  });
+
+  cancelBtn.addEventListener("click", () => closeModal());
   confirmBtn.addEventListener("click", async () => {
     if (!pendingAction) return;
+
+    let fee = null;
+    if (pendingAction.action === "approve") {
+      fee = document.getElementById("consultationFeeInput").value;
+      if (!fee || parseFloat(fee) < 0) {
+        showToast("Please set a valid consultation fee", true);
+        document.getElementById("consultationFeeInput").focus();
+        return;
+      }
+    }
+
     closeModal();
-    await executeAction(pendingAction.action, pendingAction.approvalId);
+    await executeAction(pendingAction.action, pendingAction.approvalId, fee);
     pendingAction = null;
   });
 }
@@ -220,13 +216,26 @@ function openConfirmModal(action, approvalId, doctorName) {
 
   if (action === "approve") {
     modalConfirmBtn.className =
-      "px-5 py-2 rounded-lg bg-teal text-white font-medium hover:bg-teal-dark transition-colors shadow-sm cursor-pointer";
+      "px-5 py-2 rounded-lg bg-teal text-white font-medium hover:bg-teal-dark transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
+    modalConfirmBtn.disabled = true;
   } else {
     modalConfirmBtn.className =
       "px-5 py-2 rounded-lg bg-rose-600 text-white font-medium hover:bg-rose-700 transition-colors shadow-sm cursor-pointer";
+    modalConfirmBtn.disabled = false;
   }
 
   pendingAction = { action, approvalId, doctorName };
+
+  const feeContainer = document.getElementById("feeInputContainer");
+  const feeInput = document.getElementById("consultationFeeInput");
+
+  if (action === "approve") {
+    feeContainer.classList.remove("hidden");
+    feeInput.value = ""; // Clear previous
+    setTimeout(() => feeInput.focus(), 300);
+  } else {
+    feeContainer.classList.add("hidden");
+  }
 
   modal.classList.remove("hidden");
   const modalContent = document.getElementById("modalContent");
@@ -252,12 +261,15 @@ function closeModal() {
   }, 150);
 }
 
-async function executeAction(action, approvalId) {
+async function executeAction(action, approvalId, fee = null) {
   try {
+    const payload = { action: action, approval_id: approvalId };
+    if (fee) payload.consultation_fee = fee;
+
     const response = await fetch("../../api/admin/doctor_approvals.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: action, approval_id: approvalId }),
+      body: JSON.stringify(payload),
     });
 
     const result = await response.json();
@@ -374,24 +386,8 @@ function showDoctorDetails(doctor) {
           <p class="font-medium text-gray-800">${escapeHtml(specialization)}</p>
         </div>
         <div class="bg-gray-50 p-3 rounded-lg">
-          <label class="text-xs text-gray-400 uppercase font-semibold">Consultation Fee</label>
-          <p class="font-medium text-gray-800">${escapeHtml(consultationFee)}</p>
-        </div>
-        <div class="bg-gray-50 p-3 rounded-lg">
-          <label class="text-xs text-gray-400 uppercase font-semibold">Experience</label>
-          <p class="font-medium text-gray-800">${escapeHtml(String(experience))}</p>
-        </div>
-        <div class="bg-gray-50 p-3 rounded-lg">
-          <label class="text-xs text-gray-400 uppercase font-semibold">Qualification</label>
-          <p class="font-medium text-gray-800">${escapeHtml(String(qualification))}</p>
-        </div>
-        <div class="bg-gray-50 p-3 rounded-lg">
           <label class="text-xs text-gray-400 uppercase font-semibold">Medical ID</label>
           <p class="font-medium text-gray-800">${escapeHtml(String(medicalId))}</p>
-        </div>
-        <div class="bg-gray-50 p-3 rounded-lg">
-          <label class="text-xs text-gray-400 uppercase font-semibold">Password Status</label>
-          <p class="font-medium text-gray-800">${escapeHtml(hasPassword)}</p>
         </div>
       </div>
 
@@ -453,4 +449,231 @@ function closeDoctorDetailsModal() {
       modal.classList.add("hidden");
     }, 150);
   }
+}
+
+// Treatment Category Management
+let allCategories = [];
+
+async function loadCategories() {
+  const tbody = document.getElementById("categories-table-body");
+  if (!tbody) return;
+
+  try {
+    const response = await fetch("../../api/admin/treatment_categories.php");
+    const result = await response.json();
+
+    if (result.status === "success") {
+      allCategories = result.data || [];
+      renderCategories();
+    } else {
+      tbody.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-red-500">${result.message}</td></tr>`;
+    }
+  } catch (error) {
+    console.error("Error loading categories:", error);
+  }
+}
+
+function renderCategories() {
+  const tbody = document.getElementById("categories-table-body");
+  if (!tbody) return;
+
+  if (allCategories.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-gray-500">No categories found.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = allCategories
+    .map(
+      (cat) => `
+    <tr class="border-b last:border-0 hover:bg-gray-50 transition-colors group">
+      <td class="px-5 py-4">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-teal/5 text-teal flex items-center justify-center font-bold">
+            ${cat.name.charAt(0)}
+          </div>
+          <span class="font-semibold text-gray-800">${escapeHtml(cat.name)}</span>
+        </div>
+      </td>
+      <td class="px-5 py-4 text-sm text-gray-600">${escapeHtml(cat.description)}</td>
+      <td class="px-5 py-4">
+        <div class="flex items-center gap-3">
+          <button onclick="showCategoryTickets('${escapeHtml(cat.name)}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal/5 text-teal text-xs font-bold hover:bg-teal hover:text-white transition-all">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+            Tickets
+          </button>
+          <div class="h-4 w-px bg-gray-200"></div>
+          <button onclick="editCategory(${cat.id})" class="text-gray-400 hover:text-teal transition-colors p-1" title="Edit">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          </button>
+          <button onclick="deleteCategory(${cat.id})" class="text-gray-400 hover:text-rose-600 transition-colors p-1" title="Delete">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>
+  `,
+    )
+    .join("");
+}
+
+async function showCategoryTickets(categoryName) {
+  const modal = document.getElementById("categoryTicketsModal");
+  const title = document.getElementById("modalCategoryName");
+  const tbody = document.getElementById("category-tickets-body");
+
+  title.textContent = `${categoryName} Treatment History`;
+  tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-500">Searching records...</td></tr>`;
+  modal.classList.remove("hidden");
+
+  try {
+    const response = await fetch(
+      `../../api/admin/treatment_tickets.php?category=${encodeURIComponent(categoryName)}`,
+    );
+    const result = await response.json();
+
+    if (result.status === "success" && result.data.length > 0) {
+      tbody.innerHTML = result.data
+        .map(
+          (t) => `
+        <tr class="border-b last:border-0 hover:bg-gray-50">
+          <td class="px-4 py-3 font-mono text-xs font-bold text-teal">${t.ticket_number}</td>
+          <td class="px-4 py-3">
+            <p class="text-sm font-medium text-gray-800">${t.patient_name}</p>
+          </td>
+          <td class="px-4 py-3 font-bold text-gray-700 text-sm">₹${parseFloat(t.cost).toLocaleString()}</td>
+          <td class="px-4 py-3 text-xs text-gray-500">
+            ${new Date(t.generated_at).toLocaleDateString()}<br>${new Date(t.generated_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          </td>
+          <td class="px-4 py-3">
+            <button onclick="viewTicketFromDrillDown(${JSON.stringify(t).replace(/'/g, "&apos;")})" class="text-teal hover:underline text-xs font-bold">Details</button>
+          </td>
+        </tr>
+      `,
+        )
+        .join("");
+    } else {
+      tbody.innerHTML = `<tr><td colspan="5" class="text-center py-12 text-gray-400">No tickets generated for this category yet.</td></tr>`;
+    }
+  } catch (error) {
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-red-500">Error loading data.</td></tr>`;
+  }
+}
+
+function viewTicketFromDrillDown(ticket) {
+  // Reuse the existing detail modal (we need to make sure it exists in the HTML)
+  const detailModal = document.getElementById("ticketDetailModal");
+  if (!detailModal) {
+    alert(
+      `Ticket: ${ticket.ticket_number}\nPatient: ${ticket.patient_name}\nCost: ₹${ticket.cost}`,
+    );
+    return;
+  }
+
+  document.getElementById("detailTicketNum").textContent = ticket.ticket_number;
+  document.getElementById("detailPatientName").textContent =
+    ticket.patient_name;
+  document.getElementById("detailCategory").textContent = ticket.category_name;
+  document.getElementById("detailCost").textContent =
+    `₹${parseFloat(ticket.cost).toLocaleString()}`;
+  document.getElementById("detailDate").textContent = new Date(
+    ticket.generated_at,
+  ).toLocaleString();
+  document.getElementById("detailDescription").textContent =
+    ticket.category_description || "No description available.";
+
+  detailModal.classList.remove("hidden");
+  detailModal.style.zIndex = "60"; // Make sure it stays on top of the drill-down modal
+}
+
+function closeCategoryTicketsModal() {
+  document.getElementById("categoryTicketsModal").classList.add("hidden");
+}
+
+function closeTicketModal() {
+  document.getElementById("ticketDetailModal").classList.add("hidden");
+}
+
+function openCategoryModal(mode, id = null) {
+  const modal = document.getElementById("categoryModal");
+  const title = document.getElementById("categoryModalTitle");
+  const form = document.getElementById("categoryForm");
+
+  form.reset();
+  document.getElementById("categoryId").value = "";
+
+  if (mode === "edit" && id) {
+    const cat = allCategories.find((c) => c.id == id);
+    if (cat) {
+      title.textContent = "Edit Treatment Category";
+      document.getElementById("categoryId").value = cat.id;
+      document.getElementById("categoryName").value = cat.name;
+      document.getElementById("categoryDescription").value = cat.description;
+    }
+  } else {
+    title.textContent = "Add Treatment Category";
+  }
+
+  modal.classList.remove("hidden");
+}
+
+function closeCategoryModal() {
+  document.getElementById("categoryModal").classList.add("hidden");
+}
+
+function editCategory(id) {
+  openCategoryModal("edit", id);
+}
+
+async function deleteCategory(id) {
+  if (!confirm("Are you sure you want to delete this category?")) return;
+
+  try {
+    const response = await fetch(
+      `../../api/admin/treatment_categories.php?id=${id}`,
+      {
+        method: "DELETE",
+      },
+    );
+    const result = await response.json();
+    if (result.status === "success") {
+      showToast(result.message);
+      loadCategories();
+    } else {
+      showToast(result.message, true);
+    }
+  } catch (error) {
+    console.error("Error deleting category:", error);
+  }
+}
+
+function setupCategoryForm() {
+  const form = document.getElementById("categoryForm");
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const data = {
+      id: document.getElementById("categoryId").value,
+      name: document.getElementById("categoryName").value,
+      description: document.getElementById("categoryDescription").value,
+    };
+
+    try {
+      const response = await fetch("../../api/admin/treatment_categories.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      if (result.status === "success") {
+        showToast(result.message);
+        closeCategoryModal();
+        loadCategories();
+      } else {
+        showToast(result.message, true);
+      }
+    } catch (error) {
+      console.error("Error saving category:", error);
+    }
+  });
 }
