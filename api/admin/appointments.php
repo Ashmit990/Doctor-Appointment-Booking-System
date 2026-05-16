@@ -54,10 +54,17 @@ try {
         $count_result = $stmt->get_result()->fetch_assoc();
         $stmt->close();
 
+        // Get total completed count
+        $stmt = $conn->prepare("SELECT COUNT(*) as completed FROM appointments WHERE status = 'Completed' OR (app_date < CURDATE() AND status = 'Upcoming')");
+        $stmt->execute();
+        $completed_result = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
         echo json_encode([
             'status' => 'success',
             'data' => $appointments,
             'total' => $count_result['total'],
+            'completed_total' => $completed_result['completed'],
             'page' => $page,
             'pages' => ceil($count_result['total'] / $limit)
         ]);

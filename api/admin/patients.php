@@ -33,6 +33,8 @@ try {
                 p.gender,
                 p.age,
                 p.address,
+                p.emergency_contact_name,
+                p.emergency_contact_phone,
                 COALESCE(
                     (SELECT COUNT(*) FROM appointments WHERE patient_id = u.user_id), 
                     0

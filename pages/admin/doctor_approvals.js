@@ -6,11 +6,9 @@ document.addEventListener("DOMContentLoaded", () => {
   loadApprovals();
 
   loadCategories();
-  loadAllTickets(); // New: Load global ticket list
   setupModal();
   setupDoctorDetailsModal();
   setupCategoryForm();
-  setupTicketFilters(); // New: Search & Filter for tickets
 });
 
 function updateCurrentDate() {
@@ -468,7 +466,7 @@ async function loadCategories() {
       allCategories = result.data || [];
       renderCategories();
     } else {
-      tbody.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-red-500">${result.message}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-red-500">${result.message}</td></tr>`;
     }
   } catch (error) {
     console.error("Error loading categories:", error);
@@ -480,7 +478,7 @@ function renderCategories() {
   if (!tbody) return;
 
   if (allCategories.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-gray-500">No categories found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-gray-500">No categories found.</td></tr>`;
     return;
   }
 
@@ -498,6 +496,9 @@ function renderCategories() {
       </td>
       <td class="px-5 py-4 text-sm text-gray-600">${escapeHtml(cat.description)}</td>
       <td class="px-5 py-4">
+        <span class="font-bold text-gray-700">₹${parseFloat(cat.estimated_cost || 0).toLocaleString()}</span>
+      </td>
+      <td class="px-5 py-4">
         <div class="flex items-center gap-3">
           <button onclick="editCategory(${cat.id})" class="text-gray-400 hover:text-teal transition-colors p-1" title="Edit">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -514,135 +515,7 @@ function renderCategories() {
 }
 
 
-function viewTicketFromDrillDown(ticket) {
-  // Reuse the existing detail modal (we need to make sure it exists in the HTML)
-  const detailModal = document.getElementById("ticketDetailModal");
-  if (!detailModal) {
-    alert(
-      `Ticket: ${ticket.ticket_number}\nPatient: ${ticket.patient_name}\nCost: ₹${ticket.cost}`,
-    );
-    return;
-  }
 
-  document.getElementById("detailTicketNum").textContent = ticket.ticket_number;
-  document.getElementById("detailPatientName").textContent =
-    ticket.patient_name;
-  document.getElementById("detailDoctorName").textContent =
-    ticket.doctor_name || "N/A";
-  document.getElementById("detailCategory").textContent = ticket.category_name;
-  document.getElementById("detailCost").textContent =
-    `₹${parseFloat(ticket.cost).toLocaleString()}`;
-  document.getElementById("detailDuration").textContent =
-    ticket.duration || "30 Mins";
-  document.getElementById("detailDate").textContent = new Date(
-    ticket.generated_at,
-  ).toLocaleString();
-  document.getElementById("detailDescription").textContent =
-    ticket.category_description || "No description available.";
-
-  detailModal.classList.remove("hidden");
-  detailModal.style.zIndex = "60"; // Make sure it stays on top of the drill-down modal
-}
-
-// Global Tickets Management
-let allTickets = [];
-
-async function loadAllTickets() {
-  const tbody = document.getElementById("all-tickets-table-body");
-  const search = document.getElementById("ticketSearch")?.value || "";
-  const category = document.getElementById("ticketCategoryFilter")?.value || "";
-
-  if (!tbody) return;
-
-  try {
-    const url = `../../api/admin/treatment_tickets.php?search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}`;
-    const response = await fetch(url);
-    const result = await response.json();
-
-    if (result.status === "success") {
-      allTickets = result.data || [];
-      renderAllTickets();
-      if (result.categories) {
-        populateCategoryFilter(result.categories);
-      }
-    } else {
-      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-12 text-red-500">${result.message}</td></tr>`;
-    }
-  } catch (error) {
-    console.error("Error loading all tickets:", error);
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-12 text-red-500">Failed to load ticket data.</td></tr>`;
-  }
-}
-
-function renderAllTickets() {
-  const tbody = document.getElementById("all-tickets-table-body");
-  if (!tbody) return;
-
-  if (allTickets.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-12 text-gray-400">No matching tickets found.</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = allTickets
-    .map(
-      (t) => `
-    <tr class="border-b last:border-0 hover:bg-gray-50 transition-colors">
-      <td class="px-5 py-4 font-mono text-xs font-bold text-teal">${t.ticket_number}</td>
-      <td class="px-5 py-4 text-sm font-medium text-gray-800">${escapeHtml(t.patient_name)}</td>
-      <td class="px-5 py-4 text-sm font-medium text-gray-600">Dr. ${escapeHtml(t.doctor_name)}</td>
-      <td class="px-5 py-4">
-        <span class="inline-block px-2 py-0.5 rounded bg-teal/5 text-teal text-[10px] font-bold border border-teal/10">${escapeHtml(t.category_name)}</span>
-      </td>
-      <td class="px-5 py-4 font-bold text-gray-700 text-sm">₹${parseFloat(t.cost).toLocaleString()}</td>
-      <td class="px-5 py-4 text-xs text-gray-500 font-medium">${escapeHtml(t.duration || "30 Mins")}</td>
-      <td class="px-5 py-4 text-xs text-gray-500">
-        ${new Date(t.generated_at).toLocaleDateString()}
-      </td>
-      <td class="px-5 py-4">
-        <button onclick='viewTicketFromDrillDown(${JSON.stringify(t).replace(/'/g, "&apos;")})' class="text-teal hover:underline text-xs font-bold">Details</button>
-      </td>
-    </tr>
-  `,
-    )
-    .join("");
-}
-
-function populateCategoryFilter(categories) {
-  const filter = document.getElementById("ticketCategoryFilter");
-  if (!filter || filter.options.length > 1) return; // Only populate once
-
-  categories.forEach((cat) => {
-    const opt = document.createElement("option");
-    opt.value = cat;
-    opt.textContent = cat;
-    filter.appendChild(opt);
-  });
-}
-
-function setupTicketFilters() {
-  const searchInput = document.getElementById("ticketSearch");
-  const filterSelect = document.getElementById("ticketCategoryFilter");
-
-  let timeout = null;
-  searchInput?.addEventListener("input", () => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => {
-      loadAllTickets();
-    }, 500);
-  });
-
-  filterSelect?.addEventListener("change", () => {
-    loadAllTickets();
-  });
-}
-
-function closeCategoryTicketsModal() {
-  document.getElementById("categoryTicketsModal").classList.add("hidden");
-}
-
-function closeTicketModal() {
-  document.getElementById("ticketDetailModal").classList.add("hidden");
-}
 
 function openCategoryModal(mode, id = null) {
   const modal = document.getElementById("categoryModal");
@@ -659,6 +532,7 @@ function openCategoryModal(mode, id = null) {
       document.getElementById("categoryId").value = cat.id;
       document.getElementById("categoryName").value = cat.name;
       document.getElementById("categoryDescription").value = cat.description;
+      document.getElementById("categoryPrice").value = cat.estimated_cost;
     }
   } else {
     title.textContent = "Add Treatment Category";
@@ -707,6 +581,7 @@ function setupCategoryForm() {
       id: document.getElementById("categoryId").value,
       name: document.getElementById("categoryName").value,
       description: document.getElementById("categoryDescription").value,
+      estimated_cost: document.getElementById("categoryPrice").value,
     };
 
     try {

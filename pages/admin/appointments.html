@@ -225,6 +225,19 @@
 
       <div class="p-4 md:p-8 flex-1 overflow-y-auto">
         <h2 class="text-2xl font-bold text-teal-dark mb-6">All Appointments</h2>
+        
+        <!-- Summary Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between h-32">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Total Completed Bookings</span>
+              <div class="w-8 h-8 bg-green-50 text-green-600 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              </div>
+            </div>
+            <h3 class="text-3xl font-black text-gray-900 leading-none" id="total-completed-count">0</h3>
+          </div>
+        </div>
 
         <!-- Toolbar -->
         <div class="flex flex-col md:flex-row gap-4 mb-6">

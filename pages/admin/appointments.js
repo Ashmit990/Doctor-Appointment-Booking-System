@@ -134,6 +134,11 @@ async function loadAppointments(page = 1) {
         totalPagesEl.textContent = result.pages || 1;
       }
 
+      const completedCountEl = document.getElementById("total-completed-count");
+      if (completedCountEl) {
+        completedCountEl.textContent = result.completed_total || 0;
+      }
+
       displayAppointments();
     } else {
       console.warn("API returned error");

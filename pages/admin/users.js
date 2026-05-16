@@ -62,6 +62,12 @@ function viewPatientDetails(userId) {
       `${patient.total_appointments || 0} Total`;
     document.getElementById("modalAddress").textContent =
       patient.address || "N/A";
+    
+    // Set emergency contact
+    const eName = patient.emergency_contact_name || "";
+    const ePhone = patient.emergency_contact_phone || "";
+    document.getElementById("modalEmergency").textContent = 
+      (eName || ePhone) ? `${eName} (${ePhone})` : "N/A";
 
     // Set initials
     const initials = (patient.full_name || "U")

@@ -25,15 +25,16 @@ try {
             $data = json_decode(file_get_contents('php://input'), true);
             $name = $conn->real_escape_string($data['name']);
             $description = $conn->real_escape_string($data['description']);
+            $estimated_cost = isset($data['estimated_cost']) ? (float)$data['estimated_cost'] : 0.0;
             $id = isset($data['id']) ? (int)$data['id'] : null;
 
             if ($id) {
                 // Update
-                $conn->query("UPDATE treatment_categories SET name='$name', description='$description' WHERE id=$id");
+                $conn->query("UPDATE treatment_categories SET name='$name', description='$description', estimated_cost=$estimated_cost WHERE id=$id");
                 echo json_encode(['status' => 'success', 'message' => 'Category updated']);
             } else {
                 // Insert
-                $conn->query("INSERT INTO treatment_categories (name, description) VALUES ('$name', '$description')");
+                $conn->query("INSERT INTO treatment_categories (name, description, estimated_cost) VALUES ('$name', '$description', $estimated_cost)");
                 echo json_encode(['status' => 'success', 'message' => 'Category added']);
             }
             break;

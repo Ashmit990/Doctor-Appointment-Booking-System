@@ -31,7 +31,6 @@ async function fetchAchievements() {
 
     if (result.status === "success") {
       allAchievements = result.data || [];
-      updateSummaryCards(result.summary);
       renderTable(allAchievements);
       document.getElementById("last-updated").textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
     }
@@ -43,26 +42,13 @@ async function fetchAchievements() {
 }
 
 
-function updateSummaryCards(summary) {
-  if (document.getElementById("stat-total-doctors"))
-    document.getElementById("stat-total-doctors").textContent = summary.total_doctors || 0;
-  if (document.getElementById("stat-completed"))
-    document.getElementById("stat-completed").textContent = summary.total_completed || 0;
-  
-  // Calculate average performance
-  const avgPerf = allAchievements.length > 0 
-    ? Math.round(allAchievements.reduce((acc, curr) => acc + curr.performance, 0) / allAchievements.length) 
-    : 0;
-    
-  if (document.getElementById("stat-avg-perf"))
-    document.getElementById("stat-avg-perf").textContent = `${avgPerf}%`;
-}
+
 
 function renderTable(doctors) {
   const tableBody = document.getElementById("achievement-table-body");
   
   if (doctors.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-gray-400 font-medium">No activity records found.</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-gray-400 font-medium">No activity records found.</td></tr>`;
     return;
   }
 
@@ -101,11 +87,6 @@ function renderTable(doctors) {
           </div>
         </div>
       </td>
-      <td class="px-6 py-4">
-        <button onclick="viewStats('${doc.user_id}')" class="text-teal hover:text-teal-dark font-bold text-xs uppercase tracking-widest transition-colors">
-          Performance Details
-        </button>
-      </td>
     </tr>
   `).join("");
 }
@@ -119,7 +100,4 @@ function filterAchievements() {
   renderTable(filtered);
 }
 
-function viewStats(id) {
-  // Navigation to individual doctor profile/stats can be added here
-  window.location.href = `doctor.html?id=${id}`;
-}
+
