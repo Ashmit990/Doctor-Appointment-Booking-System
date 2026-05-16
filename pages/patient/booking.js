@@ -106,8 +106,8 @@ function setBookingConflictMessage(message = "") {
   notifyParentResize();
 }
 
-async function getSameDayBookingConflict(dateStr, excludeAppointmentId = null) {
-  if (!dateStr) return null;
+async function getSameDayBookingConflict(dateStr, timeStr, doctorId, excludeAppointmentId = null) {
+  if (!dateStr || !timeStr || !doctorId) return null;
   try {
     const r = await fetch(
       `${API_BASE}/patient/appointments_by_day.php?date=${encodeURIComponent(dateStr)}`,
@@ -116,13 +116,23 @@ async function getSameDayBookingConflict(dateStr, excludeAppointmentId = null) {
     const j = await r.json();
     if (j.status !== "success" || !Array.isArray(j.data)) return null;
 
+    const targetTime = String(timeStr).substring(0, 5);
+    const targetDocId = String(doctorId);
+
     const conflict = j.data.find((apt) => {
       const status = String(apt.status || "").toLowerCase();
       const isCancelled = status === "cancelled";
       const sameAsEdited =
         excludeAppointmentId != null &&
         Number(apt.appointment_id) === Number(excludeAppointmentId);
-      return !isCancelled && !sameAsEdited;
+      
+      if (isCancelled || sameAsEdited) return false;
+
+      const aptTime = String(apt.app_time).substring(0, 5);
+      const aptDocId = String(apt.doctor_id);
+
+      // Conflict if same doctor OR same time
+      return aptDocId === targetDocId || aptTime === targetTime;
     });
     return conflict || null;
   } catch (err) {
@@ -506,43 +516,94 @@ document.getElementById("doctor").addEventListener("change", async () => {
     ? formatMoney(selectedDoctor.consultation_fee)
     : "—";
   await loadDates(doctorId);
-  setBookingConflictMessage("");
+  await checkBookingConflicts();
 });
+
+async function checkBookingConflicts() {
+  const doctorId = document.getElementById("doctor").value;
+  const dateStr = document.getElementById("date").value;
+  const timeSel = document.getElementById("time");
+  
+  const confirmBtn = document.getElementById("confirmBtn");
+  if (!confirmBtn) return;
+
+  if (!dateStr || !doctorId) {
+    confirmBtn.disabled = false;
+    confirmBtn.classList.remove("opacity-60", "cursor-not-allowed");
+    setBookingConflictMessage("");
+    return;
+  }
+
+  // Fetch all appointments for that day to check for both doctor and time conflicts
+  try {
+    const r = await fetch(
+      `${API_BASE}/patient/appointments_by_day.php?date=${encodeURIComponent(dateStr)}`,
+      { credentials: "include" },
+    );
+    const j = await r.json();
+    if (j.status !== "success" || !Array.isArray(j.data)) return;
+
+    const targetDocId = String(doctorId);
+    const selectedOpt = timeSel.selectedOptions[0];
+    const timeStr = (selectedOpt && selectedOpt.value) ? selectedOpt.dataset.start : null;
+    const targetTime = timeStr ? String(timeStr).substring(0, 5) : null;
+
+    const conflict = j.data.find((apt) => {
+      const status = String(apt.status || "").toLowerCase();
+      if (status === "cancelled") return false;
+      if (rescheduleAppointmentId && Number(apt.appointment_id) === Number(rescheduleAppointmentId)) return false;
+
+      const aptDocId = String(apt.doctor_id);
+      const aptTime = String(apt.app_time).substring(0, 5);
+
+      // 1. Same Doctor Check (Always blocks)
+      if (aptDocId === targetDocId) return true;
+
+      // 2. Same Time Check (Blocks if time is selected)
+      if (targetTime && aptTime === targetTime) return true;
+
+      return false;
+    });
+
+    if (conflict) {
+      const doctorName = conflict.doctor_name || "another doctor";
+      confirmBtn.disabled = true;
+      confirmBtn.classList.add("opacity-60", "cursor-not-allowed");
+      
+      if (String(conflict.doctor_id) === targetDocId) {
+          confirmBtn.title = `You already have an appointment with ${doctorName} on this date.`;
+          setBookingConflictMessage(
+            `You already have an appointment with ${doctorName} on this date. Multiple bookings with the same doctor on the same day are not allowed.`
+          );
+      } else {
+          const formattedTime = formatTime12h(conflict.app_time);
+          confirmBtn.title = `You already have an appointment at ${formattedTime} with ${doctorName}.`;
+          setBookingConflictMessage(
+            `You already have an appointment at ${formattedTime} with ${doctorName}. Please choose a different time.`
+          );
+      }
+    } else {
+      confirmBtn.disabled = false;
+      confirmBtn.classList.remove("opacity-60", "cursor-not-allowed");
+      confirmBtn.title = "";
+      setBookingConflictMessage("");
+    }
+  } catch (err) {
+    console.error("Conflict check failed:", err);
+  }
+}
 
 document.getElementById("date").addEventListener("change", async () => {
   const doctorId = document.getElementById("doctor").value;
   const dateStr = document.getElementById("date").value;
   await loadSlots(doctorId, dateStr);
-
-  const confirmBtn = document.getElementById("confirmBtn");
-  if (!confirmBtn || !dateStr) {
-    setBookingConflictMessage("");
-    return;
-  }
-
-  const conflict = await getSameDayBookingConflict(
-    dateStr,
-    rescheduleAppointmentId,
-  );
-  if (conflict) {
-    const doctorName = conflict.doctor_name || "another doctor";
-    confirmBtn.disabled = true;
-    confirmBtn.classList.add("opacity-60", "cursor-not-allowed");
-    confirmBtn.title = `You already have an appointment with ${doctorName} on this date.`;
-    setBookingConflictMessage(
-      `You already have an appointment with ${doctorName} on this date. Please choose a different date.`,
-    );
-  } else {
-    confirmBtn.disabled = false;
-    confirmBtn.classList.remove("opacity-60", "cursor-not-allowed");
-    confirmBtn.title = "";
-    setBookingConflictMessage("");
-  }
+  await checkBookingConflicts();
 });
 
-document.getElementById("time").addEventListener("change", () => {
+document.getElementById("time").addEventListener("change", async () => {
   const v = document.getElementById("time").value;
   document.getElementById("availId").value = v || "";
+  await checkBookingConflicts();
 });
 
 // Close success modal

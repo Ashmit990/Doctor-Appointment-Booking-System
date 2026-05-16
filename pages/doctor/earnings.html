@@ -282,7 +282,7 @@
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-gray-600 text-sm font-medium">
-                    Non-taxable Earnings
+                    Gross Earnings
                   </p>
                   <p
                     id="totalEarnings"
@@ -302,7 +302,7 @@
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-gray-600 text-sm font-medium">
-                    Completed Appointments
+                    Total Appointments
                   </p>
                   <p
                     id="totalCompleted"
@@ -325,25 +325,34 @@
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-gray-600 text-sm font-medium">
-                    Average Per Visit
+                    Completed Appointments
                   </p>
                   <p
-                    id="avgPerVisit"
+                    id="completedCount"
                     class="text-4xl font-bold text-gray-900 mt-2"
                   >
-                    $0
+                    0
                   </p>
                 </div>
                 <div
                   class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center"
                 >
                   <i
-                    data-lucide="trending-up"
+                    data-lucide="check-square"
                     class="w-7 h-7 primary-color"
                   ></i>
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- Net Income Info Line -->
+          <div class="bg-primary/5 border border-primary/10 rounded-xl p-4 mb-8 flex items-center gap-3">
+             <i data-lucide="info" class="w-5 h-5 primary-color"></i>
+             <p class="text-gray-700 font-medium">
+               Your net income is <span id="netIncomeText" class="primary-color font-bold">Rs. 0.00</span> 
+               <span class="text-xs text-gray-500 font-normal ml-1">(after 10% platform fee deduction)</span>
+             </p>
           </div>
 
           <!-- Transactions Table -->
@@ -360,8 +369,7 @@
                     <th class="px-6 py-3">Appointment Date</th>
                     <th class="px-6 py-3">Patient Name</th>
                     <th class="px-6 py-3">Appointment ID</th>
-                    <th class="px-6 py-3">Remarks</th>
-                    <th class="px-6 py-3">Status</th>
+                    <th class="px-6 py-3">Appointment Status</th>
                   </tr>
                 </thead>
                 <tbody id="earningsTable" class="divide-y divide-gray-100">
@@ -414,18 +422,24 @@
       }
 
       function renderDashboard() {
-        const total = earningsData.reduce(
+        const totalGross = earningsData.reduce(
           (sum, item) => sum + parseFloat(item.amount || 0),
           0,
         );
-        const count = earningsData.length;
-        const avg = count > 0 ? total / count : 0;
+        const totalCount = earningsData.length;
+        const completedCount = earningsData.filter(item => item.status === 'Completed').length;
+        
+        // 10% platform fee deduction
+        const platformFeePercent = 10; 
+        const totalIncome = totalGross * (1 - platformFeePercent / 100);
 
         document.getElementById("totalEarnings").textContent =
-          `$${total.toFixed(2)}`;
-        document.getElementById("totalCompleted").textContent = count;
-        document.getElementById("avgPerVisit").textContent =
-          `$${avg.toFixed(2)}`;
+          `Rs. ${totalGross.toFixed(2)}`;
+        document.getElementById("totalCompleted").textContent = totalCount;
+        document.getElementById("completedCount").textContent = completedCount;
+        
+        document.getElementById("netIncomeText").textContent = 
+          `Rs. ${totalIncome.toFixed(2)}`;
 
         renderTable();
         lucide.createIcons();
@@ -437,7 +451,7 @@
         if (!earningsData || earningsData.length === 0) {
           tbody.innerHTML = `
           <tr>
-            <td colspan="5" class="px-6 py-16 text-center">
+            <td colspan="4" class="px-6 py-16 text-center">
               <div class="flex flex-col items-center justify-center">
                 <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-gray-100">
                     <i data-lucide="receipt" class="w-8 h-8 text-gray-400"></i>
@@ -454,15 +468,28 @@
 
         tbody.innerHTML = earningsData
           .map(
-            (item) => `
+            (item) => {
+              const status = item.status || "Unknown";
+              let statusClass = "bg-gray-100 text-gray-600";
+              
+              if (status === "Upcoming") statusClass = "bg-blue-100 text-blue-600";
+              else if (status === "Completed") statusClass = "bg-emerald-100 text-emerald-600";
+              else if (status === "Cancelled") statusClass = "bg-red-100 text-red-600";
+              else if (status === "In Progress") statusClass = "bg-amber-100 text-amber-600";
+
+              return `
                 <tr class="hover:bg-gray-50 border-b border-gray-100">
                     <td class="px-6 py-3 text-sm text-gray-700">${item.app_date || "-"}</td>
                     <td class="px-6 py-3 text-sm font-medium text-gray-800">${escapeHtml(item.patient_name || "Unknown Patient")}</td>
                     <td class="px-6 py-3 text-sm text-gray-500">#${item.appointment_id || "-"}</td>
-                    <td class="px-6 py-3 text-sm text-gray-500">${escapeHtml(item.remarks || "Appointment completed successfully")}</td>
-                    <td class="px-6 py-3"><span class="bg-[#007E85]/15 text-[#007E85] px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap">${item.status || "Appointment Complete"}</span></td>
+                    <td class="px-6 py-3">
+                        <span class="${statusClass} px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap">
+                            ${status}
+                        </span>
+                    </td>
                 </tr>
-            `,
+              `;
+            }
           )
           .join("");
       }

@@ -91,15 +91,21 @@ if (!function_exists('complete_appointment_payment')) {
             $appt_reason = $booking['reason'] ?? 'Appointment booked via Khalti';
             $room_num = 'Room A1';
 
-            // 3. Double-check conflict (one appt per patient per day)
-            $conf = $conn->prepare("SELECT appointment_id FROM appointments WHERE patient_id = ? AND app_date = ? AND status <> 'Cancelled' LIMIT 1");
-            $conf->bind_param('ss', $payment['patient_id'], $appt_date);
+            // 3. Double-check conflict (no same doctor on same day, no same time slot)
+            $conf = $conn->prepare("SELECT a.appointment_id, u.full_name AS doctor_name, a.doctor_id FROM appointments a JOIN users u ON a.doctor_id = u.user_id WHERE a.patient_id = ? AND a.app_date = ? AND (a.doctor_id = ? OR a.app_time = ?) AND a.status <> 'Cancelled' LIMIT 1");
+            $docId = $payment['doctor_id'];
+            $conf->bind_param('ssss', $payment['patient_id'], $appt_date, $docId, $appt_time);
             $conf->execute();
-            if ($conf->get_result()->fetch_assoc()) {
-                $conf->close();
-                throw new Exception('Conflict: Appointment already exists for this date.');
-            }
+            $conflict = $conf->get_result()->fetch_assoc();
             $conf->close();
+            
+            if ($conflict) {
+                if ($conflict['doctor_id'] == $docId) {
+                    throw new Exception("Conflict: You already have an appointment with " . $conflict['doctor_name'] . " on this date. Multiple bookings with the same doctor on the same day are not allowed.");
+                } else {
+                    throw new Exception("Conflict: You already have an appointment at " . date("h:i A", strtotime($appt_time)) . " with " . $conflict['doctor_name'] . " on this date.");
+                }
+            }
 
             // 4. Create appointment
             $appt_insert = $conn->prepare("INSERT INTO appointments (patient_id, doctor_id, app_date, app_time, room_num, reason_for_visit, status, created_at) VALUES (?, ?, ?, ?, ?, ?, 'Upcoming', NOW())");

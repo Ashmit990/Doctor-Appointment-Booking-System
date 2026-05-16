@@ -140,8 +140,8 @@ async function loadHomePageData() {
         const stats = data.stats || {};
         
         document.getElementById('stat-today-visits').textContent = stats.today_appointments || 0;
-        document.getElementById('stat-total-patients').textContent = data.today_appointments?.length || 0;
-        document.getElementById('stat-completed').textContent = stats.completed_total || 0;
+        document.getElementById('stat-total-patients').textContent = stats.patients_today || 0;
+        document.getElementById('stat-completed').textContent = stats.completed_today || 0;
         updateDoctorNotificationBadge(stats.unread_notifications || 0);
     }
     
