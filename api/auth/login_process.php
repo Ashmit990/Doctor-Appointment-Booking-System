@@ -2,25 +2,10 @@
 session_start();
 require_once '../config/db.php';
 require_once '../includes/csrf_protection.php';
-require_once '../includes/password_helper.php';
 
 header('Content-Type: application/json');
-
-/**
- * Map DB role to canonical session role (trim / case-insensitive).
- */
-function login_canonical_role(string $raw): ?string
-{
-    $t = trim($raw);
-    $lower = strtolower($t);
-    return match (true) {
-        $lower === 'doctor' => 'Doctor',
-        $lower === 'patient' => 'Patient',
-        $lower === 'admin', $lower === 'administrator' => 'Admin',
-        in_array($t, ['Doctor', 'Patient', 'Admin'], true) => $t,
-        default => null,
-    };
-}
+error_reporting(0);
+ini_set('display_errors', 0);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // CSRF Token Validation
@@ -37,7 +22,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // Check for user in database
+    // Note: The column name is 'password_hash' in this database
     $stmt = $conn->prepare("SELECT user_id, full_name, password_hash, role FROM users WHERE email = ?");
+    if (!$stmt) {
+        echo json_encode(['status' => 'error', 'message' => 'Database error.']);
+        exit;
+    }
+    
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -45,52 +37,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
 
-        if (app_verify_password($password, $user['password_hash'])) {
-            if (!app_password_is_hashed($user['password_hash'])) {
-                $newHash = app_hash_password($password);
-                $up = $conn->prepare('UPDATE users SET password_hash = ? WHERE user_id = ?');
-                if ($up) {
-                    $up->bind_param('ss', $newHash, $user['user_id']);
-                    $up->execute();
-                    $up->close();
-                }
-            }
+        if (password_verify($password, $user['password_hash'])) {
+            $is_valid = true;
+        } else if ($password === $user['password_hash']) {
+            $is_valid = true;
+        }
 
-            $role = login_canonical_role((string) ($user['role'] ?? ''));
-            if ($role === null) {
-                echo json_encode([
-                    'status' => 'error',
-                    'message' => 'Your account has an invalid role. Please contact support.',
-                ]);
-                $stmt->close();
-                $conn->close();
-                exit;
-            }
-
+        if ($is_valid) {
             $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['full_name'] = $user['full_name'];
-            $_SESSION['role'] = $role;
+            $_SESSION['role'] = $user['role'];
 
-            // Paths relative to pages/auth/login.html so they work on any host/folder name
-            $redirect = match ($role) {
-                'Doctor' => '../doctor/home.html',
-                'Patient' => '../patient/homepage.html',
-                'Admin' => '../admin/dashboard.html',
-                default => '../../index.html',
-            };
+            $redirect = '';
+            switch ($user['role']) {
+                case 'Doctor':
+                    $redirect = '/Doctor-Appointment-Booking-System/pages/doctor/home.html';
+                    break;
+                case 'Patient':
+                    $redirect = '/Doctor-Appointment-Booking-System/pages/patient/homepage.html';
+                    break;
+                case 'Admin':
+                    $redirect = '/Doctor-Appointment-Booking-System/pages/admin/dashboard.html';
+                    break;
+                default:
+                    $redirect = '/Doctor-Appointment-Booking-System/index.html';
+            }
 
             echo json_encode([
                 'status' => 'success',
-                'role' => $role,
+                'role' => $user['role'],
                 'redirect' => $redirect
             ]);
+            exit;
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Invalid email or password.']);
+            exit;
         }
     } else {
         echo json_encode(['status' => 'error', 'message' => 'User not found.']);
+        exit;
     }
     $stmt->close();
 }
 $conn->close();
-?>
