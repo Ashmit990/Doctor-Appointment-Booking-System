@@ -34,7 +34,6 @@ async function fetchActivity() {
       allActivity = result.data || [];
       updateSummaryCards(result.summary);
       renderTable(allActivity);
-      renderDiscountLeaderboard(allActivity);
       document.getElementById("last-updated").textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
     }
   } catch (error) {
@@ -45,69 +44,12 @@ async function fetchActivity() {
 }
 
 
-function renderDiscountLeaderboard(patients) {
-  const leaderboardBody = document.getElementById("discount-leaderboard-body");
-  if (!leaderboardBody) return;
 
-  if (patients.length === 0) {
-    leaderboardBody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-gray-400 font-medium">No discount data available for this period.</td></tr>`;
-    return;
-  }
-
-  // Filter out patients with $0 if you only want to see people who got discounts, 
-  // but user said "If a patient has no discount, show $0".
-  // So we keep all and sort by discount.
-  
-  const sorted = [...patients].sort((a, b) => b.total_discount - a.total_discount);
-
-  leaderboardBody.innerHTML = sorted.map((pat, index) => `
-    <tr class="hover:bg-gray-50/50 transition-colors">
-      <td class="px-6 py-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-teal/10 flex items-center justify-center text-teal font-bold text-xs">
-            ${pat.full_name.charAt(0)}
-          </div>
-          <div>
-            <span class="font-bold text-gray-800 block">${pat.full_name}</span>
-            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">${pat.email}</span>
-          </div>
-        </div>
-      </td>
-      <td class="px-6 py-4">
-        <span class="text-sm font-black text-green-600">$${pat.total_discount.toFixed(2)}</span>
-      </td>
-      <td class="px-6 py-4">
-        <div class="flex flex-col">
-          <span class="text-xs font-bold text-gray-700">${pat.discount_count} Visits</span>
-          <span class="text-[10px] text-gray-400 font-bold uppercase">Discount applied</span>
-        </div>
-      </td>
-      <td class="px-6 py-4">
-        <span class="text-xs font-bold text-gray-600">$${pat.avg_discount.toFixed(2)}</span>
-      </td>
-      <td class="px-6 py-4">
-        <div class="w-8 h-8 rounded-full ${index < 3 ? 'bg-teal text-white' : 'bg-gray-100 text-gray-400'} flex items-center justify-center font-black text-xs">
-          ${index + 1}
-        </div>
-      </td>
-    </tr>
-  `).join("");
-}
 
 
 function updateSummaryCards(summary) {
-  if (document.getElementById("stat-total-patients"))
-    document.getElementById("stat-total-patients").textContent = summary.total_patients || 0;
   if (document.getElementById("stat-active"))
     document.getElementById("stat-active").textContent = summary.active_this_month || 0;
-  
-  // Calculate average engagement
-  const avgEng = allActivity.length > 0 
-    ? Math.round(allActivity.reduce((acc, curr) => acc + curr.engagement, 0) / allActivity.length) 
-    : 0;
-    
-  if (document.getElementById("stat-avg-engagement"))
-    document.getElementById("stat-avg-engagement").textContent = `${avgEng}%`;
     
   const totalTickets = allActivity.reduce((acc, curr) => acc + curr.ticket_count, 0);
   if (document.getElementById("stat-tickets"))

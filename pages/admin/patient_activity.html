@@ -150,14 +150,7 @@
         </div>
 
         <!-- Activity Summary -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10" id="summary-cards">
-           <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between h-40 activity-card">
-            <div class="h-8"></div>
-            <div>
-              <h3 class="text-3xl font-black text-gray-900 leading-none mb-1" id="stat-total-patients">0</h3>
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Patients</p>
-            </div>
-          </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10" id="summary-cards">
           <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between h-40 activity-card">
             <div class="h-8"></div>
             <div>
@@ -168,53 +161,8 @@
           <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between h-40 activity-card">
             <div class="h-8"></div>
             <div>
-              <h3 class="text-3xl font-black text-gray-900 leading-none mb-1" id="stat-avg-engagement">0%</h3>
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Avg. Engagement</p>
-            </div>
-          </div>
-          <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between h-40 activity-card">
-            <div class="h-8"></div>
-            <div>
               <h3 class="text-3xl font-black text-gray-900 leading-none mb-1" id="stat-tickets">0</h3>
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Tickets Issued</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Discount Leaderboard Section -->
-        <div class="mb-10">
-          <div class="flex items-center justify-between mb-6">
-            <div>
-              <h2 class="text-2xl font-bold text-teal-dark">Discount Leaderboard</h2>
-              <p class="text-sm text-gray-500">Top patients by total savings received.</p>
-            </div>
-            <select 
-              id="discountPeriod" 
-              onchange="fetchActivity()" 
-              class="bg-white border border-gray-200 text-gray-700 text-xs font-bold py-2 px-4 rounded-xl outline-none focus:ring-2 focus:ring-teal/20 transition-all uppercase tracking-widest cursor-pointer"
-            >
-              <option value="7d">Last 7 Days</option>
-              <option value="this_month">This Month</option>
-              <option value="all" selected>All Time</option>
-            </select>
-          </div>
-
-          <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full min-w-[900px]">
-                <thead class="bg-gray-50 border-b border-gray-100">
-                  <tr>
-                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Patient</th>
-                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Total Discount</th>
-                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Applied On</th>
-                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Avg. Per Visit</th>
-                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Rank</th>
-                  </tr>
-                </thead>
-                <tbody id="discount-leaderboard-body" class="divide-y divide-gray-50">
-                  <!-- Data will be injected here -->
-                </tbody>
-              </table>
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Tickets</p>
             </div>
           </div>
         </div>
