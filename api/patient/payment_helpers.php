@@ -63,6 +63,106 @@ if (!function_exists('khalti_payment_config')) {
     }
 }
 
+if (!function_exists('complete_appointment_payment')) {
+    /**
+     * Centralized function to complete an appointment after successful payment.
+     * Used by both callback and polling logic to ensure consistency.
+     */
+    function complete_appointment_payment(mysqli $conn, int $payment_id, array $khalti_data): array {
+        $verified_status = $khalti_data['status'] ?? 'Unknown';
+        $verified_txn_id = $khalti_data['transaction_id'] ?? '';
+
+        // 1. Fetch the payment record
+        $stmt = $conn->prepare("SELECT * FROM appointment_payments WHERE payment_id = ? FOR UPDATE");
+        $stmt->bind_param('i', $payment_id);
+        $stmt->execute();
+        $payment = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$payment) return ['success' => false, 'message' => 'Payment record not found'];
+        if ($payment['payment_status'] === 'Completed') return ['success' => true, 'appointment_id' => $payment['appointment_id']];
+
+        $conn->begin_transaction();
+        try {
+            // 2. Parse booking details
+            $booking = json_decode($payment['booking_payload'] ?? '{}', true) ?? [];
+            $appt_date = $booking['slot_date'] ?? date('Y-m-d');
+            $appt_time = $booking['slot_time'] ?? '09:00:00';
+            $appt_reason = $booking['reason'] ?? 'Appointment booked via Khalti';
+            $room_num = 'Room A1';
+
+            // 3. Double-check conflict (one appt per patient per day)
+            $conf = $conn->prepare("SELECT appointment_id FROM appointments WHERE patient_id = ? AND app_date = ? AND status <> 'Cancelled' LIMIT 1");
+            $conf->bind_param('ss', $payment['patient_id'], $appt_date);
+            $conf->execute();
+            if ($conf->get_result()->fetch_assoc()) {
+                $conf->close();
+                throw new Exception('Conflict: Appointment already exists for this date.');
+            }
+            $conf->close();
+
+            // 4. Create appointment
+            $appt_insert = $conn->prepare("INSERT INTO appointments (patient_id, doctor_id, app_date, app_time, room_num, reason_for_visit, status, created_at) VALUES (?, ?, ?, ?, ?, ?, 'Upcoming', NOW())");
+            $appt_insert->bind_param('ssssss', $payment['patient_id'], $payment['doctor_id'], $appt_date, $appt_time, $room_num, $appt_reason);
+            $appt_insert->execute();
+            $appointment_id = $appt_insert->insert_id;
+            $appt_insert->close();
+
+            // 5. Generate Ticket (Optional but standard in this app)
+            // (Logic extracted from existing scripts)
+            $astmt = $conn->prepare("SELECT specialization FROM doctor_profiles WHERE user_id = ?");
+            $astmt->bind_param("s", $payment['doctor_id']);
+            $astmt->execute();
+            $spec = $astmt->get_result()->fetch_assoc()['specialization'] ?? 'General Consultation';
+            $astmt->close();
+
+            $cstmt = $conn->prepare("SELECT id, estimated_cost FROM treatment_categories WHERE name LIKE ? LIMIT 1");
+            $likeSpec = "%$spec%";
+            $cstmt->bind_param("s", $likeSpec);
+            $cstmt->execute();
+            $cat = $cstmt->get_result()->fetch_assoc();
+            $cstmt->close();
+            
+            if ($cat && $appointment_id) {
+                $ticket_number = 'TKT-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
+                $cost = (float)$cat['estimated_cost'];
+                $cat_id = (int)$cat['id'];
+                $ins = $conn->prepare("INSERT INTO treatment_tickets (ticket_number, patient_id, appointment_id, category_id, cost, generated_at) VALUES (?, ?, ?, ?, ?, NOW())");
+                $ins->bind_param("ssiids", $ticket_number, $payment['patient_id'], $appointment_id, $cat_id, $cost, date('Y-m-d H:i:s'));
+                $ins->execute();
+                $ins->close();
+            }
+
+            // 6. Update Payment Record
+            $upd = $conn->prepare("UPDATE appointment_payments SET appointment_id = ?, payment_status = 'Completed', transaction_id = ?, callback_status = ?, verified_at = NOW(), updated_at = NOW() WHERE payment_id = ?");
+            $upd->bind_param('issi', $appointment_id, $verified_txn_id, $verified_status, $payment_id);
+            $upd->execute();
+            $upd->close();
+
+            // 7. Record Earnings
+            $earnAmount = (float)$payment['amount_rupees'];
+            if ($earnAmount > 0) {
+                $earn = $conn->prepare("INSERT INTO earnings (doctor_id, appointment_id, amount, payment_date) VALUES (?, ?, ?, NOW())");
+                $earn->bind_param('sid', $payment['doctor_id'], $appointment_id, $earnAmount);
+                $earn->execute();
+                $earn->close();
+            }
+
+            // 8. Notify Doctor
+            $notif = $conn->prepare("INSERT INTO notifications (user_id, title, message, created_at) VALUES (?, 'New Booking', 'A patient has booked an appointment via Khalti.', NOW())");
+            $notif->bind_param('s', $payment['doctor_id']);
+            @$notif->execute();
+            $notif->close();
+
+            $conn->commit();
+            return ['success' => true, 'appointment_id' => $appointment_id];
+        } catch (Exception $e) {
+            $conn->rollback();
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+}
+
 if (!function_exists('khalti_post_json')) {
     function khalti_post_json(string $url, array $payload, string $secretKey): array
     {
@@ -76,6 +176,7 @@ if (!function_exists('khalti_post_json')) {
             ],
             CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_SLASHES),
             CURLOPT_TIMEOUT => 30,
+            CURLOPT_CONNECTTIMEOUT => 10,
         ]);
 
         $response = curl_exec($ch);
@@ -85,24 +186,25 @@ if (!function_exists('khalti_post_json')) {
 
         if ($response === false) {
             return [
+                'success' => false,
                 'ok' => false,
-                'http_code' => 0,
-                'data' => null,
-                'error' => $curlError ?: 'Unable to contact Khalti',
+                'http_code' => $httpCode,
+                'error' => $curlError ?: ($httpCode == 504 ? 'Khalti Gateway Timeout' : 'Unable to contact Khalti'),
+                'is_maintenance' => ($httpCode >= 500)
             ];
         }
 
         $decoded = json_decode($response, true);
+        $is_success = ($httpCode >= 200 && $httpCode < 300);
 
-        $is_success = $httpCode >= 200 && $httpCode < 300;
         return [
             'success' => $is_success,
             'ok' => $is_success,
             'http_code' => $httpCode,
-            'data' => $is_success && is_array($decoded) ? $decoded : null,
+            'data' => $decoded,
             'raw' => $response,
-            'message' => $is_success ? null : (is_array($decoded) ? ($decoded['detail'] ?? $decoded['error_key'] ?? 'Khalti request failed') : 'Invalid response from Khalti'),
-            'error' => $is_success ? null : (is_array($decoded) ? ($decoded['detail'] ?? $decoded['error_key'] ?? 'Khalti request failed') : 'Invalid response from Khalti'),
+            'message' => $decoded['detail'] ?? $decoded['error_key'] ?? ($is_success ? null : 'Khalti request failed'),
+            'is_auth_error' => ($httpCode === 401)
         ];
     }
 }

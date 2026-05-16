@@ -253,169 +253,19 @@ if ($verified_amount !== (int)$payment['amount_paisa']) {
 }
 
 // Payment verified successfully - create appointment and mark payment as complete
-$conn->begin_transaction();
-try {
-    // Parse booking details
-    $booking = json_decode($payment['booking_payload'] ?? '{}', true) ?? [];
-    $appt_date = $booking['slot_date'] ?? date('Y-m-d');
-    $appt_time = $booking['slot_time'] ?? '09:00:00';
-    $appt_reason = $booking['reason'] ?? 'Appointment booked via Khalti payment';
-    $room_num = 'Room A1';
+$result = complete_appointment_payment($conn, $payment['payment_id'], $khalti_data);
 
-    // Double-check conflict at callback time to avoid race-condition double booking.
-    $conf_sql = "SELECT a.appointment_id, COALESCE(u.full_name, a.doctor_id) AS doctor_name FROM appointments a " .
-                "LEFT JOIN users u ON a.doctor_id = u.user_id " .
-                "WHERE a.patient_id = ? AND a.app_date = ? AND a.status <> 'Cancelled' LIMIT 1";
-    $conf = $conn->prepare($conf_sql);
-    $conf->bind_param('ss', $payment['patient_id'], $appt_date);
-    $conf->execute();
-    $conflict_row = $conf->get_result()->fetch_assoc();
-    $conf->close();
-
-    if ($conflict_row) {
-        $existing_doctor = trim((string) ($conflict_row['doctor_name'] ?? 'another doctor'));
-        $markConflictStmt = $conn->prepare("UPDATE appointment_payments SET payment_status = 'Failed', callback_status = 'BookingConflict', updated_at = NOW() WHERE payment_id = ?");
-        $markConflictStmt->bind_param('i', $payment['payment_id']);
-        $markConflictStmt->execute();
-        $markConflictStmt->close();
-
-        $releaseStmt = $conn->prepare("UPDATE doctor_availability SET status = 'Available' WHERE avail_id = ?");
-        $releaseStmt->bind_param('i', $payment['avail_id']);
-        $releaseStmt->execute();
-        $releaseStmt->close();
-
-        $conn->commit();
-        http_response_code(409);
-        $render_response(false, 'Booking Conflict', 'You already have an appointment on this date with ' . $existing_doctor . '. Multiple bookings on the same day are not allowed.', $pidx, $verified_txn_id);
-        exit;
-    }
-
-    // Create appointment record (use actual column names: app_date, app_time)
-    $appt_insert = $conn->prepare("
-        INSERT INTO appointments 
-        (patient_id, doctor_id, app_date, app_time, room_num, reason_for_visit, status, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, 'Upcoming', NOW())
-    ");
-    $appt_insert->bind_param('ssssss', 
-        $payment['patient_id'],
-        $payment['doctor_id'],
-        $appt_date,
-        $appt_time,
-        $room_num,
-        $appt_reason
-    );
-    $appt_insert->execute();
-    $appointment_id = $appt_insert->insert_id;
-    $appt_insert->close();
-
-    if (!$appointment_id) {
-        throw new Exception('Failed to create appointment');
-    }
-
-    // Auto-generate treatment ticket
-    $astmt = $conn->prepare("SELECT dp.specialization FROM doctor_profiles dp WHERE dp.user_id = ?");
-    $astmt->bind_param("s", $payment['doctor_id']);
-    $astmt->execute();
-    $astmt_result = $astmt->get_result()->fetch_assoc();
-    $astmt->close();
-    $specialization = $astmt_result['specialization'] ?? '';
-
-    $cstmt = $conn->prepare("
-        SELECT id, name, estimated_cost FROM treatment_categories 
-        WHERE LOWER(name) = LOWER(?) 
-           OR LOWER(name) LIKE CONCAT('%', LOWER(?), '%')
-           OR LOWER(?) LIKE CONCAT('%', SUBSTRING(LOWER(name), 1, 5), '%')
-        LIMIT 1
-    ");
-    $cstmt->bind_param("sss", $specialization, $specialization, $specialization);
-    $cstmt->execute();
-    $cat = $cstmt->get_result()->fetch_assoc();
-    $cstmt->close();
-    
-    if (!$cat) {
-        $cat = $conn->query("SELECT id, name, estimated_cost FROM treatment_categories WHERE name = 'General Consultation' LIMIT 1")->fetch_assoc();
-    }
-    if (!$cat) {
-        $cat = $conn->query("SELECT id, name, estimated_cost FROM treatment_categories ORDER BY id ASC LIMIT 1")->fetch_assoc();
-    }
-
-    if ($cat) {
-        date_default_timezone_set('Asia/Kathmandu');
-        $ticket_number = 'TKT-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
-        $cost = (float)$cat['estimated_cost'];
-        $cat_id = (int)$cat['id'];
-        $generated_at = date('Y-m-d H:i:s');
-        
-        $ins = $conn->prepare("INSERT INTO treatment_tickets (ticket_number, patient_id, appointment_id, category_id, cost, generated_at) VALUES (?, ?, ?, ?, ?, ?)");
-        $ins->bind_param("ssiids", $ticket_number, $payment['patient_id'], $appointment_id, $cat_id, $cost, $generated_at);
-        $ins->execute();
-        $ins->close();
-    }
-
-    // Update payment record to Completed
-    $updateStmt = $conn->prepare("
-        UPDATE appointment_payments 
-        SET appointment_id = ?, payment_status = 'Completed', 
-            transaction_id = ?, callback_status = ?, verified_at = NOW(), updated_at = NOW()
-        WHERE payment_id = ?
-    ");
-    $updateStmt->bind_param('issi',
-        $appointment_id,
-        $verified_txn_id,
-        $verified_status,
-        $payment['payment_id']
-    );
-    $updateStmt->execute();
-    $updateStmt->close();
-
-    // Record earnings for the booked appointment
-    $earnAmount = isset($payment['amount_rupees']) ? floatval($payment['amount_rupees']) : 0.0;
-    if ($earnAmount > 0) {
-        $earnStmt = $conn->prepare("INSERT INTO earnings (doctor_id, appointment_id, amount, payment_date) VALUES (?, ?, ?, NOW())");
-        $earnStmt->bind_param('sid', $payment['doctor_id'], $appointment_id, $earnAmount);
-        $earnStmt->execute();
-        $earnStmt->close();
-    }
-
-    // Send notification to doctor
-    $notif_title = 'New Appointment Booking';
-    $notif_msg = 'A new patient has successfully booked an appointment with you.';
-    $notifStmt = $conn->prepare("INSERT INTO notifications (user_id, title, message, is_read, created_at) VALUES (?, ?, ?, 0, NOW())");
-    @$notifStmt->bind_param('sss', $payment['doctor_id'], $notif_title, $notif_msg);
-    @$notifStmt->execute();
-    @$notifStmt->close();
-
-    $conn->commit();
-
+if ($result['success']) {
     http_response_code(200);
     $render_response(true, 'Payment Successful',
         'Your appointment has been booked successfully! Check your dashboard for details.',
-        $pidx, $verified_txn_id, $appointment_id);
-    exit;
-
-} catch (Exception $e) {
-    $conn->rollback();
-
-    // Log detailed error for debugging
-    error_log('Khalti Callback Error: ' . json_encode([
-        'error' => $e->getMessage(),
-        'payment_id' => $payment['payment_id'] ?? 'unknown',
-        'payment_patient_id' => $payment['patient_id'] ?? 'NULL',
-        'payment_doctor_id' => $payment['doctor_id'] ?? 'NULL',
-        'booking_payload' => $payment['booking_payload'] ?? 'NULL',
-    ]));
-
-    // Release the slot on error
-    $releaseStmt = $conn->prepare("UPDATE doctor_availability SET status = 'Available' WHERE avail_id = ?");
-    $releaseStmt->bind_param('i', $payment['avail_id']);
-    @$releaseStmt->execute();
-    $releaseStmt->close();
-
+        $pidx, $verified_txn_id, $result['appointment_id']);
+} else {
     http_response_code(500);
     $render_response(false, 'Booking Failed', 
-        'Payment verified but appointment creation failed. Contact support for assistance.',
+        'Payment verified but appointment creation failed: ' . $result['message'],
         $pidx, $verified_txn_id);
-    exit;
 }
+exit;
 
 $conn->close();

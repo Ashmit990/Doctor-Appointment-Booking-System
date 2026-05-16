@@ -99,6 +99,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         },
       );
 
+      if (response.status === 504 || response.status === 502) {
+        throw new Error("Khalti payment server is currently undergoing maintenance or is slow. Please try again in a few minutes.");
+      }
+
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error("Server Error Response:", errText);
+        throw new Error("Server error: " + response.status + ". Please try again later.");
+      }
+
       const result = await response.json();
 
       if (result.status !== "success") {

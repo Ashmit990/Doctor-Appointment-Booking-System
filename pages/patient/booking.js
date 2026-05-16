@@ -162,6 +162,15 @@ async function startKhaltiPayment() {
         reason_for_visit: String(pendingBookingRequest.description).trim(),
       }),
     });
+
+    if (r.status === 504 || r.status === 502) {
+      throw new Error("Khalti server timeout (Maintenance). Please try again in a moment.");
+    }
+
+    if (!r.ok) {
+      throw new Error("Payment server error (" + r.status + ").");
+    }
+
     const j = await r.json();
 
     if (j.status !== "success") {

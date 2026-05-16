@@ -230,6 +230,12 @@ try {
             'email' => $patient['email'],
             'phone' => $patient['contact_number'],
         ],
+        'amount_breakdown' => [
+            [
+                'label' => 'Consultation Fee',
+                'amount' => $amount_paisa,
+            ]
+        ],
         'product_details' => [
             [
                 'identity' => 'consultation_' . $doctor_id,
@@ -249,7 +255,7 @@ try {
         $config['secret_key']
     );
 
-    if (!($khalti_response['success'] ?? $khalti_response['ok'] ?? false)) {
+    if (!$khalti_response['success']) {
         // Release slot on API failure
         $rel = $conn->prepare("UPDATE doctor_availability SET status = 'Available' WHERE avail_id = ?");
         $rel->bind_param('i', $avail_id);
@@ -259,16 +265,22 @@ try {
         // Log detailed error for debugging
         error_log('Khalti API Error: ' . json_encode([
             'http_code' => $khalti_response['http_code'] ?? 'unknown',
-            'message' => $khalti_response['message'] ?? $khalti_response['error'] ?? 'Unknown',
+            'message' => $khalti_response['message'] ?? 'Unknown',
             'raw_response' => substr($khalti_response['raw'] ?? '', 0, 500),
         ]));
 
-        http_response_code(502);
-        $errorMsg = $khalti_response['message'] ?? $khalti_response['error'] ?? 'Unknown error';
-        // Check if this is a auth token issue
-        if (strpos(strtolower($errorMsg), 'token') !== false || strpos(strtolower($errorMsg), 'unauthorized') !== false) {
-            $errorMsg = 'Invalid Khalti credentials. Please check .env KHALTI_SECRET_KEY. Get key from https://test-admin.khalti.com/';
+        $http_code = $khalti_response['http_code'] ?? 502;
+        http_response_code($http_code);
+        
+        $errorMsg = $khalti_response['message'] ?? 'Unknown error';
+        
+        // Descriptive error based on status code
+        if ($khalti_response['is_auth_error'] ?? false) {
+            $errorMsg = 'Invalid Khalti credentials. Please check your KHALTI_SECRET_KEY in .env';
+        } else if ($khalti_response['is_maintenance'] ?? false) {
+            $errorMsg = 'Khalti payment server is currently undergoing maintenance or is slow (504/500). Please try again in a few minutes.';
         }
+
         echo json_encode([
             'status' => 'error',
             'message' => 'Failed to initiate payment: ' . $errorMsg,

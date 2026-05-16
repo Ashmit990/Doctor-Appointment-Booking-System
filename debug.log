@@ -1,0 +1,118 @@
+﻿
+[2026-05-16 13:56:42] Khalti Init: Starting request
+[2026-05-16 13:56:42] Khalti Init: Requires done
+[2026-05-16 13:56:42] Khalti Init: Session closed
+[2026-05-16 13:56:42] Khalti Init: Starting for patient PAT_9495
+[2026-05-16 13:56:42] Khalti Init: Cleanup done
+[2026-05-16 13:56:42] Khalti Init: Patient fetched
+[2026-05-16 13:56:42] Khalti Init: Transaction started
+[2026-05-16 13:56:42] Khalti Init: Transaction committed, payment_id=115
+[2026-05-16 13:58:31] Khalti Init: Starting request
+[2026-05-16 13:58:31] Khalti Init: Requires done
+[2026-05-16 13:58:31] Khalti Init: Session closed
+[2026-05-16 13:58:31] Khalti Init: Starting for patient PAT_9495
+[2026-05-16 13:58:31] Khalti Init: Cleanup done
+[2026-05-16 13:58:31] Khalti Init: Patient fetched
+[2026-05-16 13:58:31] Khalti Init: Transaction started
+[2026-05-16 13:58:31] Khalti Init: Transaction committed, payment_id=116
+[2026-05-16 13:58:31] Khalti Init: Calling Khalti API at https://a.khalti.com/api/v2
+[2026-05-16 13:58:31] Khalti API duration: 0.71s
+[2026-05-16 14:01:15] Khalti Init: Starting request
+[2026-05-16 14:01:15] Khalti Init: Requires done
+[2026-05-16 14:01:15] Khalti Init: Session closed
+[2026-05-16 14:01:15] Khalti Init: Starting for patient PAT_9495
+[2026-05-16 14:01:15] Khalti Init: Cleanup done
+[2026-05-16 14:01:15] Khalti Init: Patient fetched
+[2026-05-16 14:01:15] Khalti Init: Transaction started
+[2026-05-16 14:01:15] Khalti Init: Transaction committed, payment_id=117
+[2026-05-16 14:01:15] Khalti Init: Calling Khalti API at https://a.khalti.com/api/v2
+[2026-05-16 14:01:15] Khalti API duration: 0.779s
+[2026-05-16 14:05:34] Khalti Init: Starting request
+[2026-05-16 14:05:34] Khalti Init: Requires done
+[2026-05-16 14:05:34] Khalti Init: Session closed
+[2026-05-16 14:05:34] Khalti Init: Starting for patient PAT_9495
+[2026-05-16 14:05:34] Khalti Init: Cleanup done
+[2026-05-16 14:05:34] Khalti Init: Patient fetched
+[2026-05-16 14:05:34] Khalti Init: Transaction started
+[2026-05-16 14:05:34] Khalti Init: Transaction committed, payment_id=118
+[2026-05-16 14:05:34] Khalti Init: Calling Khalti API at https://khalti.com/api/v2
+[2026-05-16 14:05:34] Khalti API duration: 0.657s
+[2026-05-16 14:05:34] Khalti API Error: Invalid token.
+[2026-05-16 14:05:44] Khalti Init: Starting request
+[2026-05-16 14:05:44] Khalti Init: Requires done
+[2026-05-16 14:05:44] Khalti Init: Session closed
+[2026-05-16 14:05:44] Khalti Init: Starting for patient PAT_9495
+[2026-05-16 14:05:44] Khalti Init: Cleanup done
+[2026-05-16 14:05:44] Khalti Init: Patient fetched
+[2026-05-16 14:05:44] Khalti Init: Transaction started
+[2026-05-16 14:05:44] Khalti Init: Transaction committed, payment_id=119
+[2026-05-16 14:05:44] Khalti Init: Calling Khalti API at https://khalti.com/api/v2
+[2026-05-16 14:05:44] Khalti API duration: 0.662s
+[2026-05-16 14:05:44] Khalti API Error: Invalid token.
+[2026-05-16 14:09:44] Khalti Init: Starting request
+[2026-05-16 14:09:44] Khalti Init: Requires done
+[2026-05-16 14:09:44] Khalti Init: Session closed
+[2026-05-16 14:09:44] Khalti Init: Starting for patient PAT_9495
+[2026-05-16 14:09:44] Khalti Init: Cleanup done
+[2026-05-16 14:09:44] Khalti Init: Patient fetched
+[2026-05-16 14:09:44] Khalti Init: Transaction started
+[2026-05-16 14:09:44] Khalti Init: Transaction committed, payment_id=120
+[2026-05-16 14:09:44] Khalti Init: Calling Khalti API at https://a.khalti.com/api/v2
+[2026-05-16 14:09:44] Khalti API duration: 0.671s
+[2026-05-16 14:09:44] Khalti API Error: Invalid token.
+[2026-05-16 14:11:07] Khalti Init: Starting request
+[2026-05-16 14:11:07] Khalti Init: Requires done
+[2026-05-16 14:11:07] Khalti Init: Session closed
+[2026-05-16 14:11:07] Khalti Init: Starting for patient PAT_9495
+[2026-05-16 14:11:07] Khalti Init: Cleanup done
+[2026-05-16 14:11:07] Khalti Init: Patient fetched
+[2026-05-16 14:11:07] Khalti Init: Transaction started
+[2026-05-16 14:11:07] Khalti Init: Transaction committed, payment_id=121
+[2026-05-16 14:11:07] Khalti Init: Using key starting with: test_secret_key
+[2026-05-16 14:11:07] Khalti Init: Calling Khalti API at https://a.khalti.com/api/v2
+[2026-05-16 14:11:07] Khalti API duration: 0.625s
+[2026-05-16 14:11:07] Khalti API Error: Invalid token.
+[2026-05-16 14:12:34] Khalti Init: Starting request
+[2026-05-16 14:12:34] Khalti Init: Requires done
+[2026-05-16 14:12:34] Khalti Init: Session closed
+[2026-05-16 14:12:34] Khalti Init: Starting for patient PAT_9495
+[2026-05-16 14:12:34] Khalti Init: Cleanup done
+[2026-05-16 14:12:34] Khalti Init: Patient fetched
+[2026-05-16 14:12:34] Khalti Init: Transaction started
+[2026-05-16 14:12:34] Khalti Init: Transaction committed, payment_id=122
+[2026-05-16 14:12:34] Khalti Init: Using key starting with: test_secret_key
+[2026-05-16 14:12:34] Khalti Init: Success, payment_url=https://khalti.com/mock-payment
+[2026-05-16 14:13:38] Khalti Init: Starting request
+[2026-05-16 14:13:38] Khalti Init: Requires done
+[2026-05-16 14:13:38] Khalti Init: Session closed
+[2026-05-16 14:13:38] Khalti Init: Starting for patient PAT_9495
+[2026-05-16 14:13:38] Khalti Init: Cleanup done
+[2026-05-16 14:13:38] Khalti Init: Patient fetched
+[2026-05-16 14:13:38] Khalti Init: Transaction started
+[2026-05-16 14:13:38] Khalti Init: Transaction committed, payment_id=123
+[2026-05-16 14:13:38] Khalti Init: Using key starting with: test_secret_key
+[2026-05-16 14:13:38] Khalti Init: Success, payment_url=mock_payment.html?payment_id=123&pidx=MOCK_PIDX_1778933618
+[2026-05-16 14:15:35] Khalti Init: Starting request
+[2026-05-16 14:15:35] Khalti Init: Requires done
+[2026-05-16 14:15:35] Khalti Init: Session closed
+[2026-05-16 14:15:35] Khalti Init: Starting for patient PAT_9495
+[2026-05-16 14:15:35] Khalti Init: Cleanup done
+[2026-05-16 14:15:35] Khalti Init: Patient fetched
+[2026-05-16 14:15:35] Khalti Init: Transaction started
+[2026-05-16 14:15:35] Khalti Init: Transaction committed, payment_id=124
+[2026-05-16 14:15:35] Khalti Init: Using key starting with: test_secret_key
+[2026-05-16 14:15:35] Khalti Init: Calling Khalti API at https://a.khalti.com/api/v2
+[2026-05-16 14:15:36] Khalti API duration: 0.641s
+[2026-05-16 14:15:36] Khalti API Error: Invalid token.
+[2026-05-16 14:16:23] Khalti Init: Starting request
+[2026-05-16 14:16:23] Khalti Init: Requires done
+[2026-05-16 14:16:23] Khalti Init: Session closed
+[2026-05-16 14:16:23] Khalti Init: Starting for patient PAT_9495
+[2026-05-16 14:16:23] Khalti Init: Cleanup done
+[2026-05-16 14:16:23] Khalti Init: Patient fetched
+[2026-05-16 14:16:23] Khalti Init: Transaction started
+[2026-05-16 14:16:23] Khalti Init: Transaction committed, payment_id=125
+[2026-05-16 14:16:23] Khalti Init: Using key starting with: 3c1ddff45abd4f1
+[2026-05-16 14:16:23] Khalti Init: Calling Khalti API at https://a.khalti.com/api/v2
+[2026-05-16 14:16:24] Khalti API duration: 0.823s
+[2026-05-16 14:16:24] Khalti Init: Success, payment_url=https://test-pay.khalti.com/?pidx=GRToqibEhUPrhGXjxaCEEK

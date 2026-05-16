@@ -187,6 +187,10 @@ async function fetchAppointments() {
     `${API_BASE}/patient/appointments.php?${params.toString()}`,
     { credentials: "include" },
   );
+  if (!r.ok) {
+    console.warn("Appointments load error status:", r.status);
+    return []; // Return empty list instead of crashing on 504/500
+  }
   const j = await r.json();
   if (j.status !== "success") throw new Error(j.message || "Load failed");
   return j.data || [];
@@ -299,40 +303,36 @@ function renderAppointments(rows) {
           <button type="button" data-view="${item.appointment_id}" class="view-btn w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-medium transition whitespace-nowrap text-center">
             Details
           </button>
-          ${
-            showReschedule
-              ? `<button type="button" data-reschedule="${item.appointment_id}" class="reschedule-btn w-full px-3 py-2 rounded-lg bg-teal-600 text-white hover:bg-teal-700 text-xs font-medium shadow-sm transition whitespace-nowrap text-center">
+          ${showReschedule
+        ? `<button type="button" data-reschedule="${item.appointment_id}" class="reschedule-btn w-full px-3 py-2 rounded-lg bg-teal-600 text-white hover:bg-teal-700 text-xs font-medium shadow-sm transition whitespace-nowrap text-center">
             Reschedule
           </button>`
-              : ""
-          }
-          ${
-            item.status_key === "completed" && item.feedback
-              ? `<button type="button" data-view-feedback="${item.appointment_id}" class="view-feedback-btn w-full px-3 py-2 rounded-lg border border-yellow-300 bg-yellow-400 text-white hover:bg-yellow-500 text-xs font-medium transition whitespace-nowrap text-center">
+        : ""
+      }
+          ${item.status_key === "completed" && item.feedback
+        ? `<button type="button" data-view-feedback="${item.appointment_id}" class="view-feedback-btn w-full px-3 py-2 rounded-lg border border-yellow-300 bg-yellow-400 text-white hover:bg-yellow-500 text-xs font-medium transition whitespace-nowrap text-center">
             View Feedback
           </button>`
-              : item.status_key === "completed" && !item.feedback
-                ? `<button type="button" data-feedback="${item.appointment_id}" class="feedback-btn w-full px-3 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 text-xs font-medium shadow-sm transition whitespace-nowrap text-center">
+        : item.status_key === "completed" && !item.feedback
+          ? `<button type="button" data-feedback="${item.appointment_id}" class="feedback-btn w-full px-3 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 text-xs font-medium shadow-sm transition whitespace-nowrap text-center">
             Feedback
           </button>`
-                : ""
-          }
-          ${
-            item.status_key === "completed"
-              ? `<button type="button" data-view-report="${item.appointment_id}" class="view-report-btn w-full px-3 py-2 rounded-lg border border-red-600 bg-red-600 text-white hover:bg-red-700 text-xs font-medium transition whitespace-nowrap text-center flex items-center justify-center gap-1">
+          : ""
+      }
+          ${item.status_key === "completed"
+        ? `<button type="button" data-view-report="${item.appointment_id}" class="view-report-btn w-full px-3 py-2 rounded-lg border border-red-600 bg-red-600 text-white hover:bg-red-700 text-xs font-medium transition whitespace-nowrap text-center flex items-center justify-center gap-1">
                 <i data-lucide="file-text" class="w-3 h-3"></i>
                 View Report
               </button>`
-              : ""
-          }
-          ${
-            item.payment_status_key === "completed"
-              ? `<button type="button" data-view-receipt="${item.appointment_id}" class="view-receipt-btn w-full px-3 py-2 rounded-lg border border-[#0d7377] bg-[#0d7377] text-white hover:bg-[#0a5a5d] text-xs font-medium shadow-sm transition whitespace-nowrap text-center flex items-center justify-center gap-1">
+        : ""
+      }
+          ${item.payment_status_key === "completed"
+        ? `<button type="button" data-view-receipt="${item.appointment_id}" class="view-receipt-btn w-full px-3 py-2 rounded-lg border border-[#0d7377] bg-[#0d7377] text-white hover:bg-[#0a5a5d] text-xs font-medium shadow-sm transition whitespace-nowrap text-center flex items-center justify-center gap-1">
                 <i data-lucide="receipt" class="w-3 h-3"></i>
                 View Receipt
               </button>`
-              : ""
-          }
+        : ""
+      }
           <button type="button" data-view-ticket="${item.appointment_id}" class="view-ticket-btn w-full px-3 py-2 rounded-lg border border-[#0d7377] text-[#0d7377] hover:bg-teal-50 text-xs font-medium transition whitespace-nowrap text-center">
             View Ticket
           </button>
@@ -448,7 +448,7 @@ function renderAppointments(rows) {
           }
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   });
 }
 
@@ -521,7 +521,7 @@ function renderUploadedDocs(docs) {
   container.innerHTML = docs.map((doc) => {
     const ext = doc.original_name.split(".").pop().toUpperCase();
     const isImage = ["JPG", "JPEG", "PNG", "GIF"].includes(ext);
-    const isPdf   = ext === "PDF";
+    const isPdf = ext === "PDF";
     const iconColor = isPdf ? "text-red-500" : isImage ? "text-blue-500" : "text-slate-500";
     const sizeKB = doc.file_size > 1024 * 1024
       ? (doc.file_size / 1024 / 1024).toFixed(1) + " MB"
@@ -559,7 +559,7 @@ function handleDocsFileSelect(input) {
   if (!files.length) return;
 
   const pendingSection = document.getElementById("docsPendingList");
-  const pendingItems   = document.getElementById("docsPendingItems");
+  const pendingItems = document.getElementById("docsPendingItems");
   pendingSection.classList.remove("hidden");
 
   pendingItems.innerHTML = files.map((f) => {
@@ -581,7 +581,7 @@ function handleDocsFileSelect(input) {
 async function uploadPendingDocs() {
   if (!_currentDocsAptId) return;
   const input = document.getElementById("docsFileInput");
-  const btn   = document.getElementById("docsUploadBtn");
+  const btn = document.getElementById("docsUploadBtn");
   if (!input.files.length) return;
 
   btn.disabled = true;
@@ -640,7 +640,7 @@ function closeDeleteConfirm() {
 function showDeleteConfirm(docId) {
   const modal = document.getElementById("docsDeleteConfirm");
   const inner = document.getElementById("docsDeleteConfirmInner");
-  const btn   = document.getElementById("docsDeleteConfirmBtn");
+  const btn = document.getElementById("docsDeleteConfirmBtn");
   if (!modal) { deletePatientDoc(docId); return; }
   modal.classList.remove("hidden");
   modal.classList.add("flex");
@@ -692,15 +692,15 @@ function openTicketModal(apt) {
     "tkt-date",
     apt.ticket_generated_at
       ? new Date(
-          apt.ticket_generated_at.replace(" ", "T") + "+05:45",
-        ).toLocaleString("en-US", {
-          timeZone: "Asia/Kathmandu",
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })
+        apt.ticket_generated_at.replace(" ", "T") + "+05:45",
+      ).toLocaleString("en-US", {
+        timeZone: "Asia/Kathmandu",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
       : "—",
   );
   setEl("tkt-doctor", apt.doctor_name || "—");
@@ -1064,9 +1064,9 @@ window.addEventListener("message", function (event) {
       showSuccessToast(
         "Payment successful ✓",
         event.data.message ||
-          "Your appointment has been booked successfully via Khalti.",
+        "Your appointment has been booked successfully via Khalti.",
       );
-      
+
       // Refresh the appointment list in the background
       if (typeof reload === "function") {
         reload();
@@ -1681,7 +1681,7 @@ function showTreatmentToast(type, title, msg) {
         showSuccessToast(
           "Payment successful \u2713",
           event.data.message ||
-            "Your appointment has been booked successfully via Khalti.",
+          "Your appointment has been booked successfully via Khalti.",
         );
         if (event.data.appointment_id) {
           setTimeout(() => openReceiptModal(event.data.appointment_id), 800);
@@ -1690,7 +1690,7 @@ function showTreatmentToast(type, title, msg) {
         showSuccessToast(
           "Payment " + status,
           event.data.message ||
-            "The payment did not complete. Please try again.",
+          "The payment did not complete. Please try again.",
         );
       }
     }
