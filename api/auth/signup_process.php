@@ -48,8 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute();
             $stmt->close();
 
-            $stmt = $conn->prepare("INSERT INTO patient_profiles (user_id, full_name, email, contact_number, age) VALUES (?, ?, ?, ?, ?)");
-            $stmt->bind_param("ssssi", $user_id, $full_name, $email, $phone, $age);
+            $stmt = $conn->prepare("INSERT INTO patient_profiles (user_id, contact_number, age) VALUES (?, ?, ?)");
+            $stmt->bind_param("ssi", $user_id, $phone, $age);
             $stmt->execute();
             $stmt->close();
 
