@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 14, 2026 at 07:27 AM
+-- Generation Time: May 16, 2026 at 06:15 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.1.25
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -70,7 +70,9 @@ INSERT INTO `appointments` (`appointment_id`, `patient_id`, `doctor_id`, `app_da
 (86, 'PAT_9495', 'DOC_7BD9C3', '2026-05-15', '09:00:00', 'Room A1', 'Rapid Heart Beat', NULL, NULL, 'Upcoming', '2026-05-14 04:41:02', NULL, NULL, NULL, NULL, NULL, NULL),
 (87, 'PAT_9495', 'DOC_8BF0ED', '2026-05-17', '09:00:00', 'Room A1', 'Pain in Teeth', NULL, NULL, 'Upcoming', '2026-05-14 05:12:18', NULL, NULL, NULL, NULL, NULL, NULL),
 (88, 'PAT_9495', 'DOC_DA1CE2', '2026-05-20', '13:30:00', 'Room A1', 'Fever', NULL, NULL, 'Upcoming', '2026-05-14 05:19:13', NULL, NULL, NULL, NULL, NULL, NULL),
-(89, 'PAT_E8AB', 'DOC_7BD9C3', '2026-05-19', '13:30:00', 'Room A1', 'Rapid Heart Beat', NULL, NULL, 'Upcoming', '2026-05-14 05:26:00', NULL, NULL, NULL, NULL, NULL, NULL);
+(89, 'PAT_E8AB', 'DOC_7BD9C3', '2026-05-19', '13:30:00', 'Room A1', 'Rapid Heart Beat', NULL, NULL, 'Upcoming', '2026-05-14 05:26:00', NULL, NULL, NULL, NULL, NULL, NULL),
+(90, 'PAT_9495', 'DOC_7BD9C3', '2026-05-10', '10:00:00', 'Room B1', 'Fever and headache', 'Patient responded well to treatment. Advised rest and hydration.', 'Paracetamol 500mg', 'Completed', '2026-05-09 09:00:00', 'Mild fever, BP normal', NULL, NULL, NULL, NULL, 'Great doctor, very thorough!'),
+(91, 'PAT_9495', 'DOC_8BF0ED', '2026-05-12', '11:00:00', 'Room C2', 'Tooth cavity and sensitivity', 'Filling done successfully Advised to avoid cold drinks for 48 hours', 'Ibuprofen 400mg', 'Completed', '2026-05-11 08:00:00', 'Cavity found in lower molar, filling applied', NULL, '2026-06-12', '11:00:00', NULL, 'Very professional and gentle!');
 
 -- --------------------------------------------------------
 
@@ -107,7 +109,9 @@ INSERT INTO `appointment_payments` (`payment_id`, `appointment_id`, `patient_id`
 (93, 86, 'PAT_9495', 'DOC_7BD9C3', 11690, 'khalti', 'esxjht2h4RrHuwpgs6zDCR', 'quhvjm394Vh6KETV2c56RS', 50000, 500.00, 'Completed', '{\"slot_date\":\"2026-05-15\",\"slot_time\":\"09:00:00 - 09:30:00\",\"reason\":\"Rapid Heart Beat\",\"avail_id\":11690,\"doctor_id\":\"DOC_7BD9C3\"}', '{\"pidx\":\"esxjht2h4RrHuwpgs6zDCR\",\"payment_url\":\"https:\\/\\/test-pay.khalti.com\\/?pidx=esxjht2h4RrHuwpgs6zDCR\",\"expires_at\":\"2026-05-14T10:55:49.282602+05:45\",\"expires_in\":1800}', 'Completed', '2026-05-14 04:41:02', '2026-05-14 04:41:02', '2026-05-14 04:40:48', '2026-05-14 04:41:02'),
 (94, 87, 'PAT_9495', 'DOC_8BF0ED', 12538, 'khalti', 'cc7AWHR9WBKnoztmD2R96e', 'T72VqZ5u8vAy5RgZ9p9S56', 150000, 1500.00, 'Completed', '{\"slot_date\":\"2026-05-17\",\"slot_time\":\"09:00:00 - 09:30:00\",\"reason\":\"Pain in Teeth\",\"avail_id\":12538,\"doctor_id\":\"DOC_8BF0ED\"}', '{\"pidx\":\"cc7AWHR9WBKnoztmD2R96e\",\"payment_url\":\"https:\\/\\/test-pay.khalti.com\\/?pidx=cc7AWHR9WBKnoztmD2R96e\",\"expires_at\":\"2026-05-14T11:27:03.485598+05:45\",\"expires_in\":1800}', 'Completed', '2026-05-14 05:12:18', '2026-05-14 05:12:18', '2026-05-14 05:12:02', '2026-05-14 05:12:18'),
 (95, 88, 'PAT_9495', 'DOC_DA1CE2', 20035, 'khalti', 'UffhHepNGQAaDqModQzosU', 'UKkQcUo7cR2gKqBCHVNG9j', 50000, 500.00, 'Completed', '{\"slot_date\":\"2026-05-20\",\"slot_time\":\"13:30:00 - 14:00:00\",\"reason\":\"Fever\",\"avail_id\":20035,\"doctor_id\":\"DOC_DA1CE2\"}', '{\"pidx\":\"UffhHepNGQAaDqModQzosU\",\"payment_url\":\"https:\\/\\/test-pay.khalti.com\\/?pidx=UffhHepNGQAaDqModQzosU\",\"expires_at\":\"2026-05-14T11:33:58.568507+05:45\",\"expires_in\":1800}', 'Completed', '2026-05-14 05:19:13', '2026-05-14 05:19:13', '2026-05-14 05:18:57', '2026-05-14 05:19:13'),
-(96, 89, 'PAT_E8AB', 'DOC_7BD9C3', 9219, 'khalti', 'jLNdxMJNKepk4SryGzJyCD', 'g8u7pFfbTpjQ3gDuLrNzXC', 150000, 1500.00, 'Completed', '{\"slot_date\":\"2026-05-19\",\"slot_time\":\"13:30:00 - 14:00:00\",\"reason\":\"Rapid Heart Beat\",\"avail_id\":9219,\"doctor_id\":\"DOC_7BD9C3\"}', '{\"pidx\":\"jLNdxMJNKepk4SryGzJyCD\",\"payment_url\":\"https:\\/\\/test-pay.khalti.com\\/?pidx=jLNdxMJNKepk4SryGzJyCD\",\"expires_at\":\"2026-05-14T11:40:44.876616+05:45\",\"expires_in\":1800}', 'Completed', '2026-05-14 05:26:00', '2026-05-14 05:26:00', '2026-05-14 05:25:44', '2026-05-14 05:26:00');
+(96, 89, 'PAT_E8AB', 'DOC_7BD9C3', 9219, 'khalti', 'jLNdxMJNKepk4SryGzJyCD', 'g8u7pFfbTpjQ3gDuLrNzXC', 150000, 1500.00, 'Completed', '{\"slot_date\":\"2026-05-19\",\"slot_time\":\"13:30:00 - 14:00:00\",\"reason\":\"Rapid Heart Beat\",\"avail_id\":9219,\"doctor_id\":\"DOC_7BD9C3\"}', '{\"pidx\":\"jLNdxMJNKepk4SryGzJyCD\",\"payment_url\":\"https:\\/\\/test-pay.khalti.com\\/?pidx=jLNdxMJNKepk4SryGzJyCD\",\"expires_at\":\"2026-05-14T11:40:44.876616+05:45\",\"expires_in\":1800}', 'Completed', '2026-05-14 05:26:00', '2026-05-14 05:26:00', '2026-05-14 05:25:44', '2026-05-14 05:26:00'),
+(97, 90, 'PAT_9495', 'DOC_7BD9C3', 0, 'khalti', 'PIDX_TEST_001', 'TXN_TEST_001', 50000, 500.00, 'Completed', '', NULL, 'success', '2026-05-16 16:10:01', '2026-05-09 09:05:00', '2026-05-09 09:00:00', '2026-05-09 09:05:00'),
+(98, 91, 'PAT_9495', 'DOC_8BF0ED', 0, 'khalti', 'PIDX_TEST_002', 'TXN_TEST_002', 150000, 1500.00, 'Completed', '', NULL, 'success', '2026-05-16 16:10:01', '2026-05-11 08:05:00', '2026-05-11 08:00:00', '2026-05-11 08:05:00');
 
 -- --------------------------------------------------------
 
@@ -6821,22 +6825,22 @@ INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `s
 (14183, 'DOC_8BF0ED', '2027-05-03', '15:30:00', '16:00:00', 'Available'),
 (14184, 'DOC_8BF0ED', '2027-05-03', '16:00:00', '16:30:00', 'Available'),
 (14185, 'DOC_8BF0ED', '2027-05-03', '16:30:00', '17:00:00', 'Available'),
-(14186, 'DOC_8BF0ED', '2026-05-12', '09:00:00', '09:30:00', 'Available'),
-(14187, 'DOC_8BF0ED', '2026-05-12', '09:30:00', '10:00:00', 'Available'),
-(14188, 'DOC_8BF0ED', '2026-05-12', '10:00:00', '10:30:00', 'Available'),
-(14189, 'DOC_8BF0ED', '2026-05-12', '10:30:00', '11:00:00', 'Available'),
-(14190, 'DOC_8BF0ED', '2026-05-12', '11:00:00', '11:30:00', 'Available'),
-(14191, 'DOC_8BF0ED', '2026-05-12', '11:30:00', '12:00:00', 'Available'),
-(14192, 'DOC_8BF0ED', '2026-05-12', '12:00:00', '12:30:00', 'Available'),
-(14193, 'DOC_8BF0ED', '2026-05-12', '12:30:00', '13:00:00', 'Available'),
-(14194, 'DOC_8BF0ED', '2026-05-12', '13:00:00', '13:30:00', 'Available'),
-(14195, 'DOC_8BF0ED', '2026-05-12', '13:30:00', '14:00:00', 'Available'),
-(14196, 'DOC_8BF0ED', '2026-05-12', '14:00:00', '14:30:00', 'Available'),
-(14197, 'DOC_8BF0ED', '2026-05-12', '14:30:00', '15:00:00', 'Available'),
-(14198, 'DOC_8BF0ED', '2026-05-12', '15:00:00', '15:30:00', 'Available'),
-(14199, 'DOC_8BF0ED', '2026-05-12', '15:30:00', '16:00:00', 'Available'),
-(14200, 'DOC_8BF0ED', '2026-05-12', '16:00:00', '16:30:00', 'Available'),
-(14201, 'DOC_8BF0ED', '2026-05-12', '16:30:00', '17:00:00', 'Available'),
+(14186, 'DOC_8BF0ED', '2026-05-12', '09:00:00', '09:30:00', 'Closed'),
+(14187, 'DOC_8BF0ED', '2026-05-12', '09:30:00', '10:00:00', 'Closed'),
+(14188, 'DOC_8BF0ED', '2026-05-12', '10:00:00', '10:30:00', 'Closed'),
+(14189, 'DOC_8BF0ED', '2026-05-12', '10:30:00', '11:00:00', 'Closed'),
+(14190, 'DOC_8BF0ED', '2026-05-12', '11:00:00', '11:30:00', 'Closed'),
+(14191, 'DOC_8BF0ED', '2026-05-12', '11:30:00', '12:00:00', 'Closed'),
+(14192, 'DOC_8BF0ED', '2026-05-12', '12:00:00', '12:30:00', 'Closed'),
+(14193, 'DOC_8BF0ED', '2026-05-12', '12:30:00', '13:00:00', 'Closed'),
+(14194, 'DOC_8BF0ED', '2026-05-12', '13:00:00', '13:30:00', 'Closed'),
+(14195, 'DOC_8BF0ED', '2026-05-12', '13:30:00', '14:00:00', 'Closed'),
+(14196, 'DOC_8BF0ED', '2026-05-12', '14:00:00', '14:30:00', 'Closed'),
+(14197, 'DOC_8BF0ED', '2026-05-12', '14:30:00', '15:00:00', 'Closed'),
+(14198, 'DOC_8BF0ED', '2026-05-12', '15:00:00', '15:30:00', 'Closed'),
+(14199, 'DOC_8BF0ED', '2026-05-12', '15:30:00', '16:00:00', 'Closed'),
+(14200, 'DOC_8BF0ED', '2026-05-12', '16:00:00', '16:30:00', 'Closed'),
+(14201, 'DOC_8BF0ED', '2026-05-12', '16:30:00', '17:00:00', 'Closed'),
 (14202, 'DOC_8BF0ED', '2026-05-19', '09:00:00', '09:30:00', 'Available'),
 (14203, 'DOC_8BF0ED', '2026-05-19', '09:30:00', '10:00:00', 'Available'),
 (14204, 'DOC_8BF0ED', '2026-05-19', '10:00:00', '10:30:00', 'Available'),
@@ -7119,9 +7123,9 @@ INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `s
 (14481, 'DOC_8BF0ED', '2026-09-15', '12:30:00', '13:00:00', 'Available'),
 (14482, 'DOC_8BF0ED', '2026-09-15', '13:00:00', '13:30:00', 'Available'),
 (14483, 'DOC_8BF0ED', '2026-09-15', '13:30:00', '14:00:00', 'Available'),
-(14484, 'DOC_8BF0ED', '2026-09-15', '14:00:00', '14:30:00', 'Available');
+(14484, 'DOC_8BF0ED', '2026-09-15', '14:00:00', '14:30:00', 'Available'),
+(14485, 'DOC_8BF0ED', '2026-09-15', '14:30:00', '15:00:00', 'Available');
 INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `start_time`, `end_time`, `status`) VALUES
-(14485, 'DOC_8BF0ED', '2026-09-15', '14:30:00', '15:00:00', 'Available'),
 (14486, 'DOC_8BF0ED', '2026-09-15', '15:00:00', '15:30:00', 'Available'),
 (14487, 'DOC_8BF0ED', '2026-09-15', '15:30:00', '16:00:00', 'Available'),
 (14488, 'DOC_8BF0ED', '2026-09-15', '16:00:00', '16:30:00', 'Available'),
@@ -7812,9 +7816,9 @@ INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `s
 (15173, 'DOC_8BF0ED', '2026-07-15', '14:30:00', '15:00:00', 'Available'),
 (15174, 'DOC_8BF0ED', '2026-07-15', '15:00:00', '15:30:00', 'Available'),
 (15175, 'DOC_8BF0ED', '2026-07-15', '15:30:00', '16:00:00', 'Available'),
-(15176, 'DOC_8BF0ED', '2026-07-15', '16:00:00', '16:30:00', 'Available');
+(15176, 'DOC_8BF0ED', '2026-07-15', '16:00:00', '16:30:00', 'Available'),
+(15177, 'DOC_8BF0ED', '2026-07-15', '16:30:00', '17:00:00', 'Available');
 INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `start_time`, `end_time`, `status`) VALUES
-(15177, 'DOC_8BF0ED', '2026-07-15', '16:30:00', '17:00:00', 'Available'),
 (15178, 'DOC_8BF0ED', '2026-07-22', '09:00:00', '09:30:00', 'Available'),
 (15179, 'DOC_8BF0ED', '2026-07-22', '09:30:00', '10:00:00', 'Available'),
 (15180, 'DOC_8BF0ED', '2026-07-22', '10:00:00', '10:30:00', 'Available'),
@@ -8505,9 +8509,9 @@ INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `s
 (15865, 'DOC_8BF0ED', '2026-05-14', '16:30:00', '17:00:00', 'Available'),
 (15866, 'DOC_8BF0ED', '2026-05-21', '09:00:00', '09:30:00', 'Available'),
 (15867, 'DOC_8BF0ED', '2026-05-21', '09:30:00', '10:00:00', 'Available'),
-(15868, 'DOC_8BF0ED', '2026-05-21', '10:00:00', '10:30:00', 'Available');
+(15868, 'DOC_8BF0ED', '2026-05-21', '10:00:00', '10:30:00', 'Available'),
+(15869, 'DOC_8BF0ED', '2026-05-21', '10:30:00', '11:00:00', 'Available');
 INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `start_time`, `end_time`, `status`) VALUES
-(15869, 'DOC_8BF0ED', '2026-05-21', '10:30:00', '11:00:00', 'Available'),
 (15870, 'DOC_8BF0ED', '2026-05-21', '11:00:00', '11:30:00', 'Available'),
 (15871, 'DOC_8BF0ED', '2026-05-21', '11:30:00', '12:00:00', 'Available'),
 (15872, 'DOC_8BF0ED', '2026-05-21', '12:00:00', '12:30:00', 'Available'),
@@ -9198,9 +9202,9 @@ INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `s
 (16557, 'DOC_8BF0ED', '2027-03-18', '10:30:00', '11:00:00', 'Available'),
 (16558, 'DOC_8BF0ED', '2027-03-18', '11:00:00', '11:30:00', 'Available'),
 (16559, 'DOC_8BF0ED', '2027-03-18', '11:30:00', '12:00:00', 'Available'),
-(16560, 'DOC_8BF0ED', '2027-03-18', '12:00:00', '12:30:00', 'Available');
+(16560, 'DOC_8BF0ED', '2027-03-18', '12:00:00', '12:30:00', 'Available'),
+(16561, 'DOC_8BF0ED', '2027-03-18', '12:30:00', '13:00:00', 'Available');
 INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `start_time`, `end_time`, `status`) VALUES
-(16561, 'DOC_8BF0ED', '2027-03-18', '12:30:00', '13:00:00', 'Available'),
 (16562, 'DOC_8BF0ED', '2027-03-18', '13:00:00', '13:30:00', 'Available'),
 (16563, 'DOC_8BF0ED', '2027-03-18', '13:30:00', '14:00:00', 'Available'),
 (16564, 'DOC_8BF0ED', '2027-03-18', '14:00:00', '14:30:00', 'Available'),
@@ -9891,9 +9895,9 @@ INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `s
 (17249, 'DOC_8BF0ED', '2027-01-15', '12:30:00', '13:00:00', 'Available'),
 (17250, 'DOC_8BF0ED', '2027-01-15', '13:00:00', '13:30:00', 'Available'),
 (17251, 'DOC_8BF0ED', '2027-01-15', '13:30:00', '14:00:00', 'Available'),
-(17252, 'DOC_8BF0ED', '2027-01-15', '14:00:00', '14:30:00', 'Available');
+(17252, 'DOC_8BF0ED', '2027-01-15', '14:00:00', '14:30:00', 'Available'),
+(17253, 'DOC_8BF0ED', '2027-01-15', '14:30:00', '15:00:00', 'Available');
 INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `start_time`, `end_time`, `status`) VALUES
-(17253, 'DOC_8BF0ED', '2027-01-15', '14:30:00', '15:00:00', 'Available'),
 (17254, 'DOC_8BF0ED', '2027-01-15', '15:00:00', '15:30:00', 'Available'),
 (17255, 'DOC_8BF0ED', '2027-01-15', '15:30:00', '16:00:00', 'Available'),
 (17256, 'DOC_8BF0ED', '2027-01-15', '16:00:00', '16:30:00', 'Available'),
@@ -10584,9 +10588,9 @@ INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `s
 (17941, 'DOC_DA1CE2', '2026-11-08', '14:30:00', '15:00:00', 'Available'),
 (17942, 'DOC_DA1CE2', '2026-11-08', '15:00:00', '15:30:00', 'Available'),
 (17943, 'DOC_DA1CE2', '2026-11-08', '15:30:00', '16:00:00', 'Available'),
-(17944, 'DOC_DA1CE2', '2026-11-08', '16:00:00', '16:30:00', 'Available');
+(17944, 'DOC_DA1CE2', '2026-11-08', '16:00:00', '16:30:00', 'Available'),
+(17945, 'DOC_DA1CE2', '2026-11-08', '16:30:00', '17:00:00', 'Available');
 INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `start_time`, `end_time`, `status`) VALUES
-(17945, 'DOC_DA1CE2', '2026-11-08', '16:30:00', '17:00:00', 'Available'),
 (17946, 'DOC_DA1CE2', '2026-11-15', '09:00:00', '09:30:00', 'Available'),
 (17947, 'DOC_DA1CE2', '2026-11-15', '09:30:00', '10:00:00', 'Available'),
 (17948, 'DOC_DA1CE2', '2026-11-15', '10:00:00', '10:30:00', 'Available'),
@@ -11277,9 +11281,9 @@ INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `s
 (18633, 'DOC_DA1CE2', '2026-09-07', '16:30:00', '17:00:00', 'Available'),
 (18634, 'DOC_DA1CE2', '2026-09-14', '09:00:00', '09:30:00', 'Available'),
 (18635, 'DOC_DA1CE2', '2026-09-14', '09:30:00', '10:00:00', 'Available'),
-(18636, 'DOC_DA1CE2', '2026-09-14', '10:00:00', '10:30:00', 'Available');
+(18636, 'DOC_DA1CE2', '2026-09-14', '10:00:00', '10:30:00', 'Available'),
+(18637, 'DOC_DA1CE2', '2026-09-14', '10:30:00', '11:00:00', 'Available');
 INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `start_time`, `end_time`, `status`) VALUES
-(18637, 'DOC_DA1CE2', '2026-09-14', '10:30:00', '11:00:00', 'Available'),
 (18638, 'DOC_DA1CE2', '2026-09-14', '11:00:00', '11:30:00', 'Available'),
 (18639, 'DOC_DA1CE2', '2026-09-14', '11:30:00', '12:00:00', 'Available'),
 (18640, 'DOC_DA1CE2', '2026-09-14', '12:00:00', '12:30:00', 'Available'),
@@ -11970,9 +11974,9 @@ INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `s
 (19325, 'DOC_DA1CE2', '2026-07-14', '10:30:00', '11:00:00', 'Available'),
 (19326, 'DOC_DA1CE2', '2026-07-14', '11:00:00', '11:30:00', 'Available'),
 (19327, 'DOC_DA1CE2', '2026-07-14', '11:30:00', '12:00:00', 'Available'),
-(19328, 'DOC_DA1CE2', '2026-07-14', '12:00:00', '12:30:00', 'Available');
+(19328, 'DOC_DA1CE2', '2026-07-14', '12:00:00', '12:30:00', 'Available'),
+(19329, 'DOC_DA1CE2', '2026-07-14', '12:30:00', '13:00:00', 'Available');
 INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `start_time`, `end_time`, `status`) VALUES
-(19329, 'DOC_DA1CE2', '2026-07-14', '12:30:00', '13:00:00', 'Available'),
 (19330, 'DOC_DA1CE2', '2026-07-14', '13:00:00', '13:30:00', 'Available'),
 (19331, 'DOC_DA1CE2', '2026-07-14', '13:30:00', '14:00:00', 'Available'),
 (19332, 'DOC_DA1CE2', '2026-07-14', '14:00:00', '14:30:00', 'Available'),
@@ -12663,9 +12667,9 @@ INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `s
 (20017, 'DOC_DA1CE2', '2026-05-13', '12:30:00', '13:00:00', 'Available'),
 (20018, 'DOC_DA1CE2', '2026-05-13', '13:00:00', '13:30:00', 'Available'),
 (20019, 'DOC_DA1CE2', '2026-05-13', '13:30:00', '14:00:00', 'Available'),
-(20020, 'DOC_DA1CE2', '2026-05-13', '14:00:00', '14:30:00', 'Available');
+(20020, 'DOC_DA1CE2', '2026-05-13', '14:00:00', '14:30:00', 'Available'),
+(20021, 'DOC_DA1CE2', '2026-05-13', '14:30:00', '15:00:00', 'Available');
 INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `start_time`, `end_time`, `status`) VALUES
-(20021, 'DOC_DA1CE2', '2026-05-13', '14:30:00', '15:00:00', 'Available'),
 (20022, 'DOC_DA1CE2', '2026-05-13', '15:00:00', '15:30:00', 'Available'),
 (20023, 'DOC_DA1CE2', '2026-05-13', '15:30:00', '16:00:00', 'Available'),
 (20024, 'DOC_DA1CE2', '2026-05-13', '16:00:00', '16:30:00', 'Available'),
@@ -13356,9 +13360,9 @@ INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `s
 (20709, 'DOC_DA1CE2', '2027-03-10', '14:30:00', '15:00:00', 'Available'),
 (20710, 'DOC_DA1CE2', '2027-03-10', '15:00:00', '15:30:00', 'Available'),
 (20711, 'DOC_DA1CE2', '2027-03-10', '15:30:00', '16:00:00', 'Available'),
-(20712, 'DOC_DA1CE2', '2027-03-10', '16:00:00', '16:30:00', 'Available');
+(20712, 'DOC_DA1CE2', '2027-03-10', '16:00:00', '16:30:00', 'Available'),
+(20713, 'DOC_DA1CE2', '2027-03-10', '16:30:00', '17:00:00', 'Available');
 INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `start_time`, `end_time`, `status`) VALUES
-(20713, 'DOC_DA1CE2', '2027-03-10', '16:30:00', '17:00:00', 'Available'),
 (20714, 'DOC_DA1CE2', '2027-03-17', '09:00:00', '09:30:00', 'Available'),
 (20715, 'DOC_DA1CE2', '2027-03-17', '09:30:00', '10:00:00', 'Available'),
 (20716, 'DOC_DA1CE2', '2027-03-17', '10:00:00', '10:30:00', 'Available'),
@@ -14049,9 +14053,9 @@ INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `s
 (21401, 'DOC_DA1CE2', '2027-01-07', '16:30:00', '17:00:00', 'Available'),
 (21402, 'DOC_DA1CE2', '2027-01-14', '09:00:00', '09:30:00', 'Available'),
 (21403, 'DOC_DA1CE2', '2027-01-14', '09:30:00', '10:00:00', 'Available'),
-(21404, 'DOC_DA1CE2', '2027-01-14', '10:00:00', '10:30:00', 'Available');
+(21404, 'DOC_DA1CE2', '2027-01-14', '10:00:00', '10:30:00', 'Available'),
+(21405, 'DOC_DA1CE2', '2027-01-14', '10:30:00', '11:00:00', 'Available');
 INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `start_time`, `end_time`, `status`) VALUES
-(21405, 'DOC_DA1CE2', '2027-01-14', '10:30:00', '11:00:00', 'Available'),
 (21406, 'DOC_DA1CE2', '2027-01-14', '11:00:00', '11:30:00', 'Available'),
 (21407, 'DOC_DA1CE2', '2027-01-14', '11:30:00', '12:00:00', 'Available'),
 (21408, 'DOC_DA1CE2', '2027-01-14', '12:00:00', '12:30:00', 'Available'),
@@ -14742,9 +14746,9 @@ INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `s
 (22093, 'DOC_DA1CE2', '2026-11-13', '10:30:00', '11:00:00', 'Available'),
 (22094, 'DOC_DA1CE2', '2026-11-13', '11:00:00', '11:30:00', 'Available'),
 (22095, 'DOC_DA1CE2', '2026-11-13', '11:30:00', '12:00:00', 'Available'),
-(22096, 'DOC_DA1CE2', '2026-11-13', '12:00:00', '12:30:00', 'Available');
+(22096, 'DOC_DA1CE2', '2026-11-13', '12:00:00', '12:30:00', 'Available'),
+(22097, 'DOC_DA1CE2', '2026-11-13', '12:30:00', '13:00:00', 'Available');
 INSERT INTO `doctor_availability` (`avail_id`, `doctor_id`, `available_date`, `start_time`, `end_time`, `status`) VALUES
-(22097, 'DOC_DA1CE2', '2026-11-13', '12:30:00', '13:00:00', 'Available'),
 (22098, 'DOC_DA1CE2', '2026-11-13', '13:00:00', '13:30:00', 'Available'),
 (22099, 'DOC_DA1CE2', '2026-11-13', '13:30:00', '14:00:00', 'Available'),
 (22100, 'DOC_DA1CE2', '2026-11-13', '14:00:00', '14:30:00', 'Available'),
@@ -15204,7 +15208,9 @@ INSERT INTO `earnings` (`earning_id`, `doctor_id`, `appointment_id`, `amount`, `
 (49, 'DOC_7BD9C3', 86, 500.00, '2026-05-14 04:41:02', NULL),
 (50, 'DOC_8BF0ED', 87, 1500.00, '2026-05-14 05:12:18', NULL),
 (51, 'DOC_DA1CE2', 88, 500.00, '2026-05-14 05:19:13', NULL),
-(52, 'DOC_7BD9C3', 89, 1500.00, '2026-05-14 05:26:00', NULL);
+(52, 'DOC_7BD9C3', 89, 1500.00, '2026-05-14 05:26:00', NULL),
+(53, 'DOC_7BD9C3', 90, 500.00, '2026-05-10 10:00:00', 'Consultation fee'),
+(54, 'DOC_8BF0ED', 91, 1500.00, '2026-05-12 11:00:00', 'Consultation fee');
 
 -- --------------------------------------------------------
 
@@ -15226,6 +15232,13 @@ CREATE TABLE `medical_reports` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `medical_reports`
+--
+
+INSERT INTO `medical_reports` (`report_id`, `appointment_id`, `patient_id`, `doctor_id`, `symptoms`, `diagnosis`, `blood_pressure`, `weight`, `prescribed_medicines`, `additional_notes`, `created_at`, `updated_at`) VALUES
+(20, 91, 'PAT_9495', 'DOC_8BF0ED', 'dark cough', 'throat wound', '120/80', 75.30, '[{\"name\":\"sinex\",\"dosage\":\"10mg\",\"frequency\":\"2\"}]', 'no', '2026-05-16 16:14:36', '2026-05-16 16:14:36');
 
 -- --------------------------------------------------------
 
@@ -15253,7 +15266,32 @@ INSERT INTO `notifications` (`notification_id`, `user_id`, `title`, `message`, `
 (187, 'DOC_7BD9C3', 'Appointment Reminder', 'You have an appointment with Ashmit Dahal tomorrow (May 15, 2026) at 09:00 AM. Appointment ref. #86.', 0, '2026-05-14 04:45:25'),
 (188, 'DOC_8BF0ED', 'New Appointment Booking', 'A new patient has successfully booked an appointment with you.', 0, '2026-05-14 05:12:18'),
 (189, 'DOC_DA1CE2', 'New Appointment Booking', 'A new patient has successfully booked an appointment with you.', 0, '2026-05-14 05:19:13'),
-(190, 'DOC_7BD9C3', 'New Appointment Booking', 'A new patient has successfully booked an appointment with you.', 0, '2026-05-14 05:26:00');
+(190, 'DOC_7BD9C3', 'New Appointment Booking', 'A new patient has successfully booked an appointment with you.', 0, '2026-05-14 05:26:00'),
+(191, 'PAT_9495', 'Appointment Completed', 'Your appointment with Dr. Prithivi Bikram Shah on May 10, 2026 has been marked as completed.', 1, '2026-05-10 10:35:00'),
+(192, 'DOC_7BD9C3', 'Appointment Completed', 'Appointment with Ayush Dhungana on May 10, 2026 has been completed successfully.', 1, '2026-05-10 10:35:00'),
+(193, 'PAT_9495', 'Appointment Completed', 'Your appointment with Dr. John Doe on May 12, 2026 has been marked as completed.', 1, '2026-05-12 11:35:00'),
+(194, 'DOC_8BF0ED', 'Appointment Completed', 'Appointment with Ayush Dhungana on May 12, 2026 has been completed successfully.', 1, '2026-05-12 11:35:00'),
+(195, 'PAT_9495', 'Appointment Reminder', 'You have an appointment with Dr. John Doe tomorrow (May 17, 2026) at 09:00 AM. Appointment ref. #87.', 0, '2026-05-16 16:10:52'),
+(196, 'PAT_9495', 'Follow-up Reminder: Tomorrow', 'Reminder: You have a follow-up appointment with John Doe tomorrow at 09:00 AM. Please arrive 10 minutes early.', 0, '2026-05-16 16:10:52'),
+(197, 'DOC_8BF0ED', 'Appointment Reminder', 'You have an appointment with Ashmit Dahal tomorrow (May 17, 2026) at 09:00 AM. Appointment ref. #87.', 0, '2026-05-16 16:11:35'),
+(198, 'PAT_9495', 'Medical Report Ready', 'Your medical report for the appointment on May 12, 2026 at 11:00 AM with John Doe is now available.', 0, '2026-05-16 16:14:36');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `patient_documents`
+--
+
+CREATE TABLE `patient_documents` (
+  `id` int(11) NOT NULL,
+  `appointment_id` int(11) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `original_name` varchar(255) NOT NULL,
+  `stored_name` varchar(255) NOT NULL,
+  `file_size` int(11) NOT NULL DEFAULT 0,
+  `mime_type` varchar(100) NOT NULL DEFAULT '',
+  `uploaded_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -15331,7 +15369,8 @@ CREATE TABLE `treatment_tickets` (
 --
 
 INSERT INTO `treatment_tickets` (`id`, `ticket_number`, `patient_id`, `appointment_id`, `category_id`, `cost`, `generated_at`) VALUES
-(15, 'TKT-20260514-81BE08', 'PAT_E8AB', 89, 2, 1500.00, '2026-05-14 11:11:00');
+(15, 'TKT-20260514-81BE08', 'PAT_E8AB', 89, 2, 1500.00, '2026-05-14 11:11:00'),
+(16, 'TKT-20260516-06D868', 'PAT_9495', 88, 1, 500.00, '2026-05-16 21:59:56');
 
 -- --------------------------------------------------------
 
@@ -15438,6 +15477,14 @@ ALTER TABLE `notifications`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Indexes for table `patient_documents`
+--
+ALTER TABLE `patient_documents`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_apt` (`appointment_id`),
+  ADD KEY `idx_patient` (`patient_id`);
+
+--
 -- Indexes for table `patient_profiles`
 --
 ALTER TABLE `patient_profiles`
@@ -15479,13 +15526,13 @@ ALTER TABLE `ai_chat_history`
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
+  MODIFY `appointment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=92;
 
 --
 -- AUTO_INCREMENT for table `appointment_payments`
 --
 ALTER TABLE `appointment_payments`
-  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=97;
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=99;
 
 --
 -- AUTO_INCREMENT for table `doctor_approvals`
@@ -15503,19 +15550,25 @@ ALTER TABLE `doctor_availability`
 -- AUTO_INCREMENT for table `earnings`
 --
 ALTER TABLE `earnings`
-  MODIFY `earning_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
+  MODIFY `earning_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
 -- AUTO_INCREMENT for table `medical_reports`
 --
 ALTER TABLE `medical_reports`
-  MODIFY `report_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `report_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=191;
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=199;
+
+--
+-- AUTO_INCREMENT for table `patient_documents`
+--
+ALTER TABLE `patient_documents`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `treatment_categories`
@@ -15527,7 +15580,7 @@ ALTER TABLE `treatment_categories`
 -- AUTO_INCREMENT for table `treatment_tickets`
 --
 ALTER TABLE `treatment_tickets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- Constraints for dumped tables
