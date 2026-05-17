@@ -26,7 +26,45 @@ function showToast(message, isError = false) {
   }
 }
 
-// admin-common.js handles date, sidebar, etc.
+// Sidebar navigation toggle
+function toggleSidebar() {
+  try {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+    if (sidebar && overlay) {
+      sidebar.classList.toggle("-translate-x-full");
+      overlay.classList.toggle("hidden");
+    }
+  } catch (e) {
+    console.error("Toggle sidebar error:", e);
+  }
+}
+
+function closeSidebar() {
+  try {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+    if (sidebar && overlay) {
+      sidebar.classList.add("-translate-x-full");
+      overlay.classList.add("hidden");
+    }
+  } catch (e) {
+    console.error("Close sidebar error:", e);
+  }
+}
+
+// Update current date indicator
+function updateCurrentDate() {
+  try {
+    const el = document.getElementById("current-date");
+    if (el) {
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      el.textContent = new Date().toLocaleDateString('en-US', options);
+    }
+  } catch (e) {
+    console.error("Date error:", e);
+  }
+}
 
 function closeDetailsModal() {
   try {
@@ -306,7 +344,7 @@ function initPage() {
     console.log("╔═══════════════════════════════════╗");
     console.log("║   USERS PAGE INITIALIZATION       ║");
     console.log("╚═══════════════════════════════════╝");
-    // admin-common.js handles updateCurrentDate
+    updateCurrentDate();
     loadPatients(1);
     console.log("✓ Page ready");
   } catch (err) {
