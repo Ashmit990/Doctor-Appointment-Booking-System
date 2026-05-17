@@ -60,7 +60,7 @@ function renderTable(patients) {
   const tableBody = document.getElementById("activity-table-body");
   
   if (patients.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-gray-400 font-medium">No activity records found.</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-gray-400 font-medium">No activity records found.</td></tr>`;
     return;
   }
 
@@ -94,23 +94,6 @@ function renderTable(patients) {
           </div>
         </div>
       </td>
-      <td class="px-6 py-4">
-        <div class="flex gap-4">
-          <div class="flex flex-col">
-             <span class="text-xs font-bold text-gray-700">${pat.feedback_count}</span>
-             <span class="text-[10px] text-gray-400 uppercase font-bold">Feedback</span>
-          </div>
-          <div class="flex flex-col">
-             <span class="text-xs font-bold text-gray-700">${pat.ticket_count}</span>
-             <span class="text-[10px] text-gray-400 uppercase font-bold">Tickets</span>
-          </div>
-        </div>
-      </td>
-      <td class="px-6 py-4">
-        <button onclick="viewPatient('${pat.user_id}')" class="text-teal hover:text-teal-dark font-bold text-xs uppercase tracking-widest transition-colors">
-          View Activity
-        </button>
-      </td>
     </tr>
   `).join("");
 }
@@ -122,9 +105,4 @@ function filterActivity() {
     pat.email.toLowerCase().includes(search)
   );
   renderTable(filtered);
-}
-
-function viewPatient(id) {
-    // Navigate to users/patients page with filter or show modal
-    window.location.href = `users.html?id=${id}`;
 }
