@@ -24,11 +24,18 @@ try {
         $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
         $offset = ($page - 1) * $limit;
 
-        // Query to get feedback messages
+        // Query to get feedback messages from completed appointments
         $query = "
-            SELECT id, full_name, email, message, created_at 
-            FROM contact_messages 
-            ORDER BY created_at DESC 
+            SELECT 
+                a.appointment_id AS id, 
+                u.full_name, 
+                u.email, 
+                a.feedback AS message, 
+                CONCAT(a.app_date, ' ', a.app_time) AS created_at
+            FROM appointments a
+            JOIN users u ON a.patient_id = u.user_id
+            WHERE a.feedback IS NOT NULL AND a.feedback != ''
+            ORDER BY a.app_date DESC, a.app_time DESC
             LIMIT $limit OFFSET $offset
         ";
         
@@ -43,7 +50,7 @@ try {
         }
 
         // Get total count for pagination
-        $countResult = $conn->query("SELECT COUNT(*) as total FROM contact_messages");
+        $countResult = $conn->query("SELECT COUNT(*) as total FROM appointments WHERE feedback IS NOT NULL AND feedback != ''");
         $total = 0;
         if ($countResult) {
             $total = (int)$countResult->fetch_assoc()['total'];
@@ -68,8 +75,8 @@ try {
             exit;
         }
 
-        // Delete using prepared statement
-        $stmt = $conn->prepare("DELETE FROM contact_messages WHERE id = ?");
+        // Clear feedback using prepared statement
+        $stmt = $conn->prepare("UPDATE appointments SET feedback = NULL WHERE appointment_id = ?");
         if (!$stmt) {
             throw new Exception("Prepare statement failed: " . $conn->error);
         }

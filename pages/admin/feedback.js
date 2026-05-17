@@ -92,7 +92,7 @@ async function loadFeedback(page = 1) {
     console.log("► Fetching feedback page:", page);
 
     const response = await fetch(
-      `/Doctor-Appointment-Booking-System/api/admin/feedback.php?page=${page}&limit=10`,
+      `../../api/admin/feedback.php?page=${page}&limit=10`,
       {
         method: "GET",
         credentials: "include",
@@ -245,7 +245,7 @@ async function deleteFeedback(id) {
     console.log("► Deleting feedback ID:", id);
 
     const response = await fetch(
-      "/Doctor-Appointment-Booking-System/api/admin/feedback.php",
+      "../../api/admin/feedback.php",
       {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
