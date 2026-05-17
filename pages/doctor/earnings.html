@@ -1,456 +1,425 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      http-equiv="Cache-Control"
-      content="no-cache, no-store, must-revalidate"
-    />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    <title>Doctor Dashboard - Earnings</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      /* Custom Scrollbar */
-      ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 10px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-      }
-      * {
-        font-family: "Poppins", sans-serif;
-        scrollbar-width: thin;
-        scrollbar-color: #cbd5e1 transparent;
-      }
 
-      @keyframes pageFadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Doctor Dashboard - Earnings</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
 
-      body {
-        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-      }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
 
-      main {
-        animation: pageFadeIn 0.4s ease-out forwards;
-      }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
 
-      .primary-color {
-        color: #007E85;
-      }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
 
-      .bg-primary {
-        background: linear-gradient(135deg, #007E85 0%, #007E85 100%);
-      }
+    * {
+      font-family: "Poppins", sans-serif;
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e1 transparent;
+    }
 
-      .bg-primary-light {
-        background-color: rgba(0, 126, 133, 0.08);
-      }
-
-      .card-shadow {
-        box-shadow:
-          0 20px 50px rgba(0, 0, 0, 0.08),
-          0 1px 3px rgba(0, 0, 0, 0.06);
-      }
-
-      .sidebar {
-        background: linear-gradient(180deg, #007E85 0%, #00556B 100%);
-        box-shadow: 8px 0 40px rgba(0, 0, 0, 0.25), inset -1px 0 2px rgba(255, 255, 255, 0.1);
-        border-right: 1px solid rgba(255, 255, 255, 0.08);
-        position: relative;
-        overflow: hidden;
-      }
-
-      .sidebar::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: radial-gradient(ellipse 100% 80% at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 70%);
-        pointer-events: none;
-      }
-
-      .nav-link {
-        transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-        color: rgba(255, 255, 255, 0.9);
-        position: relative;
-        overflow: visible;
-        display: flex;
-        align-items: center;
-        gap: inherit;
-        font-weight: 500;
-        letter-spacing: 0.3px;
-      }
-
-      .nav-link::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: -8px;
-        width: 4px;
-        height: 0%;
-        background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0) 100%);
-        transform: translateY(-50%);
-        border-radius: 2px;
-        transition: height 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-        z-index: 1;
-      }
-
-      .nav-link::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 100%);
-        border-radius: 10px;
+    @keyframes pageFadeIn {
+      from {
         opacity: 0;
-        transition: opacity 0.35s ease;
-        z-index: 0;
+        transform: translateY(10px);
       }
 
-      .nav-link:hover::before {
-        height: 100%;
-      }
-
-      .nav-link:hover::after {
+      to {
         opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    body {
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    }
+
+    main {
+      animation: pageFadeIn 0.4s ease-out forwards;
+    }
+
+    .primary-color {
+      color: #007E85;
+    }
+
+    .bg-primary {
+      background: linear-gradient(135deg, #007E85 0%, #007E85 100%);
+    }
+
+    .bg-primary-light {
+      background-color: rgba(0, 126, 133, 0.08);
+    }
+
+    .card-shadow {
+      box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.08),
+        0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, #007E85 0%, #00556B 100%);
+      box-shadow: 8px 0 40px rgba(0, 0, 0, 0.25), inset -1px 0 2px rgba(255, 255, 255, 0.1);
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(ellipse 100% 80% at 50% 0%, rgba(255, 255, 255, 0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .nav-link {
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      color: rgba(255, 255, 255, 0.9);
+      position: relative;
+      overflow: visible;
+      display: flex;
+      align-items: center;
+      gap: inherit;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+
+    .nav-link::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: -8px;
+      width: 4px;
+      height: 0%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 100%);
+      transform: translateY(-50%);
+      border-radius: 2px;
+      transition: height 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 1;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.06) 50%, rgba(255, 255, 255, 0) 100%);
+      border-radius: 10px;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      z-index: 0;
+    }
+
+    .nav-link:hover::before {
+      height: 100%;
+    }
+
+    .nav-link:hover::after {
+      opacity: 1;
+    }
+
+    .nav-link:hover {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+      color: rgba(255, 255, 255, 1);
+      transform: translateX(4px);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .nav-link i {
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .nav-link:hover i {
+      transform: scale(1.15) rotate(5deg);
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+    }
+
+    .nav-link.active {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.08) 100%);
+      color: #ffffff;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.15);
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .nav-link.active::before {
+      height: 100%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0.3) 100%);
+    }
+
+    .nav-link.active i {
+      transform: scale(1.2);
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+    }
+
+    .stat-card {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 25px 60px rgba(0, 126, 133, 0.12);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
       }
 
-      .nav-link:hover {
-        background: linear-gradient(90deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%);
-        color: rgba(255, 255, 255, 1);
-        transform: translateX(4px);
-        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
+    }
 
-      .nav-link i {
-        transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-      }
+    .fade-in-up {
+      animation: fadeInUp 0.5s ease forwards;
+    }
 
-      .nav-link:hover i {
-        transform: scale(1.15) rotate(5deg);
-        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
-      }
+    html {
+      font-size: clamp(15px, 1vw, 17px);
+    }
 
-      .nav-link.active {
-        background: linear-gradient(90deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 100%);
-        color: #ffffff;
-        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.15);
-        border-radius: 10px;
-        font-weight: 600;
-      }
+    main {
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+  </style>
+</head>
 
-      .nav-link.active::before {
-        height: 100%;
-        background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.3) 100%);
-      }
-
-      .nav-link.active i {
-        transform: scale(1.2);
-        filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
-      }
-
-      .stat-card {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      .stat-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 25px 60px rgba(0, 126, 133, 0.12);
-      }
-
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .fade-in-up {
-        animation: fadeInUp 0.5s ease forwards;
-      }
-      html {
-        font-size: clamp(15px, 1vw, 17px);
-      }
-      main {
-        overflow-y: auto;
-        overflow-x: hidden;
-      }
-    </style>
-  </head>
-
-  <body class="bg-gray-50">
-    <div class="flex h-screen overflow-hidden">
-      <!-- SIDEBAR -->
-      <aside
-        class="sidebar w-full md:w-64 text-white shadow-lg fixed bottom-0 md:top-0 h-auto md:h-full overflow-x-auto md:overflow-y-auto z-40"
-      >
-            <div class="hidden md:flex items-center gap-3 p-8 border-b border-b-white/10 bg-gradient-to-r from-white/5 to-transparent">
-                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-lg">
-                    <img src="../../src/assets/Logo.svg" alt="Healthcare" class="w-14">
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold tracking-tight">Healthcare</h1>
-                    <p class="text-xs text-white/60">Doctor Portal</p>
-                </div>
-            </div>
-        <nav
-          class="p-2 md:p-4 flex flex-row md:flex-col gap-2 md:gap-2 space-y-0 md:space-y-1 justify-around md:justify-start md:flex-1"
-        >
-          <a
-            href="home.html"
-            class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-[10px] md:text-sm whitespace-nowrap"
-          >
-            <i data-lucide="home" class="w-5 h-5 flex-shrink-0"></i><span class="hidden md:inline">Home</span>
-          </a>
-          <a
-            href="schedules.html"
-            class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-[10px] md:text-sm whitespace-nowrap"
-          >
-            <i data-lucide="calendar" class="w-5 h-5 flex-shrink-0"></i><span class="hidden md:inline">Schedules</span>
-          </a>
-          <a
-            href="earnings.html"
-            class="nav-link active flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-[10px] md:text-sm whitespace-nowrap"
-          >
-            <i data-lucide="indian-rupee" class="w-5 h-5 flex-shrink-0"></i>
-            <span class="hidden md:inline">Earnings</span>
-          </a>
-          <a
-            href="profile.html"
-            class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-[10px] md:text-sm whitespace-nowrap"
-          >
-            <i data-lucide="user" class="w-5 h-5 flex-shrink-0"></i><span class="hidden md:inline">Profile</span>
-          </a>
-          <div
-            class="hidden md:block mt-auto border-t border-white/10 pt-3"
-          ></div>
-          <a
-            href="../../api/auth/logout.php"
-            class="flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition-all duration-300 text-red-300 hover:text-red-50 hover:bg-red-500/20 text-[10px] md:text-sm whitespace-nowrap"
-          >
-            <i data-lucide="log-out" class="w-5 h-5 flex-shrink-0"></i><span class="hidden md:inline">Logout</span>
-          </a>
-        </nav>
-      </aside>
-
-      <!-- MAIN CONTENT -->
-      <main class="ml-0 md:ml-64 flex-1 overflow-y-auto pb-20 md:pb-0">
+<body class="bg-gray-50">
+  <div class="flex h-screen overflow-hidden">
+    <!-- SIDEBAR -->
+    <aside
+      class="sidebar w-full md:w-64 text-white shadow-lg fixed bottom-0 md:top-0 h-auto md:h-full overflow-x-auto md:overflow-y-auto z-40">
+      <div
+        class="hidden md:flex items-center gap-3 p-8 border-b border-b-white/10 bg-gradient-to-r from-white/5 to-transparent">
         <div
-          class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm"
-        >
-          <div class="px-6 py-3 h-[70px]">
-            <h2 class="text-xl md:text-2xl font-bold text-gray-800">
-              Earnings Dashboard
-            </h2>
-            <p id="current-date" class="text-sm text-gray-500 mt-1"></p>
+          class="w-12 h-12 bg-white rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-lg">
+          <img src="../../src/assets/Logo.svg" alt="Healthcare" class="w-14">
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight">Healthcare</h1>
+          <p class="text-xs text-white/60">Doctor Portal</p>
+        </div>
+      </div>
+      <nav
+        class="p-2 md:p-4 flex flex-row md:flex-col gap-2 md:gap-2 space-y-0 md:space-y-1 justify-around md:justify-start md:flex-1">
+        <a href="home.html"
+          class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-[10px] md:text-sm whitespace-nowrap">
+          <i data-lucide="home" class="w-5 h-5 flex-shrink-0"></i><span class="hidden md:inline">Home</span>
+        </a>
+        <a href="schedules.html"
+          class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-[10px] md:text-sm whitespace-nowrap">
+          <i data-lucide="calendar" class="w-5 h-5 flex-shrink-0"></i><span class="hidden md:inline">Schedules</span>
+        </a>
+        <a href="earnings.html"
+          class="nav-link active flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-[10px] md:text-sm whitespace-nowrap">
+          <i data-lucide="indian-rupee" class="w-5 h-5 flex-shrink-0"></i>
+          <span class="hidden md:inline">Earnings</span>
+        </a>
+        <a href="profile.html"
+          class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg text-[10px] md:text-sm whitespace-nowrap">
+          <i data-lucide="user" class="w-5 h-5 flex-shrink-0"></i><span class="hidden md:inline">Profile</span>
+        </a>
+        <div class="hidden md:block mt-auto border-t border-white/10 pt-3"></div>
+        <a href="../../api/auth/logout.php"
+          class="flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition-all duration-300 text-red-300 hover:text-red-50 hover:bg-red-500/20 text-[10px] md:text-sm whitespace-nowrap">
+          <i data-lucide="log-out" class="w-5 h-5 flex-shrink-0"></i><span class="hidden md:inline">Logout</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="ml-0 md:ml-64 flex-1 overflow-y-auto pb-20 md:pb-0">
+      <div class="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
+        <div class="px-6 py-3 h-[70px]">
+          <h2 class="text-xl md:text-2xl font-bold text-gray-800">
+            Earnings Dashboard
+          </h2>
+          <p id="current-date" class="text-sm text-gray-500 mt-1"></p>
+        </div>
+      </div>
+
+      <div class="p-8">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="bg-white rounded-xl card-shadow p-6 stat-card">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-gray-600 text-sm font-medium">
+                  Total Earnings
+                </p>
+                <p id="totalEarnings" class="text-4xl font-bold text-gray-900 mt-2">
+                  Rs. 0.00
+                </p>
+              </div>
+              <div class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center">
+                <i data-lucide="wallet" class="w-7 h-7 primary-color"></i>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-xl card-shadow p-6 stat-card">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-gray-600 text-sm font-medium">
+                  Total Appointments
+                </p>
+                <p id="totalCompleted" class="text-4xl font-bold text-gray-900 mt-2">
+                  0
+                </p>
+              </div>
+              <div class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center">
+                <i data-lucide="check-circle" class="w-7 h-7 primary-color"></i>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-xl card-shadow p-6 stat-card">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-gray-600 text-sm font-medium">
+                  Completed Appointments
+                </p>
+                <p id="completedCount" class="text-4xl font-bold text-gray-900 mt-2">
+                  0
+                </p>
+              </div>
+              <div class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center">
+                <i data-lucide="check-square" class="w-7 h-7 primary-color"></i>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="p-8">
-          <!-- Stats Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white rounded-xl card-shadow p-6 stat-card">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-gray-600 text-sm font-medium">
-                    Gross Earnings
-                  </p>
-                  <p
-                    id="totalEarnings"
-                    class="text-4xl font-bold text-gray-900 mt-2"
-                  >
-                    Rs. 0.00
-                  </p>
-                </div>
-                <div
-                  class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center"
-                >
-                  <i data-lucide="wallet" class="w-7 h-7 primary-color"></i>
-                </div>
-              </div>
-            </div>
-            <div class="bg-white rounded-xl card-shadow p-6 stat-card">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-gray-600 text-sm font-medium">
-                    Total Appointments
-                  </p>
-                  <p
-                    id="totalCompleted"
-                    class="text-4xl font-bold text-gray-900 mt-2"
-                  >
-                    0
-                  </p>
-                </div>
-                <div
-                  class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center"
-                >
-                  <i
-                    data-lucide="check-circle"
-                    class="w-7 h-7 primary-color"
-                  ></i>
-                </div>
-              </div>
-            </div>
-            <div class="bg-white rounded-xl card-shadow p-6 stat-card">
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-gray-600 text-sm font-medium">
-                    Completed Appointments
-                  </p>
-                  <p
-                    id="completedCount"
-                    class="text-4xl font-bold text-gray-900 mt-2"
-                  >
-                    0
-                  </p>
-                </div>
-                <div
-                  class="w-14 h-14 bg-primary-light rounded-lg flex items-center justify-center"
-                >
-                  <i
-                    data-lucide="check-square"
-                    class="w-7 h-7 primary-color"
-                  ></i>
-                </div>
-              </div>
-            </div>
-          </div>
+        <!-- Net Income Info Line -->
+        <div class="bg-primary/5 border border-primary/10 rounded-xl p-4 mb-8 flex items-center gap-3">
+          <i data-lucide="info" class="w-5 h-5 primary-color"></i>
+          <p class="text-gray-700 font-medium">
+            Your average income per appointment is <span id="netIncomeText" class="primary-color font-bold">Rs.
+              0.00</span>
+            <span class="text-xs text-gray-500 font-normal ml-1">(after 10% platform fee deduction)</span>
+          </p>
+        </div>
 
-          <!-- Net Income Info Line -->
-          <div class="bg-primary/5 border border-primary/10 rounded-xl p-4 mb-8 flex items-center gap-3">
-             <i data-lucide="info" class="w-5 h-5 primary-color"></i>
-             <p class="text-gray-700 font-medium">
-               Your average income per appointment is <span id="netIncomeText" class="primary-color font-bold">Rs. 0.00</span> 
-               <span class="text-xs text-gray-500 font-normal ml-1">(after 10% platform fee deduction)</span>
-             </p>
+        <!-- Transactions Table -->
+        <div class="bg-white rounded-xl card-shadow overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100">
+            <h3 class="text-lg font-bold text-gray-900">
+              Transaction History
+            </h3>
           </div>
-
-          <!-- Transactions Table -->
-          <div class="bg-white rounded-xl card-shadow overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100">
-              <h3 class="text-lg font-bold text-gray-900">
-                Transaction History
-              </h3>
-            </div>
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead class="bg-gray-50">
-                  <tr class="text-left text-sm font-semibold text-gray-600">
-                    <th class="px-6 py-3">Appointment Date</th>
-                    <th class="px-6 py-3">Patient Name</th>
-                    <th class="px-6 py-3">Appointment ID</th>
-                    <th class="px-6 py-3">Appointment Status</th>
-                  </tr>
-                </thead>
-                <tbody id="earningsTable" class="divide-y divide-gray-100">
-                  <!-- Empty table body - will be populated when data exists -->
-                </tbody>
-              </table>
-            </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50">
+                <tr class="text-left text-sm font-semibold text-gray-600">
+                  <th class="px-6 py-3">Appointment Date</th>
+                  <th class="px-6 py-3">Patient Name</th>
+                  <th class="px-6 py-3">Appointment ID</th>
+                  <th class="px-6 py-3">Appointment Status</th>
+                </tr>
+              </thead>
+              <tbody id="earningsTable" class="divide-y divide-gray-100">
+                <!-- Empty table body - will be populated when data exists -->
+              </tbody>
+            </table>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </main>
+  </div>
 
-    <script>
-      let earningsData = [];
+  <script>
+    let earningsData = [];
 
-      function updateCurrentDate() {
-        const options = {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        };
-        document.getElementById("current-date").textContent =
-          new Date().toLocaleDateString("en-US", options);
-      }
+    function updateCurrentDate() {
+      const options = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+      document.getElementById("current-date").textContent =
+        new Date().toLocaleDateString("en-US", options);
+    }
 
-      async function loadEarnings() {
-        try {
-          const response = await fetch(
-            "../../api/doctor/get_earnings.php?t=" + Date.now(),
-            {
-              credentials: "include",
-              headers: { "Cache-Control": "no-cache" },
-            },
-          );
-          const result = await response.json();
+    async function loadEarnings() {
+      try {
+        const response = await fetch(
+          "../../api/doctor/get_earnings.php?t=" + Date.now(),
+          {
+            credentials: "include",
+            headers: { "Cache-Control": "no-cache" },
+          },
+        );
+        const result = await response.json();
 
-          if (result.status === "success") {
-            earningsData = result.data || [];
-            renderDashboard();
-          } else {
-            earningsData = [];
-            renderDashboard();
-          }
-        } catch (error) {
-          console.error("Fetch error:", error);
+        if (result.status === "success") {
+          earningsData = result.data || [];
+          renderDashboard();
+        } else {
           earningsData = [];
           renderDashboard();
         }
+      } catch (error) {
+        console.error("Fetch error:", error);
+        earningsData = [];
+        renderDashboard();
       }
+    }
 
-      function renderDashboard() {
-        const totalGross = earningsData.reduce(
-          (sum, item) => sum + parseFloat(item.amount || 0),
-          0,
-        );
-        const totalCount = earningsData.length;
-        const completedCount = earningsData.filter(item => item.status === 'Completed').length;
-        
-        // 10% platform fee deduction
-        const platformFeePercent = 10; 
-        const totalIncome = totalGross * (1 - platformFeePercent / 100);
-        const avgIncome = totalCount > 0 ? (totalIncome / totalCount) : 0;
+    function renderDashboard() {
+      const totalGross = earningsData.reduce(
+        (sum, item) => sum + parseFloat(item.amount || 0),
+        0,
+      );
+      const totalCount = earningsData.length;
+      const completedCount = earningsData.filter(item => item.status === 'Completed').length;
 
-        document.getElementById("totalEarnings").textContent =
-          `Rs. ${totalGross.toFixed(2)}`;
-        document.getElementById("totalCompleted").textContent = totalCount;
-        document.getElementById("completedCount").textContent = completedCount;
-        
-        document.getElementById("netIncomeText").textContent = 
-          `Rs. ${avgIncome.toFixed(2)}`;
+      // 10% platform fee deduction
+      const platformFeePercent = 10;
+      const totalIncome = totalGross * (1 - platformFeePercent / 100);
+      const avgIncome = totalCount > 0 ? (totalIncome / totalCount) : 0;
 
-        renderTable();
-        lucide.createIcons();
-      }
+      document.getElementById("totalEarnings").textContent =
+        `Rs. ${totalGross.toFixed(2)}`;
+      document.getElementById("totalCompleted").textContent = totalCount;
+      document.getElementById("completedCount").textContent = completedCount;
 
-      function renderTable() {
-        const tbody = document.getElementById("earningsTable");
+      document.getElementById("netIncomeText").textContent =
+        `Rs. ${avgIncome.toFixed(2)}`;
 
-        if (!earningsData || earningsData.length === 0) {
-          tbody.innerHTML = `
+      renderTable();
+      lucide.createIcons();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("earningsTable");
+
+      if (!earningsData || earningsData.length === 0) {
+        tbody.innerHTML = `
           <tr>
             <td colspan="4" class="px-6 py-16 text-center">
               <div class="flex flex-col items-center justify-center">
@@ -463,22 +432,22 @@
             </td>
           </tr>
         `;
-          lucide.createIcons();
-          return;
-        }
+        lucide.createIcons();
+        return;
+      }
 
-        tbody.innerHTML = earningsData
-          .map(
-            (item) => {
-              const status = item.status || "Unknown";
-              let statusClass = "bg-gray-100 text-gray-600";
-              
-              if (status === "Upcoming") statusClass = "bg-blue-100 text-blue-600";
-              else if (status === "Completed") statusClass = "bg-emerald-100 text-emerald-600";
-              else if (status === "Cancelled") statusClass = "bg-red-100 text-red-600";
-              else if (status === "In Progress") statusClass = "bg-amber-100 text-amber-600";
+      tbody.innerHTML = earningsData
+        .map(
+          (item) => {
+            const status = item.status || "Unknown";
+            let statusClass = "bg-gray-100 text-gray-600";
 
-              return `
+            if (status === "Upcoming") statusClass = "bg-blue-100 text-blue-600";
+            else if (status === "Completed") statusClass = "bg-emerald-100 text-emerald-600";
+            else if (status === "Cancelled") statusClass = "bg-red-100 text-red-600";
+            else if (status === "In Progress") statusClass = "bg-amber-100 text-amber-600";
+
+            return `
                 <tr class="hover:bg-gray-50 border-b border-gray-100">
                     <td class="px-6 py-3 text-sm text-gray-700">${item.app_date || "-"}</td>
                     <td class="px-6 py-3 text-sm font-medium text-gray-800">${escapeHtml(item.patient_name || "Unknown Patient")}</td>
@@ -490,26 +459,27 @@
                     </td>
                 </tr>
               `;
-            }
-          )
-          .join("");
-      }
+          }
+        )
+        .join("");
+    }
 
-      function escapeHtml(str) {
-        if (!str) return "";
-        return str.replace(/[&<>]/g, function (m) {
-          if (m === "&") return "&amp;";
-          if (m === "<") return "&lt;";
-          if (m === ">") return "&gt;";
-          return m;
-        });
-      }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        updateCurrentDate();
-        loadEarnings();
-        lucide.createIcons();
+    function escapeHtml(str) {
+      if (!str) return "";
+      return str.replace(/[&<>]/g, function (m) {
+        if (m === "&") return "&amp;";
+        if (m === "<") return "&lt;";
+        if (m === ">") return "&gt;";
+        return m;
       });
-    </script>
-  </body>
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      updateCurrentDate();
+      loadEarnings();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+
 </html>
