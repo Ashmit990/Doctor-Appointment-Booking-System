@@ -2,6 +2,8 @@
 require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/payment_helpers.php';
 
+date_default_timezone_set('Asia/Kathmandu');
+
 release_expired_payment_holds($conn);
 
 $action = $_GET['action'] ?? '';
@@ -14,15 +16,33 @@ if ($doctor_id === '') {
 }
 
 if ($action === 'dates') {
-    $stmt = $conn->prepare("
-        SELECT DISTINCT available_date
-        FROM doctor_availability
-        WHERE doctor_id = ?
-          AND status = 'Available'
-          AND available_date >= CURDATE()
-        ORDER BY available_date ASC
-    ");
-    $stmt->bind_param("s", $doctor_id);
+    $today = date('Y-m-d');
+    $current_hour = (int)date('H');
+
+    if ($current_hour >= 17) {
+        // After 5 PM, exclude today
+        $stmt = $conn->prepare("
+            SELECT DISTINCT available_date
+            FROM doctor_availability
+            WHERE doctor_id = ?
+              AND status = 'Available'
+              AND available_date > ?
+            ORDER BY available_date ASC
+        ");
+        $stmt->bind_param("ss", $doctor_id, $today);
+    } else {
+        // Before 5 PM, include today
+        $stmt = $conn->prepare("
+            SELECT DISTINCT available_date
+            FROM doctor_availability
+            WHERE doctor_id = ?
+              AND status = 'Available'
+              AND available_date >= ?
+            ORDER BY available_date ASC
+        ");
+        $stmt->bind_param("ss", $doctor_id, $today);
+    }
+
     $stmt->execute();
     $dates = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
@@ -42,8 +62,16 @@ if ($action === 'slots') {
         exit;
     }
 
-    // Auto-close past slots for today before returning
     $today = date('Y-m-d');
+    $current_hour = (int)date('H');
+
+    // If requesting slots for today after 5 PM, return empty slots
+    if ($date === $today && $current_hour >= 17) {
+        echo json_encode(['status' => 'success', 'data' => []]);
+        $conn->close();
+        exit;
+    }
+
     $current_time = date('H:i:s');
     
     if ($date === $today) {
