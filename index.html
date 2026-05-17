@@ -185,6 +185,29 @@
                 min-width: 280px;
             }
         }
+
+        /* Custom styles for inputs */
+        input:focus,
+        textarea:focus {
+            box-shadow: 0 0 0 4px rgba(0, 126, 133, 0.12);
+        }
+
+        /* Success/Error alert animation */
+        @keyframes alertSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: alertSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
     </style>
 </head>
 
@@ -543,249 +566,391 @@
         <div class="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-16">
             <div class="text-center mb-16" data-scroll-animation="animate-slide-up" data-delay="0s">
                 <p class="font-bold text-[#6EAB36] uppercase tracking-widest text-[16px] mb-4">Critical Emergencies</p>
-                <h2 class="font-black text-[48px] lg:text-[56px] text-[#007E85] mb-6 tracking-tight">Danger signs and immediate first aid</h2>
+                <h2 class="font-black text-[48px] lg:text-[56px] text-[#007E85] mb-6 tracking-tight">Danger signs and
+                    immediate first aid</h2>
                 <p class="text-[20px] text-[#666666] max-w-4xl mx-auto leading-relaxed font-medium">
-                    These are serious emergencies. Use first aid only as a temporary step and call emergency medical services immediately.
+                    These are serious emergencies. Use first aid only as a temporary step and call emergency medical
+                    services immediately.
                 </p>
             </div>
 
             <div class="remedy-marquee" data-scroll-animation="animate-fade-in" data-delay="0.1s">
-                <div class="absolute left-0 top-0 h-full w-24 bg-gradient-to-r from-[#F4FBFA] to-transparent z-10 pointer-events-none"></div>
-                <div class="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-[#F4FBFA] to-transparent z-10 pointer-events-none"></div>
+                <div
+                    class="absolute left-0 top-0 h-full w-24 bg-gradient-to-r from-[#F4FBFA] to-transparent z-10 pointer-events-none">
+                </div>
+                <div
+                    class="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-[#F4FBFA] to-transparent z-10 pointer-events-none">
+                </div>
 
                 <div class="remedy-track py-2">
                     <div class="remedy-row">
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift" data-scroll-animation="animate-slide-up" data-delay="0.1s">
+                        <article
+                            class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift"
+                            data-scroll-animation="animate-slide-up" data-delay="0.1s">
                             <div class="flex items-center gap-4 mb-5">
-                                <div class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
-                                    <img src="https://img.icons8.com/ios-filled/100/007E85/heart-with-pulse.png" alt="Heart attack" class="w-8 h-8 object-contain" loading="lazy">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
+                                    <img src="https://img.icons8.com/ios-filled/100/007E85/heart-with-pulse.png"
+                                        alt="Heart attack" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
                                     <h3 class="font-black text-[24px] text-[#1f2937]">Heart attack</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Blood flow to heart muscle gets blocked, usually by a clot.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Call emergency now, keep person seated and calm, loosen tight clothes, and begin CPR if they collapse and are not breathing.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span
+                                    class="font-bold text-[#333333]">How it happens:</span> Blood flow to heart muscle
+                                gets blocked, usually by a clot.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span
+                                    class="font-bold text-[#333333]">Immediate action:</span> Call emergency now, keep
+                                person seated and calm, loosen tight clothes, and begin CPR if they collapse and are not
+                                breathing.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift" data-scroll-animation="animate-slide-up" data-delay="0.15s">
+                        <article
+                            class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift"
+                            data-scroll-animation="animate-slide-up" data-delay="0.15s">
                             <div class="flex items-center gap-4 mb-5">
-                                <div class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
-                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/brain.png" alt="Stroke" class="w-8 h-8 object-contain" loading="lazy">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
+                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/brain.png" alt="Stroke"
+                                        class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
                                     <h3 class="font-black text-[24px] text-[#1f2937]">Stroke</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Brain blood flow is blocked or a vessel bursts.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Use FAST signs, call emergency immediately, keep patient on side if vomiting, do not give food or drink.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span
+                                    class="font-bold text-[#333333]">How it happens:</span> Brain blood flow is blocked
+                                or a vessel bursts.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span
+                                    class="font-bold text-[#333333]">Immediate action:</span> Use FAST signs, call
+                                emergency immediately, keep patient on side if vomiting, do not give food or drink.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift" data-scroll-animation="animate-slide-up" data-delay="0.2s">
+                        <article
+                            class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift"
+                            data-scroll-animation="animate-slide-up" data-delay="0.2s">
                             <div class="flex items-center gap-4 mb-5">
-                                <div class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
-                                    <img src="https://img.icons8.com/ios-filled/100/007E85/drop-of-blood.png" alt="Severe bleeding" class="w-8 h-8 object-contain" loading="lazy">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
+                                    <img src="https://img.icons8.com/ios-filled/100/007E85/drop-of-blood.png"
+                                        alt="Severe bleeding" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
                                     <h3 class="font-black text-[24px] text-[#1f2937]">Severe bleeding</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Deep cuts, trauma, or arterial injury can cause rapid blood loss.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Apply firm direct pressure with clean cloth, elevate if possible, call emergency, and do not remove soaked cloth layers.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span
+                                    class="font-bold text-[#333333]">How it happens:</span> Deep cuts, trauma, or
+                                arterial injury can cause rapid blood loss.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span
+                                    class="font-bold text-[#333333]">Immediate action:</span> Apply firm direct pressure
+                                with clean cloth, elevate if possible, call emergency, and do not remove soaked cloth
+                                layers.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift" data-scroll-animation="animate-slide-up" data-delay="0.25s">
+                        <article
+                            class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift"
+                            data-scroll-animation="animate-slide-up" data-delay="0.25s">
                             <div class="flex items-center gap-4 mb-5">
-                                <div class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
-                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/lungs.png" alt="Choking" class="w-8 h-8 object-contain" loading="lazy">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
+                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/lungs.png" alt="Choking"
+                                        class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
                                     <h3 class="font-black text-[24px] text-[#1f2937]">Choking</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Food or object blocks the airway and stops airflow.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> If unable to speak or breathe, give abdominal thrusts, call emergency, and start CPR if they become unresponsive.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span
+                                    class="font-bold text-[#333333]">How it happens:</span> Food or object blocks the
+                                airway and stops airflow.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span
+                                    class="font-bold text-[#333333]">Immediate action:</span> If unable to speak or
+                                breathe, give abdominal thrusts, call emergency, and start CPR if they become
+                                unresponsive.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift" data-scroll-animation="animate-slide-up" data-delay="0.3s">
+                        <article
+                            class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift"
+                            data-scroll-animation="animate-slide-up" data-delay="0.3s">
                             <div class="flex items-center gap-4 mb-5">
-                                <div class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
-                                    <img src="https://img.icons8.com/ios-filled/100/007E85/warning-shield.png" alt="Anaphylaxis" class="w-8 h-8 object-contain" loading="lazy">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
+                                    <img src="https://img.icons8.com/ios-filled/100/007E85/warning-shield.png"
+                                        alt="Anaphylaxis" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
                                     <h3 class="font-black text-[24px] text-[#1f2937]">Anaphylaxis</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Severe allergic reaction causes airway swelling and shock.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Use epinephrine auto-injector if available, call emergency now, lay person flat with legs raised unless breathing is hard.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span
+                                    class="font-bold text-[#333333]">How it happens:</span> Severe allergic reaction
+                                causes airway swelling and shock.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span
+                                    class="font-bold text-[#333333]">Immediate action:</span> Use epinephrine
+                                auto-injector if available, call emergency now, lay person flat with legs raised unless
+                                breathing is hard.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift" data-scroll-animation="animate-slide-up" data-delay="0.35s">
+                        <article
+                            class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift"
+                            data-scroll-animation="animate-slide-up" data-delay="0.35s">
                             <div class="flex items-center gap-4 mb-5">
-                                <div class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
-                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/poison.png" alt="Poisoning" class="w-8 h-8 object-contain" loading="lazy">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
+                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/poison.png" alt="Poisoning"
+                                        class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
                                     <h3 class="font-black text-[24px] text-[#1f2937]">Poisoning</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Harmful chemicals, medicines, gases, or contaminated food enter the body.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Call poison help or emergency, keep substance container for identification, and do not induce vomiting unless told by experts.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span
+                                    class="font-bold text-[#333333]">How it happens:</span> Harmful chemicals,
+                                medicines, gases, or contaminated food enter the body.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span
+                                    class="font-bold text-[#333333]">Immediate action:</span> Call poison help or
+                                emergency, keep substance container for identification, and do not induce vomiting
+                                unless told by experts.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift" data-scroll-animation="animate-slide-up" data-delay="0.4s">
+                        <article
+                            class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift"
+                            data-scroll-animation="animate-slide-up" data-delay="0.4s">
                             <div class="flex items-center gap-4 mb-5">
-                                <div class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
-                                    <img src="https://img.icons8.com/ios-filled/100/007E85/fire-element.png" alt="Severe burns" class="w-8 h-8 object-contain" loading="lazy">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
+                                    <img src="https://img.icons8.com/ios-filled/100/007E85/fire-element.png"
+                                        alt="Severe burns" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
                                     <h3 class="font-black text-[24px] text-[#1f2937]">Severe burns</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> High heat, electricity, chemicals, or explosions damage deep skin layers.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Remove from source, cool with clean running water, cover with sterile cloth, and call emergency for large, deep, or facial burns.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span
+                                    class="font-bold text-[#333333]">How it happens:</span> High heat, electricity,
+                                chemicals, or explosions damage deep skin layers.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span
+                                    class="font-bold text-[#333333]">Immediate action:</span> Remove from source, cool
+                                with clean running water, cover with sterile cloth, and call emergency for large, deep,
+                                or facial burns.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift" data-scroll-animation="animate-slide-up" data-delay="0.45s">
+                        <article
+                            class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift"
+                            data-scroll-animation="animate-slide-up" data-delay="0.45s">
                             <div class="flex items-center gap-4 mb-5">
-                                <div class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
-                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/ambulance.png" alt="Unconscious or not breathing" class="w-8 h-8 object-contain" loading="lazy">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
+                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/ambulance.png"
+                                        alt="Unconscious or not breathing" class="w-8 h-8 object-contain"
+                                        loading="lazy">
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
                                     <h3 class="font-black text-[24px] text-[#1f2937]">Unconscious, not breathing</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Cardiac arrest, severe trauma, drowning, overdose, or shock can stop breathing.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Call emergency, start CPR at once, and use AED if available.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span
+                                    class="font-bold text-[#333333]">How it happens:</span> Cardiac arrest, severe
+                                trauma, drowning, overdose, or shock can stop breathing.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span
+                                    class="font-bold text-[#333333]">Immediate action:</span> Call emergency, start CPR
+                                at once, and use AED if available.</p>
                         </article>
                     </div>
 
                     <div class="remedy-row" aria-hidden="true">
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
+                        <article
+                            class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
                             <div class="flex items-center gap-4 mb-5">
-                                <div class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
-                                    <img src="https://img.icons8.com/ios-filled/100/007E85/heart-with-pulse.png" alt="Heart attack" class="w-8 h-8 object-contain" loading="lazy">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
+                                    <img src="https://img.icons8.com/ios-filled/100/007E85/heart-with-pulse.png"
+                                        alt="Heart attack" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
                                     <h3 class="font-black text-[24px] text-[#1f2937]">Heart attack</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Blood flow to heart muscle gets blocked, usually by a clot.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Call emergency now, keep person seated and calm, loosen tight clothes, and begin CPR if they collapse and are not breathing.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span
+                                    class="font-bold text-[#333333]">How it happens:</span> Blood flow to heart muscle
+                                gets blocked, usually by a clot.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span
+                                    class="font-bold text-[#333333]">Immediate action:</span> Call emergency now, keep
+                                person seated and calm, loosen tight clothes, and begin CPR if they collapse and are not
+                                breathing.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
+                        <article
+                            class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
                             <div class="flex items-center gap-4 mb-5">
-                                <div class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
-                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/brain.png" alt="Stroke" class="w-8 h-8 object-contain" loading="lazy">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
+                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/brain.png" alt="Stroke"
+                                        class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
                                     <h3 class="font-black text-[24px] text-[#1f2937]">Stroke</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Brain blood flow is blocked or a vessel bursts.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Use FAST signs, call emergency immediately, keep patient on side if vomiting, do not give food or drink.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span
+                                    class="font-bold text-[#333333]">How it happens:</span> Brain blood flow is blocked
+                                or a vessel bursts.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span
+                                    class="font-bold text-[#333333]">Immediate action:</span> Use FAST signs, call
+                                emergency immediately, keep patient on side if vomiting, do not give food or drink.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
+                        <article
+                            class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
                             <div class="flex items-center gap-4 mb-5">
-                                <div class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
-                                    <img src="https://img.icons8.com/ios-filled/100/007E85/drop-of-blood.png" alt="Severe bleeding" class="w-8 h-8 object-contain" loading="lazy">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
+                                    <img src="https://img.icons8.com/ios-filled/100/007E85/drop-of-blood.png"
+                                        alt="Severe bleeding" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
                                     <h3 class="font-black text-[24px] text-[#1f2937]">Severe bleeding</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Deep cuts, trauma, or arterial injury can cause rapid blood loss.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Apply firm direct pressure with clean cloth, elevate if possible, call emergency, and do not remove soaked cloth layers.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span
+                                    class="font-bold text-[#333333]">How it happens:</span> Deep cuts, trauma, or
+                                arterial injury can cause rapid blood loss.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span
+                                    class="font-bold text-[#333333]">Immediate action:</span> Apply firm direct pressure
+                                with clean cloth, elevate if possible, call emergency, and do not remove soaked cloth
+                                layers.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
+                        <article
+                            class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
                             <div class="flex items-center gap-4 mb-5">
-                                <div class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
-                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/lungs.png" alt="Choking" class="w-8 h-8 object-contain" loading="lazy">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
+                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/lungs.png" alt="Choking"
+                                        class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
                                     <h3 class="font-black text-[24px] text-[#1f2937]">Choking</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Food or object blocks the airway and stops airflow.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> If unable to speak or breathe, give abdominal thrusts, call emergency, and start CPR if they become unresponsive.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span
+                                    class="font-bold text-[#333333]">How it happens:</span> Food or object blocks the
+                                airway and stops airflow.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span
+                                    class="font-bold text-[#333333]">Immediate action:</span> If unable to speak or
+                                breathe, give abdominal thrusts, call emergency, and start CPR if they become
+                                unresponsive.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
+                        <article
+                            class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
                             <div class="flex items-center gap-4 mb-5">
-                                <div class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
-                                    <img src="https://img.icons8.com/ios-filled/100/007E85/warning-shield.png" alt="Anaphylaxis" class="w-8 h-8 object-contain" loading="lazy">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
+                                    <img src="https://img.icons8.com/ios-filled/100/007E85/warning-shield.png"
+                                        alt="Anaphylaxis" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
                                     <h3 class="font-black text-[24px] text-[#1f2937]">Anaphylaxis</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Severe allergic reaction causes airway swelling and shock.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Use epinephrine auto-injector if available, call emergency now, lay person flat with legs raised unless breathing is hard.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span
+                                    class="font-bold text-[#333333]">How it happens:</span> Severe allergic reaction
+                                causes airway swelling and shock.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span
+                                    class="font-bold text-[#333333]">Immediate action:</span> Use epinephrine
+                                auto-injector if available, call emergency now, lay person flat with legs raised unless
+                                breathing is hard.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
+                        <article
+                            class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
                             <div class="flex items-center gap-4 mb-5">
-                                <div class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
-                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/poison.png" alt="Poisoning" class="w-8 h-8 object-contain" loading="lazy">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
+                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/poison.png" alt="Poisoning"
+                                        class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
                                     <h3 class="font-black text-[24px] text-[#1f2937]">Poisoning</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Harmful chemicals, medicines, gases, or contaminated food enter the body.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Call poison help or emergency, keep substance container for identification, and do not induce vomiting unless told by experts.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span
+                                    class="font-bold text-[#333333]">How it happens:</span> Harmful chemicals,
+                                medicines, gases, or contaminated food enter the body.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span
+                                    class="font-bold text-[#333333]">Immediate action:</span> Call poison help or
+                                emergency, keep substance container for identification, and do not induce vomiting
+                                unless told by experts.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
+                        <article
+                            class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
                             <div class="flex items-center gap-4 mb-5">
-                                <div class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
-                                    <img src="https://img.icons8.com/ios-filled/100/007E85/fire-element.png" alt="Severe burns" class="w-8 h-8 object-contain" loading="lazy">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-[#007E85]/10 flex items-center justify-center text-[#007E85]">
+                                    <img src="https://img.icons8.com/ios-filled/100/007E85/fire-element.png"
+                                        alt="Severe burns" class="w-8 h-8 object-contain" loading="lazy">
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
                                     <h3 class="font-black text-[24px] text-[#1f2937]">Severe burns</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> High heat, electricity, chemicals, or explosions damage deep skin layers.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Remove from source, cool with clean running water, cover with sterile cloth, and call emergency for large, deep, or facial burns.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span
+                                    class="font-bold text-[#333333]">How it happens:</span> High heat, electricity,
+                                chemicals, or explosions damage deep skin layers.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span
+                                    class="font-bold text-[#333333]">Immediate action:</span> Remove from source, cool
+                                with clean running water, cover with sterile cloth, and call emergency for large, deep,
+                                or facial burns.</p>
                         </article>
 
-                        <article class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
+                        <article
+                            class="remedy-card bg-white rounded-[2rem] p-7 shadow-sm border border-[#e5f2f0] hover-lift">
                             <div class="flex items-center gap-4 mb-5">
-                                <div class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
-                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/ambulance.png" alt="Unconscious or not breathing" class="w-8 h-8 object-contain" loading="lazy">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-[#6EAB36]/10 flex items-center justify-center text-[#6EAB36]">
+                                    <img src="https://img.icons8.com/ios-filled/100/6EAB36/ambulance.png"
+                                        alt="Unconscious or not breathing" class="w-8 h-8 object-contain"
+                                        loading="lazy">
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold uppercase tracking-widest text-[#6EAB36]">Emergency</p>
                                     <h3 class="font-black text-[24px] text-[#1f2937]">Unconscious, not breathing</h3>
                                 </div>
                             </div>
-                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span class="font-bold text-[#333333]">How it happens:</span> Cardiac arrest, severe trauma, drowning, overdose, or shock can stop breathing.</p>
-                            <p class="text-[16px] text-[#666666] leading-relaxed"><span class="font-bold text-[#333333]">Immediate action:</span> Call emergency, start CPR at once, and use AED if available.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed mb-4"><span
+                                    class="font-bold text-[#333333]">How it happens:</span> Cardiac arrest, severe
+                                trauma, drowning, overdose, or shock can stop breathing.</p>
+                            <p class="text-[16px] text-[#666666] leading-relaxed"><span
+                                    class="font-bold text-[#333333]">Immediate action:</span> Call emergency, start CPR
+                                at once, and use AED if available.</p>
                         </article>
                     </div>
                 </div>
             </div>
 
-            <p class="text-center mt-12 text-[15px] md:text-[16px] text-[#666666] font-medium max-w-4xl mx-auto" data-scroll-animation="animate-slide-up" data-delay="0.5s">
-                If any of these signs appear, treat as life-threatening and call emergency services immediately. Do not delay for home treatment.
+            <p class="text-center mt-12 text-[15px] md:text-[16px] text-[#666666] font-medium max-w-4xl mx-auto"
+                data-scroll-animation="animate-slide-up" data-delay="0.5s">
+                If any of these signs appear, treat as life-threatening and call emergency services immediately. Do not
+                delay for home treatment.
             </p>
         </div>
     </section>
@@ -835,53 +1000,109 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                <!-- Email -->
-                <div class="text-center hover-lift p-12 rounded-[2rem] bg-[#FAFAFA] border border-gray-100"
-                    data-scroll-animation="animate-slide-up" data-delay="0.1s">
-                    <div
-                        class="flex items-center justify-center h-20 w-20 bg-white shadow-md rounded-2xl mx-auto mb-8 text-[#007E85]">
-                        <svg class="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
-                            </path>
-                        </svg>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+                <!-- Left Side: Smaller Contact Cards stacked vertically -->
+                <div class="lg:col-span-5 flex flex-col gap-6 w-full">
+                    <!-- Email Card -->
+                    <div class="flex items-center gap-6 hover-lift p-6 md:p-8 rounded-[1.5rem] bg-[#FAFAFA] border border-gray-100 w-full"
+                        data-scroll-animation="animate-slide-up" data-delay="0.1s">
+                        <div
+                            class="flex-shrink-0 flex items-center justify-center h-16 w-16 bg-white shadow-md rounded-2xl text-[#007E85]">
+                            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-black text-[20px] text-[#333333] mb-1">Email Us</h4>
+                            <p class="text-[16px] text-[#666666] font-medium break-all">info@healthcare.com</p>
+                        </div>
                     </div>
-                    <h3 class="font-black text-[24px] text-[#333333] mb-3">Email Us</h3>
-                    <p class="text-[18px] text-[#666666] font-medium">info@healthcare.com</p>
+
+                    <!-- Phone Card -->
+                    <div class="flex items-center gap-6 hover-lift p-6 md:p-8 rounded-[1.5rem] bg-[#FAFAFA] border border-gray-100 w-full"
+                        data-scroll-animation="animate-slide-up" data-delay="0.2s">
+                        <div
+                            class="flex-shrink-0 flex items-center justify-center h-16 w-16 bg-white shadow-md rounded-2xl text-[#6EAB36]">
+                            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 5a2 2 0 012-2h3.28a1 1 0 00.948.684l1.498 4.493a1 1 0 00.502.756l2.73 1.365a1 1 0 001.006-.02c.563-.383 1.255-.864 2.242-1.745.158-.147.358-.500.358-.894V7a2 2 0 012-2h2.516a2 2 0 012 2v7a2 2 0 01-2 2h-2.516a2 2 0 00-1.942 1.313l-.957 3.373A2 2 0 006.623 20H5a2 2 0 01-2-2V5z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-black text-[20px] text-[#333333] mb-1">Call Us</h4>
+                            <p class="text-[16px] text-[#666666] font-medium break-all">+1 (234) 567-8900</p>
+                        </div>
+                    </div>
+
+                    <!-- Location Card -->
+                    <div class="flex items-center gap-6 hover-lift p-6 md:p-8 rounded-[1.5rem] bg-[#FAFAFA] border border-gray-100 w-full"
+                        data-scroll-animation="animate-slide-up" data-delay="0.3s">
+                        <div
+                            class="flex-shrink-0 flex items-center justify-center h-16 w-16 bg-white shadow-md rounded-2xl text-[#007E85]">
+                            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-black text-[20px] text-[#333333] mb-1">Visit Us</h4>
+                            <p class="text-[16px] text-[#666666] font-medium leading-normal">123 Medical Plaza
+                                Ave<br />Healthcare City, HC 12345</p>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Phone -->
-                <div class="text-center hover-lift p-12 rounded-[2rem] bg-[#FAFAFA] border border-gray-100"
-                    data-scroll-animation="animate-slide-up" data-delay="0.2s">
-                    <div
-                        class="flex items-center justify-center h-20 w-20 bg-white shadow-md rounded-2xl mx-auto mb-8 text-[#6EAB36]">
-                        <svg class="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 5a2 2 0 012-2h3.28a1 1 0 00.948.684l1.498 4.493a1 1 0 00.502.756l2.73 1.365a1 1 0 001.006-.02c.563-.383 1.255-.864 2.242-1.745.158-.147.358-.500.358-.894V7a2 2 0 012-2h2.516a2 2 0 012 2v7a2 2 0 01-2 2h-2.516a2 2 0 00-1.942 1.313l-.957 3.373A2 2 0 006.623 20H5a2 2 0 01-2-2V5z">
-                            </path>
-                        </svg>
-                    </div>
-                    <h3 class="font-black text-[24px] text-[#333333] mb-3">Call Us</h3>
-                    <p class="text-[18px] text-[#666666] font-medium">+1 (234) 567-8900</p>
-                </div>
+                <!-- Right Side: Contact / Feedback Form -->
+                <div class="lg:col-span-7 w-full" data-scroll-animation="animate-slide-up" data-delay="0.2s">
+                    <div class="hover-lift p-8 md:p-10 rounded-[2rem] bg-[#FAFAFA] border border-gray-100 shadow-sm">
+                        <h3 class="font-black text-[28px] text-[#007E85] mb-2">Share Your Feedback</h3>
+                        <p class="text-[16px] text-[#666666] font-medium mb-8">We value your opinion and suggestions.
+                            Let us know how we can serve you better.</p>
 
-                <!-- Location -->
-                <div class="text-center hover-lift p-12 rounded-[2rem] bg-[#FAFAFA] border border-gray-100"
-                    data-scroll-animation="animate-slide-up" data-delay="0.3s">
-                    <div
-                        class="flex items-center justify-center h-20 w-20 bg-white shadow-md rounded-2xl mx-auto mb-8 text-[#007E85]">
-                        <svg class="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
-                            </path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
+                        <!-- Success/Error Alert Container -->
+                        <div id="form-alert-container" class="hidden mb-6 p-4 rounded-xl font-medium"></div>
+
+                        <form id="landing-contact-form" class="space-y-6">
+                            <div>
+                                <label for="contact-name" class="block text-[15px] font-bold text-[#333333] mb-2">Full
+                                    Name</label>
+                                <input type="text" id="contact-name" name="full_name" required
+                                    class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#007E85] focus:border-transparent transition-all font-medium placeholder-gray-400"
+                                    placeholder="e.g. Stacy Michael">
+                            </div>
+
+                            <div>
+                                <label for="contact-email" class="block text-[15px] font-bold text-[#333333] mb-2">Email
+                                    Address</label>
+                                <input type="email" id="contact-email" name="email" required
+                                    class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#007E85] focus:border-transparent transition-all font-medium placeholder-gray-400"
+                                    placeholder="e.g. stacy@example.com">
+                            </div>
+
+                            <div>
+                                <label for="contact-message"
+                                    class="block text-[15px] font-bold text-[#333333] mb-2">Your Feedback</label>
+                                <textarea id="contact-message" name="feedback" required rows="4"
+                                    class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#007E85] focus:border-transparent transition-all font-medium placeholder-gray-400 resize-none"
+                                    placeholder="Tell us about your experience or share your feedback..."></textarea>
+                            </div>
+
+                            <button type="submit"
+                                class="w-full py-4 bg-gradient-to-r from-[#007E85] to-[#6EAB36] hover:to-[#5c912c] text-white font-bold text-[18px] rounded-xl btn-glow flex items-center justify-center gap-3 transition-all">
+                                Submit Feedback
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                </svg>
+                            </button>
+                        </form>
                     </div>
-                    <h3 class="font-black text-[24px] text-[#333333] mb-3">Visit Us</h3>
-                    <p class="text-[18px] text-[#666666] font-medium leading-relaxed">123 Medical Plaza
-                        Ave<br />Healthcare City, HC 12345</p>
                 </div>
             </div>
         </div>
@@ -1000,6 +1221,143 @@
     <script src="./src/js/scroll-animations.js"></script>
     <script>window.HC_CHAT_ENDPOINT = '/Doctor-Appointment-Booking-System/api/ai_chat_public.php';</script>
     <script src="./src/js/chat-widget.js"></script>
+    <script>
+        document.getElementById('landing-contact-form')?.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            const originalBtnHtml = btn.innerHTML;
+
+            // Show loading state
+            btn.disabled = true;
+            btn.innerHTML = `
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Submitting...
+            `;
+
+            const name = document.getElementById('contact-name').value;
+            const email = document.getElementById('contact-email').value;
+            const feedback = document.getElementById('contact-message').value;
+
+            const alertContainer = document.getElementById('form-alert-container');
+            if (alertContainer) {
+                alertContainer.innerHTML = '';
+                alertContainer.className = 'hidden mb-6 p-4 rounded-xl font-medium';
+            }
+
+            fetch('./api/submit_contact.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    full_name: name,
+                    email: email,
+                    feedback: feedback
+                })
+            })
+                .then(res => res.json().then(data => ({ status: res.status, body: data })))
+                .then(res => {
+                    if (res.status === 200 && res.body.status === 'success') {
+                        if (alertContainer) {
+                            alertContainer.innerHTML = '';
+                            alertContainer.className = 'hidden mb-6 p-4 rounded-xl font-medium';
+                        }
+                        showFeedbackModal(res.body.message || 'Thank you for your feedback! Your message has been submitted successfully.');
+                        document.getElementById('landing-contact-form').reset();
+                    } else {
+                        throw new Error(res.body.message || 'An error occurred during submission.');
+                    }
+                })
+                .catch(err => {
+                    if (alertContainer) {
+                        alertContainer.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 flex-shrink-0 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>${err.message}</span>
+                        </div>
+                    `;
+                        alertContainer.className = 'block mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-sm font-semibold text-red-800 animate-fade-in';
+                    }
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = originalBtnHtml;
+                });
+        });
+
+        // Feedback Modal Controls
+        function showFeedbackModal(message) {
+            const modal = document.getElementById('feedbackSuccessModal');
+            const modalContent = document.getElementById('feedbackSuccessModalContent');
+            const msgEl = document.getElementById('feedbackSuccessModalMessage');
+            if (msgEl) msgEl.textContent = message;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            setTimeout(() => {
+                modalContent.classList.remove('scale-90', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeFeedbackModal() {
+            const modal = document.getElementById('feedbackSuccessModal');
+            const modalContent = document.getElementById('feedbackSuccessModalContent');
+
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-90', 'opacity-0');
+
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 300);
+        }
+    </script>
+
+    <!-- Feedback Success Modal -->
+    <div id="feedbackSuccessModal"
+        class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md transform scale-90 opacity-0 transition-all duration-300 relative p-8 flex flex-col items-center text-center border border-gray-100"
+            id="feedbackSuccessModalContent">
+            <!-- Close (Cross) button -->
+            <button onclick="closeFeedbackModal()"
+                class="absolute top-6 right-6 p-2 text-gray-400 hover:text-[#007E85] rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="Close modal">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </button>
+
+            <!-- Success Icon -->
+            <div
+                class="w-20 h-20 bg-[#eef7e8] text-[#6EAB36] rounded-full flex items-center justify-center mb-6 shadow-inner animate-pulse">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+
+            <!-- Title -->
+            <h3 class="text-[28px] font-black text-[#007E85] tracking-tight mb-3">Feedback Received!</h3>
+
+            <!-- Message -->
+            <p class="text-[16px] text-[#666666] font-medium leading-relaxed mb-8" id="feedbackSuccessModalMessage">
+                Your message has been submitted successfully.
+            </p>
+
+            <!-- Close Button -->
+            <button onclick="closeFeedbackModal()"
+                class="w-full bg-[#007E85] hover:bg-[#005f64] text-white py-4 rounded-2xl font-bold text-[16px] transition-all shadow-md hover:shadow-lg">
+                Awesome
+            </button>
+        </div>
+    </div>
 </body>
 
 </html>

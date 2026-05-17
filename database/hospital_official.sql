@@ -15637,6 +15637,20 @@ ALTER TABLE `patient_profiles`
 --
 ALTER TABLE `treatment_tickets`
   ADD CONSTRAINT `treatment_tickets_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `treatment_categories` (`id`);
+
+--
+-- Table structure for table `contact_messages`
+--
+
+CREATE TABLE IF NOT EXISTS `contact_messages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `full_name` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `message` text NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
