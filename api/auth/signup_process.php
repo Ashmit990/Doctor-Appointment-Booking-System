@@ -66,8 +66,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $specialization = $_POST['specialization'] ?? '';
         $bio = $_POST['bio'] ?? '';
 
+        // Construct JSON structure for doctor_approvals bio field
+        $bio_data = [
+            'phone'            => $phone,
+            'age'              => $age,
+            'medical_id'       => $medical_id,
+            'specialization'   => $specialization,
+            'bio'              => $bio,
+            'experience'       => '0',
+            'qualification'    => '-',
+            'consultation_fee' => '0.00'
+        ];
+        $bio_json = json_encode($bio_data);
+
         $stmt = $conn->prepare("INSERT INTO doctor_approvals (full_name, email, password_hash, specialization, bio, status) VALUES (?, ?, ?, ?, ?, 'Pending')");
-        $stmt->bind_param("sssss", $full_name, $email, $password_hash, $specialization, $bio);
+        $stmt->bind_param("sssss", $full_name, $email, $password_hash, $specialization, $bio_json);
         
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Doctor registration submitted for approval.']);

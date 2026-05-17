@@ -110,9 +110,9 @@ if ($method === 'POST') {
             // 2. Parse bio to get individual fields
             $parsed        = parseBio($data['bio']);
             $phone         = $parsed['phone'];
-            $age           = $parsed['age'] !== '' ? (int)$parsed['age'] : null;
+            $age           = ($parsed['age'] !== '' && $parsed['age'] !== '-') ? (int)$parsed['age'] : null;
             $medical_id    = $parsed['medical_id'];
-            $experience    = $parsed['experience'] !== '' ? (int)$parsed['experience'] : null;
+            $experience    = ($parsed['experience'] !== '' && $parsed['experience'] !== '-') ? (int)$parsed['experience'] : null;
             $qualification = $parsed['qualification'];
             $bio_text      = $parsed['bio_text'];
 
