@@ -12,15 +12,17 @@
     />
     <script>
       // Load CSRF token on page load
-      window.addEventListener('DOMContentLoaded', function() {
-        fetch('../../api/auth/get_csrf_token.php')
-          .then(response => response.json())
-          .then(data => {
+      window.addEventListener("DOMContentLoaded", function () {
+        fetch("../../api/auth/get_csrf_token.php")
+          .then((response) => response.json())
+          .then((data) => {
             if (data.token) {
-              document.querySelector('meta[name="_csrf_token"]').setAttribute('content', data.token);
+              document
+                .querySelector('meta[name="_csrf_token"]')
+                .setAttribute("content", data.token);
             }
           })
-          .catch(error => console.error('Failed to load CSRF token:', error));
+          .catch((error) => console.error("Failed to load CSRF token:", error));
       });
     </script>
     <style>
@@ -32,10 +34,22 @@
       }
 
       .organic-bg {
-        background: linear-gradient(135deg, #007e85 0%, #005f65 100%);
-        clip-path: path(
-          "M1000 0 L1000 1000 L300 1000 C150 1000 150 800 250 700 C400 550 50 600 50 350 C50 150 400 150 450 0 Z"
-        );
+        background: transparent;
+      }
+      .organic-bg svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .right-panel-image {
+        position: absolute;
+        bottom: -8%;
+        right: -5%;
+        height: 120%;
+        width: auto;
+        object-fit: contain;
+        transform: scale(1.05);
+        pointer-events: none;
       }
 
       .glass-card {
@@ -547,7 +561,10 @@
                   type="email"
                   class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
                   placeholder=" "
-                  oninput="this.value = this.value.toLowerCase(); clearErr('signupEmail')"
+                  oninput="
+                    this.value = this.value.toLowerCase();
+                    clearErr('signupEmail');
+                  "
                 />
                 <p
                   id="signupEmail_err"
@@ -766,6 +783,7 @@
                     type="password"
                     class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none pr-10"
                     oninput="
+                      this.value = this.value.replace(/\s/g, '');
                       updateStrength();
                       clearErr('signupPassword');
                     "
@@ -827,7 +845,10 @@
                     id="signupConfirmPassword"
                     type="password"
                     class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none pr-10"
-                    oninput="clearErr('signupConfirmPassword')"
+                    oninput="
+                      this.value = this.value.replace(/\s/g, '');
+                      clearErr('signupConfirmPassword');
+                    "
                   />
                   <button
                     type="button"
@@ -902,7 +923,30 @@
       <div
         class="hidden lg:block w-[55%] relative overflow-hidden bg-[#F8FAFB]"
       >
-        <div class="absolute inset-0 organic-bg z-0 shadow-2xl"></div>
+        <div class="absolute inset-0 organic-bg z-0 shadow-2xl">
+          <svg
+            viewBox="0 0 1000 1000"
+            preserveAspectRatio="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <linearGradient
+                id="organicBgGradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
+                <stop offset="0%" stop-color="#007e85" />
+                <stop offset="100%" stop-color="#005f65" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M1000 0 L1000 1000 L300 1000 C150 1000 150 800 250 700 C400 550 50 600 50 350 C50 150 400 150 450 0 Z"
+              fill="url(#organicBgGradient)"
+            />
+          </svg>
+        </div>
         <div
           class="relative h-full w-full flex items-center justify-center z-10 p-12"
           data-scroll-animation="animate-slide-right"
@@ -911,7 +955,7 @@
           <img
             src="../../src/assets/photo.png"
             alt="Healthcare Professional"
-            class="h-[300%] object-contain transform scale-110 mt-10"
+            class="right-panel-image object-contain"
             onerror="this.style.display = 'none'"
           />
         </div>
@@ -1378,6 +1422,7 @@
         },
         password(v) {
           if (!v) return "Password is required.";
+          if (/\s/.test(v)) return "Password cannot contain spaces.";
           if (v.length < 8) return "Password must be at least 8 characters.";
           if (!/[A-Z]/.test(v))
             return "Password must include an uppercase letter.";
@@ -1484,13 +1529,14 @@
         formData.append("age", age);
         formData.append("role", selectedRole);
         formData.append("password", password);
-        
+
         // Add CSRF token
-        const csrfToken = document.querySelector('meta[name="_csrf_token"]')?.content || '';
+        const csrfToken =
+          document.querySelector('meta[name="_csrf_token"]')?.content || "";
         if (csrfToken) {
           formData.append("_csrf_token", csrfToken);
         }
-        
+
         if (isDoctor) {
           formData.append("medical_id", medicalId);
           formData.append("bio", bio);
