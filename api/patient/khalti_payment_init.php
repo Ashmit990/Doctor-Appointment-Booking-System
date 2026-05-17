@@ -146,35 +146,19 @@ try {
     $bookSlot->execute();
     $bookSlot->close();
 
-    // Get doctor fee from treatment_categories based on doctor's specialization
-    // First, get doctor's specialization
-    $docSpecStmt = $conn->prepare("
-        SELECT dp.specialization 
+    // Get doctor fee and specialization directly from doctor_profiles
+    $docProfileStmt = $conn->prepare("
+        SELECT dp.specialization, dp.consultation_fee 
         FROM doctor_profiles dp
         WHERE dp.user_id = ? LIMIT 1
     ");
-    $docSpecStmt->bind_param('s', $doctor_id);
-    $docSpecStmt->execute();
-    $docSpecData = $docSpecStmt->get_result()->fetch_assoc();
-    $docSpecStmt->close();
+    $docProfileStmt->bind_param('s', $doctor_id);
+    $docProfileStmt->execute();
+    $docProfileData = $docProfileStmt->get_result()->fetch_assoc();
+    $docProfileStmt->close();
     
-    $specialization = $docSpecData['specialization'] ?? 'General Consultation';
-    
-    // Try exact match first, then try LIKE for flexible matching
-    $treatStmt = $conn->prepare("
-        SELECT estimated_cost 
-        FROM treatment_categories 
-        WHERE LOWER(name) = LOWER(?) 
-           OR LOWER(name) LIKE CONCAT('%', LOWER(?), '%')
-           OR LOWER(?) LIKE CONCAT('%', SUBSTRING(LOWER(name), 1, 5), '%')
-        LIMIT 1
-    ");
-    $treatStmt->bind_param('sss', $specialization, $specialization, $specialization);
-    $treatStmt->execute();
-    $treatData = $treatStmt->get_result()->fetch_assoc();
-    $treatStmt->close();
-    
-    $fee = (int)($treatData['estimated_cost'] ?? 500);
+    $specialization = $docProfileData['specialization'] ?? 'General Consultation';
+    $fee = isset($docProfileData['consultation_fee']) ? (float)$docProfileData['consultation_fee'] : 500.00;
     
     // Log for debugging
     error_log("Khalti Payment Init: doctor_id={$doctor_id}, specialization={$specialization}, fee={$fee}");

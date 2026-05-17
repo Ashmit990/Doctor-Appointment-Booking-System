@@ -38,19 +38,7 @@ $sql = "
         a.created_at,
         u.full_name AS doctor_name,
         dp.specialization,
-        COALESCE(
-            (SELECT tc.estimated_cost 
-             FROM treatment_categories tc 
-             WHERE LOWER(tc.name) = LOWER(dp.specialization) 
-             OR LOWER(tc.name) LIKE CONCAT('%', LOWER(dp.specialization), '%')
-             OR LOWER(dp.specialization) LIKE CONCAT('%', SUBSTRING(LOWER(tc.name), 1, 5), '%')
-             LIMIT 1),
-            (SELECT tc.estimated_cost 
-             FROM treatment_categories tc 
-             WHERE tc.name = 'General Consultation' 
-             LIMIT 1),
-            500
-        ) AS consultation_fee,
+        COALESCE(dp.consultation_fee, 500) AS consultation_fee,
         tt.ticket_number,
         tc.name AS ticket_category,
         tt.cost AS ticket_cost,
