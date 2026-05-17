@@ -350,7 +350,7 @@
           <div class="bg-primary/5 border border-primary/10 rounded-xl p-4 mb-8 flex items-center gap-3">
              <i data-lucide="info" class="w-5 h-5 primary-color"></i>
              <p class="text-gray-700 font-medium">
-               Your net income is <span id="netIncomeText" class="primary-color font-bold">Rs. 0.00</span> 
+               Your average income per appointment is <span id="netIncomeText" class="primary-color font-bold">Rs. 0.00</span> 
                <span class="text-xs text-gray-500 font-normal ml-1">(after 10% platform fee deduction)</span>
              </p>
           </div>
@@ -432,6 +432,7 @@
         // 10% platform fee deduction
         const platformFeePercent = 10; 
         const totalIncome = totalGross * (1 - platformFeePercent / 100);
+        const avgIncome = totalCount > 0 ? (totalIncome / totalCount) : 0;
 
         document.getElementById("totalEarnings").textContent =
           `Rs. ${totalGross.toFixed(2)}`;
@@ -439,7 +440,7 @@
         document.getElementById("completedCount").textContent = completedCount;
         
         document.getElementById("netIncomeText").textContent = 
-          `Rs. ${totalIncome.toFixed(2)}`;
+          `Rs. ${avgIncome.toFixed(2)}`;
 
         renderTable();
         lucide.createIcons();
