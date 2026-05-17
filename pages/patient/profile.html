@@ -553,6 +553,7 @@
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">Age <span class="text-red-500">*</span></label>
                       <input type="number" id="editAge" min="1" max="80" required
+                        onwheel="this.blur()"
                         class="w-full border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#0d7377]/40 focus:border-[#0d7377] transition-all" />
                       <p class="text-xs text-red-500 hidden mt-1" id="ageError">Age must be between 1 and 80</p>
                     </div>
