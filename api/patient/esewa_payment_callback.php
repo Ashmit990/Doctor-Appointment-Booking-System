@@ -1,31 +1,27 @@
 <?php
 /**
- * Khalti Payment Callback Handler
- * Receives callback from Khalti after user completes payment
- * Verifies transaction via lookup API and creates appointment
- * Reference: https://docs.khalti.com/khalti-epayment/
+ * eSewa Payment Callback Handler
+ * Receives callback from eSewa after user completes payment
+ * Verifies transaction via Base64 decoded data and signature checks
+ * Reference: eSewa ePay v2 developer guide
  */
 
-// Set security headers BEFORE any output
 header('Content-Type: text/html; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 
-// Allow CORS for Khalti redirect
+// Allow CORS
 if (isset($_SERVER['HTTP_ORIGIN'])) {
     $origin = $_SERVER['HTTP_ORIGIN'];
-    // Allow Khalti domains
-    if (strpos($origin, 'khalti.com') !== false || strpos($origin, 'localhost') !== false) {
+    if (strpos($origin, 'esewa.com.np') !== false || strpos($origin, 'localhost') !== false) {
         header('Access-Control-Allow-Origin: ' . $origin);
         header('Access-Control-Allow-Credentials: true');
     }
 }
 
-// Load environment and database WITHOUT session check (callback from Khalti is public)
 require_once __DIR__ . '/payment_helpers.php';
 require_once __DIR__ . '/../config/db.php';
 
-// Check database connection
 if (!isset($conn) || $conn->connect_error) {
     http_response_code(500);
     echo '<h1>Database Error</h1><p>Unable to connect to database</p>';
@@ -34,27 +30,22 @@ if (!isset($conn) || $conn->connect_error) {
 
 ensure_appointment_payments_table($conn);
 
-// Extract Khalti callback parameters (GET request from Khalti redirect)
-$pidx = trim($_GET['pidx'] ?? '');
-$status = trim($_GET['status'] ?? '');
-$transaction_id = trim($_GET['transaction_id'] ?? $_GET['txnId'] ?? $_GET['tidx'] ?? '');
-$amount = isset($_GET['amount']) ? (int)$_GET['amount'] : 0;
+$payment_id = 0;
+$encoded_data = trim($_GET['data'] ?? '');
 
 // Response renderer
-$render_response = function($success, $title, $message, $pidx = '', $txn_id = '', $appointment_id = null) {
+$render_response = function($success, $title, $message, $uuid = '', $txn_id = '', $appointment_id = null) {
     $bg = $success ? '#d1fae5' : '#fee2e2';
     $color = $success ? '#047857' : '#dc2626';
     $icon = $success ? '✓' : '✕';
-    $pidx_short = $pidx ? substr($pidx, 0, 16) . '...' : '—';
+    $uuid_short = $uuid ? substr($uuid, 0, 16) . '...' : '—';
     $txn_short = $txn_id ? substr($txn_id, 0, 16) . '...' : '—';
     $status_msg = $success ? 'Notifying dashboard... This tab will close in 5 seconds.' : 'Please close this window and return to the dashboard.';
     
-    // Receipt button only on success
     $receipt_btn = ($success && $appointment_id) 
         ? "<button onclick=\"window.open('../../pages/patient/receipt.html?appointment_id={$appointment_id}', '_blank', 'width=800,height=900')\" style=\"background:#10b981;box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.39);\">View Receipt</button>"
         : "";
 
-    // Prepare safe JS values
     $js_status_val = $success ? 'Completed' : 'Failed';
     $js_success_val = $success ? 'true' : 'false';
     $js_title = json_encode($title);
@@ -95,7 +86,7 @@ $render_response = function($success, $title, $message, $pidx = '', $txn_id = ''
             <div class="details">
                 <div class="detail-row">
                     <span class="detail-label">Payment ID:</span>
-                    <span class="detail-value">$pidx_short</span>
+                    <span class="detail-value">$uuid_short</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Transaction:</span>
@@ -160,57 +151,75 @@ $render_response = function($success, $title, $message, $pidx = '', $txn_id = ''
 HTML;
 };
 
-// Validate pidx (required)
-if (!$pidx) {
+// Validate request
+if (!$encoded_data) {
     http_response_code(400);
-    $render_response(false, 'Payment Failed', 'Missing payment reference ID from Khalti');
+    $render_response(false, 'Payment Failed', 'Missing parameter requirements from eSewa');
     exit;
 }
 
-// Load config
-$config = khalti_payment_config();
+// Decode data
+$decoded_json = base64_decode($encoded_data);
+if (!$decoded_json) {
+    http_response_code(400);
+    $render_response(false, 'Payment Failed', 'Invalid callback payload from eSewa');
+    exit;
+}
 
-// Find payment record in database
+$decoded_data = json_decode($decoded_json, true);
+if (json_last_error() !== JSON_ERROR_NONE) {
+    http_response_code(400);
+    $render_response(false, 'Payment Failed', 'Invalid JSON payload from eSewa');
+    exit;
+}
+
+$txn_uuid = $decoded_data['transaction_uuid'] ?? '';
+
+// Find payment record in database by transaction UUID (stored in 'pidx' column)
 $paymentStmt = $conn->prepare("
-    SELECT payment_id, patient_id, doctor_id, avail_id, amount_paisa, amount_rupees, 
-           payment_status, booking_payload
-    FROM appointment_payments
+    SELECT * FROM appointment_payments
     WHERE pidx = ? AND payment_status IN ('Initiated', 'Pending')
     LIMIT 1
 ");
-$paymentStmt->bind_param('s', $pidx);
+$paymentStmt->bind_param('s', $txn_uuid);
 $paymentStmt->execute();
 $payment = $paymentStmt->get_result()->fetch_assoc();
 $paymentStmt->close();
 
 if (!$payment) {
     http_response_code(404);
-    $render_response(false, 'Payment Not Found', 'This payment does not exist in our system');
+    $render_response(false, 'Payment Not Found', 'This payment does not exist in our system or has already been processed');
     exit;
 }
 
-// **IMPORTANT**: Verify payment with Khalti lookup API (per Khalti docs)
-// This is mandatory - do not trust callback parameters alone
-$lookup_response = khalti_post_json(
-    $config['api_base'] . '/epayment/lookup/',
-    ['pidx' => $pidx],
-    $config['secret_key']
-);
+$payment_id = (int)$payment['payment_id'];
 
-if (!($lookup_response['success'] ?? $lookup_response['ok'] ?? false)) {
-    http_response_code(500);
-    $render_response(false, 'Verification Failed', 'Could not verify payment with Khalti. Please contact support.');
+// Verify eSewa Signature
+if (!esewa_verify_signature($decoded_data)) {
+    http_response_code(400);
+    $render_response(false, 'Verification Failed', 'Signature validation failed. Transaction untrusted.');
     exit;
 }
 
-$khalti_data = $lookup_response['data'] ?? [];
-$verified_status = $khalti_data['status'] ?? 'Unknown';
-$verified_amount = (int)($khalti_data['total_amount'] ?? 0);
-$verified_txn_id = $khalti_data['transaction_id'] ?? '';
+// Verify transaction details match database record
+$txn_uuid = $decoded_data['transaction_uuid'] ?? '';
+$total_amount = (float)($decoded_data['total_amount'] ?? 0);
+$status = $decoded_data['status'] ?? '';
+$transaction_code = $decoded_data['transaction_code'] ?? '';
 
-// Check if payment status is Completed
-// Per Khalti docs: "Only the status with Completed must be treated as success"
-if ($verified_status !== 'Completed') {
+if ($txn_uuid !== $payment['pidx']) {
+    http_response_code(400);
+    $render_response(false, 'Verification Failed', 'Transaction UUID mismatch.');
+    exit;
+}
+
+if (number_format($total_amount, 2, '.', '') !== number_format((float)$payment['amount_rupees'], 2, '.', '')) {
+    http_response_code(400);
+    $render_response(false, 'Verification Failed', 'Amount mismatch.');
+    exit;
+}
+
+if ($status !== 'COMPLETE') {
     $conn->begin_transaction();
     try {
         // Release booked slot
@@ -220,18 +229,12 @@ if ($verified_status !== 'Completed') {
         $releaseStmt->close();
 
         // Mark payment as failed
-        $map_status = match($verified_status) {
-            'Expired' => 'Expired',
-            'User canceled' => 'Cancelled',
-            default => 'Failed'
-        };
-
         $updateStmt = $conn->prepare("
             UPDATE appointment_payments 
-            SET payment_status = ?, callback_status = ?, transaction_id = ?, updated_at = NOW()
+            SET payment_status = 'Failed', callback_status = ?, transaction_id = ?, updated_at = NOW()
             WHERE payment_id = ?
         ");
-        $updateStmt->bind_param('sssi', $map_status, $verified_status, $verified_txn_id, $payment['payment_id']);
+        $updateStmt->bind_param('ssi', $status, $transaction_code, $payment['payment_id']);
         $updateStmt->execute();
         $updateStmt->close();
 
@@ -241,31 +244,29 @@ if ($verified_status !== 'Completed') {
     }
 
     http_response_code(400);
-    $render_response(false, 'Payment ' . $verified_status, 'Transaction could not be completed. Please try again.');
-    exit;
-}
-
-// Verify amount matches expected amount (security check)
-if ($verified_amount !== (int)$payment['amount_paisa']) {
-    http_response_code(400);
-    $render_response(false, 'Amount Mismatch', 'Payment amount does not match order. Contact support.');
+    $render_response(false, 'Payment Failed', 'Transaction could not be completed. Status: ' . $status);
     exit;
 }
 
 // Payment verified successfully - create appointment and mark payment as complete
-$result = complete_appointment_payment($conn, $payment['payment_id'], $khalti_data);
+$gateway_data = [
+    'status' => 'Completed',
+    'transaction_id' => $transaction_code
+];
+
+$result = complete_appointment_payment($conn, $payment['payment_id'], $gateway_data);
 
 if ($result['success']) {
     http_response_code(200);
     $render_response(true, 'Payment Successful',
         'Your appointment has been booked successfully! Check your dashboard for details.',
-        $pidx, $verified_txn_id, $result['appointment_id']);
+        $txn_uuid, $transaction_code, $result['appointment_id']);
 } else {
     http_response_code(500);
     $render_response(false, 'Booking Failed', 
         'Payment verified but appointment creation failed: ' . $result['message'],
-        $pidx, $verified_txn_id);
+        $txn_uuid, $transaction_code);
 }
-exit;
 
 $conn->close();
+exit;

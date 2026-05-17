@@ -978,7 +978,7 @@
           console.log('Payment result received on homepage:', { status, data: event.data });
           if (status === 'completed') {
             closeBookingModal();
-            showSuccessToast("Payment successful ✓", event.data.message || "Your appointment has been booked successfully via Khalti.");
+            showSuccessToast("Payment successful ✓", event.data.message || "Your appointment has been booked successfully via eSewa.");
             try {
               const home = await loadHomeData();
               applyHomeToUI(home);

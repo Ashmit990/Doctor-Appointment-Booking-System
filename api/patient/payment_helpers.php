@@ -38,27 +38,97 @@ if (!function_exists('patient_app_base_url')) {
     }
 }
 
-if (!function_exists('khalti_payment_config')) {
-    function khalti_payment_config(): array
+if (!function_exists('esewa_payment_config')) {
+    function esewa_payment_config(): array
     {
-        $apiBase = rtrim(getenv('KHALTI_API_BASE') ?: 'https://dev.khalti.com/api/v2', '/');
-        $secretKey = trim(getenv('KHALTI_SECRET_KEY') ?: '');
-        $websiteUrl = rtrim(getenv('KHALTI_WEBSITE_URL') ?: patient_app_base_url(), '/');
-        $returnUrl = trim(getenv('KHALTI_RETURN_URL') ?: patient_app_base_url() . '/api/patient/khalti_payment_callback.php');
-
-        // Fix for local testing: Browsers block redirects from public sites (Khalti) to local networks (localhost/LAN).
-        // To prevent the scary "Connection Blocked" error page, we redirect back to Khalti's site for local testing.
-        // The actual payment verification is safely handled by the dashboard's background polling.
-        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-        if (preg_match('/localhost|127\.0\.0\.1|^192\.168\.|^10\.|^172\.(1[6-9]|2[0-9]|3[0-1])\./', $host)) {
-            $returnUrl = 'https://khalti.com/';
-        }
+        $apiBase = rtrim(getenv('ESEWA_API_BASE') ?: 'https://rc-epay.esewa.com.np/api/epay', '/');
+        $merchantCode = trim(getenv('ESEWA_MERCHANT_CODE') ?: 'EPAYTEST');
+        $secretKey = trim(getenv('ESEWA_SECRET_KEY') ?: '8gBm/:&EnhH.1/q');
+        $returnUrl = trim(getenv('ESEWA_RETURN_URL') ?: patient_app_base_url() . '/api/patient/esewa_payment_callback.php');
 
         return [
             'api_base' => $apiBase,
+            'merchant_code' => $merchantCode,
             'secret_key' => $secretKey,
-            'website_url' => $websiteUrl ?: patient_app_base_url(),
             'return_url' => $returnUrl,
+        ];
+    }
+}
+
+if (!function_exists('esewa_verify_signature')) {
+    function esewa_verify_signature(array $decoded_data): bool
+    {
+        $config = esewa_payment_config();
+        $secretKey = $config['secret_key'];
+        
+        $signature = $decoded_data['signature'] ?? '';
+        $signed_field_names = $decoded_data['signed_field_names'] ?? '';
+        
+        if (!$signature || !$signed_field_names) {
+            return false;
+        }
+        
+        $fields = explode(',', $signed_field_names);
+        $message_parts = [];
+        foreach ($fields as $field) {
+            $field = trim($field);
+            if (isset($decoded_data[$field])) {
+                $message_parts[] = "$field=" . $decoded_data[$field];
+            }
+        }
+        
+        $message = implode(',', $message_parts);
+        $generated_signature = base64_encode(hash_hmac('sha256', $message, $secretKey, true));
+        
+        return hash_equals($signature, $generated_signature);
+    }
+}
+
+if (!function_exists('esewa_get_status')) {
+    function esewa_get_status(string $transaction_uuid, float $total_amount): array
+    {
+        $config = esewa_payment_config();
+        
+        // eSewa status verification URL
+        $url = $config['api_base'] . '/transaction/status/?' . http_build_query([
+            'product_code' => $config['merchant_code'],
+            'total_amount' => number_format($total_amount, 2, '.', ''),
+            'transaction_uuid' => $transaction_uuid
+        ]);
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_CONNECTTIMEOUT => 10,
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        if ($response === false) {
+            return [
+                'success' => false,
+                'status' => 'Unknown',
+                'message' => $curlError ?: 'Unable to contact eSewa status endpoint'
+            ];
+        }
+
+        $decoded = json_decode($response, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return [
+                'success' => false,
+                'status' => 'Unknown',
+                'message' => 'Invalid JSON response from eSewa status endpoint'
+            ];
+        }
+
+        return [
+            'success' => isset($decoded['status']) && $decoded['status'] === 'COMPLETE',
+            'status' => $decoded['status'] ?? 'Unknown',
+            'data' => $decoded
         ];
     }
 }
@@ -68,9 +138,9 @@ if (!function_exists('complete_appointment_payment')) {
      * Centralized function to complete an appointment after successful payment.
      * Used by both callback and polling logic to ensure consistency.
      */
-    function complete_appointment_payment(mysqli $conn, int $payment_id, array $khalti_data): array {
-        $verified_status = $khalti_data['status'] ?? 'Unknown';
-        $verified_txn_id = $khalti_data['transaction_id'] ?? '';
+    function complete_appointment_payment(mysqli $conn, int $payment_id, array $gateway_data): array {
+        $verified_status = $gateway_data['status'] ?? 'Unknown';
+        $verified_txn_id = $gateway_data['transaction_id'] ?? '';
 
         // 1. Fetch the payment record
         $stmt = $conn->prepare("SELECT * FROM appointment_payments WHERE payment_id = ? FOR UPDATE");
@@ -88,7 +158,7 @@ if (!function_exists('complete_appointment_payment')) {
             $booking = json_decode($payment['booking_payload'] ?? '{}', true) ?? [];
             $appt_date = $booking['slot_date'] ?? date('Y-m-d');
             $appt_time = $booking['slot_time'] ?? '09:00:00';
-            $appt_reason = $booking['reason'] ?? 'Appointment booked via Khalti';
+            $appt_reason = $booking['reason'] ?? 'Appointment booked via eSewa';
             $room_num = 'Room A1';
 
             // 3. Double-check conflict (no same doctor on same day, no same time slot)
@@ -115,7 +185,6 @@ if (!function_exists('complete_appointment_payment')) {
             $appt_insert->close();
 
             // 5. Generate Ticket (Optional but standard in this app)
-            // (Logic extracted from existing scripts - improved for better matching)
             $astmt = $conn->prepare("SELECT specialization FROM doctor_profiles WHERE user_id = ?");
             $astmt->bind_param("s", $payment['doctor_id']);
             $astmt->execute();
@@ -147,7 +216,7 @@ if (!function_exists('complete_appointment_payment')) {
                 $cost = (float)$cat['estimated_cost'];
                 $cat_id = (int)$cat['id'];
                 $ins = $conn->prepare("INSERT INTO treatment_tickets (ticket_number, patient_id, appointment_id, category_id, cost, generated_at) VALUES (?, ?, ?, ?, ?, NOW())");
-                $ins->bind_param("ssiids", $ticket_number, $payment['patient_id'], $appointment_id, $cat_id, $cost, date('Y-m-d H:i:s'));
+                $ins->bind_param("ssiid", $ticket_number, $payment['patient_id'], $appointment_id, $cat_id, $cost);
                 $ins->execute();
                 $ins->close();
             }
@@ -168,7 +237,7 @@ if (!function_exists('complete_appointment_payment')) {
             }
 
             // 8. Notify Doctor
-            $notif = $conn->prepare("INSERT INTO notifications (user_id, title, message, created_at) VALUES (?, 'New Booking', 'A patient has booked an appointment via Khalti.', NOW())");
+            $notif = $conn->prepare("INSERT INTO notifications (user_id, title, message, created_at) VALUES (?, 'New Booking', 'A patient has booked an appointment via eSewa.', NOW())");
             $notif->bind_param('s', $payment['doctor_id']);
             @$notif->execute();
             $notif->close();
@@ -179,52 +248,6 @@ if (!function_exists('complete_appointment_payment')) {
             $conn->rollback();
             return ['success' => false, 'message' => $e->getMessage()];
         }
-    }
-}
-
-if (!function_exists('khalti_post_json')) {
-    function khalti_post_json(string $url, array $payload, string $secretKey): array
-    {
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_POST => true,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER => [
-                'Authorization: Key ' . $secretKey,
-                'Content-Type: application/json',
-            ],
-            CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_SLASHES),
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_CONNECTTIMEOUT => 10,
-        ]);
-
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curlError = curl_error($ch);
-        curl_close($ch);
-
-        if ($response === false) {
-            return [
-                'success' => false,
-                'ok' => false,
-                'http_code' => $httpCode,
-                'error' => $curlError ?: ($httpCode == 504 ? 'Khalti Gateway Timeout' : 'Unable to contact Khalti'),
-                'is_maintenance' => ($httpCode >= 500)
-            ];
-        }
-
-        $decoded = json_decode($response, true);
-        $is_success = ($httpCode >= 200 && $httpCode < 300);
-
-        return [
-            'success' => $is_success,
-            'ok' => $is_success,
-            'http_code' => $httpCode,
-            'data' => $decoded,
-            'raw' => $response,
-            'message' => $decoded['detail'] ?? $decoded['error_key'] ?? ($is_success ? null : 'Khalti request failed'),
-            'is_auth_error' => ($httpCode === 401)
-        ];
     }
 }
 
@@ -272,7 +295,33 @@ if (!function_exists('release_expired_payment_holds')) {
 if (!function_exists('ensure_appointment_payments_table')) {
     function ensure_appointment_payments_table(mysqli $conn): void
     {
-        $conn->query("\n            CREATE TABLE IF NOT EXISTS appointment_payments (\n              payment_id int(11) NOT NULL AUTO_INCREMENT,\n              appointment_id int(11) DEFAULT NULL,\n              patient_id varchar(20) NOT NULL,\n              doctor_id varchar(20) NOT NULL,\n              avail_id int(11) NOT NULL,\n              payment_method varchar(30) NOT NULL DEFAULT 'Khalti',\n              pidx varchar(100) DEFAULT NULL,\n              transaction_id varchar(100) DEFAULT NULL,\n              amount_paisa int(11) NOT NULL,\n              amount_rupees decimal(10,2) NOT NULL,\n              payment_status enum('Initiated','Pending','Completed','Failed','Expired','Cancelled','Refunded') NOT NULL DEFAULT 'Initiated',\n              booking_payload longtext NOT NULL,\n              gateway_response longtext DEFAULT NULL,\n              callback_status varchar(40) DEFAULT NULL,\n              expires_at timestamp NOT NULL,\n              verified_at timestamp NULL DEFAULT NULL,\n              created_at timestamp NOT NULL DEFAULT current_timestamp(),\n              updated_at timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),\n              PRIMARY KEY (payment_id),\n              UNIQUE KEY uq_appointment_payments_pidx (pidx),\n              KEY idx_appointment_payments_appointment_id (appointment_id),\n              KEY idx_appointment_payments_patient_id (patient_id),\n              KEY idx_appointment_payments_avail_id (avail_id)\n            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci\n        ");
+        $conn->query("
+            CREATE TABLE IF NOT EXISTS appointment_payments (
+              payment_id int(11) NOT NULL AUTO_INCREMENT,
+              appointment_id int(11) DEFAULT NULL,
+              patient_id varchar(20) NOT NULL,
+              doctor_id varchar(20) NOT NULL,
+              avail_id int(11) NOT NULL,
+              payment_method varchar(30) NOT NULL DEFAULT 'eSewa',
+              pidx varchar(100) DEFAULT NULL,
+              transaction_id varchar(100) DEFAULT NULL,
+              amount_paisa int(11) NOT NULL,
+              amount_rupees decimal(10,2) NOT NULL,
+              payment_status enum('Initiated','Pending','Completed','Failed','Expired','Cancelled','Refunded') NOT NULL DEFAULT 'Initiated',
+              booking_payload longtext NOT NULL,
+              gateway_response longtext DEFAULT NULL,
+              callback_status varchar(40) DEFAULT NULL,
+              expires_at timestamp NOT NULL,
+              verified_at timestamp NULL DEFAULT NULL,
+              created_at timestamp NOT NULL DEFAULT current_timestamp(),
+              updated_at timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+              PRIMARY KEY (payment_id),
+              UNIQUE KEY uq_appointment_payments_pidx (pidx),
+              KEY idx_appointment_payments_appointment_id (appointment_id),
+              KEY idx_appointment_payments_patient_id (patient_id),
+              KEY idx_appointment_payments_avail_id (avail_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+        ");
     }
 }
 

@@ -38,7 +38,7 @@ function updatePrice() {
 
 function getSelectedPaymentMethod() {
   const checked = document.querySelector('input[name="paymentMethod"]:checked');
-  return checked ? checked.value : "khalti";
+  return checked ? checked.value : "esewa";
 }
 
 function setPaymentStatusMessage(message, variant = "info") {
@@ -141,7 +141,7 @@ async function getSameDayBookingConflict(dateStr, timeStr, doctorId, excludeAppo
   }
 }
 
-async function startKhaltiPayment() {
+async function startEsewaPayment() {
   if (!pendingBookingRequest) {
     setPaymentStatusMessage(
       "No booking data found. Please submit the form again.",
@@ -153,16 +153,16 @@ async function startKhaltiPayment() {
   const proceedBtn = document.getElementById("proceedPaymentBtn");
   if (proceedBtn) {
     proceedBtn.disabled = true;
-    proceedBtn.textContent = "Redirecting to Khalti...";
+    proceedBtn.textContent = "Redirecting to eSewa...";
   }
 
   setPaymentStatusMessage("Creating a secure payment request...", "info");
 
   // Open the new tab IMMEDIATELY to bypass popup blockers (user activation context)
-  const khaltiWindow = window.open('about:blank', '_blank');
+  const esewaWindow = window.open('about:blank', '_blank');
 
   try {
-    const r = await fetch(`${API_BASE}/patient/khalti_payment_init.php`, {
+    const r = await fetch(`${API_BASE}/patient/esewa_payment_init.php`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -174,7 +174,7 @@ async function startKhaltiPayment() {
     });
 
     if (r.status === 504 || r.status === 502) {
-      throw new Error("Khalti server timeout (Maintenance). Please try again in a moment.");
+      throw new Error("eSewa server timeout (Maintenance). Please try again in a moment.");
     }
 
     if (!r.ok) {
@@ -185,7 +185,7 @@ async function startKhaltiPayment() {
 
     if (j.status !== "success") {
       setPaymentStatusMessage(
-        j.message || "Could not start Khalti payment.",
+        j.message || "Could not start eSewa payment.",
         "error",
       );
       if (
@@ -195,43 +195,42 @@ async function startKhaltiPayment() {
       }
       if (proceedBtn) {
         proceedBtn.disabled = false;
-        proceedBtn.textContent = "Continue to Khalti";
+        proceedBtn.textContent = "Continue to eSewa";
       }
-      if (khaltiWindow) khaltiWindow.close();
+      if (esewaWindow) esewaWindow.close();
       return;
     }
 
     setPaymentStatusMessage(
-      "Redirecting to Khalti for payment verification...",
+      "Redirecting to eSewa for payment verification...",
       "success",
     );
 
-    // Redirect the already-opened new tab to Khalti
-    if (khaltiWindow) {
-      khaltiWindow.location.href = j.payment_url;
+    // Redirect the already-opened new tab to eSewa
+    if (esewaWindow) {
+      esewaWindow.location.href = j.payment_url;
     } else {
       window.open(j.payment_url, "_blank");
     }
 
-    if (!khaltiWindow) {
+    if (!esewaWindow) {
       setPaymentStatusMessage(
         "Could not open payment tab. Please check popup blocker.",
         "error",
       );
       if (proceedBtn) {
         proceedBtn.disabled = false;
-        proceedBtn.textContent = "Continue to Khalti";
+        proceedBtn.textContent = "Continue to eSewa";
       }
       return;
     }
 
     // Poll to check if payment was completed
-    // Callback page will postMessage back to us, but we also check periodically
     let checkCount = 0;
     const checkInterval = setInterval(async () => {
       checkCount++;
       // Check if payment tab was closed by user
-      if (khaltiWindow.closed) {
+      if (esewaWindow.closed) {
         clearInterval(checkInterval);
         setPaymentStatusMessage(
           "Payment tab closed. Checking payment status...",
@@ -246,7 +245,7 @@ async function startKhaltiPayment() {
             },
             "*",
           );
-        }, 2000); // Increased delay to 2 seconds for reliability
+        }, 2000);
         return;
       }
       // Stop checking after 5 minutes
@@ -262,7 +261,7 @@ async function startKhaltiPayment() {
     );
     if (proceedBtn) {
       proceedBtn.disabled = false;
-      proceedBtn.textContent = "Continue to Khalti";
+      proceedBtn.textContent = "Continue to eSewa";
     }
   }
 }
@@ -483,7 +482,7 @@ window.addEventListener("message", (event) => {
     }
   }
 
-  // Forward payment result from Khalti callback to parent dashboard
+  // Forward payment result from eSewa callback to parent dashboard
   if (event.data.type === "payment-result") {
     console.log(
       "Payment result received in booking iframe, forwarding to parent:",
@@ -520,11 +519,11 @@ backToFormBtn?.addEventListener("click", () => {
   pendingBookingRequest = null;
   closePaymentPanel();
   setPaymentStatusMessage(
-    "The payment will be confirmed by Khalti before the appointment is created.",
+    "The payment will be confirmed by eSewa before the appointment is created.",
   );
 });
 
-proceedPaymentBtn?.addEventListener("click", startKhaltiPayment);
+proceedPaymentBtn?.addEventListener("click", startEsewaPayment);
 
 document.getElementById("specialization").addEventListener("change", () => {
   onSpecializationChange();

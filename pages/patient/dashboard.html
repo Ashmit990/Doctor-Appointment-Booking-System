@@ -880,14 +880,14 @@
   <div id="receiptModal"
     class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[110] p-4 backdrop-blur-sm">
     <div id="receiptModalInner"
-      class="bg-white w-full max-w-2xl max-h-[90vh] rounded-[32px] shadow-2xl relative overflow-hidden transform scale-95 transition-all duration-300">
+      class="bg-white w-full max-w-2xl h-[85vh] rounded-[32px] shadow-2xl relative overflow-hidden transform scale-95 transition-all duration-300">
       <button onclick="closeReceiptModal()"
         class="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center text-slate-500 hover:text-slate-800 transition-all hover:scale-110">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
-      <div class="overflow-y-auto max-h-[90vh]">
-        <iframe id="receiptModalIframe" src="" class="w-full border-0 block min-h-[600px]" scrolling="yes"></iframe>
+      <div class="w-full h-full">
+        <iframe id="receiptModalIframe" src="" class="w-full h-full border-0 block" scrolling="yes"></iframe>
       </div>
     </div>
   </div>
@@ -900,9 +900,11 @@
     function fitBookingIframe(iframe) {
       try {
         const doc = iframe.contentDocument || iframe.contentWindow.document;
+        // Temporarily shrink iframe to force a layout reflow and avoid counting stretched height
+        iframe.style.height = "100px";
         const height =
           doc.documentElement.scrollHeight || doc.body.scrollHeight;
-        iframe.style.height = height + "px";
+        iframe.style.height = (height > 100 ? height + 20 : 340) + "px";
       } catch (e) {
         iframe.style.height = "340px";
       }
@@ -911,9 +913,11 @@
     function fitModalIframe(iframe) {
       try {
         const doc = iframe.contentDocument || iframe.contentWindow.document;
+        // Temporarily shrink iframe to force a layout reflow and avoid counting stretched height
+        iframe.style.height = "100px";
         const height =
           doc.documentElement.scrollHeight || doc.body.scrollHeight;
-        iframe.style.height = height + 20 + "px";
+        iframe.style.height = (height > 100 ? height + 20 : 800) + "px";
       } catch (e) {
         iframe.style.height = "800px";
       }

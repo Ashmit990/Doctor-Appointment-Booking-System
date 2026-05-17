@@ -1,8 +1,7 @@
 <?php
 /**
- * Khalti Payment Initialization
- * Server-side payment initiation per Khalti API docs
- * https://docs.khalti.com/khalti-epayment/#initiating-a-payment-request
+ * eSewa Payment Initialization
+ * Server-side payment initiation per eSewa Sandbox specifications
  */
 
 // Ensure JSON response on any error
@@ -55,7 +54,7 @@ if (!$doctor_id || !$avail_id || !$reason) {
     exit;
 }
 
-$config = khalti_payment_config();
+$config = esewa_payment_config();
 
 // Fetch patient
 $patientStmt = $conn->prepare("
@@ -107,9 +106,9 @@ try {
         exit;
     }
 
-    // New Conflict Rules:
-    // 1. Cannot book the same doctor twice on the same day (regardless of time).
-    // 2. Cannot book any doctor at the same time (time conflict).
+    // Double Conflict Rules:
+    // 1. Cannot book the same doctor twice on the same day.
+    // 2. Cannot book any doctor at the same time slot on the same day.
     $dateStr = $slot['available_date'];
     $timeStr = $slot['start_time'];
     $docId   = $slot['doctor_id'];
@@ -146,7 +145,7 @@ try {
     $bookSlot->execute();
     $bookSlot->close();
 
-    // Get doctor fee and specialization directly from doctor_profiles
+    // Get doctor fee directly from doctor_profiles
     $docProfileStmt = $conn->prepare("
         SELECT dp.specialization, dp.consultation_fee 
         FROM doctor_profiles dp
@@ -160,27 +159,12 @@ try {
     $specialization = $docProfileData['specialization'] ?? 'General Consultation';
     $fee = isset($docProfileData['consultation_fee']) ? (float)$docProfileData['consultation_fee'] : 500.00;
     
-    // Log for debugging
-    error_log("Khalti Payment Init: doctor_id={$doctor_id}, specialization={$specialization}, fee={$fee}");
+    error_log("eSewa Payment Init: doctor_id={$doctor_id}, specialization={$specialization}, fee={$fee}");
     
-    $amount_paisa = $fee * 100; // Convert to paisa
+    $amount_paisa = $fee * 100; // Keep paisa internally for DB records
 
-    // Khalti requires minimum 1000 paisa (Rs. 10)
-    if ($amount_paisa < 1000) {
-        $amount_paisa = 1000;
-    }
-
-    // Fetch doctor's name for display
-    $docNameStmt = $conn->prepare("SELECT full_name FROM users WHERE user_id = ? LIMIT 1");
-    $docNameStmt->bind_param('s', $doctor_id);
-    $docNameStmt->execute();
-    $docNameData = $docNameStmt->get_result()->fetch_assoc();
-    $docNameStmt->close();
-    $doctor_name = $docNameData['full_name'] ?? 'Doctor';
-
-    // Generate unique purchase order ID
-    $purchase_order_id = 'APT-' . $patient['user_id'] . '-' . time();
-    $purchase_order_name = 'Doctor Appointment';
+    // Generate unique transaction UUID
+    $transaction_uuid = 'APT-' . $patient['user_id'] . '-' . time();
 
     // Store booking details for later
     $booking_data = json_encode([
@@ -191,21 +175,22 @@ try {
         'doctor_id' => $doctor_id,
     ]);
 
-    // Insert payment record
+    // Insert payment record (pidx column will hold our unique transaction UUID)
     $payInsert = $conn->prepare("
         INSERT INTO appointment_payments 
         (patient_id, doctor_id, avail_id, payment_method, amount_paisa, 
-         amount_rupees, payment_status, booking_payload, expires_at, created_at, updated_at)
-        VALUES (?, ?, ?, 'khalti', ?, ?, 'Initiated', ?, DATE_ADD(NOW(), INTERVAL 30 MINUTE), NOW(), NOW())
+         amount_rupees, pidx, payment_status, booking_payload, expires_at, created_at, updated_at)
+        VALUES (?, ?, ?, 'eSewa', ?, ?, ?, 'Pending', ?, DATE_ADD(NOW(), INTERVAL 30 MINUTE), NOW(), NOW())
     ");
     
     $amount_rupees = (float)$fee;
-    $payInsert->bind_param('ssiids', 
+    $payInsert->bind_param('ssiidss', 
         $patient['user_id'], 
         $doctor_id, 
         $avail_id, 
         $amount_paisa, 
         $amount_rupees, 
+        $transaction_uuid,
         $booking_data
     );
     $payInsert->execute();
@@ -218,108 +203,14 @@ try {
 
     $conn->commit();
 
-    // Prepare Khalti API payload per official docs
-    $khalti_payload = [
-        'return_url' => $config['return_url'],
-        'website_url' => $config['website_url'],
-        'amount' => $amount_paisa,
-        'purchase_order_id' => $purchase_order_id,
-        'purchase_order_name' => 'Medical Consultation - ' . $doctor_name,
-        'customer_info' => [
-            'name' => $patient['full_name'] ?? 'Patient',
-            'email' => $patient['email'],
-            'phone' => $patient['contact_number'],
-        ],
-        'amount_breakdown' => [
-            [
-                'label' => 'Consultation Fee',
-                'amount' => $amount_paisa,
-            ]
-        ],
-        'product_details' => [
-            [
-                'identity' => 'consultation_' . $doctor_id,
-                'name' => 'Consultation with ' . $doctor_name,
-                'description' => 'Medical consultation appointment',
-                'total_price' => $amount_paisa,
-                'quantity' => 1,
-                'unit_price' => $amount_paisa,
-            ]
-        ],
-    ];
-
-    // Call Khalti /epayment/initiate/ endpoint
-    $khalti_response = khalti_post_json(
-        $config['api_base'] . '/epayment/initiate/',
-        $khalti_payload,
-        $config['secret_key']
-    );
-
-    if (!$khalti_response['success']) {
-        // Release slot on API failure
-        $rel = $conn->prepare("UPDATE doctor_availability SET status = 'Available' WHERE avail_id = ?");
-        $rel->bind_param('i', $avail_id);
-        @$rel->execute();
-        $rel->close();
-
-        // Log detailed error for debugging
-        error_log('Khalti API Error: ' . json_encode([
-            'http_code' => $khalti_response['http_code'] ?? 'unknown',
-            'message' => $khalti_response['message'] ?? 'Unknown',
-            'raw_response' => substr($khalti_response['raw'] ?? '', 0, 500),
-        ]));
-
-        $http_code = $khalti_response['http_code'] ?? 502;
-        http_response_code($http_code);
-        
-        $errorMsg = $khalti_response['message'] ?? 'Unknown error';
-        
-        // Descriptive error based on status code
-        if ($khalti_response['is_auth_error'] ?? false) {
-            $errorMsg = 'Invalid Khalti credentials. Please check your KHALTI_SECRET_KEY in .env';
-        } else if ($khalti_response['is_maintenance'] ?? false) {
-            $errorMsg = 'Khalti payment server is currently undergoing maintenance or is slow (504/500). Please try again in a few minutes.';
-        }
-
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'Failed to initiate payment: ' . $errorMsg,
-        ]);
-        exit;
-    }
-
-    $khalti_data = $khalti_response['data'] ?? [];
-    $pidx = $khalti_data['pidx'] ?? '';
-    $payment_url = $khalti_data['payment_url'] ?? '';
-    $expires_in = (int)($khalti_data['expires_in'] ?? 1800);
-
-    if (!$pidx || !$payment_url) {
-        http_response_code(502);
-        echo json_encode(['status' => 'error', 'message' => 'Invalid Khalti response']);
-        exit;
-    }
-
-    // Save pidx to database
-    $upd = $conn->prepare("
-        UPDATE appointment_payments 
-        SET pidx = ?, payment_status = 'Pending', gateway_response = ?, updated_at = NOW()
-        WHERE payment_id = ?
-    ");
-    $resp_json = json_encode($khalti_data);
-    $upd->bind_param('ssi', $pidx, $resp_json, $payment_id);
-    $upd->execute();
-    $upd->close();
-
-    // Return success with redirect URL
+    // Return success with redirect URL pointing to our auto-submitter
     http_response_code(200);
     echo json_encode([
         'status' => 'success',
-        'payment_url' => $payment_url,
-        'pidx' => $pidx,
+        'payment_url' => 'api/patient/esewa_redirect.php?payment_id=' . $payment_id,
         'payment_id' => $payment_id,
-        'amount_paisa' => $amount_paisa,
+        'transaction_uuid' => $transaction_uuid,
         'amount_rupees' => $amount_rupees,
-        'expires_in' => $expires_in,
     ]);
 
 } catch (Exception $e) {

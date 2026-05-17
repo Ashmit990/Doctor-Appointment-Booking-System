@@ -728,7 +728,7 @@ document.getElementById("calendarModal").addEventListener("click", (e) => {
               panelSelector: "#bookingModalOuter",
             });
           }
-          showSuccessToast("Payment successful ✓", event.data.message || "Your appointment has been booked successfully via Khalti.");
+          showSuccessToast("Payment successful ✓", event.data.message || "Your appointment has been booked successfully via eSewa.");
           
           try {
             const home = await loadHomeData();

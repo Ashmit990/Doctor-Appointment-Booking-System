@@ -1,6 +1,6 @@
 /**
  * Payment Page Logic
- * Handles parameter parsing, UI updates, and Khalti integration
+ * Handles parameter parsing, UI updates, and eSewa sandbox integration
  */
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -75,18 +75,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   payNowBtn.addEventListener("click", async () => {
     // 1. Open the new tab IMMEDIATELY to bypass popup blockers (user activation context)
-    const khaltiWindow = window.open("about:blank", "_blank");
+    const esewaWindow = window.open("about:blank", "_blank");
 
     try {
       // Show Loading State
       payNowBtn.disabled = true;
       loadingTitle.textContent = "Initiating Payment";
-      loadingMsg.textContent = "Connecting to Khalti secure gateway...";
+      loadingMsg.textContent = "Connecting to eSewa secure gateway...";
       loadingOverlay.classList.remove("hidden");
 
       // Call Backend to Init Payment
       const response = await fetch(
-        `${API_BASE}/patient/khalti_payment_init.php`,
+        `${API_BASE}/patient/esewa_payment_init.php`,
         {
           method: "POST",
           credentials: "include",
@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
 
       if (response.status === 504 || response.status === 502) {
-        throw new Error("Khalti payment server is currently undergoing maintenance or is slow. Please try again in a few minutes.");
+        throw new Error("eSewa payment server is currently undergoing maintenance or is slow. Please try again in a few minutes.");
       }
 
       if (!response.ok) {
@@ -115,17 +115,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         throw new Error(result.message || "Failed to start payment process");
       }
 
-      // 2. Redirect the already-opened new tab to Khalti
-      if (khaltiWindow) {
-        khaltiWindow.location.href = result.payment_url;
+      // 2. Redirect the already-opened new tab to eSewa redirection helper
+      if (esewaWindow) {
+        // Resolve absolute URL for the redirection helper relative to page
+        const absoluteRedirectUrl = `${API_BASE}/patient/esewa_redirect.php?payment_id=${result.payment_id}`;
+        esewaWindow.location.href = absoluteRedirectUrl;
       } else {
         // Fallback if popup was completely blocked
-        window.open(result.payment_url, "_blank");
+        window.open(`${API_BASE}/patient/esewa_redirect.php?payment_id=${result.payment_id}`, "_blank");
       }
 
       // 3. Start "watching" the payment status in the background
       if (result.payment_id) {
-        startPolling(result.payment_id, khaltiWindow);
+        startPolling(result.payment_id, esewaWindow);
       }
     } catch (error) {
       console.error("Payment Error:", error);
@@ -193,7 +195,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 5. Listen for Callback Message (Keep for compatibility if used from other places)
   window.addEventListener("message", (event) => {
-    // Security check could go here if needed
     if (event.data && event.data.type === "payment-result") {
       const data = event.data;
 
@@ -204,7 +205,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           "Your appointment has been confirmed. Redirecting to dashboard...";
         loadingOverlay.querySelector(".animate-spin")?.classList.add("hidden");
 
-        // Show a big checkmark if possible, or just redirect
         setTimeout(() => {
           window.location.href = "dashboard.html?booking_success=true";
         }, 3000);

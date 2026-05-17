@@ -11,7 +11,7 @@ if (!$payment_id) {
     exit;
 }
 
-$stmt = $conn->prepare("SELECT payment_id, pidx, patient_id, doctor_id, avail_id, amount_paisa, payment_status, booking_payload, appointment_id FROM appointment_payments WHERE payment_id = ? AND patient_id = ?");
+$stmt = $conn->prepare("SELECT payment_id, pidx, patient_id, doctor_id, avail_id, amount_rupees, payment_status, booking_payload, appointment_id FROM appointment_payments WHERE payment_id = ? AND patient_id = ?");
 $stmt->bind_param('is', $payment_id, $patient_id);
 $stmt->execute();
 $payment = $stmt->get_result()->fetch_assoc();
@@ -32,28 +32,27 @@ if (!in_array($payment['payment_status'], ['Initiated', 'Pending'])) {
     exit;
 }
 
-// If Pending/Initiated, perform Khalti lookup server-side
+// If Pending/Initiated, perform eSewa lookup server-side
 if (!empty($payment['pidx'])) {
-    $config = khalti_payment_config();
-    $lookup_response = khalti_post_json(
-        $config['api_base'] . '/epayment/lookup/',
-        ['pidx' => $payment['pidx']],
-        $config['secret_key']
-    );
+    $status_response = esewa_get_status($payment['pidx'], (float)$payment['amount_rupees']);
 
-    $verified_status = $lookup_response['data']['status'] ?? 'Unknown';
-    $verified_txn_id = $lookup_response['data']['transaction_id'] ?? '';
-
-    if ($verified_status === 'Completed') {
-        $result = complete_appointment_payment($conn, $payment['payment_id'], $lookup_response['data']);
+    if ($status_response['success'] && $status_response['status'] === 'COMPLETE') {
+        $gateway_data = [
+            'status' => 'Completed',
+            'transaction_id' => $status_response['data']['transaction_code'] ?? ''
+        ];
+        $result = complete_appointment_payment($conn, $payment['payment_id'], $gateway_data);
         if ($result['success']) {
             echo json_encode(['status' => 'success', 'payment_status' => 'Completed', 'appointment_id' => $result['appointment_id']]);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Failed to create appointment: ' . $result['message']]);
         }
         exit;
-    } else if (in_array($verified_status, ['Expired', 'User canceled', 'Refunded'])) {
-        $map_status = match($verified_status) { 'Expired' => 'Expired', 'User canceled' => 'Cancelled', 'Refunded' => 'Refunded', default => 'Failed' };
+    } else if (in_array($status_response['status'], ['CANCELED', 'FAILED'])) {
+        $map_status = match($status_response['status']) { 'CANCELED' => 'Cancelled', default => 'Failed' };
+        $verified_txn_id = $status_response['data']['transaction_code'] ?? '';
+        $verified_status = $status_response['status'];
+        
         $conn->begin_transaction();
         try {
             $updateStmt = $conn->prepare("UPDATE appointment_payments SET payment_status = ?, callback_status = ?, transaction_id = ?, updated_at = NOW() WHERE payment_id = ?");

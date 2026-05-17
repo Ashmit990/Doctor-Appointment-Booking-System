@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("totalAmount").textContent = formattedAmount;
       document.getElementById("paymentMethod").textContent =
         data.payment_method +
-        (data.payment_method === "Khalti" ? " e-Wallet" : "");
+        (data.payment_method === "eSewa" || data.payment_method === "esewa" || data.payment_method === "Khalti" ? " e-Wallet" : "");
       document.getElementById("transactionId").textContent =
         data.transaction_id || data.pidx || "N/A";
 

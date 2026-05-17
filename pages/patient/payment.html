@@ -22,14 +22,14 @@
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.2);
       }
-      .khalti-color {
-        color: #5c2d91;
+      .esewa-color {
+        color: #60bb46;
       }
-      .bg-khalti {
-        background-color: #5c2d91;
+      .bg-esewa {
+        background-color: #60bb46;
       }
-      .bg-khalti:hover {
-        background-color: #4a2475;
+      .bg-esewa:hover {
+        background-color: #41a124;
       }
       @keyframes pulse-soft {
         0%,
@@ -218,12 +218,12 @@
 
               <div class="space-y-3">
                 <label
-                  class="relative flex items-center p-4 rounded-2xl border-2 border-[#5c2d91] bg-[#5c2d91]/5 cursor-pointer transition-all"
+                  class="relative flex items-center p-4 rounded-2xl border-2 border-[#60bb46] bg-[#60bb46]/5 cursor-pointer transition-all"
                 >
                   <input
                     type="radio"
                     name="paymentMethod"
-                    value="khalti"
+                    value="esewa"
                     checked
                     class="hidden"
                   />
@@ -232,21 +232,21 @@
                       class="w-10 h-10 rounded-lg bg-white p-1 shadow-sm border border-slate-100 flex items-center justify-center"
                     >
                       <img
-                        src="https://khalti.com/static/img/logo1.png"
-                        alt="Khalti"
+                        src="https://upload.wikimedia.org/wikipedia/commons/f/ff/ESewa_logo.png"
+                        alt="eSewa"
                         class="max-h-6"
                       />
                     </div>
                     <div class="flex-grow">
                       <p class="text-sm font-bold text-slate-800">
-                        Khalti Wallet / Mobile Banking
+                        eSewa Wallet / Mobile Banking
                       </p>
                       <p class="text-xs text-slate-500">
-                        Fast and secure payment via Khalti
+                        Fast and secure payment via eSewa Sandbox
                       </p>
                     </div>
                     <div
-                      class="w-6 h-6 rounded-full bg-[#5c2d91] flex items-center justify-center"
+                      class="w-6 h-6 rounded-full bg-[#60bb46] flex items-center justify-center"
                     >
                       <svg
                         class="w-4 h-4 text-white"
@@ -334,9 +334,9 @@
 
                 <button
                   id="payNowBtn"
-                  class="w-full bg-khalti text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-[#5c2d91]/20 hover:shadow-xl hover:shadow-[#5c2d91]/30 transition-all transform active:scale-[0.98] flex items-center justify-center gap-3"
+                  class="w-full bg-esewa hover:bg-[#41a124] text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-[#60bb46]/20 hover:shadow-xl hover:shadow-[#60bb46]/30 transition-all transform active:scale-[0.98] flex items-center justify-center gap-3"
                 >
-                  <span>Pay with Khalti</span>
+                  <span>Pay with eSewa</span>
                   <svg
                     class="w-5 h-5"
                     fill="none"
@@ -415,7 +415,7 @@
         Processing Payment
       </h3>
       <p id="loadingMsg" class="text-white/70 text-center max-w-xs">
-        Redirecting you to Khalti secure payment gateway...
+        Redirecting you to eSewa secure payment gateway...
       </p>
     </div>
 
@@ -442,6 +442,5 @@
 
     <script src="patient-common.js"></script>
     <script src="payment.js?v=2"></script>
-    <script src="https://khalti.s3.ap-south-1.amazonaws.com/KPG/dist/2020.12.17.0.0.0/khalti-checkout.js"></script>
   </body>
 </html>

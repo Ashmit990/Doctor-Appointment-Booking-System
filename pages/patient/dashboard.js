@@ -265,7 +265,7 @@ function renderAppointments(rows) {
             <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${getStatusClasses(item.status)}">
               ${formatStatus(item.status)}
             </span>
-            ${item.payment_status_label ? `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${getPaymentStatusClasses(item.payment_status_key)}">${item.payment_status_label}${item.payment_status_key === "completed" ? " via Khalti" : ""}</span>` : ""}
+            ${item.payment_status_label ? `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${getPaymentStatusClasses(item.payment_status_key)}">${item.payment_status_label}${item.payment_status_key === "completed" ? " via eSewa" : ""}</span>` : ""}
           </div>
 
           <p class="text-xs text-slate-500 mb-3">${item.specialization || ""} • Consultation</p>
@@ -826,8 +826,10 @@ function fitBookingIframe(iframe) {
   try {
     const doc = iframe.contentDocument || iframe.contentWindow?.document;
     if (!doc) return;
+    // Temporarily shrink iframe to force a layout reflow and avoid counting stretched height
+    iframe.style.height = "100px";
     const height = doc.documentElement.scrollHeight || doc.body.scrollHeight;
-    iframe.style.height = height + 20 + "px";
+    iframe.style.height = (height > 100 ? height + 20 : 340) + "px";
   } catch (err) {
     console.warn("Could not resize booking iframe:", err);
   }
@@ -838,8 +840,10 @@ function fitModalIframe(iframe) {
   try {
     const doc = iframe.contentDocument || iframe.contentWindow?.document;
     if (!doc) return;
+    // Temporarily shrink iframe to force a layout reflow and avoid counting stretched height
+    iframe.style.height = "100px";
     const height = doc.documentElement.scrollHeight || doc.body.scrollHeight;
-    iframe.style.height = height + 20 + "px";
+    iframe.style.height = (height > 100 ? height + 20 : 800) + "px";
   } catch (err) {
     console.warn("Could not resize modal iframe:", err);
   }
@@ -968,7 +972,7 @@ async function openDetailModal(id) {
       <p><span class="text-slate-400">Doctor</span><br/><strong class="text-slate-800">${a.doctor_name}</strong> — ${a.specialization || ""}</p>
       <p><span class="text-slate-400">When</span><br/>${a.app_date} at ${formatTime12h(a.app_time)} · ${a.room_num || ""}</p>
       <p><span class="text-slate-400">Status</span><br/>${formatStatus(a.status)}</p>
-      <p><span class="text-slate-400">Payment</span><br/><strong class="${getPaymentStatusClasses(a.payment_status_key)} inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold">${a.payment_status_label || "Unpaid"}${a.payment_status_key === "completed" ? " via Khalti" : ""}</strong></p>
+      <p><span class="text-slate-400">Payment</span><br/><strong class="${getPaymentStatusClasses(a.payment_status_key)} inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold">${a.payment_status_label || "Unpaid"}${a.payment_status_key === "completed" ? " via eSewa" : ""}</strong></p>
       <p><span class="text-slate-400">Payment details</span><br/>Method: ${a.payment_method || "—"}<br/>Reference: ${a.payment_transaction_id || a.payment_pidx || "—"}<br/>Amount: ${a.payment_amount ? "Rs. " + Number(a.payment_amount).toFixed(2) : "—"}</p>
       <p class="break-words whitespace-pre-wrap"><span class="text-slate-400">Reason</span><br/>${a.reason_for_visit || "—"}</p>
       <p class="break-words whitespace-pre-wrap"><span class="text-slate-400">Doctor comments</span><br/>${a.doctor_comments || "—"}</p>
@@ -1060,11 +1064,20 @@ window.addEventListener("message", function (event) {
       ) {
         closeBookingModal();
       }
+
+      // Reset inline booking iframe if it was the source of the payment
+      const bookingIframe = document.getElementById("bookingIframe");
+      if (
+        bookingIframe &&
+        event.source === bookingIframe.contentWindow
+      ) {
+        bookingIframe.src = `booking.html?t=${Date.now()}`;
+      }
       // Show success popup
       showSuccessToast(
         "Payment successful ✓",
         event.data.message ||
-        "Your appointment has been booked successfully via Khalti.",
+        "Your appointment has been booked successfully via eSewa.",
       );
 
       // Refresh the appointment list in the background
@@ -1638,7 +1651,7 @@ function showTreatmentToast(type, title, msg) {
   if (successParam === "true") {
     showSuccessToast(
       "Payment successful \u2713",
-      "Your appointment has been booked successfully via Khalti.",
+      "Your appointment has been booked successfully via eSewa.",
     );
     // Auto-open receipt modal
     const apptId = urlParams.get("appointment_id");
@@ -1681,7 +1694,7 @@ function showTreatmentToast(type, title, msg) {
         showSuccessToast(
           "Payment successful \u2713",
           event.data.message ||
-          "Your appointment has been booked successfully via Khalti.",
+          "Your appointment has been booked successfully via eSewa.",
         );
         if (event.data.appointment_id) {
           setTimeout(() => openReceiptModal(event.data.appointment_id), 800);
