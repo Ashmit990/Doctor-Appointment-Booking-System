@@ -508,6 +508,7 @@
               <input
                 id="loginPassword"
                 type="password"
+                oninput="this.value = this.value.replace(/\s/g, '')"
                 class="w-full border-b-2 border-[#007E85] bg-transparent focus:outline-none pb-2 text-gray-800 text-lg pr-10"
               />
               <button
@@ -616,7 +617,7 @@
 
       function handleLogin() {
         const email = document.getElementById("loginEmail").value.trim();
-        const password = document.getElementById("loginPassword").value.trim();
+        const password = document.getElementById("loginPassword").value;
         const errorEl = document.getElementById("loginError");
 
         errorEl.classList.add("hidden");
@@ -624,6 +625,12 @@
 
         if (!email || !password) {
           errorEl.textContent = "Please fill in all fields.";
+          errorEl.classList.remove("hidden");
+          return;
+        }
+
+        if (/\s/.test(password)) {
+          errorEl.textContent = "Password cannot contain spaces.";
           errorEl.classList.remove("hidden");
           return;
         }

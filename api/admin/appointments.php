@@ -99,7 +99,7 @@ try {
         ]);
 
     } elseif ($method === 'DELETE') {
-        // Delete appointment
+        // Delete appointment and dependent earnings records
         $input = json_decode(file_get_contents("php://input"), true);
         $appointment_id = $input['appointment_id'] ?? null;
 
@@ -107,18 +107,32 @@ try {
             throw new Exception('Appointment ID required');
         }
 
-        $stmt = $conn->prepare("DELETE FROM appointments WHERE appointment_id = ?");
-        $stmt->bind_param("i", $appointment_id);
-        
-        if (!$stmt->execute()) {
-            throw new Exception($stmt->error);
-        }
-        $stmt->close();
+        $conn->begin_transaction();
+        try {
+            $stmt = $conn->prepare("DELETE FROM earnings WHERE appointment_id = ?");
+            $stmt->bind_param("i", $appointment_id);
+            if (!$stmt->execute()) {
+                throw new Exception($stmt->error);
+            }
+            $stmt->close();
 
-        echo json_encode([
-            'status' => 'success',
-            'message' => 'Appointment deleted successfully'
-        ]);
+            $stmt = $conn->prepare("DELETE FROM appointments WHERE appointment_id = ?");
+            $stmt->bind_param("i", $appointment_id);
+            if (!$stmt->execute()) {
+                throw new Exception($stmt->error);
+            }
+            $stmt->close();
+
+            $conn->commit();
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Appointment deleted successfully'
+            ]);
+        } catch (Exception $e) {
+            $conn->rollback();
+            throw $e;
+        }
     }
 
 } catch (Exception $e) {

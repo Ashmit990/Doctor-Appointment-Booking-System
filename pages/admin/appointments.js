@@ -10,6 +10,7 @@ let currentPage = 1;
 let allAppointments = [];
 let filteredAppointments = [];
 let currentEditId = null;
+let pendingDeleteAppointmentId = null;
 
 console.log("✓ appointments.js loading...");
 
@@ -209,7 +210,7 @@ function displayAppointments() {
                                 title="${titleMessage}">
                                 Edit
                             </button>
-                            <button onclick="deleteAppointment(${apt.appointment_id})" class="text-xs px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors font-semibold">Delete</button>
+                            <button onclick="openDeleteConfirm(${apt.appointment_id})" class="text-xs px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors font-semibold">Delete</button>
                         </div>
                     </td>
                 </tr>
@@ -270,6 +271,10 @@ function openEditModal(appointmentId, status, comments, appointmentDate) {
     const editStatus = document.getElementById("editStatus");
     const editComments = document.getElementById("editComments");
 
+    if (status === "Upcoming") {
+      status = "Completed";
+    }
+
     if (editStatus) editStatus.value = status;
     if (editComments) editComments.value = comments;
 
@@ -291,7 +296,7 @@ function openEditModal(appointmentId, status, comments, appointmentDate) {
       warningNote.className =
         "mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700";
       warningNote.innerHTML =
-        "📅 <strong>Note:</strong> This is a past appointment (${appointmentDate}). You can modify the status and add comments.";
+        "📅 <strong>Note:</strong> This is a past appointment. You can modify the status and add comments.";
     }
   } catch (e) {
     console.error("Modal error:", e);
@@ -367,13 +372,31 @@ async function saveAppointment(event) {
 }
 
 // ==================== DELETE ====================
+function openDeleteConfirm(appointmentId) {
+  pendingDeleteAppointmentId = appointmentId;
+  const modal = document.getElementById("deleteConfirmModal");
+  if (modal) {
+    modal.classList.add("active");
+  }
+}
+
+function closeDeleteConfirm() {
+  pendingDeleteAppointmentId = null;
+  const modal = document.getElementById("deleteConfirmModal");
+  if (modal) {
+    modal.classList.remove("active");
+  }
+}
+
+async function confirmDeleteAppointment() {
+  if (!pendingDeleteAppointmentId) return;
+  const appointmentId = pendingDeleteAppointmentId;
+  closeDeleteConfirm();
+  await deleteAppointment(appointmentId);
+}
+
 async function deleteAppointment(appointmentId) {
-  if (
-    !confirm(
-      "Are you sure you want to delete this appointment? This action cannot be undone.",
-    )
-  )
-    return;
+  if (!appointmentId) return;
 
   try {
     const response = await fetch("../../api/admin/appointments.php", {

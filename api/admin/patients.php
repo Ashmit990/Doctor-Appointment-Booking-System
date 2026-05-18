@@ -95,28 +95,44 @@ try {
         }
 
         // Use prepared statements to prevent SQL injection
-        // Delete from appointments
-        $delAppointments = $conn->prepare("DELETE FROM appointments WHERE patient_id = ?");
-        $delAppointments->bind_param("s", $patient_id);
-        $delAppointments->execute();
-        $delAppointments->close();
-        
-        // Delete from patient_profiles
-        $delProfiles = $conn->prepare("DELETE FROM patient_profiles WHERE user_id = ?");
-        $delProfiles->bind_param("s", $patient_id);
-        $delProfiles->execute();
-        $delProfiles->close();
-        
-        // Delete from users
-        $delUsers = $conn->prepare("DELETE FROM users WHERE user_id = ? AND role = 'Patient'");
-        $delUsers->bind_param("s", $patient_id);
-        $delUsers->execute();
-        $delUsers->close();
-        
-        echo json_encode([
-            'status' => 'success',
-            'message' => 'Patient deleted successfully'
-        ]);
+        $conn->begin_transaction();
+        try {
+            // Delete earnings for appointments belonging to this patient
+            $delEarnings = $conn->prepare(
+                "DELETE e FROM earnings e JOIN appointments a ON e.appointment_id = a.appointment_id WHERE a.patient_id = ?"
+            );
+            $delEarnings->bind_param("s", $patient_id);
+            $delEarnings->execute();
+            $delEarnings->close();
+
+            // Delete from appointments
+            $delAppointments = $conn->prepare("DELETE FROM appointments WHERE patient_id = ?");
+            $delAppointments->bind_param("s", $patient_id);
+            $delAppointments->execute();
+            $delAppointments->close();
+            
+            // Delete from patient_profiles
+            $delProfiles = $conn->prepare("DELETE FROM patient_profiles WHERE user_id = ?");
+            $delProfiles->bind_param("s", $patient_id);
+            $delProfiles->execute();
+            $delProfiles->close();
+            
+            // Delete from users
+            $delUsers = $conn->prepare("DELETE FROM users WHERE user_id = ? AND role = 'Patient'");
+            $delUsers->bind_param("s", $patient_id);
+            $delUsers->execute();
+            $delUsers->close();
+
+            $conn->commit();
+
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Patient deleted successfully'
+            ]);
+        } catch (Exception $e) {
+            $conn->rollback();
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Method not allowed']);
     }

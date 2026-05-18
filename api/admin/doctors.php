@@ -191,22 +191,50 @@ try {
             exit;
         }
 
-        // Delete from doctor_profiles first
-        $stmt = $conn->prepare("DELETE FROM doctor_profiles WHERE user_id = ?");
-        $stmt->bind_param("s", $doctor_id);
-        $stmt->execute();
-        $stmt->close();
-        
-        // Delete from users
-        $stmt = $conn->prepare("DELETE FROM users WHERE user_id = ? AND role = 'Doctor'");
-        $stmt->bind_param("s", $doctor_id);
-        
-        if ($stmt->execute()) {
+        $conn->begin_transaction();
+        try {
+            // Delete earnings for any appointments belonging to this doctor first
+            $stmt = $conn->prepare(
+                "DELETE e FROM earnings e
+                 INNER JOIN appointments a ON e.appointment_id = a.appointment_id
+                 WHERE a.doctor_id = ?"
+            );
+            $stmt->bind_param("s", $doctor_id);
+            if (!$stmt->execute()) {
+                throw new Exception($stmt->error);
+            }
+            $stmt->close();
+
+            // Delete appointments for this doctor
+            $stmt = $conn->prepare("DELETE FROM appointments WHERE doctor_id = ?");
+            $stmt->bind_param("s", $doctor_id);
+            if (!$stmt->execute()) {
+                throw new Exception($stmt->error);
+            }
+            $stmt->close();
+
+            // Delete doctor profile if present
+            $stmt = $conn->prepare("DELETE FROM doctor_profiles WHERE user_id = ?");
+            $stmt->bind_param("s", $doctor_id);
+            if (!$stmt->execute()) {
+                throw new Exception($stmt->error);
+            }
+            $stmt->close();
+
+            // Delete doctor user record
+            $stmt = $conn->prepare("DELETE FROM users WHERE user_id = ? AND role = 'Doctor'");
+            $stmt->bind_param("s", $doctor_id);
+            if (!$stmt->execute()) {
+                throw new Exception($stmt->error);
+            }
+            $stmt->close();
+
+            $conn->commit();
             echo json_encode(['status' => 'success', 'message' => 'Doctor deleted successfully']);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Failed to delete doctor']);
+        } catch (Exception $e) {
+            $conn->rollback();
+            echo json_encode(['status' => 'error', 'message' => 'Failed to delete doctor: ' . $e->getMessage()]);
         }
-        $stmt->close();
 
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Method not allowed']);

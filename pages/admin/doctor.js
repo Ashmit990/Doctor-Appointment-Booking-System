@@ -14,6 +14,7 @@ function showToast(message, isError = false) {
 let currentPage = 1;
 let allDoctors = [];
 let filteredDoctors = [];
+let pendingDeleteDoctorId = null;
 
 // Utility Functions
 function updateCurrentDate() {
@@ -311,7 +312,7 @@ function displayDoctors() {
                 <td class="px-5 py-4 text-sm hidden md:table-cell">${escapeHtml(doc.email || "")}</td>
                 <td class="px-5 py-4 text-sm">${doc.total_appointments || 0}</td>
                 <td class="px-5 py-4">
-                    <button onclick="deleteDoctor('${doc.user_id}')" class="text-xs px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 font-semibold transition">
+                    <button onclick="openDeleteDoctorConfirm('${doc.user_id}')" class="text-xs px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 font-semibold transition">
                         Delete
                     </button>
                  </td>
@@ -334,9 +335,31 @@ function filterDoctors() {
   displayDoctors();
 }
 
+function openDeleteDoctorConfirm(doctorId) {
+  pendingDeleteDoctorId = doctorId;
+  const modal = document.getElementById("doctorDeleteConfirmModal");
+  if (modal) {
+    modal.classList.add("active");
+  }
+}
+
+function closeDeleteDoctorConfirm() {
+  pendingDeleteDoctorId = null;
+  const modal = document.getElementById("doctorDeleteConfirmModal");
+  if (modal) {
+    modal.classList.remove("active");
+  }
+}
+
+function confirmDeleteDoctor() {
+  if (!pendingDeleteDoctorId) return;
+  const doctorId = pendingDeleteDoctorId;
+  closeDeleteDoctorConfirm();
+  deleteDoctor(doctorId);
+}
+
 function deleteDoctor(doctorId) {
-  if (!confirm("⚠️ Delete this doctor?\n\nThis action cannot be undone."))
-    return;
+  if (!doctorId) return;
 
   fetch("../../api/admin/doctors.php", {
     method: "DELETE",

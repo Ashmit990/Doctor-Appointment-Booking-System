@@ -7,6 +7,7 @@
 let currentPage = 1;
 let allPatients = [];
 let filteredPatients = [];
+let pendingDeletePatientId = null;
 
 console.log("✓ users.js file loading...");
 
@@ -58,8 +59,13 @@ function updateCurrentDate() {
   try {
     const el = document.getElementById("current-date");
     if (el) {
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      el.textContent = new Date().toLocaleDateString('en-US', options);
+      const options = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+      el.textContent = new Date().toLocaleDateString("en-US", options);
     }
   } catch (e) {
     console.error("Date error:", e);
@@ -100,12 +106,12 @@ function viewPatientDetails(userId) {
       `${patient.total_appointments || 0} Total`;
     document.getElementById("modalAddress").textContent =
       patient.address || "N/A";
-    
+
     // Set emergency contact
     const eName = patient.emergency_contact_name || "";
     const ePhone = patient.emergency_contact_phone || "";
-    document.getElementById("modalEmergency").textContent = 
-      (eName || ePhone) ? `${eName} (${ePhone})` : "N/A";
+    document.getElementById("modalEmergency").textContent =
+      eName || ePhone ? `${eName} (${ePhone})` : "N/A";
 
     // Set initials
     const initials = (patient.full_name || "U")
@@ -122,7 +128,7 @@ function viewPatientDetails(userId) {
     const deleteBtn = document.getElementById("modalDeleteBtn");
     deleteBtn.onclick = () => {
       closeDetailsModal();
-      deletePatient(userId);
+      openDeleteConfirm(userId);
     };
 
     // Show modal
@@ -245,7 +251,7 @@ function displayPatients() {
               <button onclick="viewPatientDetails('${userId}')" class="text-xs px-3 py-1.5 bg-teal text-white rounded-lg hover:bg-teal-dark font-bold transition-all shadow-sm">
                 View
               </button>
-              <button onclick="deletePatient('${userId}')" class="text-xs px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 font-bold transition-all">
+              <button onclick="openDeleteConfirm('${userId}')" class="text-xs px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 font-bold transition-all">
                 Delete
               </button>
             </div>
@@ -285,8 +291,38 @@ function filterPatients() {
 }
 
 // ==================== DELETE ====================
+function openDeleteConfirm(patientId) {
+  if (!patientId) return;
+  pendingDeletePatientId = patientId;
+
+  const detailsModal = document.getElementById("detailsModal");
+  if (detailsModal && detailsModal.classList.contains("active")) {
+    detailsModal.classList.remove("active");
+  }
+
+  const confirmModal = document.getElementById("deleteConfirmModal");
+  if (confirmModal) {
+    confirmModal.classList.add("active");
+  }
+}
+
+function closeDeleteConfirm() {
+  pendingDeletePatientId = null;
+  const confirmModal = document.getElementById("deleteConfirmModal");
+  if (confirmModal) {
+    confirmModal.classList.remove("active");
+  }
+}
+
+async function confirmDeletePatient() {
+  if (!pendingDeletePatientId) return;
+  const patientId = pendingDeletePatientId;
+  closeDeleteConfirm();
+  await deletePatient(patientId);
+}
+
 async function deletePatient(patientId) {
-  if (!confirm("Delete this patient? This action cannot be undone.")) return;
+  if (!patientId) return;
 
   try {
     console.log("► Deleting patient:", patientId);

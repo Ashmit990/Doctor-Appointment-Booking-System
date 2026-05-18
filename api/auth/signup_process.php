@@ -62,9 +62,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
     } else if ($role === 'Medical Professional' || $role === 'Doctor') {
-        $medical_id = $_POST['medical_id'] ?? '';
+        $medical_id = trim($_POST['medical_id'] ?? '');
         $specialization = $_POST['specialization'] ?? '';
         $bio = $_POST['bio'] ?? '';
+
+        if (!preg_match('/^\d{4,}$/', $medical_id)) {
+            echo json_encode(['success' => false, 'message' => 'Medical ID must be at least 4 digits.']);
+            exit;
+        }
 
         // Construct JSON structure for doctor_approvals bio field
         $bio_data = [

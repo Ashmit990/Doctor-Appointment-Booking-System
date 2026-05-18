@@ -22,6 +22,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    if (preg_match('/\s/', $password)) {
+        echo json_encode(['status' => 'error', 'message' => 'Password cannot contain spaces.']);
+        exit;
+    }
+
     // Check for user in database
     // Note: The column name is 'password_hash' in this database
     $stmt = $conn->prepare("SELECT user_id, full_name, password_hash, role FROM users WHERE email = ?");
