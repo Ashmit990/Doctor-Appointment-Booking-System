@@ -42,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
 
+        $is_valid = false;
         if (password_verify($password, $user['password_hash'])) {
             $is_valid = true;
         } else if ($password === $user['password_hash']) {
@@ -49,6 +50,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($is_valid) {
+            // Check if doctor is available
+            if ($user['role'] === 'Doctor') {
+                $check_avail = $conn->prepare("SELECT is_available FROM doctor_profiles WHERE user_id = ?");
+                if ($check_avail) {
+                    $check_avail->bind_param("s", $user['user_id']);
+                    $check_avail->execute();
+                    $avail_res = $check_avail->get_result()->fetch_assoc();
+                    $check_avail->close();
+                    if ($avail_res && isset($avail_res['is_available']) && (int)$avail_res['is_available'] === 0) {
+                        echo json_encode(['status' => 'error', 'message' => 'Your account is currently set to unavailable. Please contact the administrator to log in.']);
+                        exit;
+                    }
+                }
+            }
+
             $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['full_name'] = $user['full_name'];
             $_SESSION['role'] = $user['role'];
