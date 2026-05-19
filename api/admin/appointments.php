@@ -17,6 +17,9 @@ try {
     $method = $_SERVER['REQUEST_METHOD'];
 
     if ($method === 'GET') {
+        require_once '../includes/appointment_reminder_sync.php';
+        sync_all_appointment_statuses($conn);
+
         // Get all appointments
         $page = $_GET['page'] ?? 1;
         $limit = $_GET['limit'] ?? 10;

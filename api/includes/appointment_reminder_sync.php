@@ -1,10 +1,26 @@
 <?php
 
 /**
+ * Automatically update past 'Upcoming' appointments to 'Completed' in the database.
+ */
+function sync_all_appointment_statuses(mysqli $conn): void
+{
+    $sql = "
+        UPDATE appointments 
+        SET status = 'Completed' 
+        WHERE status = 'Upcoming' 
+          AND (app_date < CURDATE() OR (app_date = CURDATE() AND app_time <= CURTIME()))
+    ";
+    $conn->query($sql);
+}
+
+/**
  * Insert one-day-ahead appointment reminders (idempotent per appointment per local day).
  */
 function sync_patient_appointment_reminders(mysqli $conn, string $patient_id): void
 {
+    sync_all_appointment_statuses($conn);
+
     $sql = "
         INSERT INTO notifications (user_id, title, message, is_read, created_at)
         SELECT
@@ -39,6 +55,8 @@ function sync_patient_appointment_reminders(mysqli $conn, string $patient_id): v
 
 function sync_doctor_appointment_reminders(mysqli $conn, string $doctor_id): void
 {
+    sync_all_appointment_statuses($conn);
+
     $sql = "
         INSERT INTO notifications (user_id, title, message, is_read, created_at)
         SELECT

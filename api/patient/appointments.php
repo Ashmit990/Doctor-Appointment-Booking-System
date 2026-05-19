@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/payment_helpers.php';
+require_once __DIR__ . '/../includes/appointment_reminder_sync.php';
 
+sync_all_appointment_statuses($conn);
 ensure_appointment_payments_table($conn);
 release_expired_payment_holds($conn);
 

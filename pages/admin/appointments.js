@@ -87,8 +87,8 @@ function isEditable(appointmentDate) {
   const aptDate = new Date(appointmentDate);
   aptDate.setHours(0, 0, 0, 0);
 
-  // Only allow editing if appointment date is in the PAST (before today)
-  return aptDate < today;
+  // Allow editing if appointment date is today or in the past
+  return aptDate <= today;
 }
 
 function getEditableMessage(appointmentDate) {
@@ -100,11 +100,8 @@ function getEditableMessage(appointmentDate) {
   const aptDate = new Date(appointmentDate);
   aptDate.setHours(0, 0, 0, 0);
 
-  if (aptDate.getTime() === today.getTime()) {
-    return "⚠️ Cannot edit today's appointments. Only past appointments can be modified.";
-  }
   if (aptDate > today) {
-    return "⚠️ Cannot edit future appointments. Only past appointments can be modified.";
+    return "⚠️ Cannot edit future appointments. Only today's or past appointments can be modified.";
   }
   return "";
 }

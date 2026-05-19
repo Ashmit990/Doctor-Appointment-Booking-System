@@ -10,6 +10,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
 }
 
 try {
+    require_once '../includes/appointment_reminder_sync.php';
+    sync_all_appointment_statuses($conn);
+
     // Get total patients
     $stmt = $conn->prepare("SELECT COUNT(*) as total FROM users WHERE role = 'Patient'");
     $stmt->execute();
