@@ -1,6 +1,7 @@
 <?php
 /**
- * eSewa Sandbox Form Auto-Submit Redirection
+ * Khalti Payment Redirect
+ * Displays Khalti payment form or redirects to Khalti checkout
  */
 
 require_once __DIR__ . '/bootstrap.php';
@@ -38,18 +39,18 @@ $slot_date = $booking['slot_date'] ?? 'N/A';
 $slot_time = $booking['slot_time'] ?? 'N/A';
 $reason = $booking['reason'] ?? 'Consultation';
 
-$config = esewa_payment_config();
-$secret_key = $config['secret_key'];
-$product_code = $config['merchant_code'];
+$config = khalti_payment_config();
+$pidx = $payment['pidx'];
+$amount = (int)$payment['amount_paisa'];
 
-$transaction_uuid = $payment['pidx']; // We store the unique transaction UUID in the 'pidx' column
-$total_amount = number_format((float)$payment['amount_rupees'], 2, '.', '');
+// The payment URL should be stored in the database from Khalti's response, 
+// but if not, construct it
+$khalti_payment_url = sprintf(
+    'https://test-pay.khalti.com/?pidx=%s&public_key=%s',
+    urlencode($pidx),
+    urlencode($config['public_key'])
+);
 
-// Message format: total_amount,transaction_uuid,product_code
-$message = "total_amount=$total_amount,transaction_uuid=$transaction_uuid,product_code=$product_code";
-$signature = base64_encode(hash_hmac('sha256', $message, $secret_key, true));
-
-$success_url = $config['return_url'];
 $failure_url = patient_app_base_url() . "/pages/patient/payment.html?doctor_id=" . urlencode($payment['doctor_id']) . "&avail_id=" . urlencode($payment['avail_id']) . "&payment_status=Failed&success=false&error=" . urlencode("Payment was cancelled or failed.");
 
 ?>
@@ -58,7 +59,7 @@ $failure_url = patient_app_base_url() . "/pages/patient/payment.html?doctor_id="
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirecting to eSewa...</title>
+    <title>Redirecting to Khalti...</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -78,18 +79,18 @@ $failure_url = patient_app_base_url() . "/pages/patient/payment.html?doctor_id="
             max-width: 460px;
             width: 100%;
             border: 1px solid #e2e8f0;
-            border-top: 6px solid #60bb46;
+            border-top: 6px solid #5B3CC4;
         }
         .header {
             text-align: center;
             margin-bottom: 28px;
         }
         .spinner {
-            border: 4px solid rgba(96, 187, 70, 0.1);
+            border: 4px solid rgba(91, 60, 196, 0.1);
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            border-left-color: #60bb46;
+            border-left-color: #5B3CC4;
             animation: spin 1s linear infinite;
             margin: 0 auto 16px;
         }
@@ -139,13 +140,13 @@ $failure_url = patient_app_base_url() . "/pages/patient/payment.html?doctor_id="
             font-weight: 700;
         }
         .value.price {
-            color: #60bb46;
+            color: #5B3CC4;
             font-size: 15px;
         }
         .btn-proceed {
             display: block;
             width: 100%;
-            background-color: #60bb46;
+            background-color: #5B3CC4;
             color: white;
             border: none;
             border-radius: 12px;
@@ -154,13 +155,13 @@ $failure_url = patient_app_base_url() . "/pages/patient/payment.html?doctor_id="
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(96, 187, 70, 0.2);
+            box-shadow: 0 4px 12px rgba(91, 60, 196, 0.2);
             text-align: center;
         }
         .btn-proceed:hover {
-            background-color: #4fa336;
+            background-color: #4a2fa8;
             transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(96, 187, 70, 0.3);
+            box-shadow: 0 6px 16px rgba(91, 60, 196, 0.3);
         }
         .countdown {
             text-align: center;
@@ -179,7 +180,7 @@ $failure_url = patient_app_base_url() . "/pages/patient/payment.html?doctor_id="
         <div class="header">
             <div class="spinner"></div>
             <h2>Secure Checkout</h2>
-            <p class="subtitle">Connecting you to eSewa payment gateway...</p>
+            <p class="subtitle">Connecting you to Khalti payment gateway...</p>
         </div>
         
         <div class="details-box">
@@ -201,27 +202,13 @@ $failure_url = patient_app_base_url() . "/pages/patient/payment.html?doctor_id="
             </div>
             <div class="detail-row">
                 <span class="label">Amount</span>
-                <span class="value price">Rs. <?php echo htmlspecialchars($total_amount); ?></span>
+                <span class="value price">Rs. <?php echo htmlspecialchars(number_format($payment['amount_rupees'], 2)); ?></span>
             </div>
         </div>
 
-        <button type="button" class="btn-proceed" onclick="document.getElementById('esewaForm').submit();">Proceed with eSewa</button>
-        <div class="countdown" id="countdown-text">Redirecting automatically in 3 seconds...</div>
+        <button type="button" class="btn-proceed" onclick="window.location.href='<?php echo htmlspecialchars($khalti_payment_url); ?>';">Proceed with Khalti</button>
+        <div class="countdown">Redirecting automatically in 3 seconds...</div>
     </div>
-    
-    <form id="esewaForm" action="<?php echo htmlspecialchars($config['api_base'] . '/main/v2/form'); ?>" method="POST">
-        <input type="hidden" name="amount" value="<?php echo htmlspecialchars($total_amount); ?>">
-        <input type="hidden" name="tax_amount" value="0.00">
-        <input type="hidden" name="product_service_charge" value="0.00">
-        <input type="hidden" name="product_delivery_charge" value="0.00">
-        <input type="hidden" name="total_amount" value="<?php echo htmlspecialchars($total_amount); ?>">
-        <input type="hidden" name="transaction_uuid" value="<?php echo htmlspecialchars($transaction_uuid); ?>">
-        <input type="hidden" name="product_code" value="<?php echo htmlspecialchars($product_code); ?>">
-        <input type="hidden" name="success_url" value="<?php echo htmlspecialchars($success_url); ?>">
-        <input type="hidden" name="failure_url" value="<?php echo htmlspecialchars($failure_url); ?>">
-        <input type="hidden" name="signed_field_names" value="total_amount,transaction_uuid,product_code">
-        <input type="hidden" name="signature" value="<?php echo htmlspecialchars($signature); ?>">
-    </form>
     
     <script>
         var secondsLeft = 3;
@@ -229,9 +216,9 @@ $failure_url = patient_app_base_url() . "/pages/patient/payment.html?doctor_id="
             secondsLeft--;
             if (secondsLeft <= 0) {
                 clearInterval(countdownTimer);
-                document.getElementById('esewaForm').submit();
+                window.location.href = '<?php echo htmlspecialchars($khalti_payment_url); ?>';
             } else {
-                document.getElementById('countdown-text').textContent = "Redirecting automatically in " + secondsLeft + " seconds...";
+                document.querySelector('.countdown').textContent = "Redirecting automatically in " + secondsLeft + " seconds...";
             }
         }, 1000);
     </script>

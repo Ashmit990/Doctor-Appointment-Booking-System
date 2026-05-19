@@ -31,6 +31,15 @@
       .bg-esewa:hover {
         background-color: #41a124;
       }
+      .khalti-color {
+        color: #5B3CC4;
+      }
+      .bg-khalti {
+        background-color: #5B3CC4;
+      }
+      .bg-khalti:hover {
+        background-color: #4a2fa8;
+      }
       @keyframes pulse-soft {
         0%,
         100% {
@@ -193,7 +202,7 @@
               </div>
             </section>
 
-            <!-- Payment Method -->
+            <!-- Payment Method Dropdown -->
             <section
               class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100"
             >
@@ -216,83 +225,40 @@
                 Payment Method
               </h2>
 
-              <div class="space-y-3">
-                <label
-                  class="relative flex items-center p-4 rounded-2xl border-2 border-[#60bb46] bg-[#60bb46]/5 cursor-pointer transition-all"
+              <div class="relative">
+                <select
+                  id="paymentMethodSelect"
+                  class="w-full appearance-none bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 font-medium text-slate-800 cursor-pointer transition-all hover:border-[#0d7377]/20 focus:outline-none focus:border-[#0d7377] focus:ring-2 focus:ring-[#0d7377]/10"
                 >
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="esewa"
-                    checked
-                    class="hidden"
-                  />
-                  <div class="flex items-center gap-4 w-full">
-                    <div
-                      class="w-10 h-10 rounded-lg bg-white p-1 shadow-sm border border-slate-100 flex items-center justify-center"
-                    >
-                      <img
-                        src="https://esewa.com.np/common/images/esewa_logo.png"
-                        alt="eSewa"
-                        class="max-h-6"
-                      />
-                    </div>
-                    <div class="flex-grow">
-                      <p class="text-sm font-bold text-slate-800">
-                        eSewa Wallet / Mobile Banking
-                      </p>
-                      <p class="text-xs text-slate-500">
-                        Fast and secure payment via eSewa Sandbox
-                      </p>
-                    </div>
-                    <div
-                      class="w-6 h-6 rounded-full bg-[#60bb46] flex items-center justify-center"
-                    >
-                      <svg
-                        class="w-4 h-4 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
-                    </div>
-                  </div>
-                </label>
+                  <option value="esewa" selected>🟢 eSewa Wallet / Mobile Banking</option>
+                  <option value="khalti">🟣 Khalti Digital Wallet</option>
+                </select>
+                <svg
+                  class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-600 pointer-events-none"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                  ></path>
+                </svg>
+              </div>
 
-                <!-- Placeholder for other methods if needed later -->
-                <div
-                  class="flex items-center p-4 rounded-2xl border border-slate-100 bg-slate-50 opacity-50 cursor-not-allowed"
-                >
-                  <div
-                    class="w-10 h-10 rounded-lg bg-white flex items-center justify-center border border-slate-100"
-                  >
-                    <svg
-                      class="w-6 h-6 text-slate-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                      ></path>
-                    </svg>
-                  </div>
-                  <div class="ml-4">
-                    <p class="text-sm font-semibold text-slate-400">
-                      Other Methods
-                    </p>
-                    <p class="text-xs text-slate-400">Coming soon</p>
-                  </div>
-                </div>
+              <div id="paymentMethodInfo" class="mt-6 p-4 rounded-2xl bg-gradient-to-br from-[#60bb46]/10 to-[#60bb46]/5 border border-[#60bb46]/20">
+                <p class="text-sm text-slate-600">
+                  <span class="font-semibold text-[#60bb46]">eSewa</span> - Fast and secure payment via eSewa Sandbox
+                </p>
+              </div>
+              
+              <!-- Debug Info -->
+              <div id="debugInfo" class="mt-4 p-2 bg-gray-100 rounded text-xs text-gray-700 hidden">
+                <div>Selected: <span id="debugSelected">esewa</span></div>
+                <div>Button Text: <span id="debugButtonText">Pay with eSewa</span></div>
+                <div>Script Status: <span id="debugStatus">loading...</span></div>
               </div>
             </section>
           </div>
@@ -336,7 +302,7 @@
                   id="payNowBtn"
                   class="w-full bg-esewa hover:bg-[#41a124] text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-[#60bb46]/20 hover:shadow-xl hover:shadow-[#60bb46]/30 transition-all transform active:scale-[0.98] flex items-center justify-center gap-3"
                 >
-                  <span>Pay with eSewa</span>
+                  <span id="payBtnText">Pay with eSewa</span>
                   <svg
                     class="w-5 h-5"
                     fill="none"
@@ -441,6 +407,6 @@
     </div>
 
     <script src="patient-common.js"></script>
-    <script src="payment.js?v=2"></script>
+    <script src="payment.js?v=6"></script>
   </body>
 </html>

@@ -3,7 +3,10 @@
  * Handles parameter parsing, UI updates, and eSewa sandbox integration
  */
 
+console.log("payment.js loading...");
+
 document.addEventListener("DOMContentLoaded", async () => {
+  console.log("DOMContentLoaded fired in payment.js");
   // 1. Initialize State
   const urlParams = new URLSearchParams(window.location.search);
   const doctorId = urlParams.get("doctor_id");
@@ -58,10 +61,114 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 4. Interaction Handlers
   const backBtn = document.getElementById("backBtn");
   const payNowBtn = document.getElementById("payNowBtn");
+  const payBtnText = document.getElementById("payBtnText");
   const cancelBtn = document.getElementById("cancelBtn");
   const loadingOverlay = document.getElementById("loadingOverlay");
   const loadingTitle = document.getElementById("loadingTitle");
   const loadingMsg = document.getElementById("loadingMsg");
+  const paymentMethodSelect = document.getElementById("paymentMethodSelect");
+  const paymentMethodInfo = document.getElementById("paymentMethodInfo");
+  const debugInfo = document.getElementById("debugInfo");
+  const debugSelected = document.getElementById("debugSelected");
+  const debugButtonText = document.getElementById("debugButtonText");
+  const debugStatus = document.getElementById("debugStatus");
+
+  let selectedPaymentMethod = "esewa"; // Default
+
+  // Payment method information
+  const paymentMethodDescriptions = {
+    esewa: {
+      name: "eSewa",
+      desc: "Fast and secure payment via eSewa Sandbox",
+      color: "#60bb46",
+      bgColor: "from-[#60bb46]/10 to-[#60bb46]/5",
+      borderColor: "border-[#60bb46]/20",
+      textColor: "text-[#60bb46]"
+    },
+    khalti: {
+      name: "Khalti",
+      desc: "Fast payments via Khalti mobile wallet",
+      color: "#5B3CC4",
+      bgColor: "from-[#5B3CC4]/10 to-[#5B3CC4]/5",
+      borderColor: "border-[#5B3CC4]/20",
+      textColor: "text-[#5B3CC4]"
+    }
+  };
+
+  // Function to update UI based on payment method
+  function updatePaymentMethodUI(method) {
+    console.log("Updating UI for method:", method);
+    selectedPaymentMethod = method;
+    const info = paymentMethodDescriptions[method];
+
+    // Update button text
+    payBtnText.textContent = method === "khalti" ? "Pay with Khalti" : "Pay with eSewa";
+    console.log("Button text updated to:", payBtnText.textContent);
+
+    // Update button styling using inline styles for reliability
+    if (method === "khalti") {
+      payNowBtn.style.backgroundColor = "#5B3CC4";
+      payNowBtn.style.boxShadow = "0 4px 12px rgba(91, 60, 196, 0.2)";
+      payNowBtn.onmouseover = function() { this.style.backgroundColor = "#4a2fa8"; };
+      payNowBtn.onmouseout = function() { this.style.backgroundColor = "#5B3CC4"; };
+    } else {
+      payNowBtn.style.backgroundColor = "#60bb46";
+      payNowBtn.style.boxShadow = "0 4px 12px rgba(96, 187, 70, 0.2)";
+      payNowBtn.onmouseover = function() { this.style.backgroundColor = "#41a124"; };
+      payNowBtn.onmouseout = function() { this.style.backgroundColor = "#60bb46"; };
+    }
+    console.log("Button styles updated");
+
+    // Update payment method info box
+    if (paymentMethodInfo) {
+      paymentMethodInfo.className = `mt-6 p-4 rounded-2xl bg-gradient-to-br ${info.bgColor} border ${info.borderColor}`;
+      paymentMethodInfo.innerHTML = `
+        <p class="text-sm text-slate-600">
+          <span class="font-semibold ${info.textColor}">${info.name}</span> - ${info.desc}
+        </p>
+      `;
+      console.log("Info box updated to:", info.name);
+    }
+
+    // Update debug display
+    if (debugInfo && debugSelected) {
+      debugSelected.textContent = method;
+      debugButtonText.textContent = payBtnText.textContent;
+      debugInfo.classList.remove("hidden");
+    }
+  }
+
+  // Dropdown change handler - Try multiple methods to ensure it works
+  if (paymentMethodSelect) {
+    console.log("Payment method select found, attaching listeners");
+    debugStatus.textContent = "Script loaded, listeners attached";
+    
+    // Method 1: addEventListener for "change"
+    paymentMethodSelect.addEventListener("change", (e) => {
+      console.log("Event: change - Payment method changed to:", e.target.value);
+      updatePaymentMethodUI(e.target.value);
+    });
+    
+    // Method 2: addEventListener for "input"
+    paymentMethodSelect.addEventListener("input", (e) => {
+      console.log("Event: input - Payment method input:", e.target.value);
+      updatePaymentMethodUI(e.target.value);
+    });
+
+    // Method 3: Direct property assignment
+    paymentMethodSelect.onchange = function(e) {
+      console.log("Event: onchange - Payment method changed to:", this.value);
+      updatePaymentMethodUI(this.value);
+    };
+    
+    // Initialize with current value on page load
+    const currentValue = paymentMethodSelect.value;
+    console.log("Initial payment method:", currentValue);
+    updatePaymentMethodUI(currentValue);
+  } else {
+    console.error("Payment method select element not found!");
+    debugStatus.textContent = "ERROR: Select element not found";
+  }
 
   backBtn.addEventListener("click", () => {
     window.history.back();
@@ -74,33 +181,36 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   payNowBtn.addEventListener("click", async () => {
-    // 1. Open the new tab IMMEDIATELY to bypass popup blockers (user activation context)
-    const esewaWindow = window.open("about:blank", "_blank");
+    console.log("Pay button clicked, selected method:", selectedPaymentMethod);
 
     try {
       // Show Loading State
       payNowBtn.disabled = true;
       loadingTitle.textContent = "Initiating Payment";
-      loadingMsg.textContent = "Connecting to eSewa secure gateway...";
+      
+      const gatewayName = selectedPaymentMethod === "khalti" ? "Khalti" : "eSewa";
+      loadingMsg.textContent = `Connecting to ${gatewayName} secure gateway...`;
       loadingOverlay.classList.remove("hidden");
 
+      // Determine endpoint
+      const endpoint = selectedPaymentMethod === "khalti" 
+        ? `${API_BASE}/patient/khalti_payment_init.php`
+        : `${API_BASE}/patient/esewa_payment_init.php`;
+
       // Call Backend to Init Payment
-      const response = await fetch(
-        `${API_BASE}/patient/esewa_payment_init.php`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            doctor_id: doctorId,
-            avail_id: parseInt(availId),
-            reason_for_visit: reasonValue || "Consultation",
-          }),
-        },
-      );
+      const response = await fetch(endpoint, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          doctor_id: doctorId,
+          avail_id: parseInt(availId),
+          reason_for_visit: reasonValue || "Consultation",
+        }),
+      });
 
       if (response.status === 504 || response.status === 502) {
-        throw new Error("eSewa payment server is currently undergoing maintenance or is slow. Please try again in a few minutes.");
+        throw new Error(`${gatewayName} payment server is currently undergoing maintenance or is slow. Please try again in a few minutes.`);
       }
 
       if (!response.ok) {
@@ -115,19 +225,30 @@ document.addEventListener("DOMContentLoaded", async () => {
         throw new Error(result.message || "Failed to start payment process");
       }
 
-      // 2. Redirect the already-opened new tab to eSewa redirection helper
-      if (esewaWindow) {
-        // Resolve absolute URL for the redirection helper relative to page
-        const absoluteRedirectUrl = `${API_BASE}/patient/esewa_redirect.php?payment_id=${result.payment_id}`;
-        esewaWindow.location.href = absoluteRedirectUrl;
-      } else {
-        // Fallback if popup was completely blocked
-        window.open(`${API_BASE}/patient/esewa_redirect.php?payment_id=${result.payment_id}`, "_blank");
+      // Open popup window for payment redirect
+      const paymentWindow = window.open("", "_blank");
+      if (!paymentWindow) {
+        throw new Error("Popup blocked. Please allow popups for this site.");
       }
 
-      // 3. Start "watching" the payment status in the background
+      // Determine redirect path
+      let redirectPath;
+      if (selectedPaymentMethod === "khalti" && result.payment_url) {
+        // Use Khalti's payment URL directly if available
+        redirectPath = result.payment_url;
+      } else {
+        // Use our redirect endpoints
+        redirectPath = selectedPaymentMethod === "khalti"
+          ? `${API_BASE}/patient/khalti_redirect.php?payment_id=${result.payment_id}`
+          : `${API_BASE}/patient/esewa_redirect.php?payment_id=${result.payment_id}`;
+      }
+      
+      console.log("Redirecting to:", redirectPath);
+      paymentWindow.location.href = redirectPath;
+
+      // Start polling
       if (result.payment_id) {
-        startPolling(result.payment_id, esewaWindow);
+        startPolling(result.payment_id, paymentWindow);
       }
     } catch (error) {
       console.error("Payment Error:", error);

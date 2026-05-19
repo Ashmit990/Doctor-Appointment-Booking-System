@@ -55,6 +55,73 @@ if (!function_exists('esewa_payment_config')) {
     }
 }
 
+if (!function_exists('khalti_payment_config')) {
+    function khalti_payment_config(): array
+    {
+        $apiBase = rtrim(getenv('KHALTI_API_BASE') ?: 'https://a.khalti.com/api/v2', '/');
+        $publicKey = trim(getenv('KHALTI_PUBLIC_KEY') ?: '3c1ddff45abd4f13ae9ff17051c305c7');
+        $secretKey = trim(getenv('KHALTI_SECRET_KEY') ?: '34276386a1a346d4b9f43cacb99fc0d6');
+        $returnUrl = trim(getenv('KHALTI_RETURN_URL') ?: patient_app_base_url() . '/api/patient/khalti_payment_callback.php');
+
+        return [
+            'api_base' => $apiBase,
+            'public_key' => $publicKey,
+            'secret_key' => $secretKey,
+            'return_url' => $returnUrl,
+        ];
+    }
+}
+
+if (!function_exists('khalti_verify_transaction')) {
+    function khalti_verify_transaction(string $pidx, string $secret_key): array
+    {
+        $config = khalti_payment_config();
+        
+        $url = $config['api_base'] . '/transaction/lookup/';
+        
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Key ' . $config['secret_key'],
+                'Content-Type: application/json',
+            ],
+            CURLOPT_POSTFIELDS => json_encode(['pidx' => $pidx]),
+            CURLOPT_POST => true,
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        if ($response === false) {
+            return [
+                'success' => false,
+                'status' => 'Unknown',
+                'message' => $curlError ?: 'Unable to contact Khalti verification endpoint'
+            ];
+        }
+
+        $decoded = json_decode($response, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return [
+                'success' => false,
+                'status' => 'Unknown',
+                'message' => 'Invalid JSON response from Khalti'
+            ];
+        }
+
+        return [
+            'success' => isset($decoded['status']) && $decoded['status'] === 'Completed',
+            'status' => $decoded['status'] ?? 'Unknown',
+            'data' => $decoded
+        ];
+    }
+}
+
 if (!function_exists('esewa_verify_signature')) {
     function esewa_verify_signature(array $decoded_data): bool
     {
