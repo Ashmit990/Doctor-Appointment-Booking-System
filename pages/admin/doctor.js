@@ -138,6 +138,13 @@ function viewDoctorDetails(doctorId) {
                                     class="w-full mt-1 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-teal focus:border-transparent outline-none transition-all font-semibold" 
                                     value="${doc.consultation_fee || 0}">
                             </div>
+                            <div class="md:col-span-2">
+                                <p class="text-xs text-gray-400 mb-1">Availability Status</p>
+                                <select id="edit_is_available" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-teal focus:border-transparent outline-none transition-all font-semibold">
+                                    <option value="1" ${doc.is_available == 1 ? 'selected' : ''}>Available</option>
+                                    <option value="0" ${doc.is_available == 0 ? 'selected' : ''}>Unavailable</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                     
@@ -198,6 +205,7 @@ function viewDoctorDetails(doctorId) {
 
 function updateDoctorProfile(doctorId) {
   const fee = document.getElementById("edit_consultation_fee").value;
+  const isAvailable = document.getElementById("edit_is_available").value;
 
   if (fee === "" || parseFloat(fee) < 0) {
     showToast("Please enter a valid consultation fee", true);
@@ -211,6 +219,7 @@ function updateDoctorProfile(doctorId) {
     body: JSON.stringify({
       doctor_id: doctorId,
       consultation_fee: fee,
+      is_available: parseInt(isAvailable),
     }),
   })
     .then((response) => response.json())
@@ -281,7 +290,7 @@ function loadDoctors(page = 1) {
       } else {
         showToast("Error loading doctors");
         document.getElementById("doctors-table-body").innerHTML =
-          '<tr><td colspan="5" class="text-center py-8 text-red-500">Failed to load doctors</td></tr>';
+          '<tr><td colspan="6" class="text-center py-8 text-red-500">Failed to load doctors</td></tr>';
       }
     })
     .catch((error) => {
@@ -295,12 +304,14 @@ function displayDoctors() {
 
   if (!filteredDoctors.length) {
     tbody.innerHTML =
-      '<tr><td colspan="5" class="text-center py-8 text-gray-500">No doctors found</td></tr>';
+      '<tr><td colspan="6" class="text-center py-8 text-gray-500">No doctors found</td></tr>';
     return;
   }
 
   let html = "";
   for (const doc of filteredDoctors) {
+    const isAvailableVal = doc.is_available === null ? 1 : parseInt(doc.is_available);
+    const isAvailable = isAvailableVal === 1;
     html += `
             <tr class="border-b hover:bg-gray-50">
                 <td class="px-5 py-4">
@@ -311,6 +322,13 @@ function displayDoctors() {
                 <td class="px-5 py-4 text-sm">${escapeHtml(doc.specialization || "N/A")}</td>
                 <td class="px-5 py-4 text-sm hidden md:table-cell">${escapeHtml(doc.email || "")}</td>
                 <td class="px-5 py-4 text-sm">${doc.total_appointments || 0}</td>
+                <td class="px-5 py-4 text-sm">
+                    <button onclick="toggleAvailability('${doc.user_id}', ${isAvailableVal})" 
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${isAvailable ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'bg-red-50 text-red-700 hover:bg-red-100'}">
+                        <span class="w-1.5 h-1.5 rounded-full ${isAvailable ? 'bg-emerald-500' : 'bg-red-500'}"></span>
+                        ${isAvailable ? 'Available' : 'Unavailable'}
+                    </button>
+                </td>
                 <td class="px-5 py-4">
                     <button onclick="openDeleteDoctorConfirm('${doc.user_id}')" class="text-xs px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 font-semibold transition">
                         Delete
@@ -320,6 +338,32 @@ function displayDoctors() {
         `;
   }
   tbody.innerHTML = html;
+}
+
+function toggleAvailability(doctorId, currentStatus) {
+  const nextStatus = currentStatus === 1 ? 0 : 1;
+  fetch("../../api/admin/doctors.php", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      doctor_id: doctorId,
+      is_available: nextStatus
+    }),
+  })
+    .then((response) => response.json())
+    .then((result) => {
+      if (result.status === "success") {
+        showToast("✓ Availability updated successfully!");
+        loadDoctors(currentPage);
+      } else {
+        showToast(result.message || "Error updating availability", true);
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      showToast("Error updating availability", true);
+    });
 }
 
 function filterDoctors() {

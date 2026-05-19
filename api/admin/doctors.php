@@ -35,6 +35,7 @@ try {
                     dp.consultation_fee,
                     dp.bio,
                     dp.age,
+                    dp.is_available,
                     (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id) as total_appointments,
                     (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id AND status = 'Completed') as completed_appointments
                 FROM users u
@@ -65,6 +66,7 @@ try {
                     u.email,
                     COALESCE(dp.specialization, 'Not Specified') as specialization,
                     dp.consultation_fee,
+                    dp.is_available,
                     (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id) as total_appointments
                 FROM users u
                 LEFT JOIN doctor_profiles dp ON u.user_id = dp.user_id
@@ -105,6 +107,7 @@ try {
         $bio            = $input['bio']              ?? null;
         $age            = $input['age']              ?? null;
         $consultation_fee = $input['consultation_fee'] ?? null;
+        $is_available   = isset($input['is_available']) ? $input['is_available'] : null;
 
         if (!$doctor_id) throw new Exception('Doctor ID required');
 
@@ -156,6 +159,7 @@ try {
         if ($bio !== null) { $profileUpdates[] = "bio = ?"; $profileParams[] = $bio; $profileTypes .= "s"; }
         if ($age !== null) { $profileUpdates[] = "age = ?"; $profileParams[] = (int)$age; $profileTypes .= "i"; }
         if ($consultation_fee !== null) { $profileUpdates[] = "consultation_fee = ?"; $profileParams[] = (float)$consultation_fee; $profileTypes .= "d"; }
+        if ($is_available !== null) { $profileUpdates[] = "is_available = ?"; $profileParams[] = (int)$is_available; $profileTypes .= "i"; }
 
         if (!empty($profileUpdates)) {
             $profileParams[] = $doctor_id;

@@ -8,7 +8,7 @@ $sql = "
         (SELECT COUNT(*) FROM appointments a WHERE a.doctor_id = u.user_id) AS total_appointments
     FROM users u
     INNER JOIN doctor_profiles dp ON u.user_id = dp.user_id
-    WHERE u.role = 'Doctor'
+    WHERE u.role = 'Doctor' AND COALESCE(dp.is_available, 1) = 1
     ORDER BY total_appointments DESC, consultation_fee DESC
 ";
 $result = $conn->query($sql);
