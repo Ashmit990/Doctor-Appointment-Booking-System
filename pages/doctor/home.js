@@ -39,6 +39,63 @@ function updateDoctorNotificationPanelPosition() {
     panel.style.left = `${Math.round(left)}px`;
 }
 
+function parseNotificationDateToISO(message) {
+    if (!message) return null;
+
+    const text = String(message);
+    const isoMatch = text.match(/\b(\d{4}-\d{2}-\d{2})\b/);
+    if (isoMatch) return isoMatch[1];
+
+    const friendlyMatch = text.match(/\b([A-Z][a-z]{2,8} \d{1,2}, \d{4})\b/);
+    if (friendlyMatch) {
+        const parsed = new Date(`${friendlyMatch[1]} 00:00:00`);
+        if (!Number.isNaN(parsed.getTime())) {
+            const year = parsed.getFullYear();
+            const month = String(parsed.getMonth() + 1).padStart(2, '0');
+            const day = String(parsed.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+    }
+
+    return null;
+}
+
+function parseNotificationAppointmentId(message) {
+    if (!message) return null;
+    const match = String(message).match(/Appointment ref\.\s*#(\d+)/i);
+    return match ? parseInt(match[1], 10) : null;
+}
+
+function resolveDoctorNotificationTarget(item) {
+    const title = String(item?.title || '').toLowerCase();
+    const message = String(item?.message || '');
+
+    if (title.includes('account') || title.includes('admin')) {
+        return { url: 'profile.html' };
+    }
+
+    if (title.includes('earning') || title.includes('payment')) {
+        return { url: 'earnings.html' };
+    }
+
+    if (
+        title.includes('appointment') ||
+        title.includes('reminder') ||
+        title.includes('follow-up') ||
+        title.includes('follow up') ||
+        title.includes('schedule')
+    ) {
+        const date = parseNotificationDateToISO(message);
+        const appointmentId = parseNotificationAppointmentId(message);
+        const url = date
+            ? `schedules.html?date=${encodeURIComponent(date)}${appointmentId ? `&apt_id=${encodeURIComponent(appointmentId)}` : ''}`
+            : 'schedules.html';
+        return { url };
+    }
+
+    return { url: 'home.html' };
+}
+
 async function loadDoctorNotifications() {
     const r = await fetch(`${DOCTOR_API_BASE}/doctor/notifications.php`, { credentials: 'include' });
     const j = await r.json();
@@ -93,6 +150,9 @@ function renderDoctorNotificationList(rows) {
                     updateDoctorNotificationBadge(statsJ.data.stats.unread_notifications || 0);
                 }
             }
+
+            const target = resolveDoctorNotificationTarget(item);
+            window.location.href = target.url;
         };
         listEl.appendChild(wrap);
     });
