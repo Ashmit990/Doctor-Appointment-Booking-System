@@ -318,7 +318,7 @@
         <div class="bg-primary/5 border border-primary/10 rounded-xl p-4 mb-8 flex items-center gap-3">
           <i data-lucide="info" class="w-5 h-5 primary-color"></i>
           <p class="text-gray-700 font-medium">
-            Your average income per appointment is <span id="netIncomeText" class="primary-color font-bold">Rs.
+            Your income per appointment is <span id="netIncomeText" class="primary-color font-bold">Rs.
               0.00</span>
             <span class="text-xs text-gray-500 font-normal ml-1">(after 10% platform fee deduction)</span>
           </p>
@@ -353,6 +353,7 @@
 
   <script>
     let earningsData = [];
+    let doctorConsultationFee = 0;
 
     function updateCurrentDate() {
       const options = {
@@ -378,15 +379,34 @@
 
         if (result.status === "success") {
           earningsData = result.data || [];
-          renderDashboard();
         } else {
           earningsData = [];
-          renderDashboard();
         }
       } catch (error) {
         console.error("Fetch error:", error);
         earningsData = [];
-        renderDashboard();
+      }
+    }
+
+    async function loadDoctorProfile() {
+      try {
+        const response = await fetch(
+          "../../api/doctor/get_doctor_info.php?t=" + Date.now(),
+          {
+            credentials: "include",
+            headers: { "Cache-Control": "no-cache" },
+          },
+        );
+        const result = await response.json();
+
+        if (result.status === "success" && result.data) {
+          doctorConsultationFee = parseFloat(result.data.consultation_fee || 0);
+        } else {
+          doctorConsultationFee = 0;
+        }
+      } catch (error) {
+        console.error("Profile fetch error:", error);
+        doctorConsultationFee = 0;
       }
     }
 
@@ -398,10 +418,11 @@
       const totalCount = earningsData.length;
       const completedCount = earningsData.filter(item => item.status === 'Completed').length;
 
-      // 10% platform fee deduction
+      // 10% platform fee deduction from the doctor's consultation fee
       const platformFeePercent = 10;
-      const totalIncome = totalGross * (1 - platformFeePercent / 100);
-      const avgIncome = totalCount > 0 ? (totalIncome / totalCount) : 0;
+      const netIncomePerAppointment = doctorConsultationFee > 0
+        ? doctorConsultationFee * (1 - platformFeePercent / 100)
+        : 0;
 
       document.getElementById("totalEarnings").textContent =
         `Rs. ${totalGross.toFixed(2)}`;
@@ -409,7 +430,7 @@
       document.getElementById("completedCount").textContent = completedCount;
 
       document.getElementById("netIncomeText").textContent =
-        `Rs. ${avgIncome.toFixed(2)}`;
+        `Rs. ${netIncomePerAppointment.toFixed(2)}`;
 
       renderTable();
       lucide.createIcons();
@@ -476,7 +497,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       updateCurrentDate();
-      loadEarnings();
+      Promise.all([loadDoctorProfile(), loadEarnings()]).then(() => renderDashboard());
       lucide.createIcons();
     });
   </script>
