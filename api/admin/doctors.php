@@ -19,6 +19,14 @@ try {
         $offset = ($page - 1) * $limit;
         $doctor_id = $_GET['doctor_id'] ?? null;
 
+        // Dynamic check: Check if 'is_available' exists in database. If not, fallback gracefully.
+        $has_avail = false;
+        $check_col = $conn->query("SHOW COLUMNS FROM doctor_profiles LIKE 'is_available'");
+        if ($check_col && $check_col->num_rows > 0) {
+            $has_avail = true;
+        }
+        $avail_select = $has_avail ? "dp.is_available" : "1 AS is_available";
+
         if ($doctor_id) {
             // Get single doctor with ALL details - Using correct column names
             $stmt = $conn->prepare("
@@ -35,7 +43,7 @@ try {
                     dp.consultation_fee,
                     dp.bio,
                     dp.age,
-                    dp.is_available,
+                    {$avail_select},
                     (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id) as total_appointments,
                     (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id AND status = 'Completed') as completed_appointments
                 FROM users u
@@ -66,7 +74,7 @@ try {
                     u.email,
                     COALESCE(dp.specialization, 'Not Specified') as specialization,
                     dp.consultation_fee,
-                    dp.is_available,
+                    {$avail_select},
                     (SELECT COUNT(*) FROM appointments WHERE doctor_id = u.user_id) as total_appointments
                 FROM users u
                 LEFT JOIN doctor_profiles dp ON u.user_id = dp.user_id
