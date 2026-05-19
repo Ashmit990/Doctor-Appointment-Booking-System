@@ -1,7 +1,6 @@
 let doctorsList = [];
 let selectedDoctor = null;
 let rescheduleAppointmentId = null;
-let pendingBookingRequest = null;
 let _pendingRescheduleId = null;
 
 function notifyParentResize() {
@@ -34,61 +33,6 @@ function updatePrice() {
   document.getElementById("totalPrice").textContent = doc
     ? formatMoney(doc.consultation_fee)
     : "—";
-}
-
-function getSelectedPaymentMethod() {
-  const checked = document.querySelector('input[name="paymentMethod"]:checked');
-  return checked ? checked.value : "esewa";
-}
-
-function setPaymentStatusMessage(message, variant = "info") {
-  const box = document.getElementById("paymentStatusMessage");
-  if (!box) return;
-  box.textContent = message;
-  box.className = "mt-3 rounded-xl px-3 py-2 text-xs";
-  if (variant === "error") {
-    box.classList.add("bg-red-50", "text-red-700", "border", "border-red-200");
-  } else if (variant === "success") {
-    box.classList.add(
-      "bg-emerald-50",
-      "text-emerald-700",
-      "border",
-      "border-emerald-200",
-    );
-  } else {
-    box.classList.add(
-      "bg-slate-50",
-      "text-slate-500",
-      "border",
-      "border-slate-100",
-    );
-  }
-}
-
-function openPaymentPanel() {
-  const doctorId = document.getElementById("doctor").value;
-  const availId = document.getElementById("availId").value;
-  const reason = document.getElementById("description").value;
-  const doctorName = selectedDoctor
-    ? selectedDoctor.full_name
-    : document.getElementById("doctor").selectedOptions?.[0]?.textContent ||
-      "—";
-  const specialization = selectedDoctor
-    ? selectedDoctor.specialization
-    : "Consultation";
-  const dateValue = document.getElementById("date").value || "—";
-  const timeValue =
-    document.getElementById("time").selectedOptions?.[0]?.textContent || "—";
-
-  const paymentUrl = `payment.html?doctor_id=${encodeURIComponent(doctorId)}&avail_id=${encodeURIComponent(availId)}&reason=${encodeURIComponent(reason)}&doctor_name=${encodeURIComponent(doctorName)}&specialization=${encodeURIComponent(specialization)}&date=${encodeURIComponent(dateValue)}&time=${encodeURIComponent(timeValue)}`;
-
-  window.location.href = paymentUrl;
-}
-
-function closePaymentPanel() {
-  const panel = document.getElementById("paymentPanel");
-  if (panel) panel.classList.add("hidden");
-  notifyParentResize();
 }
 
 function setBookingConflictMessage(message = "") {
@@ -138,131 +82,6 @@ async function getSameDayBookingConflict(dateStr, timeStr, doctorId, excludeAppo
   } catch (err) {
     console.error("Conflict check failed:", err);
     return null;
-  }
-}
-
-async function startEsewaPayment() {
-  if (!pendingBookingRequest) {
-    setPaymentStatusMessage(
-      "No booking data found. Please submit the form again.",
-      "error",
-    );
-    return;
-  }
-
-  const proceedBtn = document.getElementById("proceedPaymentBtn");
-  if (proceedBtn) {
-    proceedBtn.disabled = true;
-    proceedBtn.textContent = "Redirecting to eSewa...";
-  }
-
-  setPaymentStatusMessage("Creating a secure payment request...", "info");
-
-  // Open the new tab IMMEDIATELY to bypass popup blockers (user activation context)
-  const esewaWindow = window.open('about:blank', '_blank');
-
-  try {
-    const r = await fetch(`${API_BASE}/patient/esewa_payment_init.php`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        doctor_id: String(pendingBookingRequest.doctorId).trim(),
-        avail_id: parseInt(pendingBookingRequest.availId) || 0,
-        reason_for_visit: String(pendingBookingRequest.description).trim(),
-      }),
-    });
-
-    if (r.status === 504 || r.status === 502) {
-      throw new Error("eSewa server timeout (Maintenance). Please try again in a moment.");
-    }
-
-    if (!r.ok) {
-      throw new Error("Payment server error (" + r.status + ").");
-    }
-
-    const j = await r.json();
-
-    if (j.status !== "success") {
-      setPaymentStatusMessage(
-        j.message || "Could not start eSewa payment.",
-        "error",
-      );
-      if (
-        /already have an appointment|same day/i.test(String(j.message || ""))
-      ) {
-        setBookingConflictMessage(j.message);
-      }
-      if (proceedBtn) {
-        proceedBtn.disabled = false;
-        proceedBtn.textContent = "Continue to eSewa";
-      }
-      if (esewaWindow) esewaWindow.close();
-      return;
-    }
-
-    setPaymentStatusMessage(
-      "Redirecting to eSewa for payment verification...",
-      "success",
-    );
-
-    // Redirect the already-opened new tab to eSewa
-    if (esewaWindow) {
-      esewaWindow.location.href = j.payment_url;
-    } else {
-      window.open(j.payment_url, "_blank");
-    }
-
-    if (!esewaWindow) {
-      setPaymentStatusMessage(
-        "Could not open payment tab. Please check popup blocker.",
-        "error",
-      );
-      if (proceedBtn) {
-        proceedBtn.disabled = false;
-        proceedBtn.textContent = "Continue to eSewa";
-      }
-      return;
-    }
-
-    // Poll to check if payment was completed
-    let checkCount = 0;
-    const checkInterval = setInterval(async () => {
-      checkCount++;
-      // Check if payment tab was closed by user
-      if (esewaWindow.closed) {
-        clearInterval(checkInterval);
-        setPaymentStatusMessage(
-          "Payment tab closed. Checking payment status...",
-          "info",
-        );
-        // Wait a bit longer for backend to update payment status
-        setTimeout(() => {
-          parent.postMessage(
-            {
-              type: "payment-result",
-              status: "checking", // Will reload appointments on parent side
-            },
-            "*",
-          );
-        }, 2000);
-        return;
-      }
-      // Stop checking after 5 minutes
-      if (checkCount > 300) {
-        clearInterval(checkInterval);
-      }
-    }, 1000);
-  } catch (err) {
-    console.error(err);
-    setPaymentStatusMessage(
-      "Something went wrong while starting the payment.",
-      "error",
-    );
-    if (proceedBtn) {
-      proceedBtn.disabled = false;
-      proceedBtn.textContent = "Continue to eSewa";
-    }
   }
 }
 
@@ -466,9 +285,6 @@ async function loadRescheduleContext(appointmentId) {
 
 const bookingForm = document.getElementById("bookingForm");
 const cancelBooking = document.getElementById("cancelBooking");
-const backToFormBtn = document.getElementById("backToFormBtn");
-const proceedPaymentBtn = document.getElementById("proceedPaymentBtn");
-
 window.addEventListener("message", (event) => {
   if (!event.data) return;
 
@@ -482,24 +298,6 @@ window.addEventListener("message", (event) => {
     }
   }
 
-  // Forward payment result from eSewa callback to parent dashboard
-  if (event.data.type === "payment-result") {
-    console.log(
-      "Payment result received in booking iframe, forwarding to parent:",
-      event.data,
-    );
-    window.parent.postMessage(
-      {
-        type: "payment-result",
-        status: event.data.status,
-        title: event.data.title,
-        message: event.data.message,
-        success: event.data.success,
-        appointment_id: event.data.appointment_id,
-      },
-      "*",
-    );
-  }
 });
 
 cancelBooking?.addEventListener("click", () => {
@@ -514,16 +312,6 @@ cancelBooking?.addEventListener("click", () => {
   ds.style.cursor = "";
   window.parent.postMessage({ type: "booking:close" }, "*");
 });
-
-backToFormBtn?.addEventListener("click", () => {
-  pendingBookingRequest = null;
-  closePaymentPanel();
-  setPaymentStatusMessage(
-    "The payment will be confirmed by eSewa before the appointment is created.",
-  );
-});
-
-proceedPaymentBtn?.addEventListener("click", startEsewaPayment);
 
 document.getElementById("specialization").addEventListener("change", () => {
   onSpecializationChange();
@@ -706,16 +494,6 @@ bookingForm.addEventListener("submit", async (e) => {
   }
   setBookingConflictMessage("");
 
-  if (!rescheduleAppointmentId) {
-    pendingBookingRequest = {
-      doctorId,
-      availId,
-      description,
-    };
-    openPaymentPanel();
-    return;
-  }
-
   try {
     if (rescheduleAppointmentId) {
       const r = await fetch(`${API_BASE}/patient/reschedule.php`, {
@@ -772,9 +550,7 @@ bookingForm.addEventListener("submit", async (e) => {
     document.getElementById("patientName").value = patientName;
     rescheduleAppointmentId = null;
     document.getElementById("confirmBtn").textContent = "Confirm Booking";
-    pendingBookingRequest = null;
     setBookingConflictMessage("");
-    closePaymentPanel();
 
     // Notify parent — parent handles the single success popup
     window.parent.postMessage({ type: "patient-booking-done" }, "*");
