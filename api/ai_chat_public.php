@@ -47,12 +47,12 @@ try {
             ORDER BY u.full_name ASC
             LIMIT 20
         ");
-        if ($res && $res->num_rows > 0) {
+            if ($res && $res->num_rows > 0) {
             $docs = [];
             while ($row = $res->fetch_assoc()) {
                 $docs[] = "- {$row['full_name']} ({$row['specialization']})";
             }
-            $doctorContext = "\n\nCurrently available doctors on our platform:\n" . implode("\n", $docs);
+                $doctorContext = "\n\nDoctors on our platform:\n" . implode("\n", $docs);
         }
         $conn->close();
     }

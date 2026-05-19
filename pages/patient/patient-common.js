@@ -5,7 +5,17 @@ async function requirePatientSession() {
   const r = await fetch(`${API_BASE}/auth/session_info.php`, {
     credentials: "include",
   });
-  const j = await r.json();
+  const text = await r.text();
+  let j = null;
+
+  if (text) {
+    try {
+      j = JSON.parse(text);
+    } catch (err) {
+      throw new Error(`Invalid session response: ${text.slice(0, 160)}`);
+    }
+  }
+
   if (!j.logged_in || j.role !== "Patient") {
     window.location.href = "../auth/login.html";
     return false;

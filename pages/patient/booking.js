@@ -19,6 +19,29 @@ function notifyParentResize() {
   }
 }
 
+async function fetchJsonSafe(url, options = {}) {
+  const response = await fetch(url, options);
+  const bodyText = await response.text();
+  let data = null;
+
+  if (bodyText) {
+    try {
+      data = JSON.parse(bodyText);
+    } catch (parseError) {
+      const preview = bodyText.slice(0, 160).replace(/\s+/g, " ");
+      throw new Error(`Invalid JSON response from ${url}: ${preview}`);
+    }
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message || `Request failed (${response.status}) from ${url}`,
+    );
+  }
+
+  return data;
+}
+
 function formatMoney(n) {
   if (n == null || n === "") return "—";
   const x = Number(n);
@@ -53,11 +76,10 @@ function setBookingConflictMessage(message = "") {
 async function getSameDayBookingConflict(dateStr, timeStr, doctorId, excludeAppointmentId = null) {
   if (!dateStr || !timeStr || !doctorId) return null;
   try {
-    const r = await fetch(
+    const j = await fetchJsonSafe(
       `${API_BASE}/patient/appointments_by_day.php?date=${encodeURIComponent(dateStr)}`,
       { credentials: "include" },
     );
-    const j = await r.json();
     if (j.status !== "success" || !Array.isArray(j.data)) return null;
 
     const targetTime = String(timeStr).substring(0, 5);
@@ -86,10 +108,9 @@ async function getSameDayBookingConflict(dateStr, timeStr, doctorId, excludeAppo
 }
 
 async function loadDoctors() {
-  const r = await fetch(`${API_BASE}/patient/doctors.php`, {
+  const j = await fetchJsonSafe(`${API_BASE}/patient/doctors.php`, {
     credentials: "include",
   });
-  const j = await r.json();
   if (j.status !== "success") throw new Error(j.message || "Doctors failed");
   doctorsList = j.data || [];
 
@@ -176,11 +197,10 @@ async function loadDates(doctorId) {
     return;
   }
 
-  const r = await fetch(
+  const j = await fetchJsonSafe(
     `${API_BASE}/patient/availability.php?action=dates&doctor_id=${encodeURIComponent(doctorId)}`,
     { credentials: "include" },
   );
-  const j = await r.json();
   dateSel.innerHTML = '<option value="">Select date</option>';
   if (j.status !== "success" || !j.data || !j.data.length) {
     const opt = document.createElement("option");
@@ -208,11 +228,10 @@ async function loadSlots(doctorId, dateStr) {
     return;
   }
 
-  const r = await fetch(
+  const j = await fetchJsonSafe(
     `${API_BASE}/patient/availability.php?action=slots&doctor_id=${encodeURIComponent(doctorId)}&date=${encodeURIComponent(dateStr)}`,
     { credentials: "include" },
   );
-  const j = await r.json();
   timeSel.innerHTML = '<option value="">Select time</option>';
   if (j.status !== "success" || !j.data || !j.data.length) {
     const opt = document.createElement("option");
@@ -233,11 +252,10 @@ async function loadSlots(doctorId, dateStr) {
 
 async function loadRescheduleContext(appointmentId) {
   rescheduleAppointmentId = appointmentId;
-  const r = await fetch(
+  const j = await fetchJsonSafe(
     `${API_BASE}/patient/appointment_detail.php?id=${appointmentId}`,
     { credentials: "include" },
   );
-  const j = await r.json();
   if (j.status !== "success" || !j.data) {
     alert(j.message || "Could not load appointment");
     return;
@@ -348,11 +366,10 @@ async function checkBookingConflicts() {
 
   // Fetch all appointments for that day to check for both doctor and time conflicts
   try {
-    const r = await fetch(
+    const j = await fetchJsonSafe(
       `${API_BASE}/patient/appointments_by_day.php?date=${encodeURIComponent(dateStr)}`,
       { credentials: "include" },
     );
-    const j = await r.json();
     if (j.status !== "success" || !Array.isArray(j.data)) return;
 
     const targetDocId = String(doctorId);
@@ -433,10 +450,9 @@ bookingForm.addEventListener("submit", async (e) => {
 
   // --- Profile completion check ---
   try {
-    const profileRes = await fetch(`${API_BASE}/patient/profile.php`, {
+    const profileJson = await fetchJsonSafe(`${API_BASE}/patient/profile.php`, {
       credentials: "include",
     });
-    const profileJson = await profileRes.json();
     if (profileJson.status === "success" && profileJson.data) {
       const p = profileJson.data;
       const fields = [
@@ -496,7 +512,7 @@ bookingForm.addEventListener("submit", async (e) => {
 
   try {
     if (rescheduleAppointmentId) {
-      const r = await fetch(`${API_BASE}/patient/reschedule.php`, {
+      const j = await fetchJsonSafe(`${API_BASE}/patient/reschedule.php`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -505,13 +521,12 @@ bookingForm.addEventListener("submit", async (e) => {
           avail_id: availId,
         }),
       });
-      const j = await r.json();
       if (j.status !== "success") {
         alert(j.message || "Reschedule failed");
         return;
       }
     } else {
-      const r = await fetch(`${API_BASE}/patient/book.php`, {
+      const j = await fetchJsonSafe(`${API_BASE}/patient/book.php`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -521,7 +536,6 @@ bookingForm.addEventListener("submit", async (e) => {
           reason_for_visit: description,
         }),
       });
-      const j = await r.json();
       if (j.status !== "success") {
         alert(j.message || "Booking failed");
         return;
@@ -565,9 +579,9 @@ bookingForm.addEventListener("submit", async (e) => {
   if (!ok) return;
 
   try {
-    const me = await fetch(`${API_BASE}/patient/me.php`, {
+    const me = await fetchJsonSafe(`${API_BASE}/patient/me.php`, {
       credentials: "include",
-    }).then((r) => r.json());
+    });
     if (me.status === "success" && me.data) {
       const nameField = document.getElementById("patientName");
       nameField.value = me.data.full_name || "";
