@@ -206,12 +206,13 @@ try {
             $stmt->close();
 
             // Delete appointments for this doctor
-            $stmt = $conn->prepare("DELETE FROM appointments WHERE doctor_id = ?");
-            $stmt->bind_param("s", $doctor_id);
-            if (!$stmt->execute()) {
-                throw new Exception($stmt->error);
-            }
-            $stmt->close();
+            // Skipping deletion of appointments to preserve them when a doctor is removed.
+            // $stmt = $conn->prepare("DELETE FROM appointments WHERE doctor_id = ?");
+            // $stmt->bind_param("s", $doctor_id);
+            // if (!$stmt->execute()) {
+            //     throw new Exception($stmt->error);
+            // }
+            // $stmt->close();
 
             // Delete doctor profile if present
             $stmt = $conn->prepare("DELETE FROM doctor_profiles WHERE user_id = ?");

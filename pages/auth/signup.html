@@ -1427,6 +1427,22 @@
           return "Please enter a valid Gmail address.";
         }
 
+        const domainParts = domain.split(".");
+        const tld = domainParts[domainParts.length - 1];
+        
+        // A list of common valid Top Level Domains to prevent typos/fake registrations (like .hi)
+        const commonValidTlds = [
+          "com", "org", "net", "edu", "gov", "mil", "int", "co", "io", "me", 
+          "info", "biz", "us", "uk", "ca", "au", "in", "de", "fr", "jp", "np", 
+          "tv", "online", "xyz", "site", "tech", "store", "shop", "app", "dev",
+          "care", "health", "clinic", "hospital", "medical", "dental", "ai", 
+          "cc", "space", "live", "club", "website", "icu", "top", "vip", "club"
+        ];
+
+        if (!commonValidTlds.includes(tld)) {
+          return `The email extension ".${tld}" is not a recognized domain.`;
+        }
+
         return null;
       }
 

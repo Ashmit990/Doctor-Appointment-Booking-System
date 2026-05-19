@@ -26,6 +26,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // Strict email format validation
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo json_encode(['success' => false, 'message' => 'Please enter a valid email address.']);
+        exit;
+    }
+
+    // Extract domain and TLD to check against valid extensions
+    $domain = substr(strrchr($email, "@"), 1);
+    $domain_parts = explode('.', $domain);
+    $tld = end($domain_parts);
+
+    $common_valid_tlds = [
+        "com", "org", "net", "edu", "gov", "mil", "int", "co", "io", "me", 
+        "info", "biz", "us", "uk", "ca", "au", "in", "de", "fr", "jp", "np", 
+        "tv", "online", "xyz", "site", "tech", "store", "shop", "app", "dev",
+        "care", "health", "clinic", "hospital", "medical", "dental", "ai", 
+        "cc", "space", "live", "club", "website", "icu", "top", "vip"
+    ];
+
+    if (!in_array($tld, $common_valid_tlds)) {
+        echo json_encode(['success' => false, 'message' => 'The email extension ".' . $tld . '" is not recognized.']);
+        exit;
+    }
+
+    // Double check DNS to ensure the domain actually exists
+    if (function_exists('checkdnsrr')) {
+        if (!in_array($domain, ['localhost', '127.0.0.1']) && !checkdnsrr($domain, 'MX') && !checkdnsrr($domain, 'A')) {
+            echo json_encode(['success' => false, 'message' => 'The email domain does not exist or cannot receive mail.']);
+            exit;
+        }
+    }
+
     // Check if email exists
     $stmt = $conn->prepare("SELECT user_id FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
