@@ -13,6 +13,7 @@ let currentEditId = null;
 let pendingDeleteAppointmentId = null;
 let currentStatusFilter = ""; // Store current filter
 let currentSearchText = ""; // Store current search
+let totalPagesFromAPI = 1; // Store total pages from API
 
 console.log("✓ appointments.js loading...");
 
@@ -128,6 +129,9 @@ async function loadAppointments(page = 1) {
     if (result && result.status === "success") {
       allAppointments = result.data || [];
       
+      // Store total pages from API
+      totalPagesFromAPI = result.pages || 1;
+      
       // Copy all appointments to filtered for display
       filteredAppointments = [...allAppointments];
 
@@ -169,7 +173,20 @@ function displayAppointments() {
 
     // Handle pagination for filtered results (10 items per page)
     const ITEMS_PER_PAGE = 10;
-    const totalPages = Math.ceil(filteredAppointments.length / ITEMS_PER_PAGE);
+    
+    // Calculate total pages based on whether filter is active
+    const hasActiveFilter = currentSearchText || currentStatusFilter;
+    let totalPages;
+    
+    if (hasActiveFilter) {
+      // For filtered results, calculate from filtered data
+      totalPages = Math.ceil(filteredAppointments.length / ITEMS_PER_PAGE);
+    } else {
+      // For unfiltered results, use total pages from API
+      totalPages = totalPagesFromAPI;
+    }
+    
+    console.log(`Display mode - Active filter: ${hasActiveFilter}, Total pages: ${totalPages}, Filtered count: ${filteredAppointments.length}`);
     
     // Ensure currentPage is within bounds
     if (currentPage > totalPages) {
@@ -549,6 +566,12 @@ function initPage() {
 
     updateCurrentDate();
     loadAppointments();
+
+    // Auto-refresh appointments every 30 seconds to show new bookings
+    setInterval(() => {
+      console.log("Auto-refreshing appointments...");
+      loadAppointments(currentPage);
+    }, 30000);
 
     const editForm = document.getElementById("editForm");
     if (editForm) {
