@@ -1068,19 +1068,18 @@ async function openAppointmentModal(aptId) {
       medicalReportBtn.classList.remove("hidden");
     }
     
-    // Ensure inputs are enabled
-    statusSelect.disabled = false;
+    // Ensure inputs are enabled for editing notes/rx but prevent changing status
+    statusSelect.disabled = true;
     completeBtn.disabled = false;
     completeBtn.classList.remove("opacity-50", "cursor-not-allowed");
-    statusSelect.classList.remove("opacity-50", "cursor-not-allowed");
+    statusSelect.classList.add("opacity-50", "cursor-not-allowed");
 
     notesReadonlyWrapper.classList.add("hidden");
     rxReadonlyWrapper.classList.add("hidden");
 
-    // Rebuild status options and remove 'Upcoming' for completed appointments
+    // Rebuild status options and ensure only 'Completed' is shown (status cannot be changed)
     statusSelect.innerHTML = `
       <option value="Completed">Completed</option>
-      <option value="Missed">Missed</option>
     `;
     statusSelect.value = apt.status || "Completed";
     notesInput.value = apt.doctor_comments || apt.doctor_notes || "";
@@ -1340,6 +1339,13 @@ async function submitConsultation() {
   if (followupLocked) {
     fDate = "";
     fTime = "";
+  }
+
+  // Prevent changing status if appointment is already completed
+  const originalApt = storedAppointmentsForModal.find((a) => a.apt_id == aptId);
+  if (originalApt && String(originalApt.status) === 'Completed' && statusVal !== 'Completed') {
+    showToast('Status cannot be changed for a completed appointment', 'error');
+    return;
   }
 
   console.log("=== SUBMITTING CONSULTATION ===");
