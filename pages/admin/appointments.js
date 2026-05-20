@@ -177,28 +177,32 @@ function displayAppointments() {
     // Calculate total pages based on whether filter is active
     const hasActiveFilter = currentSearchText || currentStatusFilter;
     let totalPages;
+    let pageAppointments;
     
     if (hasActiveFilter) {
-      // For filtered results, calculate from filtered data
+      // For filtered results, calculate from filtered data and slice based on currentPage
       totalPages = Math.ceil(filteredAppointments.length / ITEMS_PER_PAGE);
-    } else {
-      // For unfiltered results, use total pages from API
-      totalPages = totalPagesFromAPI;
-    }
-    
-    console.log(`Display mode - Active filter: ${hasActiveFilter}, Total pages: ${totalPages}, Filtered count: ${filteredAppointments.length}`);
-    
-    // Ensure currentPage is within bounds
-    if (currentPage > totalPages) {
-      currentPage = totalPages;
-    }
-    if (currentPage < 1) {
-      currentPage = 1;
-    }
+      
+      console.log(`Filter mode - Total pages: ${totalPages}, Filtered count: ${filteredAppointments.length}`);
+      
+      // Ensure currentPage is within bounds
+      if (currentPage > totalPages) {
+        currentPage = totalPages;
+      }
+      if (currentPage < 1) {
+        currentPage = 1;
+      }
 
-    const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIdx = startIdx + ITEMS_PER_PAGE;
-    const pageAppointments = filteredAppointments.slice(startIdx, endIdx);
+      const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+      const endIdx = startIdx + ITEMS_PER_PAGE;
+      pageAppointments = filteredAppointments.slice(startIdx, endIdx);
+    } else {
+      // For unfiltered API results: API already returned page data, display all 10 items directly
+      totalPages = totalPagesFromAPI;
+      pageAppointments = filteredAppointments; // Show all items from this API page
+      
+      console.log(`API mode - Current page: ${currentPage}, Total pages: ${totalPages}, Items in this page: ${filteredAppointments.length}`);
+    }
 
     let html = "";
     for (const apt of pageAppointments) {
@@ -295,7 +299,7 @@ function updatePaginationUI(currentPageNum, totalPagesNum) {
 }
 
 // ==================== FILTER ====================
-function filterAppointments() {
+async function filterAppointments() {
   const searchText = (
     document.getElementById("searchInput")?.value || ""
   ).toLowerCase();
@@ -309,7 +313,24 @@ function filterAppointments() {
 
   // If filter is active, do local filtering and pagination
   if (searchText || statusFilter) {
-    // Filter locally from currently loaded appointments
+    // First, fetch ALL appointments from API without pagination limit
+    try {
+      const response = await fetch(
+        "../../api/admin/appointments.php?page=1&limit=9999",
+        {
+          credentials: "include",
+        },
+      );
+      const result = await response.json();
+      if (result && result.status === "success") {
+        allAppointments = result.data || [];
+        console.log(`Loaded ${allAppointments.length} total appointments for filtering`);
+      }
+    } catch (err) {
+      console.error("Error fetching all appointments for filter:", err);
+    }
+
+    // Filter locally from ALL loaded appointments
     filteredAppointments = allAppointments.filter((apt) => {
       // Calculate display status (past Upcoming appointments show as Completed)
       let displayStatus = apt.status;
@@ -340,10 +361,9 @@ function filterAppointments() {
     currentPage = 1;
     displayAppointments();
   } else {
-    // No filter - show all appointments from allAppointments
-    filteredAppointments = [...allAppointments];
+    // No filter - reload from page 1 with pagination
     currentPage = 1;
-    displayAppointments();
+    loadAppointments(1);
   }
 }
 
