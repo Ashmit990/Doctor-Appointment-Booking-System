@@ -1077,6 +1077,11 @@ async function openAppointmentModal(aptId) {
     notesReadonlyWrapper.classList.add("hidden");
     rxReadonlyWrapper.classList.add("hidden");
 
+    // Rebuild status options and remove 'Upcoming' for completed appointments
+    statusSelect.innerHTML = `
+      <option value="Completed">Completed</option>
+      <option value="Missed">Missed</option>
+    `;
     statusSelect.value = apt.status || "Completed";
     notesInput.value = apt.doctor_comments || apt.doctor_notes || "";
     rxInput.value = apt.prescribed_medicines || apt.prescriptions || "";
@@ -1162,6 +1167,12 @@ async function openAppointmentModal(aptId) {
     rxReadonlyWrapper.classList.add("hidden");
     feedbackSec.classList.add("hidden");
 
+    // Rebuild status options for editable appointments (include Upcoming)
+    statusSelect.innerHTML = `
+      <option value="Upcoming">Upcoming</option>
+      <option value="Completed">Completed</option>
+      <option value="Missed">Missed</option>
+    `;
     statusSelect.value = apt.status === "Upcoming" ? "Upcoming" : apt.status;
     notesInput.value = apt.doctor_comments || apt.doctor_notes || "";
     rxInput.value = apt.prescribed_medicines || apt.prescriptions || "";
