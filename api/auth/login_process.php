@@ -42,12 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
 
-        $is_valid = false;
-        if (password_verify($password, $user['password_hash'])) {
-            $is_valid = true;
-        } else if ($password === $user['password_hash']) {
-            $is_valid = true;
-        }
+        $is_valid = password_verify($password, $user['password_hash']);
 
         if ($is_valid) {
             // Check if doctor is available
