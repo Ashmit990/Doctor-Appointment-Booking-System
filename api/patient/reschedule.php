@@ -1,4 +1,7 @@
 <?php
+ob_start();
+error_reporting(0);
+ini_set('display_errors', 0);
 require_once __DIR__ . '/bootstrap.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -11,9 +14,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $input = json_decode(file_get_contents('php://input'), true) ?: [];
 $appointment_id = isset($input['appointment_id']) ? (int) $input['appointment_id'] : 0;
 $avail_id = isset($input['avail_id']) ? (int) $input['avail_id'] : 0;
+$direct_date = trim($input['app_date'] ?? '');
+$direct_time = trim($input['app_time'] ?? '');
 
-if ($appointment_id < 1 || $avail_id < 1) {
-    echo json_encode(['status' => 'error', 'message' => 'appointment_id and avail_id required']);
+// Direct mode: follow-up reschedule passes app_date + app_time without a slot
+$direct_mode = ($avail_id < 1 && $direct_date !== '' && $direct_time !== '');
+
+if ($appointment_id < 1 || ($avail_id < 1 && !$direct_mode)) {
+    echo json_encode(['status' => 'error', 'message' => 'appointment_id and avail_id (or app_date + app_time) required']);
     $conn->close();
     exit;
 }
@@ -46,6 +54,21 @@ $doctor_id = $apt['doctor_id'];
 $conn->begin_transaction();
 
 try {
+    if ($direct_mode) {
+        // ── Direct mode (follow-up reschedule): just update the date/time ──────
+        $newDate = $direct_date;
+        $newTime = strlen($direct_time) === 5 ? $direct_time . ':00' : $direct_time;
+
+        // Silently free the old slot if it exists
+        $free = $conn->prepare("
+            UPDATE doctor_availability SET status = 'Available'
+            WHERE doctor_id = ? AND available_date = ? AND start_time = ? AND status = 'Booked'
+        ");
+        $free->bind_param("sss", $doctor_id, $apt['app_date'], $apt['app_time']);
+        $free->execute();
+        $free->close();
+    } else {
+    // ── Slot mode (normal reschedule) ────────────────────────────────────────
     $slotStmt = $conn->prepare("
         SELECT avail_id, doctor_id, available_date, start_time, status
         FROM doctor_availability
@@ -89,6 +112,7 @@ try {
 
     $newDate = $slot['available_date'];
     $newTime = $slot['start_time'];
+    } // end slot mode
 
         // Prevent double booking: one active appointment per patient per day.
         $conf = $conn->prepare("

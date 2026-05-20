@@ -363,7 +363,14 @@ function renderAppointments(rows) {
 
   document.querySelectorAll(".reschedule-btn").forEach((button) => {
     button.addEventListener("click", () => {
-      openRescheduleModal(Number(button.dataset.reschedule));
+      const apt = cachedAppointments.find(
+        (a) => a.appointment_id == button.dataset.reschedule,
+      );
+      if (apt && apt.is_followup_visit) {
+        openFollowupRescheduleModal(Number(button.dataset.reschedule), apt.app_date);
+      } else {
+        openRescheduleModal(Number(button.dataset.reschedule));
+      }
     });
   });
 
@@ -903,6 +910,90 @@ async function openBookingModal() {
   smoothOpenModal(modal, {
     mode: "class",
     panelSelector: "#bookingModalInner",
+  });
+}
+
+function openFollowupRescheduleModal(appointmentId, currentDate) {
+  const today = new Date().toISOString().split("T")[0];
+  const overlay = document.createElement("div");
+  overlay.id = "followupRescheduleOverlay";
+  overlay.className =
+    "fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999] p-4";
+  overlay.innerHTML = `
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-sm w-full overflow-hidden">
+      <div class="p-8">
+        <h3 class="text-xl font-bold text-slate-800 mb-1">Change Follow-up Date</h3>
+        <p class="text-slate-500 text-sm mb-6">Pick a new date and time for this follow-up appointment.</p>
+        <div class="space-y-4">
+          <div>
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">New Date</label>
+            <input type="date" id="followupNewDate" min="${today}" value="${currentDate || ""}"
+              class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 bg-slate-50 focus:bg-white"/>
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">New Time</label>
+            <input type="time" id="followupNewTime"
+              class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 bg-slate-50 focus:bg-white"/>
+          </div>
+          <p id="followupRescheduleErr" class="hidden text-red-600 text-xs text-center"></p>
+        </div>
+        <div class="flex gap-3 mt-6">
+          <button type="button" id="cancelFollowupReschedule"
+            class="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-colors">
+            Cancel
+          </button>
+          <button type="button" id="confirmFollowupReschedule"
+            class="flex-1 px-4 py-3 rounded-xl bg-teal-600 text-white font-semibold hover:bg-teal-700 transition-colors">
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  document.getElementById("cancelFollowupReschedule").addEventListener("click", () => {
+    overlay.remove();
+  });
+
+  document.getElementById("confirmFollowupReschedule").addEventListener("click", async () => {
+    const newDate = document.getElementById("followupNewDate").value;
+    const newTime = document.getElementById("followupNewTime").value;
+    const errEl = document.getElementById("followupRescheduleErr");
+
+    if (!newDate || !newTime) {
+      errEl.textContent = "Please select both a date and time.";
+      errEl.classList.remove("hidden");
+      return;
+    }
+
+    const btn = document.getElementById("confirmFollowupReschedule");
+    btn.disabled = true;
+    btn.textContent = "Saving…";
+
+    try {
+      const r = await fetch(`${API_BASE}/patient/reschedule.php`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ appointment_id: appointmentId, app_date: newDate, app_time: newTime }),
+      });
+      const j = await r.json();
+      if (j.status !== "success") {
+        errEl.textContent = j.message || "Failed to reschedule.";
+        errEl.classList.remove("hidden");
+        btn.disabled = false;
+        btn.textContent = "Confirm";
+        return;
+      }
+      overlay.remove();
+      showSuccessToast("Rescheduled", "Follow-up appointment date updated.");
+      reload();
+    } catch (err) {
+      errEl.textContent = "Network error. Please try again.";
+      errEl.classList.remove("hidden");
+      btn.disabled = false;
+      btn.textContent = "Confirm";
+    }
   });
 }
 

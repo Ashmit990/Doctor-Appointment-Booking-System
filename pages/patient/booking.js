@@ -318,11 +318,46 @@ async function loadRescheduleContext(appointmentId) {
     return;
   }
   const a = j.data;
+
+  // ── Lock doctor (hidden input) ────────────────────────────────────────────
   const doctorSel = document.getElementById("doctor");
   doctorSel.value = String(a.doctor_id);
   doctorSel.disabled = true;
   doctorSel.style.opacity = "0.7";
   doctorSel.style.cursor = "not-allowed";
+
+  // ── Pre-fill specialization dropdown and show the doctor row ─────────────
+  const doc = doctorsList.find((d) => String(d.doctor_id) === String(a.doctor_id));
+  const specSel = document.getElementById("specialization");
+  if (doc && doc.specialization) {
+    specSel.value = doc.specialization;
+  }
+  specSel.disabled = true;
+  specSel.style.opacity = "0.7";
+  specSel.style.cursor = "not-allowed";
+  specSel.style.pointerEvents = "none";
+
+  // ── Update and lock the custom doctor dropdown UI ─────────────────────────
+  const doctorLabel = document.getElementById("doctorDropdownLabel");
+  if (doctorLabel) {
+    doctorLabel.textContent = a.doctor_name || doc?.full_name || "Doctor";
+    doctorLabel.classList.remove("text-slate-400");
+    doctorLabel.classList.add("text-slate-700");
+  }
+  const doctorDropBtn = document.getElementById("doctorDropdownBtn");
+  if (doctorDropBtn) {
+    doctorDropBtn.disabled = true;
+    doctorDropBtn.style.opacity = "0.7";
+    doctorDropBtn.style.cursor = "not-allowed";
+    doctorDropBtn.style.pointerEvents = "none";
+  }
+  const doctorDropContainer = document.getElementById("doctorDropdownContainer");
+  if (doctorDropContainer) {
+    doctorDropContainer.style.pointerEvents = "none";
+  }
+  document.getElementById("doctorSelectWrap")?.classList.remove("hidden");
+
+  selectedDoctor = doc || null;
   updatePrice();
   await loadDates(a.doctor_id);
   if (a.app_date) {
@@ -366,8 +401,7 @@ window.addEventListener("message", (event) => {
 
   // Handle reschedule context from parent dashboard
   if (event.data.type === "START_RESCHEDULE" && event.data.appointment_id) {
-    const sel = document.getElementById("doctor");
-    if (sel && sel.options.length > 1) {
+    if (doctorsList.length > 0) {
       loadRescheduleContext(event.data.appointment_id);
     } else {
       _pendingRescheduleId = event.data.appointment_id;
@@ -640,7 +674,8 @@ bookingForm.addEventListener("submit", async (e) => {
           avail_id: availId,
         }),
       });
-      const j = await r.json();
+      let j;
+      try { j = await r.json(); } catch (_) { j = { status: "error", message: await r.text().catch(() => "Server error") }; }
       if (j.status !== "success") {
         alert(j.message || "Reschedule failed");
         return;
@@ -687,7 +722,7 @@ bookingForm.addEventListener("submit", async (e) => {
     document.getElementById("confirmBtn").textContent = "Confirm Booking";
     pendingBookingRequest = null;
     setBookingConflictMessage("");
-    closePaymentPanel();
+    if (typeof closePaymentPanel === "function") closePaymentPanel();
 
     // Notify parent — parent handles the single success popup
     window.parent.postMessage({ type: "patient-booking-done" }, "*");

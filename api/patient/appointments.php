@@ -89,8 +89,8 @@ $stmt->close();
 foreach ($rows as &$row) {
     $row['status_key'] = strtolower($row['status']);
     $isFollowupVisit = !empty($row['is_followup_visit']);
-    unset($row['is_followup_visit']);
     patient_apply_payment_display_fields($row, $isFollowupVisit);
+    $row['is_followup_visit'] = $isFollowupVisit ? 1 : 0;
 }
 unset($row);
 
