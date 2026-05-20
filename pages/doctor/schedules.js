@@ -1,3 +1,19 @@
+// ===== SESSION VERIFICATION ON PAGE LOAD =====
+(async () => {
+  try {
+    const response = await fetch('../../api/auth/session_info.php', { credentials: 'include' });
+    const data = await response.json();
+    if (!data.logged_in || data.role !== 'Doctor') {
+      console.error("Not logged in as doctor");
+      window.location.href = '../auth/login.html';
+      return;
+    }
+  } catch (error) {
+    console.error("Session check failed:", error);
+    window.location.href = '../auth/login.html';
+  }
+})();
+
 const _now = new Date();
 let scheduleMonth = new Date(_now.getFullYear(), _now.getMonth(), 1);
 let selectedScheduleDate = null;
