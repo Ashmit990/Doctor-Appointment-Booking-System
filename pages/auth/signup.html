@@ -461,6 +461,8 @@
               type="text"
               class="custom-input w-full bg-transparent py-2 text-base text-slate-800 outline-none border-b-2 border-gray-200 focus:border-[#007E85]"
               placeholder="e.g. Neurosurgeon"
+              onkeydown="if(/[^a-zA-Z\s]/.test(event.key) && event.key.length===1) event.preventDefault();"
+              oninput="this.value=this.value.replace(/[^a-zA-Z\s]/g,'');"
             />
           </div>
         </div>
@@ -744,7 +746,8 @@
                   type="tel"
                   class="custom-input w-full bg-transparent py-1.5 text-base xl:text-lg text-slate-800 outline-none"
                   placeholder=" "
-                  oninput="clearErr('signupPhone')"
+                  onkeydown="if(['+','-','e','E','.'].includes(event.key)) event.preventDefault();"
+                  oninput="this.value=this.value.replace(/[^0-9]/g,''); clearErr('signupPhone');"
                 />
                 <p
                   id="signupPhone_err"
