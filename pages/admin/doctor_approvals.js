@@ -188,6 +188,13 @@ function setupModal() {
   confirmBtn.addEventListener("click", async () => {
     if (!pendingAction) return;
 
+    if (pendingAction.action === "delete_category") {
+      closeModal();
+      await proceedDeleteCategory(pendingAction.approvalId);
+      pendingAction = null;
+      return;
+    }
+
     let fee = null;
     if (pendingAction.action === "approve") {
       fee = document.getElementById("consultationFeeInput").value;
@@ -210,18 +217,26 @@ function openConfirmModal(action, approvalId, doctorName) {
   const modalMessage = document.getElementById("modalMessage");
   const modalConfirmBtn = document.getElementById("modalConfirmBtn");
 
-  const actionText = action === "approve" ? "Approve" : "Reject";
-  modalTitle.textContent = `${actionText} Doctor`;
-  modalMessage.textContent = `Are you sure you want to ${action.toLowerCase()} ${doctorName}?`;
-
-  if (action === "approve") {
-    modalConfirmBtn.className =
-      "px-5 py-2 rounded-lg bg-teal text-white font-medium hover:bg-teal-dark transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
-    modalConfirmBtn.disabled = true;
-  } else {
+  if (action === "delete_category") {
+    modalTitle.textContent = "Delete Category";
+    modalMessage.textContent = "Are you sure you want to delete this category?";
     modalConfirmBtn.className =
       "px-5 py-2 rounded-lg bg-rose-600 text-white font-medium hover:bg-rose-700 transition-colors shadow-sm cursor-pointer";
     modalConfirmBtn.disabled = false;
+  } else {
+    const actionText = action === "approve" ? "Approve" : "Reject";
+    modalTitle.textContent = `${actionText} Doctor`;
+    modalMessage.textContent = `Are you sure you want to ${action.toLowerCase()} ${doctorName}?`;
+
+    if (action === "approve") {
+      modalConfirmBtn.className =
+        "px-5 py-2 rounded-lg bg-teal text-white font-medium hover:bg-teal-dark transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
+      modalConfirmBtn.disabled = true;
+    } else {
+      modalConfirmBtn.className =
+        "px-5 py-2 rounded-lg bg-rose-600 text-white font-medium hover:bg-rose-700 transition-colors shadow-sm cursor-pointer";
+      modalConfirmBtn.disabled = false;
+    }
   }
 
   pendingAction = { action, approvalId, doctorName };
@@ -549,9 +564,11 @@ function editCategory(id) {
   openCategoryModal("edit", id);
 }
 
-async function deleteCategory(id) {
-  if (!confirm("Are you sure you want to delete this category?")) return;
+function deleteCategory(id) {
+  openConfirmModal("delete_category", id, "");
+}
 
+async function proceedDeleteCategory(id) {
   try {
     const response = await fetch(
       `../../api/admin/treatment_categories.php?id=${id}`,
@@ -583,6 +600,13 @@ function setupCategoryForm() {
       description: document.getElementById("categoryDescription").value,
       estimated_cost: document.getElementById("categoryPrice").value,
     };
+
+    const price = parseFloat(data.estimated_cost);
+    if (isNaN(price) || price < 0) {
+      showToast("Ticket price must be a non-negative number", true);
+      document.getElementById("categoryPrice").focus();
+      return;
+    }
 
     try {
       const response = await fetch("../../api/admin/treatment_categories.php", {

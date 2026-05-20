@@ -13,6 +13,12 @@ try {
     require_once '../includes/appointment_reminder_sync.php';
     sync_all_appointment_statuses($conn);
 
+    // Get target month for statistics
+    $current_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
+    if (!preg_match('/^\d{4}-\d{2}$/', $current_month)) {
+        $current_month = date('Y-m');
+    }
+
     // Get total patients
     $stmt = $conn->prepare("SELECT COUNT(*) as total FROM users WHERE role = 'Patient'");
     $stmt->execute();
@@ -25,14 +31,16 @@ try {
     $doctors = $stmt->get_result()->fetch_assoc();
     $stmt->close();
 
-    // Get total upcoming appointments
-    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM appointments WHERE status = 'Upcoming'");
+    // Get total upcoming appointments for the selected month
+    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM appointments WHERE status = 'Upcoming' AND DATE_FORMAT(app_date, '%Y-%m') = ?");
+    $stmt->bind_param("s", $current_month);
     $stmt->execute();
     $upcoming = $stmt->get_result()->fetch_assoc();
     $stmt->close();
 
-    // Get total completed appointments
-    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM appointments WHERE status = 'Completed'");
+    // Get total completed appointments for the selected month
+    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM appointments WHERE status = 'Completed' AND DATE_FORMAT(app_date, '%Y-%m') = ?");
+    $stmt->bind_param("s", $current_month);
     $stmt->execute();
     $completed = $stmt->get_result()->fetch_assoc();
     $stmt->close();
@@ -60,7 +68,6 @@ try {
     $stmt->close();
 
     // Get appointment dates for calendar
-    $current_month = date('Y-m');
     $stmt = $conn->prepare("
         SELECT DISTINCT DAY(app_date) as day, status
         FROM appointments

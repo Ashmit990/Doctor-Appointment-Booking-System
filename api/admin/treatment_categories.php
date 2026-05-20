@@ -26,6 +26,10 @@ try {
             $name = $conn->real_escape_string($data['name']);
             $description = $conn->real_escape_string($data['description']);
             $estimated_cost = isset($data['estimated_cost']) ? (float)$data['estimated_cost'] : 0.0;
+            if ($estimated_cost < 0) {
+                echo json_encode(['status' => 'error', 'message' => 'Ticket price cannot be negative']);
+                exit;
+            }
             $id = isset($data['id']) ? (int)$data['id'] : null;
 
             if ($id) {

@@ -47,7 +47,11 @@ async function loadAdminInfo() {
 
 async function loadDashboardStats() {
   try {
-    const response = await fetch("../../api/admin/dashboard_stats.php", {
+    const year = currentMonth.getFullYear();
+    const month = String(currentMonth.getMonth() + 1).padStart(2, "0");
+    const monthStr = `${year}-${month}`;
+
+    const response = await fetch(`../../api/admin/dashboard_stats.php?month=${monthStr}`, {
       credentials: "include",
     });
     const result = await response.json();
@@ -139,11 +143,13 @@ function renderCalendar() {
 function previousMonth() {
   currentMonth.setMonth(currentMonth.getMonth() - 1);
   renderCalendar();
+  loadDashboardStats();
 }
 
 function nextMonth() {
   currentMonth.setMonth(currentMonth.getMonth() + 1);
   renderCalendar();
+  loadDashboardStats();
 }
 
 async function loadAppointmentsForDate(dateStr) {
