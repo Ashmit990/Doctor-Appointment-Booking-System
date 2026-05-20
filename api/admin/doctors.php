@@ -205,7 +205,18 @@ try {
 
         $conn->begin_transaction();
         try {
-            // Delete earnings for any appointments belonging to this doctor first
+            // Delete payment records for any appointments belonging to this doctor first
+            $stmt = $conn->prepare(
+                "DELETE ap FROM appointment_payments ap
+                 WHERE ap.doctor_id = ?"
+            );
+            $stmt->bind_param("s", $doctor_id);
+            if (!$stmt->execute()) {
+                throw new Exception($stmt->error);
+            }
+            $stmt->close();
+
+            // Delete earnings for any appointments belonging to this doctor
             $stmt = $conn->prepare(
                 "DELETE e FROM earnings e
                  INNER JOIN appointments a ON e.appointment_id = a.appointment_id
@@ -218,13 +229,20 @@ try {
             $stmt->close();
 
             // Delete appointments for this doctor
-            // Skipping deletion of appointments to preserve them when a doctor is removed.
-            // $stmt = $conn->prepare("DELETE FROM appointments WHERE doctor_id = ?");
-            // $stmt->bind_param("s", $doctor_id);
-            // if (!$stmt->execute()) {
-            //     throw new Exception($stmt->error);
-            // }
-            // $stmt->close();
+            $stmt = $conn->prepare("DELETE FROM appointments WHERE doctor_id = ?");
+            $stmt->bind_param("s", $doctor_id);
+            if (!$stmt->execute()) {
+                throw new Exception($stmt->error);
+            }
+            $stmt->close();
+
+            // Delete availability slots for this doctor
+            $stmt = $conn->prepare("DELETE FROM doctor_availability WHERE doctor_id = ?");
+            $stmt->bind_param("s", $doctor_id);
+            if (!$stmt->execute()) {
+                throw new Exception($stmt->error);
+            }
+            $stmt->close();
 
             // Delete doctor profile if present
             $stmt = $conn->prepare("DELETE FROM doctor_profiles WHERE user_id = ?");
