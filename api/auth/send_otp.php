@@ -1,4 +1,6 @@
 <?php
+ob_start();
+error_reporting(0);
 session_start();
 require_once '../config/db.php';
 require_once '../config/mail_config.php';
@@ -10,6 +12,7 @@ use PHPMailer\PHPMailer\Exception;
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    ob_end_clean();
     echo json_encode(['success' => false, 'message' => 'Invalid request.']);
     exit;
 }
@@ -17,56 +20,52 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $email = trim($_POST['email'] ?? '');
 
 if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    ob_end_clean();
     echo json_encode(['success' => false, 'message' => 'Please enter a valid email address.']);
     exit;
 }
 
 // Check email exists in users table
-$stmt = $conn->prepare("SELECT user_id, full_name FROM users WHERE email = ?");
-$stmt->bind_param("s", $email);
-$stmt->execute();
-$result = $stmt->get_result();
+try {
+    $stmt = $conn->prepare("SELECT user_id, full_name FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-if ($result->num_rows === 0) {
-    echo json_encode(['success' => false, 'message' => 'No account found with this email address.']);
+    if ($result->num_rows === 0) {
+        ob_end_clean();
+        echo json_encode(['success' => false, 'message' => 'No account found with this email address.']);
+        exit;
+    }
+
+    $user = $result->fetch_assoc();
+    $stmt->close();
+
+    // Invalidate any existing unused OTPs for this email
+    $stmt = $conn->prepare("UPDATE otp_tokens SET used = 1 WHERE email = ? AND used = 0");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $stmt->close();
+
+    // Generate 6-digit OTP and store in DB
+    $otp = sprintf('%06d', random_int(100000, 999999));
+
+    $stmt = $conn->prepare("INSERT INTO otp_tokens (email, otp, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))");
+    $stmt->bind_param("ss", $email, $otp);
+    $stmt->execute();
+    $stmt->close();
+} catch (Exception $e) {
+    ob_end_clean();
+    echo json_encode(['success' => false, 'message' => 'A server error occurred. Please try again.']);
     exit;
 }
 
-$user = $result->fetch_assoc();
-$stmt->close();
-
-// Invalidate any existing unused OTPs for this email
-$stmt = $conn->prepare("UPDATE otp_tokens SET used = 1 WHERE email = ? AND used = 0");
-$stmt->bind_param("s", $email);
-$stmt->execute();
-$stmt->close();
-
-// Generate 6-digit OTP and store in DB (MySQL computes expiry to avoid timezone mismatch)
-$otp = sprintf('%06d', random_int(100000, 999999));
-
-$stmt = $conn->prepare("INSERT INTO otp_tokens (email, otp, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))");
-$stmt->bind_param("ss", $email, $otp);
-$stmt->execute();
-$stmt->close();
-
-// ── Set session and respond to browser IMMEDIATELY ───────────────────────────
+// ── Set session ───────────────────────────────────────────────────────────────
 $_SESSION['otp_email'] = $email;
 unset($_SESSION['otp_verified']);
-session_write_close(); // commit session before flushing
+session_write_close();
 
-$successJson = json_encode(['success' => true, 'message' => 'OTP sent to your email address.']);
-header('Content-Type: application/json');
-header('Connection: close');
-header('Content-Length: ' . strlen($successJson));
-ob_end_clean();
-echo $successJson;
-ob_flush();
-flush();
-
-// ── Send email in background AFTER response is already sent ──────────────────
-ignore_user_abort(true);
-set_time_limit(60);
-
+// ── Send email ────────────────────────────────────────────────────────────────
 $mail = new PHPMailer(true);
 try {
     $mail->isSMTP();
@@ -108,5 +107,9 @@ try {
     $mail->AltBody = "Your OTP for password reset is: {$otp}. It expires in 10 minutes.";
     $mail->send();
 } catch (Exception $e) {
-    // Email failed silently — OTP is still in DB, user can use Resend
+    // Email failed silently — OTP is still in DB, user can still enter it if sent
 }
+
+// ── Always respond with valid JSON ────────────────────────────────────────────
+ob_end_clean();
+echo json_encode(['success' => true, 'message' => 'OTP sent to your email address.']);
