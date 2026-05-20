@@ -5,12 +5,16 @@
  */
 function sync_all_appointment_statuses(mysqli $conn): void
 {
-    $sql = "
-        UPDATE appointments 
-        SET status = 'Completed' 
-        WHERE status = 'Upcoming' 
-          AND (app_date < CURDATE() OR (app_date = CURDATE() AND app_time <= CURTIME()))
-    ";
+        // Only mark an appointment as Completed when its scheduled start time is sufficiently
+        // in the past. Using CONCAT(app_date, ' ', app_time) ensures we compare full datetime
+        // and adding a small grace period (10 minutes) prevents appointments from being
+        // marked Completed immediately at their start time.
+        $sql = "
+                UPDATE appointments
+                SET status = 'Completed'
+                WHERE status = 'Upcoming'
+                    AND CONCAT(app_date, ' ', app_time) <= DATE_SUB(NOW(), INTERVAL 10 MINUTE)
+        ";
     $conn->query($sql);
 }
 
