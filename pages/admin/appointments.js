@@ -11,6 +11,8 @@ let allAppointments = [];
 let filteredAppointments = [];
 let currentEditId = null;
 let pendingDeleteAppointmentId = null;
+let currentStatusFilter = ""; // Store current filter
+let currentSearchText = ""; // Store current search
 
 console.log("✓ appointments.js loading...");
 
@@ -125,19 +127,18 @@ async function loadAppointments(page = 1) {
 
     if (result && result.status === "success") {
       allAppointments = result.data || [];
-      filteredAppointments = result.data || [];
+      
+      // Copy all appointments to filtered for display
+      filteredAppointments = [...allAppointments];
 
-      const totalPagesEl = document.getElementById("total-pages");
-      if (totalPagesEl) {
-        totalPagesEl.textContent = result.pages || 1;
-      }
+      const totalPages = result.pages || 1;
+      updatePaginationUI(currentPage, totalPages);
+      displayAppointments();
 
       const completedCountEl = document.getElementById("total-completed-count");
       if (completedCountEl) {
         completedCountEl.textContent = result.completed_total || 0;
       }
-
-      displayAppointments();
     } else {
       console.warn("API returned error");
       showToast("Error loading appointments");
@@ -162,11 +163,28 @@ function displayAppointments() {
     if (!filteredAppointments || filteredAppointments.length === 0) {
       tbody.innerHTML =
         '<tr><td colspan="5" class="text-center py-8 text-gray-500">No appointments found</td></tr>';
+      updatePaginationUI(0, 1);
       return;
     }
 
+    // Handle pagination for filtered results (10 items per page)
+    const ITEMS_PER_PAGE = 10;
+    const totalPages = Math.ceil(filteredAppointments.length / ITEMS_PER_PAGE);
+    
+    // Ensure currentPage is within bounds
+    if (currentPage > totalPages) {
+      currentPage = totalPages;
+    }
+    if (currentPage < 1) {
+      currentPage = 1;
+    }
+
+    const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIdx = startIdx + ITEMS_PER_PAGE;
+    const pageAppointments = filteredAppointments.slice(startIdx, endIdx);
+
     let html = "";
-    for (const apt of filteredAppointments) {
+    for (const apt of pageAppointments) {
       const comments = (apt.doctor_comments || "").replace(/'/g, "\\'");
       const editable = isEditable(apt.app_date);
 
@@ -215,9 +233,47 @@ function displayAppointments() {
     }
 
     tbody.innerHTML = html;
+    updatePaginationUI(currentPage, totalPages);
     console.log("Table updated");
   } catch (e) {
     console.error("Display error:", e);
+  }
+}
+
+// ==================== UPDATE PAGINATION UI ====================
+function updatePaginationUI(currentPageNum, totalPagesNum) {
+  const currentPageEl = document.getElementById("current-page");
+  const totalPagesEl = document.getElementById("total-pages");
+  const prevBtn = document.querySelector('button[onclick="previousPage()"]');
+  const nextBtn = document.querySelector('button[onclick="nextPage()"]');
+
+  // Update page numbers
+  if (currentPageEl) {
+    currentPageEl.textContent = currentPageNum;
+  }
+  if (totalPagesEl) {
+    totalPagesEl.textContent = totalPagesNum;
+  }
+
+  // Disable/enable buttons based on current page
+  if (prevBtn) {
+    if (currentPageNum <= 1) {
+      prevBtn.disabled = true;
+      prevBtn.classList.add("opacity-50", "cursor-not-allowed");
+    } else {
+      prevBtn.disabled = false;
+      prevBtn.classList.remove("opacity-50", "cursor-not-allowed");
+    }
+  }
+
+  if (nextBtn) {
+    if (currentPageNum >= totalPagesNum) {
+      nextBtn.disabled = true;
+      nextBtn.classList.add("opacity-50", "cursor-not-allowed");
+    } else {
+      nextBtn.disabled = false;
+      nextBtn.classList.remove("opacity-50", "cursor-not-allowed");
+    }
   }
 }
 
@@ -228,26 +284,50 @@ function filterAppointments() {
   ).toLowerCase();
   const statusFilter = document.getElementById("statusFilter")?.value || "";
 
-  filteredAppointments = allAppointments.filter((apt) => {
-    // Dynamic status logic for filtering
-    let displayStatus = apt.status;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const aptDate = new Date(apt.app_date);
-    aptDate.setHours(0, 0, 0, 0);
-    if (aptDate < today && displayStatus === "Upcoming") {
-      displayStatus = "Completed";
-    }
+  // Store current filter values
+  currentSearchText = searchText;
+  currentStatusFilter = statusFilter;
 
-    const matchesSearch =
-      (apt.patient_name || "").toLowerCase().includes(searchText) ||
-      (apt.doctor_name || "").toLowerCase().includes(searchText) ||
-      (apt.app_date && apt.app_date.includes(searchText));
-    const matchesStatus = !statusFilter || displayStatus === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  console.log("Filtering with:", { searchText, statusFilter });
 
-  displayAppointments();
+  // If filter is active, do local filtering and pagination
+  if (searchText || statusFilter) {
+    // Filter locally from currently loaded appointments
+    filteredAppointments = allAppointments.filter((apt) => {
+      // Calculate display status (past Upcoming appointments show as Completed)
+      let displayStatus = apt.status;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const aptDate = new Date(apt.app_date);
+      aptDate.setHours(0, 0, 0, 0);
+      
+      if (aptDate < today && displayStatus === "Upcoming") {
+        displayStatus = "Completed";
+      }
+
+      // Check search match
+      const matchesSearch =
+        (apt.patient_name || "").toLowerCase().includes(searchText) ||
+        (apt.doctor_name || "").toLowerCase().includes(searchText) ||
+        (apt.app_date && apt.app_date.includes(searchText));
+      
+      // Check status match - compare with calculated display status
+      const matchesStatus = !statusFilter || displayStatus === statusFilter;
+      
+      return matchesSearch && matchesStatus;
+    });
+
+    console.log(`Filtered results: ${filteredAppointments.length} appointments`);
+    
+    // Reset to page 1 when filtering
+    currentPage = 1;
+    displayAppointments();
+  } else {
+    // No filter - show all appointments from allAppointments
+    filteredAppointments = [...allAppointments];
+    currentPage = 1;
+    displayAppointments();
+  }
 }
 
 // ==================== EDIT MODAL ====================
@@ -417,21 +497,37 @@ async function deleteAppointment(appointmentId) {
 
 // ==================== PAGINATION ====================
 function nextPage() {
+  const hasFilter = currentSearchText || currentStatusFilter;
   const totalPages = parseInt(
     document.getElementById("total-pages")?.textContent || "1",
   );
+  
   if (currentPage < totalPages) {
     currentPage++;
-    document.getElementById("current-page").textContent = currentPage;
-    loadAppointments(currentPage);
+    
+    if (hasFilter) {
+      // If filter active, just paginate through filtered results locally
+      displayAppointments();
+    } else {
+      // If no filter, load next page from API
+      loadAppointments(currentPage);
+    }
   }
 }
 
 function previousPage() {
+  const hasFilter = currentSearchText || currentStatusFilter;
+  
   if (currentPage > 1) {
     currentPage--;
-    document.getElementById("current-page").textContent = currentPage;
-    loadAppointments(currentPage);
+    
+    if (hasFilter) {
+      // If filter active, just paginate through filtered results locally
+      displayAppointments();
+    } else {
+      // If no filter, load previous page from API
+      loadAppointments(currentPage);
+    }
   }
 }
 
