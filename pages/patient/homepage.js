@@ -302,7 +302,11 @@ function applyHomeToUI(data) {
 
 
 
+  const nextCard = document.getElementById("nextAppointmentCard");
+
   if (nextA && !sameAsToday) {
+
+    if (nextCard) nextCard.classList.remove("hidden");
 
     document.getElementById("nextAppointmentCard").dataset.aptDate =
 
@@ -345,6 +349,8 @@ function applyHomeToUI(data) {
     if (nextBadgeEl) nextBadgeEl.style.display = "";
 
   } else if (!nextA || sameAsToday) {
+
+    if (nextCard) nextCard.classList.add("hidden");
 
     document.getElementById("nextDoctorName").textContent = "—";
 
