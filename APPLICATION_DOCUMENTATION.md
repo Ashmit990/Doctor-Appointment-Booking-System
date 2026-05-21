@@ -125,6 +125,7 @@ KHALTI_RETURN_URL=http://localhost/Doctor-Appointment-Booking-System/api/patient
    ├─ Redirect to dashboard after 5 seconds
    └─ Release slot if failed
 ```
+a
 
 ### API Endpoints
 
