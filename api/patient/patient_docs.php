@@ -15,7 +15,7 @@ $conn->query("
     CREATE TABLE IF NOT EXISTS patient_documents (
         id INT AUTO_INCREMENT PRIMARY KEY,
         appointment_id INT NOT NULL,
-        patient_id INT NOT NULL,
+        patient_id VARCHAR(50) NOT NULL,
         original_name VARCHAR(255) NOT NULL,
         stored_name VARCHAR(255) NOT NULL,
         file_size INT NOT NULL DEFAULT 0,
@@ -25,6 +25,11 @@ $conn->query("
         INDEX idx_patient (patient_id)
     )
 ");
+// Migrate patient_id column to VARCHAR if it was previously created as INT
+$col = $conn->query("SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'patient_documents' AND COLUMN_NAME = 'patient_id'");
+if ($col && ($row = $col->fetch_assoc()) && strtolower($row['DATA_TYPE']) !== 'varchar') {
+    $conn->query("ALTER TABLE patient_documents MODIFY patient_id VARCHAR(50) NOT NULL");
+}
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -38,7 +43,7 @@ if ($method === 'GET') {
 
     // Verify the appointment belongs to this patient
     $chk = $conn->prepare("SELECT appointment_id FROM appointments WHERE appointment_id=? AND patient_id=?");
-    $chk->bind_param("ii", $appointment_id, $patient_id);
+    $chk->bind_param("is", $appointment_id, $patient_id);
     $chk->execute();
     if (!$chk->get_result()->fetch_assoc()) {
         http_response_code(403);
@@ -47,7 +52,7 @@ if ($method === 'GET') {
     }
 
     $stmt = $conn->prepare("SELECT id, original_name, stored_name, file_size, mime_type, uploaded_at FROM patient_documents WHERE appointment_id=? AND patient_id=? ORDER BY uploaded_at DESC");
-    $stmt->bind_param("ii", $appointment_id, $patient_id);
+    $stmt->bind_param("is", $appointment_id, $patient_id);
     $stmt->execute();
     $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
@@ -65,7 +70,7 @@ if ($method === 'POST') {
 
     // Verify ownership
     $chk = $conn->prepare("SELECT appointment_id FROM appointments WHERE appointment_id=? AND patient_id=?");
-    $chk->bind_param("ii", $appointment_id, $patient_id);
+    $chk->bind_param("is", $appointment_id, $patient_id);
     $chk->execute();
     if (!$chk->get_result()->fetch_assoc()) {
         http_response_code(403);
@@ -130,7 +135,7 @@ if ($method === 'POST') {
         }
 
         $stmt = $conn->prepare("INSERT INTO patient_documents (appointment_id, patient_id, original_name, stored_name, file_size, mime_type) VALUES (?,?,?,?,?,?)");
-        $stmt->bind_param("iissss", $appointment_id, $patient_id, $orig_name, $stored_name, $size, $detected_mime);
+        $stmt->bind_param("isssis", $appointment_id, $patient_id, $orig_name, $stored_name, $size, $detected_mime);
         $stmt->execute();
         $doc_id = $conn->insert_id;
 
@@ -164,7 +169,7 @@ if ($method === 'DELETE') {
     }
 
     $stmt = $conn->prepare("SELECT stored_name FROM patient_documents WHERE id=? AND patient_id=?");
-    $stmt->bind_param("ii", $doc_id, $patient_id);
+    $stmt->bind_param("is", $doc_id, $patient_id);
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
 
@@ -178,7 +183,7 @@ if ($method === 'DELETE') {
     if (file_exists($file)) @unlink($file);
 
     $del = $conn->prepare("DELETE FROM patient_documents WHERE id=? AND patient_id=?");
-    $del->bind_param("ii", $doc_id, $patient_id);
+    $del->bind_param("is", $doc_id, $patient_id);
     $del->execute();
 
     echo json_encode(['status' => 'success', 'message' => 'Deleted']);
